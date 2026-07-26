@@ -7,6 +7,22 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Google Translate Widget Container -->
+<div id="google_translate_element" style="margin: 15px 0;"></div>
+
+<!-- Google Translate Script -->
+<script type="text/javascript">
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+            pageLanguage: 'en', // ඔබගේ වෙබ් අඩවියේ මූලික භාෂාව (ප්‍රධාන භාෂාව) මෙහි සඳහන් කරන්න
+            includedLanguages: 'si,ta,en,hi,fr,de', // පරිශීලකයින්ට ලබා දීමට අවශ්‍ය භාෂා (සිංහල, දෙමළ, ඉංග්‍රීසි ආදී වශයෙන් කැමති තරම් එකතු කළ හැක)
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false
+        }, 'google_translate_element');
+    }
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
     <title>
         Guide Dashboard | Explore Sri Lanka
     </title>
