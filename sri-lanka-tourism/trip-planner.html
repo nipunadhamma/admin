@@ -1,0 +1,739 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Plan My Journey | Explore Sri Lanka
+    </title>
+
+
+    <!-- ========================================================
+         MAIN CSS
+    ========================================================= -->
+
+    <link rel="stylesheet" href="css/style.css">
+
+
+    <!-- ========================================================
+         TRIP PLANNER CSS
+    ========================================================= -->
+
+    <link rel="stylesheet" href="css/trip-planner.css">
+
+</head>
+
+
+<body>
+
+
+    <!-- ============================================================
+         SITE HEADER
+    ============================================================ -->
+
+    <header class="site-header">
+
+
+        <!-- ========================================================
+             BRAND
+        ========================================================= -->
+
+        <div class="site-brand">
+
+            <a href="index.html" class="planner-brand-link">
+
+                <div class="brand-icon">
+                    🇱🇰
+                </div>
+
+
+                <div class="brand-text">
+
+                    <h1>
+                        Explore Sri Lanka
+                    </h1>
+
+                    <p>
+                        Discover the Wonder of Sri Lanka
+                    </p>
+
+                </div>
+
+            </a>
+
+        </div>
+
+
+        <!-- ========================================================
+             NAVIGATION
+        ========================================================= -->
+
+        <nav class="main-navigation" aria-label="Main Navigation">
+
+            <a href="index.html" class="nav-link">
+                Home
+            </a>
+
+
+            <a href="index.html#map" class="nav-link">
+                Explore Map
+            </a>
+
+
+            <a href="index.html#destinations" class="nav-link">
+                Destinations
+            </a>
+
+        </nav>
+
+
+        <!-- ========================================================
+             BACK TO MAP
+        ========================================================= -->
+
+        <div class="header-actions">
+
+            <a href="index.html" class="back-to-map-btn">
+
+                ←
+
+                Back to Explore
+
+            </a>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- ============================================================
+         MAIN TRIP PLANNER
+    ============================================================ -->
+
+    <main class="trip-planner-page">
+
+
+        <!-- ========================================================
+             PAGE HERO
+        ========================================================= -->
+
+        <section class="planner-hero">
+
+            <div class="planner-hero-content">
+
+                <span class="planner-hero-icon">
+                    🗺️
+                </span>
+
+
+                <div>
+
+                    <h2>
+                        Plan My Journey
+                    </h2>
+
+                    <p>
+                        Create your perfect Sri Lankan adventure
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ========================================================
+             PLANNER CONTENT
+        ======================================================== -->
+
+        <section class="planner-container">
+
+
+            <!-- ====================================================
+                 LEFT SIDE
+            ==================================================== -->
+
+            <div class="planner-main">
+
+
+                <!-- ==================================================
+                     SELECTED DESTINATIONS
+                ================================================== -->
+
+                <section class="planner-card">
+
+
+                    <div class="planner-card-header">
+
+                        <div>
+
+                            <h3>
+                                📍 My Destinations
+                            </h3>
+
+                            <p>
+                                Places you have selected for your journey
+                            </p>
+
+                        </div>
+
+
+                        <span id="plannerPlaceCount" class="planner-count">
+                            0 Places
+                        </span>
+
+                    </div>
+
+
+                    <!-- Destinations -->
+
+                    <div id="plannerDestinations" class="planner-destinations">
+
+                        <!-- JavaScript
+                             Selected places මෙතැනට load කරයි -->
+
+                    </div>
+
+
+                    <!-- Empty State -->
+
+                    <div id="plannerEmptyState" class="planner-empty-state">
+
+                        <div>
+                            🗺️
+                        </div>
+
+                        <h3>
+                            No destinations selected
+                        </h3>
+
+                        <p>
+                            Go back to the map and add
+                            places to your My Trip.
+                        </p>
+
+
+                        <a href="index.html" class="explore-map-btn">
+
+                            Explore Destinations →
+
+                        </a>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- ==================================================
+                     TRAVEL DETAILS
+                ================================================== -->
+
+                <section class="planner-card">
+
+
+                    <div class="planner-card-header">
+
+                        <div>
+
+                            <h3>
+                                📅 Travel Details
+                            </h3>
+
+                            <p>
+                                Tell us about your planned journey
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="planner-form-grid">
+
+
+                        <!-- Start Date -->
+
+                        <div class="form-group">
+
+                            <label for="startDate">
+                                Start Date
+                            </label>
+
+                            <input type="date" id="startDate">
+
+                        </div>
+
+
+                        <!-- End Date -->
+
+                        <div class="form-group">
+
+                            <label for="endDate">
+                                End Date
+                            </label>
+
+                            <input type="date" id="endDate">
+
+                        </div>
+
+
+                        <!-- Travelers -->
+
+                        <div class="form-group">
+
+                            <label for="travelerCount">
+                                Number of Travelers
+                            </label>
+
+                            <select id="travelerCount">
+
+                                <option value="">
+                                    Select
+                                </option>
+
+                                <option value="1">
+                                    1 Traveler
+                                </option>
+
+                                <option value="2">
+                                    2 Travelers
+                                </option>
+
+                                <option value="3">
+                                    3 Travelers
+                                </option>
+
+                                <option value="4">
+                                    4 Travelers
+                                </option>
+
+                                <option value="5">
+                                    5 Travelers
+                                </option>
+
+                                <option value="6+">
+                                    6+ Travelers
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- Travel Style -->
+
+                        <div class="form-group">
+
+                            <label for="travelStyle">
+                                Travel Style
+                            </label>
+
+                            <select id="travelStyle">
+
+                                <option value="">
+                                    Select
+                                </option>
+
+                                <option value="relaxing">
+                                    Relaxing
+                                </option>
+
+                                <option value="adventure">
+                                    Adventure
+                                </option>
+
+                                <option value="cultural">
+                                    Cultural
+                                </option>
+
+                                <option value="wildlife">
+                                    Wildlife
+                                </option>
+
+                                <option value="mixed">
+                                    Mixed Experience
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- ==================================================
+                     TRANSPORT
+                ================================================== -->
+
+                <section class="planner-card">
+
+                    <div class="planner-card-header">
+
+                        <div>
+
+                            <h3>
+                                🚗 Transportation
+                            </h3>
+
+                            <p>
+                                How would you like to travel?
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="option-grid">
+
+
+                        <label class="option-card">
+
+                            <input type="radio" name="transport" value="private-car">
+
+                            <span class="option-icon">
+                                🚗
+                            </span>
+
+                            <strong>
+                                Private Car
+                            </strong>
+
+                            <small>
+                                Comfortable private travel
+                            </small>
+
+                        </label>
+
+
+                        <label class="option-card">
+
+                            <input type="radio" name="transport" value="van">
+
+                            <span class="option-icon">
+                                🚐
+                            </span>
+
+                            <strong>
+                                Van
+                            </strong>
+
+                            <small>
+                                Ideal for groups
+                            </small>
+
+                        </label>
+
+
+                        <label class="option-card">
+
+                            <input type="radio" name="transport" value="public">
+
+                            <span class="option-icon">
+                                🚌
+                            </span>
+
+                            <strong>
+                                Public Transport
+                            </strong>
+
+                            <small>
+                                Bus and train travel
+                            </small>
+
+                        </label>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- ==================================================
+                     ACCOMMODATION
+                ================================================== -->
+
+                <section class="planner-card">
+
+                    <div class="planner-card-header">
+
+                        <div>
+
+                            <h3>
+                                🏨 Accommodation
+                            </h3>
+
+                            <p>
+                                Choose your preferred stay
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="option-grid">
+
+
+                        <label class="option-card">
+
+                            <input type="radio" name="accommodation" value="budget">
+
+                            <span class="option-icon">
+                                🛏️
+                            </span>
+
+                            <strong>
+                                Budget
+                            </strong>
+
+                            <small>
+                                Affordable stays
+                            </small>
+
+                        </label>
+
+
+                        <label class="option-card">
+
+                            <input type="radio" name="accommodation" value="standard">
+
+                            <span class="option-icon">
+                                🏨
+                            </span>
+
+                            <strong>
+                                Standard
+                            </strong>
+
+                            <small>
+                                Comfortable hotels
+                            </small>
+
+                        </label>
+
+
+                        <label class="option-card">
+
+                            <input type="radio" name="accommodation" value="luxury">
+
+                            <span class="option-icon">
+                                🏝️
+                            </span>
+
+                            <strong>
+                                Luxury
+                            </strong>
+
+                            <small>
+                                Premium experiences
+                            </small>
+
+                        </label>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- ==================================================
+                     SPECIAL REQUESTS
+                ================================================== -->
+
+                <section class="planner-card">
+
+                    <div class="planner-card-header">
+
+                        <div>
+
+                            <h3>
+                                💬 Special Requests
+                            </h3>
+
+                            <p>
+                                Tell us anything else about your trip
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <textarea id="specialRequests" class="special-requests" rows="5"
+                        placeholder="Example: I would like to visit a tea plantation, see a waterfall, and spend two days near the beach..."></textarea>
+
+                </section>
+
+            </div>
+
+
+
+            <!-- ====================================================
+                 RIGHT SIDE — TRIP SUMMARY
+            ==================================================== -->
+
+            <aside class="planner-sidebar">
+
+
+                <div class="summary-card">
+
+
+                    <div class="summary-header">
+
+                        <span>
+                            ❤️
+                        </span>
+
+                        <div>
+
+                            <h3>
+                                My Trip Summary
+                            </h3>
+
+                            <p>
+                                Your Sri Lanka journey
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Selected Places -->
+
+                    <div class="summary-stat">
+
+                        <span>
+                            📍 Destinations
+                        </span>
+
+                        <strong id="summaryPlaceCount">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <!-- Travel Dates -->
+
+                    <div class="summary-stat">
+
+                        <span>
+                            📅 Travel Dates
+                        </span>
+
+                        <strong id="summaryDates">
+                            Not selected
+                        </strong>
+
+                    </div>
+
+
+                    <!-- Travelers -->
+
+                    <div class="summary-stat">
+
+                        <span>
+                            👥 Travelers
+                        </span>
+
+                        <strong id="summaryTravelers">
+                            Not selected
+                        </strong>
+
+                    </div>
+
+
+                    <!-- Transport -->
+
+                    <div class="summary-stat">
+
+                        <span>
+                            🚗 Transport
+                        </span>
+
+                        <strong id="summaryTransport">
+                            Not selected
+                        </strong>
+
+                    </div>
+
+
+                    <!-- Accommodation -->
+
+                    <div class="summary-stat">
+
+                        <span>
+                            🏨 Stay
+                        </span>
+
+                        <strong id="summaryAccommodation">
+                            Not selected
+                        </strong>
+
+                    </div>
+
+
+                    <!-- ==================================================
+                         REQUEST GUIDE QUOTATION
+                    ================================================== -->
+                    
+                    <button type="button" id="requestQuoteButton" class="request-quote-button">
+                    
+                        🧑‍💼
+                    
+                        Request Guide Quotation
+                    
+                        →
+                    
+                    </button>
+
+
+                    <p class="quote-note">
+
+                        Your trip details can be sent to
+                        registered Sri Lankan tour guides
+                        to request a personalized quotation.
+
+                    </p>
+
+                </div>
+
+            </aside>
+
+        </section>
+
+    </main>
+
+
+
+ <!-- ============================================================
+     AUTHENTICATION CORE
+============================================================ -->
+
+<script src="js/auth.js"></script>
+
+
+<!-- ============================================================
+     TRIP PLANNER LOGIC
+============================================================ -->
+
+<script src="js/trip-planner.js"></script>
+
+
+</body>
+
+</html>

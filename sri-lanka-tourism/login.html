@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Login | Explore Sri Lanka
+    </title>
+
+
+    <!-- ============================================================
+     MAIN SITE CSS
+============================================================= -->
+
+    <link rel="stylesheet" href="css/style.css">
+
+
+    <!-- ============================================================
+     LOGIN PAGE CSS
+============================================================= -->
+
+    <link rel="stylesheet" href="css/login.css">
+    
+</head>
+
+<body>
+
+    
+    <!-- ============================================================
+     SITE HEADER
+============================================================= -->
+
+    <header class="site-header">
+
+
+        <!-- ========================================================
+         BRAND
+    ========================================================= -->
+
+        <div class="site-brand">
+
+            <a href="index.html" class="planner-brand-link">
+
+                <div class="brand-icon">
+                    🇱🇰
+                </div>
+
+
+                <div class="brand-text">
+
+                    <h1>
+                        Explore Sri Lanka
+                    </h1>
+
+                    <p>
+                        Discover the Wonder of Sri Lanka
+                    </p>
+
+                </div>
+
+            </a>
+
+        </div>
+
+
+
+        <!-- ========================================================
+         NAVIGATION
+    ========================================================= -->
+
+        <nav class="main-navigation" aria-label="Main Navigation">
+
+            <a href="index.html" class="nav-link">
+                Home
+            </a>
+
+
+            <a href="index.html#map" class="nav-link">
+                Explore Map
+            </a>
+
+
+            <a href="trip-planner.html" class="nav-link">
+                My Trip
+            </a>
+
+        </nav>
+
+
+
+        <!-- ========================================================
+         HEADER ACTION
+    ========================================================= -->
+
+        <div class="header-actions">
+
+            <a href="register.html" class="back-to-map-btn">
+
+                Create Account
+
+            </a>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- ============================================================
+     LOGIN PAGE
+============================================================= -->
+
+    <main class="login-page">
+
+
+        <!-- ========================================================
+         LOGIN CARD
+    ========================================================= -->
+
+        <section class="login-card">
+
+
+            <!-- ====================================================
+             LOGIN HEADER
+        ===================================================== -->
+
+            <div class="login-header">
+
+                <div class="login-icon">
+                    🇱🇰
+                </div>
+
+
+                <h2>
+                    Welcome Back
+                </h2>
+
+
+                <p>
+                    Login to continue your Sri Lanka journey.
+                </p>
+
+            </div>
+
+
+
+            <!-- ====================================================
+             LOGIN FORM
+        ===================================================== -->
+
+            <form id="loginForm" class="login-form">
+
+
+                <!-- =================================================
+                 EMAIL
+            ================================================== -->
+
+                <div class="form-group">
+
+                    <label for="loginEmail">
+                        Email Address
+                    </label>
+
+
+                    <input type="email" id="loginEmail" name="email" placeholder="you@example.com" autocomplete="email"
+                        required>
+
+                </div>
+
+
+
+                <!-- =================================================
+                 PASSWORD
+            ================================================== -->
+
+                <div class="form-group">
+
+                    <label for="loginPassword">
+                        Password
+                    </label>
+
+
+                    <div class="password-wrapper">
+
+                        <input type="password" id="loginPassword" name="password" placeholder="Enter your password"
+                            autocomplete="current-password" required>
+
+
+                        <button type="button" id="togglePassword" class="toggle-password" aria-label="Show password">
+
+                            👁️
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                 REMEMBER ME / FORGOT PASSWORD
+            ================================================== -->
+
+                <div class="login-options">
+
+
+                    <label class="remember-me">
+
+                        <input type="checkbox" id="rememberMe">
+
+                        <span>
+                            Remember me
+                        </span>
+
+                    </label>
+
+
+                    <a href="#" id="forgotPassword">
+
+                        Forgot Password?
+
+                    </a>
+
+                </div>
+
+
+
+                <!-- =================================================
+                 LOGIN BUTTON
+            ================================================== -->
+
+                <button type="submit" class="login-submit-button">
+
+                    Login
+
+                    →
+
+                </button>
+
+
+
+                <!-- =================================================
+                 LOGIN MESSAGE
+            ================================================== -->
+
+                <div id="loginMessage" class="login-message"></div>
+
+
+            </form>
+
+
+
+            <!-- ====================================================
+             REGISTER
+        ===================================================== -->
+
+            <div class="register-prompt">
+
+                <p>
+
+                    Don't have an account?
+
+                    <a href="register.html">
+                        Create an account
+                    </a>
+
+                </p>
+
+            </div>
+
+
+
+            <!-- ====================================================
+             ACCOUNT TYPE INFORMATION
+        ===================================================== -->
+
+            <div class="login-info">
+
+
+                <div class="login-info-item">
+
+                    <span>
+                        🧳
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Tourist
+                        </strong>
+
+                        <p>
+                            Plan trips and request
+                            guide quotations.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="login-info-item">
+
+                    <span>
+                        🧑‍💼
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Registered Guide
+                        </strong>
+
+                        <p>
+                            Manage trip requests and
+                            send quotations.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- ============================================================
+     AUTHENTICATION SYSTEM
+============================================================= -->
+
+    <script src="js/auth.js"></script>
+
+
+    <!-- ============================================================
+     LOGIN LOGIC
+============================================================= -->
+
+    <script src="js/login.js"></script>
+    
+
+</body>
+
+</html>

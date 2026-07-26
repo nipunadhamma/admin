@@ -1,0 +1,873 @@
+
+/* ============================================================
+   MY TRIP / TRIP PLANNER
+============================================================ */
+
+* {
+
+    box-sizing: border-box;
+
+}
+
+
+body {
+
+    margin: 0;
+
+    font-family:
+        Arial,
+        sans-serif;
+
+    background:
+        #f5f7f6;
+
+    color:
+        #1f2933;
+
+}
+
+
+/* ============================================================
+   HEADER
+============================================================ */
+
+.trip-header {
+
+    background:
+        #174a3c;
+
+    color:
+        white;
+
+}
+
+
+.trip-header-inner {
+
+    max-width:
+        1200px;
+
+    margin:
+        auto;
+
+    padding:
+        18px 25px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+}
+
+
+.back-home {
+
+    color:
+        white;
+
+    text-decoration:
+        none;
+
+    font-size:
+        14px;
+
+}
+
+
+.trip-logo {
+
+    font-size:
+        20px;
+
+    font-weight:
+        700;
+
+}
+
+
+/* ============================================================
+   MAIN CONTAINER
+============================================================ */
+
+.trip-container {
+
+    max-width:
+        1100px;
+
+    margin:
+        auto;
+
+    padding:
+        50px 20px 80px;
+
+}
+
+
+/* ============================================================
+   INTRO
+============================================================ */
+
+.trip-intro {
+
+    text-align:
+        center;
+
+    max-width:
+        700px;
+
+    margin:
+        0 auto 40px;
+
+}
+
+
+.trip-eyebrow,
+.section-label {
+
+    color:
+        #b77900;
+
+    font-size:
+        12px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        1.5px;
+
+}
+
+
+.trip-intro h1 {
+
+    margin:
+        10px 0;
+
+    font-size:
+        38px;
+
+}
+
+
+.trip-intro p {
+
+    color:
+        #6b7280;
+
+    line-height:
+        1.7;
+
+}
+
+
+/* ============================================================
+   SUMMARY
+============================================================ */
+
+.trip-summary {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap:
+        18px;
+
+    margin-bottom:
+        30px;
+
+}
+
+
+.summary-card {
+
+    background:
+        white;
+
+    border-radius:
+        16px;
+
+    padding:
+        20px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        15px;
+
+    box-shadow:
+        0 5px 20px rgba(0,
+            0,
+            0,
+            0.05);
+
+}
+
+
+.summary-icon {
+
+    font-size:
+        28px;
+
+}
+
+
+.summary-card strong {
+
+    display:
+        block;
+
+    font-size:
+        22px;
+
+}
+
+
+.summary-card span {
+
+    color:
+        #777;
+
+    font-size:
+        13px;
+
+}
+
+
+/* ============================================================
+   COMMON CARDS
+============================================================ */
+
+.trip-details-card,
+.destinations-section,
+.itinerary-section,
+.preferences-card {
+
+    background:
+        white;
+
+    border-radius:
+        18px;
+
+    padding:
+        30px;
+
+    margin-bottom:
+        25px;
+
+    box-shadow:
+        0 5px 20px rgba(0,
+            0,
+            0,
+            0.05);
+
+}
+
+
+.section-heading {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    margin-bottom:
+        25px;
+
+}
+
+
+.section-heading h2 {
+
+    margin:
+        6px 0 0;
+
+    font-size:
+        24px;
+
+}
+
+
+/* ============================================================
+   FORM
+============================================================ */
+
+.trip-form-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap:
+        20px;
+
+}
+
+
+.form-group {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        7px;
+
+}
+
+
+.form-group label {
+
+    font-size:
+        13px;
+
+    font-weight:
+        600;
+
+}
+
+
+.form-group input,
+.form-group select {
+
+    height:
+        48px;
+
+    padding:
+        0 14px;
+
+    border:
+        1px solid #ddd;
+
+    border-radius:
+        9px;
+
+    outline:
+        none;
+
+    font-size:
+        14px;
+
+}
+
+
+.form-group input:focus,
+.form-group select:focus {
+
+    border-color:
+        #174a3c;
+
+}
+
+
+/* ============================================================
+   ADD MORE
+============================================================ */
+
+.add-more-btn {
+
+    text-decoration:
+        none;
+
+    color:
+        #174a3c;
+
+    font-size:
+        14px;
+
+    font-weight:
+        600;
+
+}
+
+
+/* ============================================================
+   DESTINATIONS
+============================================================ */
+
+.trip-destinations {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap:
+        18px;
+
+}
+
+
+.destination-card {
+
+    display:
+        flex;
+
+    gap:
+        14px;
+
+    border:
+        1px solid #eee;
+
+    border-radius:
+        14px;
+
+    padding:
+        12px;
+
+}
+
+
+.destination-card img {
+
+    width:
+        100px;
+
+    height:
+        100px;
+
+    object-fit:
+        cover;
+
+    border-radius:
+        10px;
+
+}
+
+
+.destination-info {
+
+    flex:
+        1;
+
+}
+
+
+.destination-info h3 {
+
+    margin:
+        0 0 5px;
+
+    font-size:
+        17px;
+
+}
+
+
+.destination-location {
+
+    color:
+        #777;
+
+    font-size:
+        12px;
+
+}
+
+
+.remove-trip-btn {
+
+    border:
+        none;
+
+    background:
+        #fff0f0;
+
+    color:
+        #d64545;
+
+    padding:
+        6px 10px;
+
+    border-radius:
+        7px;
+
+    cursor:
+        pointer;
+
+}
+
+
+/* ============================================================
+   EMPTY STATE
+============================================================ */
+
+.empty-trip {
+
+    text-align:
+        center;
+
+    padding:
+        50px 20px;
+
+}
+
+
+.empty-icon {
+
+    font-size:
+        55px;
+
+}
+
+
+.empty-trip h3 {
+
+    margin:
+        15px 0 8px;
+
+}
+
+
+.empty-trip p {
+
+    color:
+        #777;
+
+}
+
+
+/* ============================================================
+   BUTTON
+============================================================ */
+
+.primary-btn {
+
+    display:
+        inline-block;
+
+    margin-top:
+        15px;
+
+    padding:
+        12px 20px;
+
+    background:
+        #174a3c;
+
+    color:
+        white;
+
+    border-radius:
+        8px;
+
+    text-decoration:
+        none;
+
+}
+
+
+/* ============================================================
+   ITINERARY
+============================================================ */
+
+.itinerary-container {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        15px;
+
+}
+
+
+.itinerary-day {
+
+    border:
+        1px solid #e5e7eb;
+
+    border-radius:
+        12px;
+
+    padding:
+        18px;
+
+}
+
+
+.itinerary-day-header {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+}
+
+
+.itinerary-day h3 {
+
+    margin:
+        0;
+
+}
+
+
+.day-destinations {
+
+    margin-top:
+        15px;
+
+    min-height:
+        50px;
+
+    padding:
+        12px;
+
+    background:
+        #f8faf9;
+
+    border-radius:
+        8px;
+
+    color:
+        #777;
+
+    font-size:
+        13px;
+
+}
+
+
+/* ============================================================
+   PREFERENCES
+============================================================ */
+
+.preferences-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap:
+        12px;
+
+}
+
+
+.preference-option {
+
+    border:
+        1px solid #eee;
+
+    padding:
+        14px;
+
+    border-radius:
+        10px;
+
+    cursor:
+        pointer;
+
+}
+
+
+.preference-option:hover {
+
+    background:
+        #f5faf7;
+
+}
+
+
+/* ============================================================
+   QUOTE SECTION
+============================================================ */
+
+.quote-section {
+
+    background:
+        #174a3c;
+
+    color:
+        white;
+
+    border-radius:
+        18px;
+
+    padding:
+        30px;
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    gap:
+        25px;
+
+}
+
+
+.quote-content {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        18px;
+
+}
+
+
+.quote-icon {
+
+    font-size:
+        40px;
+
+}
+
+
+.quote-content h2 {
+
+    margin:
+        0 0 8px;
+
+}
+
+
+.quote-content p {
+
+    margin:
+        0;
+
+    opacity:
+        0.85;
+
+}
+
+
+.request-quote-btn {
+
+    border:
+        none;
+
+    background:
+        white;
+
+    color:
+        #174a3c;
+
+    padding:
+        14px 20px;
+
+    border-radius:
+        9px;
+
+    font-weight:
+        700;
+
+    cursor:
+        pointer;
+
+    white-space:
+        nowrap;
+
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 700px) {
+
+
+    .trip-intro h1 {
+
+        font-size:
+            30px;
+
+    }
+
+
+    .trip-summary {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .trip-form-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .trip-destinations {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .preferences-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .quote-section {
+
+        flex-direction:
+            column;
+
+        align-items:
+            flex-start;
+
+    }
+
+
+    .request-quote-btn {
+
+        width:
+            100%;
+
+    }
+
+}
+

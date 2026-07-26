@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+   
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Guide Request & Quotation | Explore Sri Lanka
+    </title>
+
+
+    <!-- ============================================================
+     MAIN SITE CSS
+============================================================= -->
+
+    <link rel="stylesheet" href="css/style.css">
+
+
+    <!-- ============================================================
+     GUIDE DASHBOARD CSS
+============================================================= -->
+
+    <link rel="stylesheet" href="css/guide-dashboard.css">
+
+
+    <!-- ============================================================
+     GUIDE REQUESTS CSS
+============================================================= -->
+
+    <link rel="stylesheet" href="css/guide-requests.css">
+  
+
+</head>
+
+<body>
+
+ 
+    <!-- ============================================================
+     SITE HEADER
+============================================================= -->
+
+    <header class="site-header">
+
+
+        <!-- ========================================================
+         BRAND
+    ========================================================= -->
+
+        <div class="site-brand">
+
+            <a href="index.html" class="planner-brand-link">
+
+                <div class="brand-icon">
+                    🇱🇰
+                </div>
+
+
+                <div class="brand-text">
+
+                    <h1>
+                        Explore Sri Lanka
+                    </h1>
+
+                    <p>
+                        Discover the Wonder of Sri Lanka
+                    </p>
+
+                </div>
+
+            </a>
+
+        </div>
+
+
+        <!-- ========================================================
+         NAVIGATION
+    ========================================================= -->
+
+        <nav class="main-navigation" aria-label="Main Navigation">
+
+            <a href="index.html" class="nav-link">
+                Home
+            </a>
+
+
+            <a href="index.html#map" class="nav-link">
+                Explore Map
+            </a>
+
+
+            <a href="trip-planner.html" class="nav-link">
+                My Trip
+            </a>
+
+        </nav>
+
+
+        <!-- ========================================================
+         GUIDE USER AREA
+    ========================================================= -->
+
+        <div class="header-actions">
+
+            <span id="guideHeaderName" class="guide-header-name">
+                Guide
+            </span>
+
+
+            <button type="button" id="logoutButton" class="logout-button">
+                Logout
+            </button>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- ============================================================
+     GUIDE REQUEST PAGE
+============================================================= -->
+
+    <main class="guide-requests-page">
+
+
+        <!-- ========================================================
+         PAGE HERO
+    ========================================================= -->
+
+        <section class="guide-requests-hero">
+
+            <div class="guide-requests-hero-content">
+
+
+                <div class="guide-requests-hero-icon">
+                    💰
+                </div>
+
+
+                <div>
+
+                    <p class="dashboard-eyebrow">
+                        QUOTATION MANAGEMENT
+                    </p>
+
+
+                    <h2>
+                        Prepare Your Quotation
+                    </h2>
+
+
+                    <p>
+                        Review the tourist's travel request
+                        and prepare a personalized quotation.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ========================================================
+         ERROR STATE
+    ========================================================= -->
+
+        <section id="requestErrorState" class="request-error-state" style="display: none;">
+
+            <div class="empty-state-icon">
+                ⚠️
+            </div>
+
+
+            <h3>
+                Request Not Found
+            </h3>
+
+
+            <p>
+                We could not find the requested trip.
+                Please return to the Guide Dashboard
+                and try again.
+            </p>
+
+
+            <button type="button" id="backToGuideDashboardButton" class="primary-action-button">
+                ← Back to Guide Dashboard
+            </button>
+
+        </section>
+
+
+
+        <!-- ========================================================
+         REQUEST CONTENT
+    ========================================================= -->
+
+        <div id="guideRequestContent" class="guide-request-content">
+
+
+            <!-- ====================================================
+             TOURIST REQUEST DETAILS
+        ===================================================== -->
+
+            <section class="request-information-card">
+
+
+                <div class="card-section-header">
+
+                    <div>
+
+                        <p class="section-eyebrow">
+                            TOURIST TRIP REQUEST
+                        </p>
+
+
+                        <h2>
+                            Trip Request Details
+                        </h2>
+
+                    </div>
+
+
+                    <span id="requestStatusBadge" class="request-status-badge">
+                        Pending
+                    </span>
+
+                </div>
+
+
+
+                <!-- =================================================
+                 TOURIST INFORMATION
+            ================================================== -->
+
+                <div class="tourist-request-profile">
+
+
+                    <div class="tourist-request-avatar">
+                        🧳
+                    </div>
+
+
+                    <div>
+
+                        <h3 id="touristName">
+                            Tourist
+                        </h3>
+
+
+                        <p id="touristEmail">
+                            Email not available
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                 TRAVEL DETAILS
+            ================================================== -->
+
+                <div class="request-details-grid">
+
+
+                    <div class="request-detail-item">
+
+                        <span>
+                            📅 Start Date
+                        </span>
+
+                        <strong id="requestStartDate">
+                            Not selected
+                        </strong>
+
+                    </div>
+
+
+                    <div class="request-detail-item">
+
+                        <span>
+                            📅 End Date
+                        </span>
+
+                        <strong id="requestEndDate">
+                            Not selected
+                        </strong>
+
+                    </div>
+
+
+                    <div class="request-detail-item">
+
+                        <span>
+                            👥 Travelers
+                        </span>
+
+                        <strong id="requestTravelers">
+                            Not selected
+                        </strong>
+
+                    </div>
+
+
+                    <div class="request-detail-item">
+
+                        <span>
+                            🌿 Travel Style
+                        </span>
+
+                        <strong id="requestTravelStyle">
+                            Not selected
+                        </strong>
+
+                    </div>
+
+
+                    <div class="request-detail-item">
+
+                        <span>
+                            🚗 Transport
+                        </span>
+
+                        <strong id="requestTransport">
+                            Not selected
+                        </strong>
+
+                    </div>
+
+
+                    <div class="request-detail-item">
+
+                        <span>
+                            🏨 Accommodation
+                        </span>
+
+                        <strong id="requestAccommodation">
+                            Not selected
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                 DESTINATIONS
+            ================================================== -->
+
+                <div class="request-destinations">
+
+                    <h4>
+                        📍 Requested Destinations
+                    </h4>
+
+
+                    <div id="requestDestinations" class="request-destination-list">
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                 SPECIAL REQUESTS
+            ================================================== -->
+
+                <div class="request-special-requests">
+
+                    <strong>
+                        💬 Special Requests
+                    </strong>
+
+
+                    <p id="requestSpecialRequests">
+                        No special requests provided.
+                    </p>
+
+                </div>
+
+
+
+                <!-- =================================================
+                 REQUEST META
+            ================================================== -->
+
+                <div class="request-meta">
+
+                    <span>
+                        Request ID:
+                    </span>
+
+
+                    <strong id="requestIdDisplay">
+                        N/A
+                    </strong>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- ====================================================
+             QUOTATION FORM
+        ===================================================== -->
+
+            <section class="quotation-form-card">
+
+
+                <div class="card-section-header">
+
+                    <div>
+
+                        <p class="section-eyebrow">
+                            GUIDE QUOTATION
+                        </p>
+
+
+                        <h2>
+                            Create Your Quotation
+                        </h2>
+
+
+                        <p>
+                            Provide clear pricing and service
+                            details for the tourist.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <form id="quotationForm" novalidate>
+
+
+                    <!-- ============================================
+                     PRICE
+                ============================================= -->
+
+                    <div class="quotation-form-section">
+
+                        <h3>
+                            💰 Pricing
+                        </h3>
+
+
+                        <div class="form-grid">
+
+
+                            <div class="form-group">
+
+                                <label for="quotationAmount">
+                                    Total Quotation Amount
+                                </label>
+
+
+                                <input type="number" id="quotationAmount" min="0" step="0.01"
+                                    placeholder="Enter total amount" required>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="quotationCurrency">
+                                    Currency
+                                </label>
+
+
+                                <select id="quotationCurrency" required>
+
+                                    <option value="">
+                                        Select Currency
+                                    </option>
+
+                                    <option value="USD">
+                                        USD - US Dollar
+                                    </option>
+
+                                    <option value="LKR">
+                                        LKR - Sri Lankan Rupee
+                                    </option>
+
+                                    <option value="EUR">
+                                        EUR - Euro
+                                    </option>
+
+                                    <option value="GBP">
+                                        GBP - British Pound
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- ============================================
+                     INCLUDED SERVICES
+                ============================================= -->
+
+                    <div class="quotation-form-section">
+
+                        <h3>
+                            ✅ What's Included
+                        </h3>
+
+
+                        <div class="form-group">
+
+                            <label for="quotationIncluded">
+                                Included Services
+                            </label>
+
+
+                            <textarea id="quotationIncluded" rows="5"
+                                placeholder="Example: Guide service, transportation, entrance assistance..."></textarea>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- ============================================
+                     EXCLUDED SERVICES
+                ============================================= -->
+
+                    <div class="quotation-form-section">
+
+                        <h3>
+                            ❌ What's Not Included
+                        </h3>
+
+
+                        <div class="form-group">
+
+                            <label for="quotationExcluded">
+                                Excluded Services
+                            </label>
+
+
+                            <textarea id="quotationExcluded" rows="5"
+                                placeholder="Example: Hotel accommodation, personal expenses, meals..."></textarea>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- ============================================
+                     QUOTATION VALIDITY
+                ============================================= -->
+
+                    <div class="quotation-form-section">
+
+                        <h3>
+                            📅 Quotation Validity
+                        </h3>
+
+
+                        <div class="form-group">
+
+                            <label for="quotationValidUntil">
+                                Valid Until
+                            </label>
+
+
+                            <input type="date" id="quotationValidUntil" required>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- ============================================
+                     GUIDE MESSAGE
+                ============================================= -->
+
+                    <div class="quotation-form-section">
+
+                        <h3>
+                            💬 Message to Tourist
+                        </h3>
+
+
+                        <div class="form-group">
+
+                            <label for="quotationNotes">
+                                Additional Notes
+                            </label>
+
+
+                            <textarea id="quotationNotes" rows="6"
+                                placeholder="Write any additional information for the tourist..."></textarea>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- ============================================
+                     DISCLAIMER
+                ============================================= -->
+
+                    <div class="quotation-disclaimer">
+
+
+                        <div class="disclaimer-title">
+                            ⚠️ Important Disclaimer
+                        </div>
+
+
+                        <p>
+
+                            The quotation provided by the guide
+                            is a direct proposal between the guide
+                            and the tourist.
+
+                            <strong>
+                                Explore Sri Lanka does not guarantee,
+                                verify, or accept any responsibility
+                                for the quoted prices, payments,
+                                refunds, cancellations, services,
+                                agreements, or any financial or
+                                personal arrangements made between
+                                the tourist and the guide.
+                            </strong>
+
+                        </p>
+
+
+                        <p>
+
+                            Any agreement entered into, payment made,
+                            or service received is solely between the
+                            tourist and the guide.
+
+                            Tourists are responsible for reviewing
+                            and confirming all quotation details
+                            directly with the guide before making
+                            any payment or finalizing any arrangement.
+
+                        </p>
+
+
+                        <p>
+
+                            By sending this quotation, the guide
+                            acknowledges that the quotation is
+                            provided independently and that
+                            Explore Sri Lanka is not a party to any
+                            financial transaction or private agreement
+                            between the guide and the tourist.
+
+                        </p>
+
+
+                        <!-- ========================================
+                         REQUIRED ACKNOWLEDGEMENT
+                    ========================================= -->
+
+                        <label class="disclaimer-checkbox">
+
+                            <input type="checkbox" id="disclaimerAccepted" required>
+
+
+                            <span>
+
+                                I have read and understood the above
+                                disclaimer. I acknowledge that Explore
+                                Sri Lanka is not responsible for any
+                                financial transaction, payment, refund,
+                                cancellation, service, or personal
+                                agreement between me and the tourist.
+
+                            </span>
+
+                        </label>
+
+                    </div>
+
+
+
+                    <!-- ============================================
+                     FORM MESSAGE
+                ============================================= -->
+
+                    <div id="quotationFormMessage" class="quotation-form-message" style="display: none;">
+                    </div>
+
+
+
+                    <!-- ============================================
+                     FORM ACTIONS
+                ============================================= -->
+
+                    <div class="quotation-form-actions">
+
+
+                        <button type="button" id="cancelQuotationButton" class="secondary-action-button">
+                            ← Back
+                        </button>
+                        
+
+
+                        <button type="submit" id="sendQuotationButton" class="send-quotation-submit-button">
+                            💰 Send Quotation
+                        </button>
+
+                    </div>
+
+
+                </form>
+
+            </section>
+
+        </div>
+
+    </main>
+
+
+
+    <!-- ============================================================
+     AUTHENTICATION CORE
+============================================================= -->
+
+    <script src="js/auth.js"></script>
+
+
+
+    <!-- ============================================================
+     GUIDE REQUESTS LOGIC
+============================================================= -->
+
+    <script src="js/guide-requests.js"></script>
+    
+
+</body>
+
+</html>

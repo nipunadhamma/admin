@@ -1,0 +1,561 @@
+
+/* ============================================================
+   MY TRIP BUTTON
+============================================================ */
+
+.my-trip-button {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 10px 16px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    background: #ffffff;
+
+    color: #174a3c;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.08);
+
+    transition:
+        all 0.2s ease;
+
+}
+
+
+.my-trip-button:hover {
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.14);
+
+}
+
+
+/* ============================================================
+   TRIP COUNTER
+============================================================ */
+
+.trip-counter {
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 22px;
+
+    height: 22px;
+
+    padding: 0 6px;
+
+    border-radius: 50px;
+
+    background: #174a3c;
+
+    color: #ffffff;
+
+    font-size: 11px;
+
+}
+
+
+/* ============================================================
+   OVERLAY
+============================================================ */
+
+.trip-planner-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    background:
+        rgba(0, 0, 0, 0.45);
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transition:
+        all 0.3s ease;
+
+    z-index: 9000;
+
+}
+
+
+.trip-planner-overlay.active {
+
+    opacity: 1;
+
+    visibility: visible;
+
+}
+
+
+/* ============================================================
+   TRIP PLANNER PANEL
+============================================================ */
+
+.trip-planner-panel {
+
+    position: fixed;
+
+    top: 0;
+
+    right: 0;
+
+    width: 440px;
+
+    max-width: 100%;
+
+    height: 100vh;
+
+    background: #ffffff;
+
+    box-shadow:
+        -10px 0 40px rgba(0, 0, 0, 0.18);
+
+    transform:
+        translateX(100%);
+
+    transition:
+        transform 0.35s ease;
+
+    z-index: 10000;
+
+    display: flex;
+
+    flex-direction: column;
+
+}
+
+
+.trip-planner-panel.active {
+
+    transform:
+        translateX(0);
+
+}
+
+
+/* ============================================================
+   HEADER
+============================================================ */
+
+.trip-planner-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 22px;
+
+    border-bottom:
+        1px solid #eeeeee;
+
+}
+
+
+.trip-planner-header>div {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+}
+
+
+.trip-planner-icon {
+
+    width: 45px;
+
+    height: 45px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 14px;
+
+    background: #fff0f0;
+
+    font-size: 22px;
+
+}
+
+
+.trip-planner-header h2 {
+
+    margin: 0;
+
+    font-size: 20px;
+
+    color: #174a3c;
+
+}
+
+
+.trip-planner-header p {
+
+    margin: 4px 0 0;
+
+    color: #888;
+
+    font-size: 12px;
+
+}
+
+
+/* ============================================================
+   CLOSE BUTTON
+============================================================ */
+
+.close-trip-planner {
+
+    width: 36px;
+
+    height: 36px;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: #f5f5f5;
+
+    color: #555;
+
+    font-size: 24px;
+
+    cursor: pointer;
+
+}
+
+
+/* ============================================================
+   TRIP SUMMARY
+============================================================ */
+
+.trip-summary {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 10px;
+
+    padding: 18px;
+
+    background: #f7faf8;
+
+}
+
+
+.trip-summary-item {
+
+    text-align: center;
+
+}
+
+
+.trip-summary-item strong {
+
+    display: block;
+
+    color: #174a3c;
+
+    font-size: 18px;
+
+}
+
+
+.trip-summary-item span {
+
+    display: block;
+
+    margin-top: 4px;
+
+    color: #888;
+
+    font-size: 11px;
+
+}
+
+
+/* ============================================================
+   DESTINATIONS
+============================================================ */
+
+.trip-destinations {
+
+    flex: 1;
+
+    overflow-y: auto;
+
+    padding: 15px;
+
+}
+
+
+/* ============================================================
+   TRIP DESTINATION CARD
+============================================================ */
+
+.trip-destination-card {
+
+    display: flex;
+
+    gap: 12px;
+
+    padding: 12px;
+
+    margin-bottom: 10px;
+
+    border:
+        1px solid #eeeeee;
+
+    border-radius: 14px;
+
+    background: #ffffff;
+
+    transition:
+        all 0.2s ease;
+
+}
+
+
+.trip-destination-card:hover {
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.08);
+
+}
+
+
+.trip-destination-image {
+
+    width: 75px;
+
+    height: 75px;
+
+    flex-shrink: 0;
+
+    object-fit: cover;
+
+    border-radius: 10px;
+
+}
+
+
+.trip-destination-info {
+
+    flex: 1;
+
+    min-width: 0;
+
+}
+
+
+.trip-destination-info h4 {
+
+    margin: 0;
+
+    color: #174a3c;
+
+    font-size: 15px;
+
+}
+
+
+.trip-destination-info p {
+
+    margin: 5px 0;
+
+    color: #777;
+
+    font-size: 11px;
+
+}
+
+
+.trip-destination-remove {
+
+    border: none;
+
+    background: transparent;
+
+    color: #d64545;
+
+    cursor: pointer;
+
+    font-size: 16px;
+
+}
+
+
+/* ============================================================
+   EMPTY TRIP
+============================================================ */
+
+.empty-trip-message {
+
+    padding: 40px 25px;
+
+    text-align: center;
+
+}
+
+
+.empty-trip-icon {
+
+    font-size: 50px;
+
+    margin-bottom: 15px;
+
+}
+
+
+.empty-trip-message h3 {
+
+    margin: 0;
+
+    color: #174a3c;
+
+}
+
+
+.empty-trip-message p {
+
+    color: #888;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+
+}
+
+
+/* ============================================================
+   EXPLORE BUTTON
+============================================================ */
+
+.explore-destinations-button {
+
+    padding: 10px 18px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: #174a3c;
+
+    color: #ffffff;
+
+    cursor: pointer;
+
+    font-weight: 600;
+
+}
+
+
+/* ============================================================
+   TRIP ACTIONS
+============================================================ */
+
+.trip-actions {
+
+    display: flex;
+
+    gap: 10px;
+
+    padding: 15px;
+
+    border-top:
+        1px solid #eeeeee;
+
+}
+
+
+.clear-trip-button {
+
+    padding: 11px 14px;
+
+    border:
+        1px solid #eeeeee;
+
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    color: #d64545;
+
+    cursor: pointer;
+
+}
+
+
+.plan-journey-button {
+
+    flex: 1;
+
+    padding: 11px 15px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: #174a3c;
+
+    color: #ffffff;
+
+    cursor: pointer;
+
+    font-weight: 700;
+
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 600px) {
+
+    .trip-planner-panel {
+
+        width: 100%;
+
+    }
+
+
+    .my-trip-button span:not(.trip-counter) {
+
+        display: none;
+
+    }
+
+}
