@@ -27,309 +27,647 @@
    FRONTEND DEMO ARCHITECTURE
 ============================================================ */
 
+
 /* ============================================================
    1. STORAGE KEYS
 ============================================================ */
 
-const DASHBOARD_TRIP_KEY = "sriLankaMyTrip";
+const DASHBOARD_TRIP_KEY =
+    "sriLankaMyTrip";
 
-const DASHBOARD_REQUESTS_KEY = "exploreSriLankaQuotationRequests";
 
-const DASHBOARD_SELECTED_GUIDE_KEY = "exploreSriLankaSelectedGuide";
+const DASHBOARD_REQUESTS_KEY =
+    "exploreSriLankaQuotationRequests";
+
+
+const DASHBOARD_SELECTED_GUIDE_KEY =
+    "exploreSriLankaSelectedGuide";
+
 
 /* ============================================================
    2. DOM ELEMENTS
 ============================================================ */
 
-const headerUserName = document.getElementById("headerUserName");
+const headerUserName =
+    document.getElementById(
+        "headerUserName"
+    );
 
-const welcomeUserName = document.getElementById("welcomeUserName");
 
-const logoutButton = document.getElementById("logoutButton");
+const welcomeUserName =
+    document.getElementById(
+        "welcomeUserName"
+    );
 
-const dashboardTripCount = document.getElementById("dashboardTripCount");
 
-const dashboardRequestCount = document.getElementById("dashboardRequestCount");
+const logoutButton =
+    document.getElementById(
+        "logoutButton"
+    );
 
-const dashboardGuideCount = document.getElementById("dashboardGuideCount");
 
-const selectedGuideContainer = document.getElementById(
-  "selectedGuideContainer",
-);
+const dashboardTripCount =
+    document.getElementById(
+        "dashboardTripCount"
+    );
 
-const quotationRequestsContainer = document.getElementById(
-  "quotationRequestsContainer",
-);
 
-const dashboardTripContainer = document.getElementById(
-  "dashboardTripContainer",
-);
+const dashboardRequestCount =
+    document.getElementById(
+        "dashboardRequestCount"
+    );
+
+
+const dashboardGuideCount =
+    document.getElementById(
+        "dashboardGuideCount"
+    );
+
+
+const selectedGuideContainer =
+    document.getElementById(
+        "selectedGuideContainer"
+    );
+
+
+const quotationRequestsContainer =
+    document.getElementById(
+        "quotationRequestsContainer"
+    );
+
+
+const dashboardTripContainer =
+    document.getElementById(
+        "dashboardTripContainer"
+    );
+
 
 /* ============================================================
    3. GET MY TRIP
 ============================================================ */
 
 function getDashboardTrip() {
-  const savedTrip = localStorage.getItem(DASHBOARD_TRIP_KEY);
 
-  if (!savedTrip) {
-    return [];
-  }
+    const savedTrip =
+        localStorage.getItem(
+            DASHBOARD_TRIP_KEY
+        );
 
-  try {
-    const trip = JSON.parse(savedTrip);
 
-    return Array.isArray(trip) ? trip : [];
-  } catch (error) {
-    console.error("Dashboard trip error:", error);
+    if (!savedTrip) {
 
-    return [];
-  }
+        return [];
+
+    }
+
+
+    try {
+
+        const trip =
+            JSON.parse(
+                savedTrip
+            );
+
+
+        return Array.isArray(trip)
+
+            ? trip
+
+            : [];
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Dashboard trip error:",
+            error
+        );
+
+
+        return [];
+
+    }
+
 }
+
 
 /* ============================================================
    4. GET ALL QUOTATION REQUESTS
 ============================================================ */
 
 function getDashboardQuotationRequests() {
-  const savedRequests = localStorage.getItem(DASHBOARD_REQUESTS_KEY);
 
-  if (!savedRequests) {
-    return [];
-  }
+    const savedRequests =
+        localStorage.getItem(
+            DASHBOARD_REQUESTS_KEY
+        );
 
-  try {
-    const requests = JSON.parse(savedRequests);
 
-    return Array.isArray(requests) ? requests : [];
-  } catch (error) {
-    console.error(
-      "Dashboard quotation request error:",
+    if (!savedRequests) {
 
-      error,
-    );
+        return [];
 
-    return [];
-  }
+    }
+
+
+    try {
+
+        const requests =
+            JSON.parse(
+                savedRequests
+            );
+
+
+        return Array.isArray(requests)
+
+            ? requests
+
+            : [];
+
+    }
+
+    catch (error) {
+
+        console.error(
+
+            "Dashboard quotation request error:",
+
+            error
+
+        );
+
+
+        return [];
+
+    }
+
 }
+
 
 /* ============================================================
    5. SAVE ALL QUOTATION REQUESTS
 ============================================================ */
 
-function saveDashboardQuotationRequests(requests) {
-  localStorage.setItem(
-    DASHBOARD_REQUESTS_KEY,
+function saveDashboardQuotationRequests(
+    requests
+) {
 
-    JSON.stringify(requests),
-  );
+    localStorage.setItem(
+
+        DASHBOARD_REQUESTS_KEY,
+
+        JSON.stringify(
+            requests
+        )
+
+    );
+
 }
+
 
 /* ============================================================
    6. GET CURRENT TOURIST REQUESTS
 ============================================================ */
 
 function getMyQuotationRequests() {
-  const user = typeof getCurrentUser === "function" ? getCurrentUser() : null;
 
-  if (!user) {
-    return [];
-  }
+    const user =
 
-  const requests = getDashboardQuotationRequests();
+        typeof getCurrentUser ===
+        "function"
 
-  /*
+            ?
+
+        getCurrentUser()
+
+            :
+
+        null;
+
+
+    if (!user) {
+
+        return [];
+
+    }
+
+
+    const requests =
+        getDashboardQuotationRequests();
+
+
+    /*
        Only current tourist requests
     */
 
-  return requests.filter(
-    (request) =>
-      request.tourist &&
-      (request.tourist.id === user.id || request.tourist.email === user.email),
-  );
+    return requests.filter(
+
+        request =>
+
+            request.tourist &&
+
+            (
+
+                request.tourist.id ===
+                user.id
+
+                ||
+
+                request.tourist.email ===
+                user.email
+
+            )
+
+    );
+
 }
+
 
 /* ============================================================
    7. GET SELECTED GUIDE
 ============================================================ */
 
 function getDashboardSelectedGuide() {
-  /*
+
+    /*
        First check quotation requests.
 
        Latest selected guide
        is the most accurate data.
     */
 
-  const requests = getMyQuotationRequests();
+    const requests =
+        getMyQuotationRequests();
 
-  const selectedRequests = requests.filter((request) => request.selectedGuide);
 
-  if (selectedRequests.length > 0) {
-    /*
+    const selectedRequests =
+
+        requests.filter(
+
+            request =>
+                request.selectedGuide
+
+        );
+
+
+    if (
+        selectedRequests.length > 0
+    ) {
+
+        /*
            Latest selected guide
         */
 
-    const latestRequest = selectedRequests[selectedRequests.length - 1];
+        const latestRequest =
 
-    return {
-      guide: latestRequest.selectedGuide,
+            selectedRequests[
+                selectedRequests.length - 1
+            ];
 
-      request: latestRequest,
-    };
-  }
 
-  /*
+        return {
+
+            guide:
+                latestRequest.selectedGuide,
+
+
+            request:
+                latestRequest
+
+        };
+
+    }
+
+
+    /*
        Fallback to
        Selected Guide Storage
     */
 
-  const savedGuide = localStorage.getItem(DASHBOARD_SELECTED_GUIDE_KEY);
+    const savedGuide =
 
-  if (!savedGuide) {
-    return null;
-  }
+        localStorage.getItem(
 
-  try {
-    return {
-      guide: JSON.parse(savedGuide),
+            DASHBOARD_SELECTED_GUIDE_KEY
 
-      request: null,
-    };
-  } catch (error) {
-    console.error(
-      "Selected guide data error:",
+        );
 
-      error,
-    );
 
-    return null;
-  }
+    if (!savedGuide) {
+
+        return null;
+
+    }
+
+
+    try {
+
+        return {
+
+            guide:
+                JSON.parse(
+                    savedGuide
+                ),
+
+
+            request:
+                null
+
+        };
+
+    }
+
+    catch (error) {
+
+        console.error(
+
+            "Selected guide data error:",
+
+            error
+
+        );
+
+
+        return null;
+
+    }
+
 }
+
 
 /* ============================================================
    8. UPDATE USER INFORMATION
 ============================================================ */
 
 function updateDashboardUser() {
-  const user = typeof getCurrentUser === "function" ? getCurrentUser() : null;
 
-  if (!user) {
-    return;
-  }
+    const user =
 
-  const displayName = user.fullName || user.email || "Tourist";
+        typeof getCurrentUser ===
+        "function"
 
-  if (headerUserName) {
-    headerUserName.textContent = displayName;
-  }
+            ?
 
-  if (welcomeUserName) {
-    welcomeUserName.textContent = displayName;
-  }
+        getCurrentUser()
+
+            :
+
+        null;
+
+
+    if (!user) {
+
+        return;
+
+    }
+
+
+    const displayName =
+
+        user.fullName
+
+        ||
+
+        user.email
+
+        ||
+
+        "Tourist";
+
+
+    if (
+        headerUserName
+    ) {
+
+        headerUserName.textContent =
+            displayName;
+
+    }
+
+
+    if (
+        welcomeUserName
+    ) {
+
+        welcomeUserName.textContent =
+            displayName;
+
+    }
+
 }
+
 
 /* ============================================================
    9. UPDATE SUMMARY
 ============================================================ */
 
 function updateDashboardSummary() {
-  const trip = getDashboardTrip();
 
-  const requests = getMyQuotationRequests();
+    const trip =
+        getDashboardTrip();
 
-  const selectedGuideRequests = requests.filter(
-    (request) => request.selectedGuide,
-  );
 
-  if (dashboardTripCount) {
-    dashboardTripCount.textContent = trip.length;
-  }
+    const requests =
+        getMyQuotationRequests();
 
-  if (dashboardRequestCount) {
-    dashboardRequestCount.textContent = requests.length;
-  }
 
-  if (dashboardGuideCount) {
-    dashboardGuideCount.textContent = selectedGuideRequests.length;
-  }
+    const selectedGuideRequests =
+
+        requests.filter(
+
+            request =>
+                request.selectedGuide
+
+        );
+
+
+    if (
+        dashboardTripCount
+    ) {
+
+        dashboardTripCount.textContent =
+            trip.length;
+
+    }
+
+
+    if (
+        dashboardRequestCount
+    ) {
+
+        dashboardRequestCount.textContent =
+            requests.length;
+
+    }
+
+
+    if (
+        dashboardGuideCount
+    ) {
+
+        dashboardGuideCount.textContent =
+
+            selectedGuideRequests.length;
+
+    }
+
 }
+
 
 /* ============================================================
    10. FORMAT REQUEST STATUS
 ============================================================ */
 
-function formatTouristRequestStatus(status) {
-  const statusMap = {
-    pending: "Pending",
+function formatTouristRequestStatus(
+    status
+) {
 
-    guide_selected: "Guide Selected",
+    const statusMap = {
 
-    quotation_sent: "Quotation Received",
+        pending:
+            "Pending",
 
-    quotation_accepted: "Quotation Accepted",
+        guide_selected:
+            "Guide Selected",
 
-    quotation_rejected: "Quotation Rejected",
-  };
+        quotation_sent:
+            "Quotation Received",
 
-  return statusMap[status] || "Pending";
+        quotation_accepted:
+            "Quotation Accepted",
+
+        quotation_rejected:
+            "Quotation Rejected"
+
+    };
+
+
+    return (
+
+        statusMap[
+            status
+        ]
+
+        ||
+
+        "Pending"
+
+    );
+
 }
+
 
 /* ============================================================
    11. FORMAT DATE
 ============================================================ */
 
-function formatDashboardDate(date) {
-  if (!date) {
-    return "";
-  }
+function formatDashboardDate(
+    date
+) {
 
-  try {
-    return new Date(date).toLocaleDateString();
-  } catch (error) {
-    return date;
-  }
+    if (!date) {
+
+        return "";
+
+    }
+
+
+    try {
+
+        return new Date(
+            date
+        ).toLocaleDateString();
+
+    }
+
+    catch (error) {
+
+        return date;
+
+    }
+
 }
+
 
 /* ============================================================
    12. GET LATEST QUOTATION
 ============================================================ */
 
-function getLatestQuotation(request) {
-  if (!request) {
-    return null;
-  }
+function getLatestQuotation(
+    request
+) {
 
-  /*
+    if (
+        !request
+    ) {
+
+        return null;
+
+    }
+
+
+    /*
        Quotations are saved
        by guide-requests.js
        inside request.quotations
     */
 
-  if (!Array.isArray(request.quotations) || request.quotations.length === 0) {
-    return null;
-  }
+    if (
 
-  /*
+        !Array.isArray(
+            request.quotations
+        )
+
+        ||
+
+        request.quotations.length === 0
+
+    ) {
+
+        return null;
+
+    }
+
+
+    /*
        Get latest quotation
     */
 
-  return request.quotations[request.quotations.length - 1];
+    return (
+
+        request.quotations[
+            request.quotations.length - 1
+        ]
+
+    );
+
 }
+
 
 /* ============================================================
    13. RENDER QUOTATION
 ============================================================ */
 
-function renderQuotation(request) {
-  const quotation = getLatestQuotation(request);
+function renderQuotation(
+    request
+) {
 
-  /*
+    const quotation =
+        getLatestQuotation(
+            request
+        );
+
+
+    /*
        No quotation yet
     */
 
-  if (!quotation) {
-    return 
+    if (
+        !quotation
+    ) {
+
+        return `
 
             <div class="quotation-not-received">
 
@@ -357,19 +695,29 @@ function renderQuotation(request) {
 
             </div>
 
-        ;
-  }
+        `;
 
-  const guide = quotation.guide || {};
+    }
 
-  const quotationStatus = quotation.status || "sent";
 
-  /*
+    const guide =
+        quotation.guide || {};
+
+
+    const quotationStatus =
+        quotation.status || "sent";
+
+
+    /*
        Accepted
     */
 
-  if (request.status === "quotation_accepted") {
-    return 
+    if (
+        request.status ===
+        "quotation_accepted"
+    ) {
+
+        return `
 
             <div class="tourist-quotation-card quotation-accepted">
 
@@ -414,7 +762,9 @@ function renderQuotation(request) {
                     Valid until:
 
                     <strong>
-                        ${formatDashboardDate(quotation.validUntil)}
+                        ${formatDashboardDate(
+                            quotation.validUntil
+                        )}
                     </strong>
 
                 </p>
@@ -453,15 +803,21 @@ function renderQuotation(request) {
 
             </div>
 
-        ;
-  }
+        `;
 
-  /*
+    }
+
+
+    /*
        Rejected
     */
 
-  if (request.status === "quotation_rejected") {
-    return 
+    if (
+        request.status ===
+        "quotation_rejected"
+    ) {
+
+        return `
 
             <div class="tourist-quotation-card quotation-rejected">
 
@@ -500,15 +856,17 @@ function renderQuotation(request) {
 
             </div>
 
-        ;
-  }
+        `;
 
-  /*
+    }
+
+
+    /*
        New Quotation
        Tourist must review
     */
 
-  return 
+    return `
 
         <div class="tourist-quotation-card quotation-pending">
 
@@ -536,7 +894,14 @@ function renderQuotation(request) {
 
                         ${guide.district || "Sri Lanka"}
 
-                        ${guide.province ? " · " + guide.province : ""}
+                        ${
+                            guide.province
+
+                                ? " · " +
+                                  guide.province
+
+                                : ""
+                        }
 
                     </p>
 
@@ -554,7 +919,7 @@ function renderQuotation(request) {
 
             <!-- ==================================================
                  PRICE
-            ==================================================
+            ================================================== -->
 
             <div class="quotation-price-section">
 
@@ -589,7 +954,9 @@ function renderQuotation(request) {
 
                     <strong>
 
-                        ${formatDashboardDate(quotation.validUntil)}
+                        ${formatDashboardDate(
+                            quotation.validUntil
+                        )}
 
                     </strong>
 
@@ -627,7 +994,18 @@ function renderQuotation(request) {
 
                 <p>
 
-                    ${quotation.included ? quotation.included : "Not specified"}
+                    ${
+                        quotation.included
+
+                            ?
+
+                        quotation.included
+
+                            :
+
+                        "Not specified"
+
+                    }
 
                 </p>
 
@@ -647,20 +1025,34 @@ function renderQuotation(request) {
 
                 <p>
 
-                    ${quotation.excluded ? quotation.excluded : "Not specified"}
+                    ${
+                        quotation.excluded
+
+                            ?
+
+                        quotation.excluded
+
+                            :
+
+                        "Not specified"
+
+                    }
 
                 </p>
 
             </div>
 
 
-              <!-- ==================================================
-                GUIDE NOTES
-              ================================================== -->
+            <!-- ==================================================
+                 GUIDE NOTES
+            ================================================== -->
 
             ${
-              quotation.notes
-                ? `
+                quotation.notes
+
+                    ?
+
+                `
 
                     <div class="quotation-service-section">
 
@@ -678,13 +1070,17 @@ function renderQuotation(request) {
                     </div>
 
                 `
-                : ""
+
+                    :
+
+                ""
+
             }
 
 
-              <!-- ==================================================
-                TOURIST DISCLAIMER
-              ================================================== -->
+            <!-- ==================================================
+                 TOURIST DISCLAIMER
+            ================================================== -->
 
             <div class="tourist-quotation-disclaimer">
 
@@ -701,7 +1097,7 @@ function renderQuotation(request) {
                     that connects tourists and
                     independent registered guides.
 
-                    <br /><br />
+                    <br><br>
 
                     The website does not provide,
                     guarantee or control the travel
@@ -712,7 +1108,7 @@ function renderQuotation(request) {
                     dispute or personal matter between
                     the tourist and the guide.
 
-                    <br /><br />
+                    <br><br>
 
                     Any quotation, payment or service
                     agreement is made directly between
@@ -748,9 +1144,9 @@ function renderQuotation(request) {
             </div>
 
 
-              <!-- ==================================================
-                ACTION BUTTONS
-              ================================================== -->
+            <!-- ==================================================
+                 ACTION BUTTONS
+            ================================================== -->
 
             <div class="quotation-action-buttons">
 
@@ -790,353 +1186,773 @@ function renderQuotation(request) {
         </div>
 
     `;
+
 }
+
 
 /* ============================================================
    14. ACCEPT QUOTATION
 ============================================================ */
 
-function acceptQuotation(requestId) {
-  const user = typeof getCurrentUser === "function" ? getCurrentUser() : null;
+function acceptQuotation(
+requestId
+) {
 
-  if (!user) {
-    return;
-  }
+    const user =
 
-  const requests = getDashboardQuotationRequests();
+        typeof getCurrentUser ===
+        "function"
 
-  const requestIndex = requests.findIndex(
-    (request) =>
-      String(request.requestId) === String(requestId) &&
-      request.tourist &&
-      (request.tourist.id === user.id || request.tourist.email === user.email),
-  );
+            ?
 
-  if (requestIndex === -1) {
-    alert("Quotation request could not be found.");
+        getCurrentUser()
 
-    return;
-  }
+            :
 
-  const request = requests[requestIndex];
+        null;
 
-  const quotation = getLatestQuotation(request);
 
-  if (!quotation) {
-    alert("No quotation is available for this request.");
+    if (!user) {
 
-    return;
-  }
+        return;
 
-  /*
+    }
+
+
+    const requests =
+        getDashboardQuotationRequests();
+
+
+    const requestIndex =
+
+        requests.findIndex(
+
+            request =>
+
+                String(
+                    request.requestId
+                )
+
+                ===
+
+                String(
+                    requestId
+                )
+
+                &&
+
+                request.tourist
+
+                &&
+
+                (
+
+                    request.tourist.id ===
+                    user.id
+
+                    ||
+
+                    request.tourist.email ===
+                    user.email
+
+                )
+
+        );
+
+
+    if (
+        requestIndex === -1
+    ) {
+
+        alert(
+            "Quotation request could not be found."
+        );
+
+
+        return;
+
+    }
+
+
+    const request =
+        requests[
+            requestIndex
+        ];
+
+
+    const quotation =
+        getLatestQuotation(
+            request
+        );
+
+
+    if (
+        !quotation
+    ) {
+
+        alert(
+            "No quotation is available for this request."
+        );
+
+
+        return;
+
+    }
+
+
+    /*
        Update Status
     */
 
-  request.status = "quotation_accepted";
+    request.status =
+        "quotation_accepted";
 
-  /*
+
+    /*
        Update Quotation Status
     */
 
-  quotation.status = "accepted";
+    quotation.status =
+        "accepted";
 
-  /*
+
+    /*
        Acceptance Timestamp
     */
 
-  quotation.acceptedAt = new Date().toISOString();
+    quotation.acceptedAt =
 
-  /*
+        new Date().toISOString();
+
+
+    /*
        Save
     */
 
-  requests[requestIndex] = request;
+    requests[
+        requestIndex
+    ] = request;
 
-  saveDashboardQuotationRequests(requests);
 
-  /*
+    saveDashboardQuotationRequests(
+        requests
+    );
+
+
+    /*
        Refresh Dashboard
     */
 
-  updateDashboardSummary();
+    updateDashboardSummary();
 
-  renderSelectedGuide();
+    renderSelectedGuide();
 
-  renderQuotationRequests();
+    renderQuotationRequests();
 
-  alert("Quotation accepted successfully. You can now proceed with the guide.");
+
+    alert(
+
+        "Quotation accepted successfully. You can now proceed with the guide."
+
+    );
+
 }
+
 
 /* ============================================================
    15. REJECT QUOTATION
 ============================================================ */
 
-function rejectQuotation(requestId) {
-  const user = typeof getCurrentUser === "function" ? getCurrentUser() : null;
+function rejectQuotation(
+requestId
+) {
 
-  if (!user) {
-    return;
-  }
+    const user =
 
-  const confirmReject = window.confirm(
-    "Are you sure you want to reject this quotation?",
-  );
+        typeof getCurrentUser ===
+        "function"
 
-  if (!confirmReject) {
-    return;
-  }
+            ?
 
-  const requests = getDashboardQuotationRequests();
+        getCurrentUser()
 
-  const requestIndex = requests.findIndex(
-    (request) =>
-      String(request.requestId) === String(requestId) &&
-      request.tourist &&
-      (request.tourist.id === user.id || request.tourist.email === user.email),
-  );
+            :
 
-  if (requestIndex === -1) {
-    alert("Quotation request could not be found.");
+        null;
 
-    return;
-  }
 
-  const request = requests[requestIndex];
+    if (!user) {
 
-  const quotation = getLatestQuotation(request);
+        return;
 
-  /*
+    }
+
+
+    const confirmReject =
+
+        window.confirm(
+
+            "Are you sure you want to reject this quotation?"
+
+        );
+
+
+    if (!confirmReject) {
+
+        return;
+
+    }
+
+
+    const requests =
+        getDashboardQuotationRequests();
+
+
+    const requestIndex =
+
+        requests.findIndex(
+
+            request =>
+
+                String(
+                    request.requestId
+                )
+
+                ===
+
+                String(
+                    requestId
+                )
+
+                &&
+
+                request.tourist
+
+                &&
+
+                (
+
+                    request.tourist.id ===
+                    user.id
+
+                    ||
+
+                    request.tourist.email ===
+                    user.email
+
+                )
+
+        );
+
+
+    if (
+        requestIndex === -1
+    ) {
+
+        alert(
+            "Quotation request could not be found."
+        );
+
+
+        return;
+
+    }
+
+
+    const request =
+        requests[
+            requestIndex
+        ];
+
+
+    const quotation =
+        getLatestQuotation(
+            request
+        );
+
+
+    /*
        Update Request Status
     */
 
-  request.status = "quotation_rejected";
+    request.status =
+        "quotation_rejected";
 
-  /*
+
+    /*
        Update Quotation Status
     */
 
-  if (quotation) {
-    quotation.status = "rejected";
+    if (
+        quotation
+    ) {
 
-    quotation.rejectedAt = new Date().toISOString();
-  }
+        quotation.status =
+            "rejected";
 
-  /*
+
+        quotation.rejectedAt =
+
+            new Date().toISOString();
+
+    }
+
+
+    /*
        Save
     */
 
-  requests[requestIndex] = request;
+    requests[
+        requestIndex
+    ] = request;
 
-  saveDashboardQuotationRequests(requests);
 
-  /*
+    saveDashboardQuotationRequests(
+        requests
+    );
+
+
+    /*
        Refresh Dashboard
     */
 
-  updateDashboardSummary();
+    updateDashboardSummary();
 
-  renderQuotationRequests();
+    renderQuotationRequests();
 
-  alert("Quotation rejected.");
+
+    alert(
+
+        "Quotation rejected."
+
+    );
+
 }
+
 
 /* ============================================================
    16. ATTACH QUOTATION ACTION BUTTONS
 ============================================================ */
 
 function attachQuotationActionButtons() {
-  /*
+
+    /*
        Acceptance Checkboxes
     */
 
-  const checkboxes = document.querySelectorAll(
-    ".quotation-disclaimer-checkbox"
-  );
+    const checkboxes =
 
-  checkboxes.forEach((checkbox) => {
-    checkbox.addEventListener(
-      "change",
+        document.querySelectorAll(
 
-      () => {
-        const requestId = checkbox.dataset.requestId;
+            ".quotation-disclaimer-checkbox"
 
-        const acceptButton = document.querySelector(
-          `.accept-quotation-button[data-request-id="${requestId}"]`
         );
 
-        if (acceptButton) {
-          acceptButton.disabled = !checkbox.checked;
-        }
-      }
-    );
-  });
 
-  /*
+    checkboxes.forEach(
+
+        checkbox => {
+
+            checkbox.addEventListener(
+
+                "change",
+
+                () => {
+
+                    const requestId =
+
+                        checkbox.dataset.requestId;
+
+
+                    const acceptButton =
+
+                        document.querySelector(
+
+                            `.accept-quotation-button[data-request-id="${requestId}"]`
+
+                        );
+
+
+                    if (
+                        acceptButton
+                    ) {
+
+                        acceptButton.disabled =
+
+                            !checkbox.checked;
+
+                    }
+
+                }
+
+            );
+
+        }
+
+    );
+
+
+    /*
        Accept Buttons
     */
 
-  const acceptButtons = document.querySelectorAll(".accept-quotation-button");
+    const acceptButtons =
 
-  acceptButtons.forEach((button) => {
-    button.addEventListener(
-      "click",
+        document.querySelectorAll(
 
-      () => {
-        const requestId = button.dataset.requestId;
+            ".accept-quotation-button"
 
-        if (!requestId) {
-          return;
+        );
+
+
+    acceptButtons.forEach(
+
+        button => {
+
+            button.addEventListener(
+
+                "click",
+
+                () => {
+
+                    const requestId =
+
+                        button.dataset.requestId;
+
+
+                    if (
+                        !requestId
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    acceptQuotation(
+                        requestId
+                    );
+
+                }
+
+            );
+
         }
 
-        acceptQuotation(requestId);
-      }
     );
-  });
 
-  /*
+
+    /*
        Reject Buttons
     */
 
-  const rejectButtons = document.querySelectorAll(".reject-quotation-button");
+    const rejectButtons =
 
-  rejectButtons.forEach((button) => {
-    button.addEventListener(
-      "click",
+        document.querySelectorAll(
 
-      () => {
-        const requestId = button.dataset.requestId;
+            ".reject-quotation-button"
 
-        if (!requestId) {
-          return;
+        );
+
+
+    rejectButtons.forEach(
+
+        button => {
+
+            button.addEventListener(
+
+                "click",
+
+                () => {
+
+                    const requestId =
+
+                        button.dataset.requestId;
+
+
+                    if (
+                        !requestId
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    rejectQuotation(
+                        requestId
+                    );
+
+                }
+
+            );
+
         }
 
-        rejectQuotation(requestId);
-      }
     );
-  });
+
 }
+
 
 /* ============================================================
    17. RENDER SELECTED GUIDE
 ============================================================ */
 
 function renderSelectedGuide() {
-  if (!selectedGuideContainer) {
-    return;
-  }
 
-  const selectedData = getDashboardSelectedGuide();
+    if (
+        !selectedGuideContainer
+    ) {
 
-  if (!selectedData || !selectedData.guide) {
-    selectedGuideContainer.textContent = "";
+        return;
 
-    const noGuide = document.createElement("div");
-    noGuide.className = "no-selected-guide";
+    }
 
-    const icon = document.createElement("div");
-    icon.className = "no-selected-guide-icon";
-    icon.textContent = "🧑‍💼";
-    noGuide.appendChild(icon);
 
-    const title = document.createElement("h4");
-    title.textContent = "No Guide Selected Yet";
-    noGuide.appendChild(title);
+    const selectedData =
+        getDashboardSelectedGuide();
 
-    const message = document.createElement("p");
-    message.textContent = "Choose a registered guide for your Sri Lanka journey.";
-    noGuide.appendChild(message);
 
-    const link = document.createElement("a");
-    link.href = "find-guides.html";
-    link.className = "dashboard-action-button";
-    link.textContent = "Find Registered Guides";
-    noGuide.appendChild(link);
+    /*
+       No Selected Guide
+    */
 
-    selectedGuideContainer.appendChild(noGuide);
-    return;
-  }
+    if (
 
-  const guide = selectedData.guide;
-  const request = selectedData.request;
-  const requestId = request ? request.requestId : "";
+        !selectedData
 
-  selectedGuideContainer.textContent = "";
+        ||
 
-  const card = document.createElement("div");
-  card.className = "selected-guide-card";
+        !selectedData.guide
 
-  const avatar = document.createElement("div");
-  avatar.className = "selected-guide-avatar";
+    ) {
 
-  if (guide.profileImage) {
-    const image = document.createElement("img");
-    image.src = guide.profileImage;
-    image.alt = guide.fullName || "Guide";
-    avatar.appendChild(image);
-  } else {
-    avatar.textContent = "🧑‍💼";
-  }
+        selectedGuideContainer.innerHTML = `
 
-  card.appendChild(avatar);
+            <div class="no-selected-guide">
 
-  const info = document.createElement("div");
-  info.className = "selected-guide-info";
+                <div class="no-selected-guide-icon">
+                    🧑‍💼
+                </div>
 
-  const guideName = document.createElement("h4");
-  guideName.textContent = guide.fullName || "Selected Guide";
-  info.appendChild(guideName);
 
-  const location = document.createElement("p");
-  location.textContent = `📍 ${guide.district || "Sri Lanka"}${
-    guide.province ? " · " + guide.province : ""
-  }`;
-  info.appendChild(location);
+                <h4>
+                    No Guide Selected Yet
+                </h4>
 
-  const languages = document.createElement("p");
-  languages.textContent = `🗣️ ${guide.languages || "Not specified"}`;
-  info.appendChild(languages);
 
-  const ratingReview = document.createElement("p");
-  ratingReview.textContent = `⭐ ${guide.rating || "N/A"} · 📝 ${
-    guide.reviewCount || 0
-  } Reviews`;
-  info.appendChild(ratingReview);
+                <p>
 
-  const status = document.createElement("span");
-  status.className = "selected-guide-status";
-  status.textContent = "✓ Guide Selected";
-  info.appendChild(status);
+                    Choose a registered guide
+                    for your Sri Lanka journey.
 
-  if (requestId) {
-    const requestLine = document.createElement("p");
-    requestLine.textContent = "Request: ";
-    const strong = document.createElement("strong");
-    strong.textContent = requestId;
-    requestLine.appendChild(strong);
-    info.appendChild(requestLine);
-  }
+                </p>
 
-  card.appendChild(info);
-  selectedGuideContainer.appendChild(card);
+
+                <a
+                    href="find-guides.html"
+                    class="dashboard-action-button"
+                >
+
+                    Find Registered Guides
+
+                </a>
+
+            </div>
+
+        `;
+
+
+        return;
+
+    }
+
+
+    const guide =
+        selectedData.guide;
+
+
+    const request =
+        selectedData.request;
+
+
+    const requestId =
+
+        request
+
+            ?
+
+        request.requestId
+
+            :
+
+        "";
+
+
+    selectedGuideContainer.innerHTML = `
+
+        <div class="selected-guide-card">
+
+
+            <div class="selected-guide-avatar">
+
+                ${
+                    guide.profileImage
+
+                        ?
+
+                    `
+
+                        <img
+                            src="${guide.profileImage}"
+                            alt="${guide.fullName || "Guide"}"
+                        >
+
+                    `
+
+                        :
+
+                    "🧑‍💼"
+
+                }
+
+            </div>
+
+
+            <div class="selected-guide-info">
+
+
+                <h4>
+
+                    ${guide.fullName || "Selected Guide"}
+
+                </h4>
+
+
+                <p>
+
+                    📍
+
+                    ${guide.district || "Sri Lanka"}
+
+                    ${
+                        guide.province
+
+                            ?
+
+                        " · " +
+                        guide.province
+
+                            :
+
+                        ""
+
+                    }
+
+                </p>
+
+
+                <p>
+
+                    🗣️
+
+                    ${guide.languages || "Not specified"}
+
+                </p>
+
+
+                <p>
+
+                    ⭐
+
+                    ${guide.rating || "N/A"}
+
+                    &nbsp;
+
+                    ·
+
+                    &nbsp;
+
+                    📝
+
+                    ${guide.reviewCount || 0}
+
+                    Reviews
+
+                </p>
+
+
+                <span class="selected-guide-status">
+
+                    ✓ Guide Selected
+
+                </span>
+
+
+                ${
+                    requestId
+
+                        ?
+
+                    `
+
+                        <p>
+
+                            Request:
+
+                            <strong>
+                                ${requestId}
+                            </strong>
+
+                        </p>
+
+                    `
+
+                        :
+
+                    ""
+
+                }
+
+
+            </div>
+
+
+        </div>
+
+    `;
+
 }
+
 
 /* ============================================================
    18. RENDER QUOTATION REQUESTS
 ============================================================ */
 
 function renderQuotationRequests() {
-  if (!quotationRequestsContainer) {
-    return;
-  }
 
-  const requests = getMyQuotationRequests();
+    if (
+        !quotationRequestsContainer
+    ) {
 
-  /*
+        return;
+
+    }
+
+
+    const requests =
+        getMyQuotationRequests();
+
+
+    /*
        No Requests
     */
 
-  if (requests.length === 0) {
-    quotationRequestsContainer.innerHTML = `
+    if (
+        requests.length === 0
+    ) {
+
+        quotationRequestsContainer.innerHTML = `
 
             <div class="dashboard-empty-state">
 
@@ -1171,41 +1987,95 @@ function renderQuotationRequests() {
 
         `;
 
-    return;
-  }
 
-  /*
+        return;
+
+    }
+
+
+    /*
        Latest First
     */
 
-  const sortedRequests = [...requests].reverse();
+    const sortedRequests =
 
-  quotationRequestsContainer.innerHTML = "";
+        [...requests].reverse();
 
-  sortedRequests.forEach((request) => {
-    const card = document.createElement("article");
 
-    card.className = "quotation-request-card";
+    quotationRequestsContainer.innerHTML =
+        "";
 
-    const destinations = Array.isArray(request.destinations)
-      ? request.destinations
-      : [];
 
-    const destinationNames = destinations
+    sortedRequests.forEach(
 
-      .map((destination) => destination.name || "Destination")
+        request => {
 
-      .join(", ");
+            const card =
+                document.createElement(
+                    "article"
+                );
 
-    const status = request.status || "pending";
 
-    /*
+            card.className =
+                "quotation-request-card";
+
+
+            const destinations =
+
+                Array.isArray(
+                    request.destinations
+                )
+
+                    ?
+
+                request.destinations
+
+                    :
+
+                [];
+
+
+            const destinationNames =
+
+                destinations
+
+                    .map(
+
+                        destination =>
+
+                            destination.name
+
+                            ||
+
+                            "Destination"
+
+                    )
+
+                    .join(
+                        ", "
+                    );
+
+
+            const status =
+
+                request.status
+
+                ||
+
+                "pending";
+
+
+            /*
                Latest quotation
             */
 
-    const quotation = getLatestQuotation(request);
+            const quotation =
+                getLatestQuotation(
+                    request
+                );
 
-    card.innerHTML = `
+
+            card.innerHTML = `
 
                 <div class="request-card-header">
 
@@ -1224,9 +2094,18 @@ function renderQuotationRequests() {
                         <span class="request-id">
 
                             ${
-                              request.createdAt
-                                ? formatDashboardDate(request.createdAt)
-                                : ""
+                                request.createdAt
+
+                                    ?
+
+                                formatDashboardDate(
+                                    request.createdAt
+                                )
+
+                                    :
+
+                                ""
+
                             }
 
                         </span>
@@ -1238,7 +2117,9 @@ function renderQuotationRequests() {
                         class="request-status ${status}"
                     >
 
-                        ${formatTouristRequestStatus(status)}
+                        ${formatTouristRequestStatus(
+                            status
+                        )}
 
                     </span>
 
@@ -1258,7 +2139,14 @@ function renderQuotationRequests() {
 
                         <strong>
 
-                            ${destinationNames || "None"}
+                            ${
+                                destinationNames
+
+                                    ||
+
+                                "None"
+
+                            }
 
                         </strong>
 
@@ -1275,9 +2163,19 @@ function renderQuotationRequests() {
                         <strong>
 
                             ${
-                              request.startDate && request.endDate
-                                ? request.startDate + " → " + request.endDate
-                                : "Not selected"
+                                request.startDate &&
+                                request.endDate
+
+                                    ?
+
+                                request.startDate +
+                                " → " +
+                                request.endDate
+
+                                    :
+
+                                "Not selected"
+
                             }
 
                         </strong>
@@ -1294,7 +2192,14 @@ function renderQuotationRequests() {
 
                         <strong>
 
-                            ${request.travelers || "Not selected"}
+                            ${
+                                request.travelers
+
+                                    ||
+
+                                "Not selected"
+
+                            }
 
                         </strong>
 
@@ -1305,8 +2210,11 @@ function renderQuotationRequests() {
 
 
                 ${
-                  request.selectedGuide
-                    ? `
+                    request.selectedGuide
+
+                        ?
+
+                    `
 
                         <div class="request-selected-guide">
 
@@ -1318,7 +2226,14 @@ function renderQuotationRequests() {
                             </strong>
 
 
-                            ${request.selectedGuide.fullName || "Guide"}
+                            ${
+                                request.selectedGuide.fullName
+
+                                    ||
+
+                                "Guide"
+
+                            }
 
 
                             <br>
@@ -1327,7 +2242,14 @@ function renderQuotationRequests() {
                             📍
 
 
-                            ${request.selectedGuide.district || "Sri Lanka"}
+                            ${
+                                request.selectedGuide.district
+
+                                    ||
+
+                                "Sri Lanka"
+
+                            }
 
 
                             &nbsp;
@@ -1337,12 +2259,22 @@ function renderQuotationRequests() {
                             ⭐
 
 
-                            ${request.selectedGuide.rating || "N/A"}
+                            ${
+                                request.selectedGuide.rating
+
+                                    ||
+
+                                "N/A"
+
+                            }
 
                         </div>
 
                     `
-                    : `
+
+                        :
+
+                    `
 
                         <div class="request-selected-guide">
 
@@ -1366,6 +2298,7 @@ function renderQuotationRequests() {
                         </div>
 
                     `
+
                 }
 
 
@@ -1377,9 +2310,17 @@ function renderQuotationRequests() {
                 <div class="request-quotation-area">
 
                     ${
-                      quotation
-                        ? renderQuotation(request)
-                        : `
+                        quotation
+
+                            ?
+
+                        renderQuotation(
+                            request
+                        )
+
+                            :
+
+                        `
 
                             <div class="quotation-not-received">
 
@@ -1408,40 +2349,61 @@ function renderQuotationRequests() {
                             </div>
 
                         `
+
                     }
 
                 </div>
 
             `;
 
-    quotationRequestsContainer.appendChild(card);
-  });
 
-  /*
+            quotationRequestsContainer.appendChild(
+                card
+            );
+
+        }
+
+    );
+
+
+    /*
        Attach Accept / Reject
        and Disclaimer Events
     */
 
-  attachQuotationActionButtons();
+    attachQuotationActionButtons();
+
 }
+
 
 /* ============================================================
    19. RENDER MY TRIP
 ============================================================ */
 
 function renderDashboardTrip() {
-  if (!dashboardTripContainer) {
-    return;
-  }
 
-  const trip = getDashboardTrip();
+    if (
+        !dashboardTripContainer
+    ) {
 
-  /*
+        return;
+
+    }
+
+
+    const trip =
+        getDashboardTrip();
+
+
+    /*
        Empty Trip
     */
 
-  if (trip.length === 0) {
-    dashboardTripContainer.innerHTML = `
+    if (
+        trip.length === 0
+    ) {
+
+        dashboardTripContainer.innerHTML = `
 
             <div class="dashboard-empty-state">
 
@@ -1476,17 +2438,31 @@ function renderDashboardTrip() {
 
         `;
 
-    return;
-  }
 
-  dashboardTripContainer.innerHTML = "";
+        return;
 
-  trip.forEach((place) => {
-    const card = document.createElement("article");
+    }
 
-    card.className = "dashboard-destination-card";
 
-    card.innerHTML = `
+    dashboardTripContainer.innerHTML =
+        "";
+
+
+    trip.forEach(
+
+        place => {
+
+            const card =
+                document.createElement(
+                    "article"
+                );
+
+
+            card.className =
+                "dashboard-destination-card";
+
+
+            card.innerHTML = `
 
                 <img
                     src="${place.image || ""}"
@@ -1512,7 +2488,19 @@ function renderDashboardTrip() {
 
                         ${place.district || ""}
 
-                        ${place.province ? " · " + place.province : ""}
+                        ${
+                            place.province
+
+                                ?
+
+                            " · " +
+                            place.province
+
+                                :
+
+                            ""
+
+                        }
 
                     </p>
 
@@ -1530,72 +2518,122 @@ function renderDashboardTrip() {
 
             `;
 
-    dashboardTripContainer.appendChild(card);
-  });
+
+            dashboardTripContainer.appendChild(
+                card
+            );
+
+        }
+
+    );
+
 }
+
 
 /* ============================================================
    20. LOGOUT
 ============================================================ */
 
 function handleTouristLogout() {
-  if (typeof logoutUser === "function") {
-    logoutUser();
 
-    return;
-  }
+    if (
+        typeof logoutUser ===
+        "function"
+    ) {
 
-  localStorage.removeItem("exploreSriLankaCurrentUser");
+        logoutUser();
 
-  sessionStorage.removeItem("exploreSriLankaCurrentUser");
 
-  window.location.href = "index.html";
+        return;
+
+    }
+
+
+    localStorage.removeItem(
+
+        "exploreSriLankaCurrentUser"
+
+    );
+
+
+    sessionStorage.removeItem(
+
+        "exploreSriLankaCurrentUser"
+
+    );
+
+
+    window.location.href =
+        "index.html";
+
 }
+
 
 /* ============================================================
    21. PAGE INITIALIZATION
 ============================================================ */
 
 document.addEventListener(
-  "DOMContentLoaded",
 
-  () => {
-    /*
+    "DOMContentLoaded",
+
+    () => {
+
+        /*
            Require Tourist Login
         */
 
-    const user =
-      typeof requireAccountType === "function"
-        ? requireAccountType("tourist")
-        : null;
+        const user =
 
-    /*
+            typeof requireAccountType ===
+            "function"
+
+                ?
+
+            requireAccountType(
+                "tourist"
+            )
+
+                :
+
+            null;
+
+
+        /*
            Stop if not Tourist
         */
 
-    if (!user) {
-      return;
-    }
+        if (
+            !user
+        ) {
 
-    /*
+            return;
+
+        }
+
+
+        /*
            Update User
         */
 
-    updateDashboardUser();
+        updateDashboardUser();
 
-    /*
+
+        /*
            Update Summary
         */
 
-    updateDashboardSummary();
+        updateDashboardSummary();
 
-    /*
+
+        /*
            Render Selected Guide
         */
 
-    renderSelectedGuide();
+        renderSelectedGuide();
 
-    /*
+
+        /*
            Render Quotation Requests
 
            Includes:
@@ -1606,34 +2644,47 @@ document.addEventListener(
            Reject
         */
 
-    renderQuotationRequests();
+        renderQuotationRequests();
 
-    /*
+
+        /*
            Render Trip
         */
 
-    renderDashboardTrip();
+        renderDashboardTrip();
 
-    /*
+
+        /*
            Logout
         */
 
-    if (logoutButton) {
-      logoutButton.addEventListener(
-        "click",
+        if (
+            logoutButton
+        ) {
 
-        handleTouristLogout,
-      );
-    }
+            logoutButton.addEventListener(
 
-    /*
+                "click",
+
+                handleTouristLogout
+
+            );
+
+        }
+
+
+        /*
            Debug
         */
 
-    console.log(
-      "Tourist Dashboard Loaded:",
+        console.log(
 
-      user,
-    );
-  },
+            "Tourist Dashboard Loaded:",
+
+            user
+
+        );
+
+    }
+
 );
