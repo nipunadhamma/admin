@@ -1,0 +1,498 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Request Guide Quotation | Explore Sri Lanka
+    </title>
+
+
+    <!-- ============================================================
+         MAIN SITE CSS
+    ============================================================= -->
+
+    <link rel="stylesheet" href="css/style.css">
+     <link rel="stylesheet" href="css/quotation-request.css">
+
+    <!-- ============================================================
+         QUOTATION REQUEST CSS
+    ============================================================= -->
+
+  
+
+</head>
+
+
+<body>
+
+
+    <!-- ============================================================
+         SITE HEADER
+    ============================================================= -->
+
+    <header class="site-header">
+
+
+        <!-- ========================================================
+             BRAND
+        ========================================================= -->
+
+        <div class="site-brand">
+
+            <a href="index.html" class="planner-brand-link">
+
+                <div class="brand-icon">
+                    🇱🇰
+                </div>
+
+
+                <div class="brand-text">
+
+                    <h1>
+                        Explore Sri Lanka
+                    </h1>
+
+                    <p>
+                        Discover the Wonder of Sri Lanka
+                    </p>
+
+                </div>
+
+            </a>
+
+        </div>
+
+
+        <!-- ========================================================
+             NAVIGATION
+        ========================================================= -->
+
+        <nav class="main-navigation" aria-label="Main Navigation">
+
+            <a href="index.html" class="nav-link">
+                Home
+            </a>
+
+
+            <a href="index.html#map" class="nav-link">
+                Explore Map
+            </a>
+
+
+            <a href="trip-planner.html" class="nav-link">
+                My Trip
+            </a>
+
+        </nav>
+
+
+        <!-- ========================================================
+             HEADER ACTION
+        ========================================================= -->
+
+        <div class="header-actions">
+
+            <a href="trip-planner.html" class="back-to-map-btn">
+
+                ←
+
+                Back to Trip Planner
+
+            </a>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- ============================================================
+         MAIN QUOTATION REQUEST PAGE
+    ============================================================= -->
+
+    <main class="quotation-request-page">
+
+
+        <!-- ========================================================
+             PAGE HERO
+        ========================================================= -->
+
+        <section class="quotation-hero">
+
+            <div class="quotation-hero-content">
+
+                <span class="quotation-hero-icon">
+                    🧑‍💼
+                </span>
+
+
+                <div>
+
+                    <h2>
+                        Request a Guide Quotation
+                    </h2>
+
+                    <p>
+                        Review your trip details and
+                        request personalized quotations
+                        from registered Sri Lankan guides.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ========================================================
+             MAIN CONTENT
+        ========================================================= -->
+
+        <section class="quotation-container">
+
+
+            <!-- ====================================================
+                 LEFT SIDE
+            ===================================================== -->
+
+            <div class="quotation-main">
+
+
+                <!-- ==================================================
+                     SELECTED DESTINATIONS
+                ================================================== -->
+
+                <section class="quotation-card">
+
+
+                    <div class="quotation-card-header">
+
+                        <div>
+
+                            <h3>
+                                📍 Selected Destinations
+                            </h3>
+
+                            <p>
+                                Your selected places
+                                for this journey
+                            </p>
+
+                        </div>
+
+
+                        <span id="quotationPlaceCount" class="quotation-count">
+                            0 Places
+                        </span>
+
+                    </div>
+
+
+                    <!-- Destinations Load Here -->
+
+                    <div id="quotationDestinations" class="quotation-destinations">
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- ==================================================
+                     TRAVEL DETAILS
+                ================================================== -->
+
+                <section class="quotation-card">
+
+
+                    <div class="quotation-card-header">
+
+                        <div>
+
+                            <h3>
+                                📅 Travel Details
+                            </h3>
+
+                            <p>
+                                Your planned journey information
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="quotation-details-grid">
+
+
+                        <!-- Start Date -->
+
+                        <div class="quotation-detail-item">
+
+                            <span>
+                                📅 Start Date
+                            </span>
+
+                            <strong id="quotationStartDate">
+                                Not selected
+                            </strong>
+
+                        </div>
+
+
+                        <!-- End Date -->
+
+                        <div class="quotation-detail-item">
+
+                            <span>
+                                📅 End Date
+                            </span>
+
+                            <strong id="quotationEndDate">
+                                Not selected
+                            </strong>
+
+                        </div>
+
+
+                        <!-- Travelers -->
+
+                        <div class="quotation-detail-item">
+
+                            <span>
+                                👥 Travelers
+                            </span>
+
+                            <strong id="quotationTravelers">
+                                Not selected
+                            </strong>
+
+                        </div>
+
+
+                        <!-- Travel Style -->
+
+                        <div class="quotation-detail-item">
+
+                            <span>
+                                🌿 Travel Style
+                            </span>
+
+                            <strong id="quotationTravelStyle">
+                                Not selected
+                            </strong>
+
+                        </div>
+
+
+                        <!-- Transport -->
+
+                        <div class="quotation-detail-item">
+
+                            <span>
+                                🚗 Transport
+                            </span>
+
+                            <strong id="quotationTransport">
+                                Not selected
+                            </strong>
+
+                        </div>
+
+
+                        <!-- Accommodation -->
+
+                        <div class="quotation-detail-item">
+
+                            <span>
+                                🏨 Accommodation
+                            </span>
+
+                            <strong id="quotationAccommodation">
+                                Not selected
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- ==================================================
+                     SPECIAL REQUESTS
+                ================================================== -->
+
+                <section class="quotation-card">
+
+
+                    <div class="quotation-card-header">
+
+                        <div>
+
+                            <h3>
+                                💬 Special Requests
+                            </h3>
+
+                            <p>
+                                Additional information
+                                for your guide
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div id="quotationSpecialRequests" class="quotation-special-requests">
+
+                        No special requests provided.
+
+                    </div>
+
+                </section>
+
+            </div>
+
+
+
+            <!-- ====================================================
+                 RIGHT SIDE
+            ===================================================== -->
+
+            <aside class="quotation-sidebar">
+
+
+                <!-- ==================================================
+                     REQUEST SUMMARY
+                ================================================== -->
+
+                <div class="quotation-summary-card">
+
+
+                    <div class="quotation-summary-header">
+
+                        <span>
+                            ❤️
+                        </span>
+
+                        <div>
+
+                            <h3>
+                                Request Summary
+                            </h3>
+
+                            <p>
+                                Review before submitting
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Destination Count -->
+
+                    <div class="quotation-summary-row">
+
+                        <span>
+                            📍 Destinations
+                        </span>
+
+                        <strong id="summaryQuotationPlaces">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <!-- Travel Dates -->
+
+                    <div class="quotation-summary-row">
+
+                        <span>
+                            📅 Travel Dates
+                        </span>
+
+                        <strong id="summaryQuotationDates">
+                            Not selected
+                        </strong>
+
+                    </div>
+
+
+                    <!-- Travelers -->
+
+                    <div class="quotation-summary-row">
+
+                        <span>
+                            👥 Travelers
+                        </span>
+
+                        <strong id="summaryQuotationTravelers">
+                            Not selected
+                        </strong>
+
+                    </div>
+
+
+                    <!-- ==================================================
+                         SUBMIT BUTTON
+                    ================================================== -->
+
+                    <button type="button" id="submitQuotationButton" class="submit-quotation-button">
+
+                        🧑‍💼
+
+                        Find Registered Guides
+
+                        →
+
+                    </button>
+
+
+                    <p class="quotation-note">
+
+                        Your request will be shared with
+                        registered guides who can review
+                        your trip and send you a quotation.
+
+                    </p>
+
+                </div>
+
+            </aside>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- ============================================================
+         AUTHENTICATION CORE
+    ============================================================= -->
+
+    <script src="js/auth.js"></script>
+
+
+    <!-- ============================================================
+         QUOTATION REQUEST LOGIC
+    ============================================================= -->
+
+    <script src="js/quotation-request.js"></script>
+
+
+</body>
+
+</html>

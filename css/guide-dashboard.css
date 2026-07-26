@@ -1,0 +1,1017 @@
+/* ============================================================
+   GUIDE DASHBOARD
+   Explore Sri Lanka
+============================================================ */
+
+
+/* ============================================================
+   PAGE
+============================================================ */
+
+.guide-dashboard-page {
+
+    width: 100%;
+
+    min-height: calc(100vh - 80px);
+
+    background:
+        #f5f7f8;
+
+    padding:
+        40px 6% 80px;
+
+}
+
+
+/* ============================================================
+   HEADER USER NAME
+============================================================ */
+
+.guide-header-name {
+
+    font-weight:
+        600;
+
+    color:
+        #1f2933;
+
+    margin-right:
+        12px;
+
+}
+
+
+/* ============================================================
+   LOGOUT BUTTON
+============================================================ */
+
+.logout-button {
+
+    border:
+        none;
+
+    background:
+        #b42318;
+
+    color:
+        #ffffff;
+
+    padding:
+        10px 18px;
+
+    border-radius:
+        8px;
+
+    cursor:
+        pointer;
+
+    font-size:
+        14px;
+
+    font-weight:
+        600;
+
+    transition:
+        0.2s ease;
+
+}
+
+
+.logout-button:hover {
+
+    background:
+        #8f1d14;
+
+}
+
+
+/* ============================================================
+   HERO
+============================================================ */
+
+.guide-dashboard-hero {
+
+    background:
+        linear-gradient(135deg,
+            #0f766e,
+            #115e59);
+
+    border-radius:
+        20px;
+
+    padding:
+        40px;
+
+    color:
+        #ffffff;
+
+    margin-bottom:
+        30px;
+
+    box-shadow:
+        0 10px 30px rgba(0,
+            0,
+            0,
+            0.08);
+
+}
+
+
+.guide-hero-content {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        22px;
+
+}
+
+
+.guide-hero-icon {
+
+    width:
+        72px;
+
+    height:
+        72px;
+
+    border-radius:
+        18px;
+
+    background:
+        rgba(255,
+            255,
+            255,
+            0.15);
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    font-size:
+        38px;
+
+}
+
+
+.dashboard-eyebrow {
+
+    margin:
+        0 0 6px;
+
+    font-size:
+        12px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        1.5px;
+
+    opacity:
+        0.8;
+
+}
+
+
+.guide-dashboard-hero h2 {
+
+    margin:
+        0 0 8px;
+
+    font-size:
+        32px;
+
+}
+
+
+.guide-dashboard-hero p {
+
+    margin:
+        0;
+
+    opacity:
+        0.9;
+
+}
+
+
+/* ============================================================
+   STATS GRID
+============================================================ */
+
+.guide-stats-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(4,
+            1fr);
+
+    gap:
+        20px;
+
+    margin-bottom:
+        35px;
+
+}
+
+
+.guide-stat-card {
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid #e5e7eb;
+
+    border-radius:
+        16px;
+
+    padding:
+        22px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        16px;
+
+    box-shadow:
+        0 5px 20px rgba(0,
+            0,
+            0,
+            0.04);
+
+}
+
+
+.guide-stat-icon {
+
+    width:
+        48px;
+
+    height:
+        48px;
+
+    border-radius:
+        12px;
+
+    background:
+        #f0fdfa;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    font-size:
+        24px;
+
+}
+
+
+.guide-stat-card span {
+
+    display:
+        block;
+
+    color:
+        #6b7280;
+
+    font-size:
+        13px;
+
+    margin-bottom:
+        5px;
+
+}
+
+
+.guide-stat-card strong {
+
+    display:
+        block;
+
+    font-size:
+        24px;
+
+    color:
+        #111827;
+
+}
+
+
+/* ============================================================
+   INCOMING REQUEST SECTION
+============================================================ */
+
+.incoming-requests-section {
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid #e5e7eb;
+
+    border-radius:
+        20px;
+
+    padding:
+        30px;
+
+    box-shadow:
+        0 5px 20px rgba(0,
+            0,
+            0,
+            0.04);
+
+}
+
+
+.section-header {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        flex-start;
+
+    gap:
+        20px;
+
+    margin-bottom:
+        28px;
+
+}
+
+
+.section-eyebrow {
+
+    margin:
+        0 0 6px;
+
+    color:
+        #0f766e;
+
+    font-size:
+        12px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        1px;
+
+}
+
+
+.section-header h2 {
+
+    margin:
+        0 0 8px;
+
+    font-size:
+        26px;
+
+    color:
+        #111827;
+
+}
+
+
+.section-header p {
+
+    margin:
+        0;
+
+    color:
+        #6b7280;
+
+}
+
+
+.refresh-requests-button {
+
+    border:
+        1px solid #d1d5db;
+
+    background:
+        #ffffff;
+
+    padding:
+        10px 18px;
+
+    border-radius:
+        8px;
+
+    cursor:
+        pointer;
+
+    font-weight:
+        600;
+
+}
+
+
+.refresh-requests-button:hover {
+
+    background:
+        #f9fafb;
+
+}
+
+
+/* ============================================================
+   REQUEST CARD
+============================================================ */
+
+.incoming-request-card {
+
+    border:
+        1px solid #e5e7eb;
+
+    border-radius:
+        16px;
+
+    padding:
+        24px;
+
+    margin-bottom:
+        20px;
+
+    background:
+        #ffffff;
+
+}
+
+
+.incoming-request-card:last-child {
+
+    margin-bottom:
+        0;
+
+}
+
+
+/* ============================================================
+   REQUEST HEADER
+============================================================ */
+
+.request-card-header {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        flex-start;
+
+    gap:
+        20px;
+
+    padding-bottom:
+        18px;
+
+    border-bottom:
+        1px solid #eeeeee;
+
+}
+
+
+.request-tourist-info h3 {
+
+    margin:
+        0 0 5px;
+
+    color:
+        #111827;
+
+}
+
+
+.request-tourist-info p {
+
+    margin:
+        0;
+
+    color:
+        #6b7280;
+
+    font-size:
+        14px;
+
+}
+
+
+.request-status {
+
+    padding:
+        6px 12px;
+
+    border-radius:
+        20px;
+
+    background:
+        #fff7ed;
+
+    color:
+        #c2410c;
+
+    font-size:
+        12px;
+
+    font-weight:
+        700;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+/* ============================================================
+   REQUEST DETAILS
+============================================================ */
+
+.request-details-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3,
+            1fr);
+
+    gap:
+        15px;
+
+    padding:
+        20px 0;
+
+}
+
+
+.request-detail-item {
+
+    background:
+        #f9fafb;
+
+    border-radius:
+        10px;
+
+    padding:
+        14px;
+
+}
+
+
+.request-detail-item span {
+
+    display:
+        block;
+
+    color:
+        #6b7280;
+
+    font-size:
+        12px;
+
+    margin-bottom:
+        5px;
+
+}
+
+
+.request-detail-item strong {
+
+    color:
+        #111827;
+
+    font-size:
+        14px;
+
+}
+
+
+/* ============================================================
+   DESTINATIONS
+============================================================ */
+
+.request-destinations {
+
+    margin-top:
+        5px;
+
+}
+
+
+.request-destinations h4 {
+
+    margin:
+        0 0 14px;
+
+    color:
+        #111827;
+
+}
+
+
+.request-destination-list {
+
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        10px;
+
+}
+
+
+.request-destination-item {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    background:
+        #f8fafc;
+
+    border:
+        1px solid #e5e7eb;
+
+    border-radius:
+        10px;
+
+    padding:
+        8px 12px;
+
+}
+
+
+.request-destination-item img {
+
+    width:
+        48px;
+
+    height:
+        48px;
+
+    object-fit:
+        cover;
+
+    border-radius:
+        8px;
+
+}
+
+
+.request-destination-item strong {
+
+    display:
+        block;
+
+    font-size:
+        13px;
+
+}
+
+
+.request-destination-item span {
+
+    display:
+        block;
+
+    font-size:
+        11px;
+
+    color:
+        #6b7280;
+
+}
+
+
+/* ============================================================
+   SPECIAL REQUESTS
+============================================================ */
+
+.request-special-requests {
+
+    margin-top:
+        20px;
+
+    padding:
+        15px;
+
+    background:
+        #fffbeb;
+
+    border:
+        1px solid #fde68a;
+
+    border-radius:
+        10px;
+
+}
+
+
+.request-special-requests strong {
+
+    display:
+        block;
+
+    margin-bottom:
+        6px;
+
+}
+
+
+.request-special-requests p {
+
+    margin:
+        0;
+
+    color:
+        #78350f;
+
+    font-size:
+        14px;
+
+}
+
+
+/* ============================================================
+   REQUEST FOOTER
+============================================================ */
+
+.request-card-footer {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    gap:
+        15px;
+
+    margin-top:
+        22px;
+
+    padding-top:
+        18px;
+
+    border-top:
+        1px solid #eeeeee;
+
+}
+
+
+.request-date {
+
+    color:
+        #6b7280;
+
+    font-size:
+        13px;
+
+}
+
+
+.send-quotation-button {
+
+    border:
+        none;
+
+    background:
+        #0f766e;
+
+    color:
+        #ffffff;
+
+    padding:
+        11px 20px;
+
+    border-radius:
+        8px;
+
+    cursor:
+        pointer;
+
+    font-weight:
+        600;
+
+}
+
+
+.send-quotation-button:hover {
+
+    background:
+        #115e59;
+
+}
+
+
+/* ============================================================
+   EMPTY STATE
+============================================================ */
+
+.no-requests-state {
+
+    text-align:
+        center;
+
+    padding:
+        60px 20px;
+
+    border:
+        2px dashed #e5e7eb;
+
+    border-radius:
+        15px;
+
+}
+
+
+.empty-state-icon {
+
+    font-size:
+        48px;
+
+    margin-bottom:
+        12px;
+
+}
+
+
+.no-requests-state h3 {
+
+    margin:
+        0 0 8px;
+
+}
+
+
+.no-requests-state p {
+
+    margin:
+        0;
+
+    color:
+        #6b7280;
+
+}
+
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
+@media (max-width: 1000px) {
+
+    .guide-stats-grid {
+
+        grid-template-columns:
+            repeat(2,
+                1fr);
+
+    }
+
+
+    .request-details-grid {
+
+        grid-template-columns:
+            repeat(2,
+                1fr);
+
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .guide-dashboard-page {
+
+        padding:
+            25px 15px 50px;
+
+    }
+
+
+    .guide-dashboard-hero {
+
+        padding:
+            25px;
+
+    }
+
+
+    .guide-hero-content {
+
+        align-items:
+            flex-start;
+
+    }
+
+
+    .guide-dashboard-hero h2 {
+
+        font-size:
+            25px;
+
+    }
+
+
+    .guide-stats-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .incoming-requests-section {
+
+        padding:
+            20px;
+
+    }
+
+
+    .section-header {
+
+        flex-direction:
+            column;
+
+    }
+
+
+    .request-card-header {
+
+        flex-direction:
+            column;
+
+    }
+
+
+    .request-details-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .request-card-footer {
+
+        flex-direction:
+            column;
+
+        align-items:
+            stretch;
+
+    }
+
+
+    .send-quotation-button {
+
+        width:
+            100%;
+
+    }
+
+}

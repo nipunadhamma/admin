@@ -1,0 +1,609 @@
+/* ============================================================
+LOGIN PAGE
+Explore Sri Lanka
+============================================================ */
+
+/* ============================================================
+
+1. LOGIN PAGE LAYOUT
+   ============================================================ */
+
+.login-page {
+
+     min-height: calc(100vh - 90px);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 50px 20px;
+
+    background:
+        linear-gradient(135deg,
+            #f5faf7,
+            #ffffff);
+    
+}
+
+/* ============================================================
+2. LOGIN CARD
+============================================================ */
+
+.login-card {
+
+     width: 100%;
+
+    max-width: 480px;
+
+    background: #ffffff;
+
+    border-radius: 24px;
+
+    padding: 40px;
+
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.10);
+
+    border:
+        1px solid #eeeeee;
+    
+}
+
+/* ============================================================
+3. LOGIN HEADER
+============================================================ */
+
+.login-header {
+
+ text-align: center;
+
+    margin-bottom: 30px;
+    
+}
+
+.login-icon {
+
+     width: 70px;
+
+    height: 70px;
+
+    margin:
+        0 auto 18px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 38px;
+
+    background:
+        #edf8f1;
+
+    border-radius: 50%;
+    
+}
+
+.login-header h2 {
+
+     margin:
+        0 0 8px;
+
+    color:
+        #174a3c;
+
+    font-size:
+        28px;
+    
+}
+
+.login-header p {
+
+     margin: 0;
+
+    color:
+        #777777;
+
+    font-size:
+        14px;
+    
+}
+
+/* ============================================================
+4. LOGIN FORM
+============================================================ */
+
+.login-form {
+
+     width: 100%;
+    
+}
+
+.form-group {
+
+     margin-bottom: 20px;
+    
+}
+
+.form-group label {
+
+     display: block;
+
+    margin-bottom: 8px;
+
+    color:
+        #333333;
+
+    font-size:
+        14px;
+
+    font-weight:
+        600;
+    
+}
+
+.form-group input {
+
+     width: 100%;
+
+    box-sizing: border-box;
+
+    padding:
+        13px 14px;
+
+    border:
+        1px solid #dddddd;
+
+    border-radius:
+        10px;
+
+    background:
+        #ffffff;
+
+    color:
+        #333333;
+
+    font-size:
+        14px;
+
+    outline:
+        none;
+
+    transition:
+        all 0.2s ease;
+    
+}
+
+.form-group input:focus {
+
+     border-color:
+        #176044;
+
+    box-shadow:
+        0 0 0 3px rgba(23, 96, 68, 0.10);
+    
+}
+
+/* ============================================================
+5. PASSWORD WRAPPER
+============================================================ */
+
+.password-wrapper {
+
+     position: relative;
+    
+}
+
+.password-wrapper input {
+
+     padding-right:
+        50px;
+    
+}
+
+.toggle-password {
+
+     position: absolute;
+
+    right: 10px;
+
+    top: 50%;
+
+    transform:
+        translateY(-50%);
+
+    width: 36px;
+
+    height: 36px;
+
+    border: none;
+
+    background:
+        transparent;
+
+    cursor: pointer;
+
+    font-size:
+        18px;
+
+    border-radius:
+        8px;
+    
+}
+
+.toggle-password:hover {
+
+     background:
+        #f4f4f4;
+    
+}
+
+/* ============================================================
+6. LOGIN OPTIONS
+============================================================ */
+
+.login-options {
+
+     display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin:
+        5px 0 24px;
+
+    font-size:
+        13px;
+    
+}
+
+.remember-me {
+
+     display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    color:
+        #555555;
+
+    cursor: pointer;
+
+}
+
+.remember-me input {
+
+     width:
+        auto;
+    
+}
+
+.login-options a {
+
+     color:
+        #176044;
+
+    text-decoration:
+        none;
+
+    font-weight:
+        600;
+    
+}
+
+.login-options a:hover {
+
+     text-decoration:
+        underline;
+    
+}
+
+/* ============================================================
+7. LOGIN BUTTON
+============================================================ */
+
+.login-submit-button {
+
+     width: 100%;
+
+    padding:
+        14px 20px;
+
+    border:
+        none;
+
+    border-radius:
+        10px;
+
+    background:
+        #174a3c;
+
+    color:
+        #ffffff;
+
+    font-size:
+        15px;
+
+    font-weight:
+        700;
+
+    cursor:
+        pointer;
+
+    transition:
+        all 0.2s ease;
+    
+}
+
+.login-submit-button:hover {
+
+     background:
+        #0e352b;
+
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 8px 20px rgba(23, 74, 60, 0.20);
+    
+}
+
+.login-submit-button:active {
+
+     transform:
+        translateY(0);
+    
+}
+
+/* ============================================================
+8. LOGIN MESSAGE
+============================================================ */
+
+.login-message {
+
+     display: none;
+
+    margin-top:
+        15px;
+
+    padding:
+        12px 14px;
+
+    border-radius:
+        9px;
+
+    font-size:
+        13px;
+
+    line-height:
+        1.5;
+
+    text-align:
+        center;
+    
+}
+
+/* ============================================================
+9. REGISTER PROMPT
+============================================================ */
+
+.register-prompt {
+
+    margin-top:
+        25px;
+
+    padding-top:
+        22px;
+
+    border-top:
+        1px solid #eeeeee;
+
+    text-align:
+        center;
+    
+}
+
+.register-prompt p {
+
+     margin: 0;
+
+    color:
+        #666666;
+
+    font-size:
+        14px;
+    
+}
+
+.register-prompt a {
+
+     color:
+        #176044;
+
+    font-weight:
+        700;
+
+    text-decoration:
+        none;
+    
+}
+
+.register-prompt a:hover {
+
+     text-decoration:
+        underline;
+    
+}
+
+/* ============================================================
+10. LOGIN INFORMATION
+============================================================ */
+
+.login-info {
+
+     margin-top:
+        25px;
+
+    padding-top:
+        22px;
+
+    border-top:
+        1px solid #eeeeee;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        15px;
+    
+}
+
+.login-info-item {
+
+     display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    gap:
+        12px;
+
+    padding:
+        12px;
+
+    background:
+        #f8faf9;
+
+    border-radius:
+        10px;
+    
+}
+
+.login-info-item>span {
+
+     font-size:
+        22px;
+
+    flex-shrink:
+        0;
+    
+}
+
+.login-info-item strong {
+
+     display:
+        block;
+
+    margin-bottom:
+        3px;
+
+    color:
+        #174a3c;
+
+    font-size:
+        14px;
+    
+}
+
+.login-info-item p {
+
+     margin: 0;
+
+    color:
+        #777777;
+
+    font-size:
+        12px;
+
+    line-height:
+        1.5;
+    
+}
+
+/* ============================================================
+11. MOBILE
+============================================================ */
+
+@media (max-width: 768px) {
+
+     .login-page {
+
+        min-height:
+            calc(100vh - 70px);
+
+        padding:
+            30px 15px;
+
+    }
+
+
+    .login-card {
+
+        padding:
+            30px 22px;
+
+        border-radius:
+            18px;
+
+    }
+
+
+    .login-header h2 {
+
+        font-size:
+            24px;
+
+    }
+
+    
+}
+
+@media (max-width: 480px) {
+
+     .login-page {
+
+        padding:
+            20px 12px;
+
+    }
+
+
+    .login-card {
+
+        padding:
+            25px 18px;
+
+    }
+
+
+    .login-options {
+
+        flex-direction:
+            column;
+
+        align-items:
+            flex-start;
+
+    }
+
+
+    .login-info-item {
+
+        padding:
+            10px;
+
+    }
+
+    
+}
