@@ -1515,6 +1515,105 @@ body {
 
 }
 
+/* ============================================================
+   tourist LOGIN BUTTON
+============================================================ */
+
+.tourist-login-button {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 10px 16px;
+
+    background: #ffffff;
+
+    color: #1f5f4a;
+
+    border: 1px solid #1f5f4a;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+}
+
+
+/* ============================================================
+   HOVER
+============================================================ */
+
+.tourist-login-button:hover {
+
+    background: #1f5f4a;
+
+    color: #ffffff;
+
+    border-color: #1f5f4a;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.12);
+
+}
+
+
+/* ============================================================
+   ACTIVE
+============================================================ */
+
+.tourist-login-button:active {
+
+    transform: translateY(0);
+
+    box-shadow: none;
+
+}
+
+
+/* ============================================================
+   tourist LOGIN ICON
+============================================================ */
+
+.tourist-login-button:first-letter {
+
+    font-size: 17px;
+
+}
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 768px) {
+
+    .tourist-login-button {
+
+        padding: 9px 12px;
+
+        font-size: 13px;
+
+    }
+
+}
 
 /* ============================================================
    RESPONSIVE
