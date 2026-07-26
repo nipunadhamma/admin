@@ -177,6 +177,53 @@ body {
 }
 
 
+/* --- Desktop සහ සාමාන්‍ය පෙනුම --- */
+.site-brand {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* ලාංඡනය සහ අක්ෂර අතර පරතරය */
+    padding: 10px 0;
+}
+
+.brand-icon img {
+    width: 50px;       /* ඩෙස්ක්ටොප් එක සඳහා ලාංඡනයේ පළල */
+    height: 50px;      /* ඩෙස්ක්ටොප් එක සඳහා ලාංඡනයේ උස */
+    object-fit: contain;
+}
+
+.brand-text h1 {
+    font-size: 24px;   /* මාතෘකාවේ ප්‍රමාණය */
+    margin: 0;
+    color: #2c3e50;
+}
+
+.brand-text p {
+    font-size: 14px;   /* උප මාතෘකාවේ ප්‍රමාණය */
+    margin: 5px 0 0 0;
+    color: #666;
+}
+
+/* --- Mobile සඳහා විශේෂ CSS (තිරය 768px හෝ අඩු නම්) --- */
+@media screen and (max-width: 768px) {
+    .site-brand {
+        gap: 10px; /* මොබයිල් එකේදී පරතරය ටිකක් අඩු කිරීම */
+        padding: 5px 0;
+    }
+
+    .brand-icon img {
+        width: 38px;  /* මොබයිල් එකේදී ලාංඡනය කුඩා කරගැනීමට */
+        height: 38px;
+    }
+
+    .brand-text h1 {
+        font-size: 18px; /* මොබයිල් එකට ගැළපෙන ලෙස අකුරු ප්‍රමාණය අඩු කිරීම */
+    }
+
+    .brand-text p {
+        font-size: 12px;
+    }
+}
+
 /* ==================================================
    SEARCH BOX
 ================================================== */
