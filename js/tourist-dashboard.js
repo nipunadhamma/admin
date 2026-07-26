@@ -554,7 +554,7 @@ function renderQuotation(request) {
 
             <!-- ==================================================
                  PRICE
-            ================================================== -->
+            ==================================================
 
             <div class="quotation-price-section">
 
@@ -654,9 +654,9 @@ function renderQuotation(request) {
             </div>
 
 
-            <!-- ==================================================
-                 GUIDE NOTES
-            ================================================== -->
+              <!-- ==================================================
+                GUIDE NOTES
+              ================================================== -->
 
             ${
               quotation.notes
@@ -682,9 +682,9 @@ function renderQuotation(request) {
             }
 
 
-            <!-- ==================================================
-                 TOURIST DISCLAIMER
-            ================================================== -->
+              <!-- ==================================================
+                TOURIST DISCLAIMER
+              ================================================== -->
 
             <div class="tourist-quotation-disclaimer">
 
@@ -701,7 +701,7 @@ function renderQuotation(request) {
                     that connects tourists and
                     independent registered guides.
 
-                    <br><br>
+                    <br /><br />
 
                     The website does not provide,
                     guarantee or control the travel
@@ -712,7 +712,7 @@ function renderQuotation(request) {
                     dispute or personal matter between
                     the tourist and the guide.
 
-                    <br><br>
+                    <br /><br />
 
                     Any quotation, payment or service
                     agreement is made directly between
@@ -748,9 +748,9 @@ function renderQuotation(request) {
             </div>
 
 
-            <!-- ==================================================
-                 ACTION BUTTONS
-            ================================================== -->
+              <!-- ==================================================
+                ACTION BUTTONS
+              ================================================== -->
 
             <div class="quotation-action-buttons">
 
@@ -950,7 +950,7 @@ function attachQuotationActionButtons() {
     */
 
   const checkboxes = document.querySelectorAll(
-    ".quotation-disclaimer-checkbox",
+    ".quotation-disclaimer-checkbox"
   );
 
   checkboxes.forEach((checkbox) => {
@@ -961,13 +961,13 @@ function attachQuotationActionButtons() {
         const requestId = checkbox.dataset.requestId;
 
         const acceptButton = document.querySelector(
-          `.accept-quotation-button[data-request-id="${requestId}"]`,
+          `.accept-quotation-button[data-request-id="${requestId}"]`
         );
 
         if (acceptButton) {
           acceptButton.disabled = !checkbox.checked;
         }
-      },
+      }
     );
   });
 
@@ -989,7 +989,7 @@ function attachQuotationActionButtons() {
         }
 
         acceptQuotation(requestId);
-      },
+      }
     );
   });
 
@@ -1011,7 +1011,7 @@ function attachQuotationActionButtons() {
         }
 
         rejectQuotation(requestId);
-      },
+      }
     );
   });
 }
@@ -1027,161 +1027,97 @@ function renderSelectedGuide() {
 
   const selectedData = getDashboardSelectedGuide();
 
-  /*
-       No Selected Guide
-    */
-
   if (!selectedData || !selectedData.guide) {
-    selectedGuideContainer.innerHTML = `
+    selectedGuideContainer.textContent = "";
 
-            <div class="no-selected-guide">
+    const noGuide = document.createElement("div");
+    noGuide.className = "no-selected-guide";
 
-                <div class="no-selected-guide-icon">
-                    🧑‍💼
-                </div>
+    const icon = document.createElement("div");
+    icon.className = "no-selected-guide-icon";
+    icon.textContent = "🧑‍💼";
+    noGuide.appendChild(icon);
 
+    const title = document.createElement("h4");
+    title.textContent = "No Guide Selected Yet";
+    noGuide.appendChild(title);
 
-                <h4>
-                    No Guide Selected Yet
-                </h4>
+    const message = document.createElement("p");
+    message.textContent = "Choose a registered guide for your Sri Lanka journey.";
+    noGuide.appendChild(message);
 
+    const link = document.createElement("a");
+    link.href = "find-guides.html";
+    link.className = "dashboard-action-button";
+    link.textContent = "Find Registered Guides";
+    noGuide.appendChild(link);
 
-                <p>
-
-                    Choose a registered guide
-                    for your Sri Lanka journey.
-
-                </p>
-
-
-                <a
-                    href="find-guides.html"
-                    class="dashboard-action-button"
-                >
-
-                    Find Registered Guides
-
-                </a>
-
-            </div>
-
-        `;
-
+    selectedGuideContainer.appendChild(noGuide);
     return;
   }
 
   const guide = selectedData.guide;
-
   const request = selectedData.request;
-
   const requestId = request ? request.requestId : "";
 
-  selectedGuideContainer.innerHTML = `
+  selectedGuideContainer.textContent = "";
 
-        <div class="selected-guide-card">
+  const card = document.createElement("div");
+  card.className = "selected-guide-card";
 
+  const avatar = document.createElement("div");
+  avatar.className = "selected-guide-avatar";
 
-            <div class="selected-guide-avatar">
+  if (guide.profileImage) {
+    const image = document.createElement("img");
+    image.src = guide.profileImage;
+    image.alt = guide.fullName || "Guide";
+    avatar.appendChild(image);
+  } else {
+    avatar.textContent = "🧑‍💼";
+  }
 
-                ${
-                  guide.profileImage
-                    ? `
+  card.appendChild(avatar);
 
-                        <img
-                            src="${guide.profileImage}"
-                            alt="${guide.fullName || "Guide"}"
-                        >
+  const info = document.createElement("div");
+  info.className = "selected-guide-info";
 
-                    `
-                    : "🧑‍💼"
-                }
+  const guideName = document.createElement("h4");
+  guideName.textContent = guide.fullName || "Selected Guide";
+  info.appendChild(guideName);
 
-            </div>
+  const location = document.createElement("p");
+  location.textContent = `📍 ${guide.district || "Sri Lanka"}${
+    guide.province ? " · " + guide.province : ""
+  }`;
+  info.appendChild(location);
 
+  const languages = document.createElement("p");
+  languages.textContent = `🗣️ ${guide.languages || "Not specified"}`;
+  info.appendChild(languages);
 
-            <div class="selected-guide-info">
+  const ratingReview = document.createElement("p");
+  ratingReview.textContent = `⭐ ${guide.rating || "N/A"} · 📝 ${
+    guide.reviewCount || 0
+  } Reviews`;
+  info.appendChild(ratingReview);
 
+  const status = document.createElement("span");
+  status.className = "selected-guide-status";
+  status.textContent = "✓ Guide Selected";
+  info.appendChild(status);
 
-                <h4>
+  if (requestId) {
+    const requestLine = document.createElement("p");
+    requestLine.textContent = "Request: ";
+    const strong = document.createElement("strong");
+    strong.textContent = requestId;
+    requestLine.appendChild(strong);
+    info.appendChild(requestLine);
+  }
 
-                    ${guide.fullName || "Selected Guide"}
-
-                </h4>
-
-
-                <p>
-
-                    📍
-
-                    ${guide.district || "Sri Lanka"}
-
-                    ${guide.province ? " · " + guide.province : ""}
-
-                </p>
-
-
-                <p>
-
-                    🗣️
-
-                    ${guide.languages || "Not specified"}
-
-                </p>
-
-
-                <p>
-
-                    ⭐
-
-                    ${guide.rating || "N/A"}
-
-                    &nbsp;
-
-                    ·
-
-                    &nbsp;
-
-                    📝
-
-                    ${guide.reviewCount || 0}
-
-                    Reviews
-
-                </p>
-
-
-                <span class="selected-guide-status">
-
-                    ✓ Guide Selected
-
-                </span>
-
-
-                ${
-                  requestId
-                    ? `
-
-                        <p>
-
-                            Request:
-
-                            <strong>
-                                ${requestId}
-                            </strong>
-
-                        </p>
-
-                    `
-                    : ""
-                }
-
-
-            </div>
-
-
-        </div>
-
-    `;
+  card.appendChild(info);
+  selectedGuideContainer.appendChild(card);
 }
 
 /* ============================================================
