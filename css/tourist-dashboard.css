@@ -1,1639 +1,1769 @@
 /* ============================================================
-   TOURIST DASHBOARD LOGIC
+   TOURIST DASHBOARD
    Explore Sri Lanka
+============================================================ */
 
-   FLOW:
 
-   Tourist
-      ↓
-   Trip Planner
-      ↓
-   Quotation Request
-      ↓
-   Guide Sends Quotation
-      ↓
+/* ============================================================
+   PAGE
+============================================================ */
+
+.tourist-dashboard-page {
+
+    width: 100%;
+
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    padding: 30px 20px 60px;
+
+}
+
+
+/* ============================================================
+   HEADER USER
+============================================================ */
+
+.header-user-name {
+
+    font-weight: 600;
+
+    color: #1f2937;
+
+    margin-right: 15px;
+
+}
+
+
+.logout-button {
+
+    border: none;
+
+    background: #b42318;
+
+    color: white;
+
+    padding: 9px 18px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-weight: 600;
+
+}
+
+
+.logout-button:hover {
+
+    opacity: 0.9;
+
+}
+
+
+/* ============================================================
+   DASHBOARD HERO
+============================================================ */
+
+.dashboard-hero {
+
+    background:
+
+        linear-gradient(135deg,
+            #0f766e,
+            #155e75);
+
+    color: white;
+
+    border-radius: 18px;
+
+    padding: 35px;
+
+    margin-bottom: 25px;
+
+}
+
+
+.dashboard-hero-content {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 20px;
+
+}
+
+
+.dashboard-hero-icon {
+
+    font-size: 50px;
+
+}
+
+
+.dashboard-hero h2 {
+
+    margin: 0 0 8px;
+
+    font-size: 30px;
+
+}
+
+
+.dashboard-hero p {
+
+    margin: 0;
+
+    opacity: 0.9;
+
+}
+
+
+/* ============================================================
+   SUMMARY
+============================================================ */
+
+.dashboard-summary {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 20px;
+
+    margin-bottom: 30px;
+
+}
+
+
+.summary-card {
+
+    background: white;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 14px;
+
+    padding: 22px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 16px;
+
+    box-shadow:
+        0 5px 18px rgba(0,
+            0,
+            0,
+            0.05);
+
+}
+
+
+.summary-icon {
+
+    font-size: 32px;
+
+}
+
+
+.summary-card span {
+
+    display: block;
+
+    color: #6b7280;
+
+    font-size: 14px;
+
+}
+
+
+.summary-card strong {
+
+    display: block;
+
+    font-size: 28px;
+
+    margin-top: 5px;
+
+    color: #111827;
+
+}
+
+
+/* ============================================================
+   SECTION
+============================================================ */
+
+.dashboard-section {
+
+    background: white;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 16px;
+
+    padding: 25px;
+
+    margin-bottom: 25px;
+
+    box-shadow:
+        0 5px 18px rgba(0,
+            0,
+            0,
+            0.04);
+
+}
+
+
+.dashboard-section-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+
+    margin-bottom: 20px;
+
+}
+
+
+.dashboard-section-header h3 {
+
+    margin: 0 0 5px;
+
+    font-size: 21px;
+
+}
+
+
+.dashboard-section-header p {
+
+    margin: 0;
+
+    color: #6b7280;
+
+}
+
+
+/* ============================================================
+   ACTION BUTTON
+============================================================ */
+
+.dashboard-action-button {
+
+    display: inline-block;
+
+    background: #0f766e;
+
+    color: white;
+
+    text-decoration: none;
+
+    padding: 10px 18px;
+
+    border-radius: 8px;
+
+    font-weight: 600;
+
+}
+
+
+.dashboard-action-button:hover {
+
+    background: #115e59;
+
+}
+
+
+/* ============================================================
+   SELECTED GUIDE
+============================================================ */
+
+.selected-guide-container {
+
+    width: 100%;
+
+}
+
+
+.selected-guide-card {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 20px;
+
+    padding: 22px;
+
+    background: #f0fdf4;
+
+    border: 1px solid #bbf7d0;
+
+    border-radius: 14px;
+
+}
+
+
+.selected-guide-avatar {
+
+    width: 75px;
+
+    height: 75px;
+
+    border-radius: 50%;
+
+    background: #d1fae5;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 35px;
+
+    overflow: hidden;
+
+    flex-shrink: 0;
+
+}
+
+
+.selected-guide-avatar img {
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: cover;
+
+}
+
+
+.selected-guide-info {
+
+    flex: 1;
+
+}
+
+
+.selected-guide-info h4 {
+
+    margin: 0 0 6px;
+
+    font-size: 20px;
+
+}
+
+
+.selected-guide-info p {
+
+    margin: 4px 0;
+
+    color: #4b5563;
+
+}
+
+
+.selected-guide-status {
+
+    display: inline-block;
+
+    margin-top: 8px;
+
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    background: #dcfce7;
+
+    color: #166534;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+}
+
+
+/* ============================================================
+   NO GUIDE
+============================================================ */
+
+.no-selected-guide {
+
+    text-align: center;
+
+    padding: 35px;
+
+    background: #f9fafb;
+
+    border: 1px dashed #d1d5db;
+
+    border-radius: 12px;
+
+}
+
+
+.no-selected-guide-icon {
+
+    font-size: 42px;
+
+    margin-bottom: 10px;
+
+}
+
+
+.no-selected-guide h4 {
+
+    margin: 0 0 8px;
+
+}
+
+
+.no-selected-guide p {
+
+    color: #6b7280;
+
+    margin-bottom: 18px;
+
+}
+
+
+/* ============================================================
+   REQUEST CARD
+============================================================ */
+
+.quotation-request-card {
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 14px;
+
+    padding: 20px;
+
+    margin-bottom: 15px;
+
+}
+
+
+.quotation-request-card:last-child {
+
+    margin-bottom: 0;
+
+}
+
+
+.request-card-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin-bottom: 15px;
+
+}
+
+
+.request-card-header h4 {
+
+    margin: 0;
+
+}
+
+
+.request-id {
+
+    color: #6b7280;
+
+    font-size: 13px;
+
+}
+
+
+.request-status {
+
+    padding: 6px 12px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    text-transform: capitalize;
+
+}
+
+
+.request-status.pending {
+
+    background: #fef3c7;
+
+    color: #92400e;
+
+}
+
+
+.request-status.guide_selected {
+
+    background: #dcfce7;
+
+    color: #166534;
+
+}
+
+
+.request-status.completed {
+
+    background: #dbeafe;
+
+    color: #1e40af;
+
+}
+
+
+/* ============================================================
+   REQUEST DETAILS
+============================================================ */
+
+.request-details-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 15px;
+
+}
+
+
+.request-detail {
+
+    background: #f9fafb;
+
+    padding: 12px;
+
+    border-radius: 8px;
+
+}
+
+
+.request-detail span {
+
+    display: block;
+
+    color: #6b7280;
+
+    font-size: 12px;
+
+    margin-bottom: 4px;
+
+}
+
+
+.request-detail strong {
+
+    color: #111827;
+
+}
+
+
+/* ============================================================
+   SELECTED GUIDE INSIDE REQUEST
+============================================================ */
+
+.request-selected-guide {
+
+    margin-top: 15px;
+
+    padding: 15px;
+
+    background: #f0fdf4;
+
+    border-left: 4px solid #16a34a;
+
+    border-radius: 8px;
+
+}
+
+
+.request-selected-guide strong {
+
+    color: #166534;
+
+}
+
+
+/* ============================================================
+   DESTINATIONS
+============================================================ */
+
+.dashboard-trip-container {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit,
+            minmax(220px,
+                1fr));
+
+    gap: 18px;
+
+}
+
+
+.dashboard-destination-card {
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    background: white;
+
+}
+
+
+.dashboard-destination-card img {
+
+    width: 100%;
+
+    height: 150px;
+
+    object-fit: cover;
+
+}
+
+
+.dashboard-destination-info {
+
+    padding: 15px;
+
+}
+
+
+.dashboard-destination-info h4 {
+
+    margin: 0 0 6px;
+
+}
+
+
+.dashboard-destination-info p {
+
+    margin: 4px 0;
+
+    color: #6b7280;
+
+    font-size: 14px;
+
+}
+
+
+/* ============================================================
+   EMPTY STATE
+============================================================ */
+
+.dashboard-empty-state {
+
+    text-align: center;
+
+    padding: 35px;
+
+    color: #6b7280;
+
+}
+
+
+.dashboard-empty-state-icon {
+
+    font-size: 42px;
+
+    margin-bottom: 10px;
+
+}
+
+
+.dashboard-empty-state h4 {
+
+    color: #374151;
+
+    margin: 0 0 8px;
+
+}
+/* ============================================================
+   QUOTATION SYSTEM
    Tourist Dashboard
-      ↓
-   View Quotation
-      ↓
-   Tourist Disclaimer
-      ↓
-   Accept / Reject
-      ↓
-   Accepted
-      ↓
-   Chat Can Be Enabled Later
-
-   FRONTEND DEMO ARCHITECTURE
 ============================================================ */
+
 
 /* ============================================================
-   1. STORAGE KEYS
+   1. QUOTATION SECTION
 ============================================================ */
 
-const DASHBOARD_TRIP_KEY = "sriLankaMyTrip";
-
-const DASHBOARD_REQUESTS_KEY = "exploreSriLankaQuotationRequests";
-
-const DASHBOARD_SELECTED_GUIDE_KEY = "exploreSriLankaSelectedGuide";
-
-/* ============================================================
-   2. DOM ELEMENTS
-============================================================ */
-
-const headerUserName = document.getElementById("headerUserName");
-
-const welcomeUserName = document.getElementById("welcomeUserName");
-
-const logoutButton = document.getElementById("logoutButton");
-
-const dashboardTripCount = document.getElementById("dashboardTripCount");
-
-const dashboardRequestCount = document.getElementById("dashboardRequestCount");
-
-const dashboardGuideCount = document.getElementById("dashboardGuideCount");
-
-const selectedGuideContainer = document.getElementById(
-  "selectedGuideContainer",
-);
-
-const quotationRequestsContainer = document.getElementById(
-  "quotationRequestsContainer",
-);
-
-const dashboardTripContainer = document.getElementById(
-  "dashboardTripContainer",
-);
-
-/* ============================================================
-   3. GET MY TRIP
-============================================================ */
-
-function getDashboardTrip() {
-  const savedTrip = localStorage.getItem(DASHBOARD_TRIP_KEY);
-
-  if (!savedTrip) {
-    return [];
-  }
-
-  try {
-    const trip = JSON.parse(savedTrip);
-
-    return Array.isArray(trip) ? trip : [];
-  } catch (error) {
-    console.error("Dashboard trip error:", error);
-
-    return [];
-  }
+.request-quotations-section {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
 }
 
-/* ============================================================
-   4. GET ALL QUOTATION REQUESTS
-============================================================ */
 
-function getDashboardQuotationRequests() {
-  const savedRequests = localStorage.getItem(DASHBOARD_REQUESTS_KEY);
-
-  if (!savedRequests) {
-    return [];
-  }
-
-  try {
-    const requests = JSON.parse(savedRequests);
-
-    return Array.isArray(requests) ? requests : [];
-  } catch (error) {
-    console.error(
-      "Dashboard quotation request error:",
-
-      error,
-    );
-
-    return [];
-  }
+.request-quotations-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 18px;
 }
 
-/* ============================================================
-   5. SAVE ALL QUOTATION REQUESTS
-============================================================ */
 
-function saveDashboardQuotationRequests(requests) {
-  localStorage.setItem(
-    DASHBOARD_REQUESTS_KEY,
-
-    JSON.stringify(requests),
-  );
+.request-quotations-title h5 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
 }
 
-/* ============================================================
-   6. GET CURRENT TOURIST REQUESTS
-============================================================ */
 
-function getMyQuotationRequests() {
-  const user = typeof getCurrentUser === "function" ? getCurrentUser() : null;
-
-  if (!user) {
-    return [];
-  }
-
-  const requests = getDashboardQuotationRequests();
-
-  /*
-       Only current tourist requests
-    */
-
-  return requests.filter(
-    (request) =>
-      request.tourist &&
-      (request.tourist.id === user.id || request.tourist.email === user.email),
-  );
+.request-quotations-title span {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: #f3f4f6;
+    color: #4b5563;
+    font-size: 13px;
+    font-weight: 600;
 }
 
+
 /* ============================================================
-   7. GET SELECTED GUIDE
+   2. QUOTATION LIST
 ============================================================ */
 
-function getDashboardSelectedGuide() {
-  /*
-       First check quotation requests.
-
-       Latest selected guide
-       is the most accurate data.
-    */
-
-  const requests = getMyQuotationRequests();
-
-  const selectedRequests = requests.filter((request) => request.selectedGuide);
-
-  if (selectedRequests.length > 0) {
-    /*
-           Latest selected guide
-        */
-
-    const latestRequest = selectedRequests[selectedRequests.length - 1];
-
-    return {
-      guide: latestRequest.selectedGuide,
-
-      request: latestRequest,
-    };
-  }
-
-  /*
-       Fallback to
-       Selected Guide Storage
-    */
-
-  const savedGuide = localStorage.getItem(DASHBOARD_SELECTED_GUIDE_KEY);
-
-  if (!savedGuide) {
-    return null;
-  }
-
-  try {
-    return {
-      guide: JSON.parse(savedGuide),
-
-      request: null,
-    };
-  } catch (error) {
-    console.error(
-      "Selected guide data error:",
-
-      error,
-    );
-
-    return null;
-  }
+.request-quotations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
+
 /* ============================================================
-   8. UPDATE USER INFORMATION
+   3. QUOTATION CARD
 ============================================================ */
 
-function updateDashboardUser() {
-  const user = typeof getCurrentUser === "function" ? getCurrentUser() : null;
-
-  if (!user) {
-    return;
-  }
-
-  const displayName = user.fullName || user.email || "Tourist";
-
-  if (headerUserName) {
-    headerUserName.textContent = displayName;
-  }
-
-  if (welcomeUserName) {
-    welcomeUserName.textContent = displayName;
-  }
+.dashboard-quotation-card {
+    position: relative;
+    padding: 22px;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
 }
 
-/* ============================================================
-   9. UPDATE SUMMARY
-============================================================ */
 
-function updateDashboardSummary() {
-  const trip = getDashboardTrip();
-
-  const requests = getMyQuotationRequests();
-
-  const selectedGuideRequests = requests.filter(
-    (request) => request.selectedGuide,
-  );
-
-  if (dashboardTripCount) {
-    dashboardTripCount.textContent = trip.length;
-  }
-
-  if (dashboardRequestCount) {
-    dashboardRequestCount.textContent = requests.length;
-  }
-
-  if (dashboardGuideCount) {
-    dashboardGuideCount.textContent = selectedGuideRequests.length;
-  }
+.dashboard-quotation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.09);
 }
 
+
 /* ============================================================
-   10. FORMAT REQUEST STATUS
+   4. QUOTATION HEADER
 ============================================================ */
 
-function formatTouristRequestStatus(status) {
-  const statusMap = {
-    pending: "Pending",
-
-    guide_selected: "Guide Selected",
-
-    quotation_sent: "Quotation Received",
-
-    quotation_accepted: "Quotation Accepted",
-
-    quotation_rejected: "Quotation Rejected",
-  };
-
-  return statusMap[status] || "Pending";
+.quotation-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #f0f0f0;
 }
 
-/* ============================================================
-   11. FORMAT DATE
-============================================================ */
 
-function formatDashboardDate(date) {
-  if (!date) {
-    return "";
-  }
-
-  try {
-    return new Date(date).toLocaleDateString();
-  } catch (error) {
-    return date;
-  }
+.quotation-card-header h5 {
+    margin: 0 0 5px;
+    font-size: 18px;
+    color: #1f2937;
 }
 
-/* ============================================================
-   12. GET LATEST QUOTATION
-============================================================ */
 
-function getLatestQuotation(request) {
-  if (!request) {
-    return null;
-  }
-
-  /*
-       Quotations are saved
-       by guide-requests.js
-       inside request.quotations
-    */
-
-  if (!Array.isArray(request.quotations) || request.quotations.length === 0) {
-    return null;
-  }
-
-  /*
-       Get latest quotation
-    */
-
-  return request.quotations[request.quotations.length - 1];
+.quotation-id {
+    display: block;
+    font-size: 12px;
+    color: #9ca3af;
+    word-break: break-all;
 }
 
+
 /* ============================================================
-   13. RENDER QUOTATION
+   5. QUOTATION STATUS
 ============================================================ */
 
-function renderQuotation(request) {
-  const quotation = getLatestQuotation(request);
-
-  /*
-       No quotation yet
-    */
-
-  if (!quotation) {
-    return 
-
-            <div class="quotation-not-received">
-
-                <div class="quotation-not-received-icon">
-                    ⏳
-                </div>
-
-
-                <div>
-
-                    <strong>
-                        Waiting for Guide Quotation
-                    </strong>
-
-
-                    <p>
-
-                        Your request has been sent.
-                        A registered guide has not
-                        sent a quotation yet.
-
-                    </p>
-
-                </div>
-
-            </div>
-
-        ;
-  }
-
-  const guide = quotation.guide || {};
-
-  const quotationStatus = quotation.status || "sent";
-
-  /*
-       Accepted
-    */
-
-  if (request.status === "quotation_accepted") {
-    return 
-
-            <div class="tourist-quotation-card quotation-accepted">
-
-                <div class="quotation-card-header">
-
-                    <div>
-
-                        <span class="quotation-label">
-                            💰 Guide Quotation
-                        </span>
-
-
-                        <h4>
-
-                            ${guide.fullName || "Registered Guide"}
-
-                        </h4>
-
-                    </div>
-
-
-                    <span class="quotation-status-badge accepted">
-
-                        ✓ Accepted
-
-                    </span>
-
-                </div>
-
-
-                <div class="quotation-price">
-
-                    ${quotation.amount || "0"}
-
-                    ${quotation.currency || ""}
-
-                </div>
-
-
-                <p class="quotation-validity">
-
-                    Valid until:
-
-                    <strong>
-                        ${formatDashboardDate(quotation.validUntil)}
-                    </strong>
-
-                </p>
-
-
-                <div class="quotation-accepted-message">
-
-                    ✓ You have accepted this quotation.
-
-                    <br>
-
-                    The guide can now be contacted
-                    through the chat system.
-
-                </div>
-
-
-                <!--
-                    Chat button will be connected
-                    in the next phase.
-                -->
-
-                <button
-                    type="button"
-                    class="quotation-chat-button"
-                    disabled
-                >
-
-                    💬 Chat with Guide
-
-                    <span>
-                        Coming Soon
-                    </span>
-
-                </button>
-
-            </div>
-
-        ;
-  }
-
-  /*
-       Rejected
-    */
-
-  if (request.status === "quotation_rejected") {
-    return 
-
-            <div class="tourist-quotation-card quotation-rejected">
-
-                <div class="quotation-card-header">
-
-                    <div>
-
-                        <span class="quotation-label">
-                            💰 Guide Quotation
-                        </span>
-
-
-                        <h4>
-
-                            ${guide.fullName || "Registered Guide"}
-
-                        </h4>
-
-                    </div>
-
-
-                    <span class="quotation-status-badge rejected">
-
-                        ✕ Rejected
-
-                    </span>
-
-                </div>
-
-
-                <div class="quotation-rejected-message">
-
-                    You have rejected this quotation.
-
-                </div>
-
-            </div>
-
-        ;
-  }
-
-  /*
-       New Quotation
-       Tourist must review
-    */
-
-  return 
-
-        <div class="tourist-quotation-card quotation-pending">
-
-            <div class="quotation-card-header">
-
-                <div>
-
-                    <span class="quotation-label">
-
-                        💰 New Guide Quotation
-
-                    </span>
-
-
-                    <h4>
-
-                        ${guide.fullName || "Registered Guide"}
-
-                    </h4>
-
-
-                    <p class="quotation-guide-location">
-
-                        📍
-
-                        ${guide.district || "Sri Lanka"}
-
-                        ${guide.province ? " · " + guide.province : ""}
-
-                    </p>
-
-                </div>
-
-
-                <span class="quotation-status-badge">
-
-                    New Quotation
-
-                </span>
-
-            </div>
-
-
-            <!-- ==================================================
-                 PRICE
-            ==================================================
-
-            <div class="quotation-price-section">
-
-                <span>
-                    Quotation Amount
-                </span>
-
-
-                <strong>
-
-                    ${quotation.amount || "0"}
-
-                    ${quotation.currency || ""}
-
-                </strong>
-
-            </div>
-
-
-            <!-- ==================================================
-                 QUOTATION DETAILS
-            ================================================== -->
-
-            <div class="quotation-details-grid">
-
-
-                <div class="quotation-detail-item">
-
-                    <span>
-                        Valid Until
-                    </span>
-
-                    <strong>
-
-                        ${formatDashboardDate(quotation.validUntil)}
-
-                    </strong>
-
-                </div>
-
-
-                <div class="quotation-detail-item">
-
-                    <span>
-                        Guide Languages
-                    </span>
-
-                    <strong>
-
-                        ${guide.languages || "Not specified"}
-
-                    </strong>
-
-                </div>
-
-
-            </div>
-
-
-            <!-- ==================================================
-                 INCLUDED SERVICES
-            ================================================== -->
-
-            <div class="quotation-service-section">
-
-                <h5>
-                    ✓ Included Services
-                </h5>
-
-
-                <p>
-
-                    ${quotation.included ? quotation.included : "Not specified"}
-
-                </p>
-
-            </div>
-
-
-            <!-- ==================================================
-                 EXCLUDED SERVICES
-            ================================================== -->
-
-            <div class="quotation-service-section">
-
-                <h5>
-                    ✕ Excluded Services
-                </h5>
-
-
-                <p>
-
-                    ${quotation.excluded ? quotation.excluded : "Not specified"}
-
-                </p>
-
-            </div>
-
-
-              <!-- ==================================================
-                GUIDE NOTES
-              ================================================== -->
-
-            ${
-              quotation.notes
-                ? `
-
-                    <div class="quotation-service-section">
-
-                        <h5>
-                            📝 Guide Notes
-                        </h5>
-
-
-                        <p>
-
-                            ${quotation.notes}
-
-                        </p>
-
-                    </div>
-
-                `
-                : ""
-            }
-
-
-              <!-- ==================================================
-                TOURIST DISCLAIMER
-              ================================================== -->
-
-            <div class="tourist-quotation-disclaimer">
-
-                <div class="disclaimer-title">
-
-                    ⚠️ Important Notice
-
-                </div>
-
-
-                <p>
-
-                    Explore Sri Lanka is a platform
-                    that connects tourists and
-                    independent registered guides.
-
-                    <br /><br />
-
-                    The website does not provide,
-                    guarantee or control the travel
-                    services offered by guides and
-                    does not accept responsibility
-                    for any financial transaction,
-                    payment, agreement, loss, damage,
-                    dispute or personal matter between
-                    the tourist and the guide.
-
-                    <br /><br />
-
-                    Any quotation, payment or service
-                    agreement is made directly between
-                    the tourist and the guide.
-
-                </p>
-
-
-                <!-- ==================================================
-                     ACCEPTANCE CHECKBOX
-                ================================================== -->
-
-                <label class="quotation-acceptance-checkbox">
-
-                    <input
-                        type="checkbox"
-                        class="quotation-disclaimer-checkbox"
-                        data-request-id="${request.requestId}"
-                    >
-
-
-                    <span>
-
-                        I have read and understood
-                        the above notice and agree
-                        to proceed with this quotation
-                        directly with the guide.
-
-                    </span>
-
-                </label>
-
-            </div>
-
-
-              <!-- ==================================================
-                ACTION BUTTONS
-              ================================================== -->
-
-            <div class="quotation-action-buttons">
-
-
-                <button
-                    type="button"
-                    class="accept-quotation-button"
-                    data-request-id="${request.requestId}"
-                    disabled
-                >
-
-                    ✓ Accept Quotation
-
-                </button>
-
-
-                <button
-                    type="button"
-                    class="reject-quotation-button"
-                    data-request-id="${request.requestId}"
-                >
-
-                    ✕ Reject Quotation
-
-                </button>
-
-
-            </div>
-
-
-            <div
-                class="quotation-action-message"
-                id="quotationMessage-${request.requestId}"
-            ></div>
-
-
-        </div>
-
-    `;
+.quotation-status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    background: #f3f4f6;
+    color: #4b5563;
 }
 
-/* ============================================================
-   14. ACCEPT QUOTATION
-============================================================ */
 
-function acceptQuotation(requestId) {
-  const user = typeof getCurrentUser === "function" ? getCurrentUser() : null;
-
-  if (!user) {
-    return;
-  }
-
-  const requests = getDashboardQuotationRequests();
-
-  const requestIndex = requests.findIndex(
-    (request) =>
-      String(request.requestId) === String(requestId) &&
-      request.tourist &&
-      (request.tourist.id === user.id || request.tourist.email === user.email),
-  );
-
-  if (requestIndex === -1) {
-    alert("Quotation request could not be found.");
-
-    return;
-  }
-
-  const request = requests[requestIndex];
-
-  const quotation = getLatestQuotation(request);
-
-  if (!quotation) {
-    alert("No quotation is available for this request.");
-
-    return;
-  }
-
-  /*
-       Update Status
-    */
-
-  request.status = "quotation_accepted";
-
-  /*
-       Update Quotation Status
-    */
-
-  quotation.status = "accepted";
-
-  /*
-       Acceptance Timestamp
-    */
-
-  quotation.acceptedAt = new Date().toISOString();
-
-  /*
-       Save
-    */
-
-  requests[requestIndex] = request;
-
-  saveDashboardQuotationRequests(requests);
-
-  /*
-       Refresh Dashboard
-    */
-
-  updateDashboardSummary();
-
-  renderSelectedGuide();
-
-  renderQuotationRequests();
-
-  alert("Quotation accepted successfully. You can now proceed with the guide.");
+.quotation-status-badge.sent {
+    background: #eff6ff;
+    color: #1d4ed8;
 }
 
-/* ============================================================
-   15. REJECT QUOTATION
-============================================================ */
 
-function rejectQuotation(requestId) {
-  const user = typeof getCurrentUser === "function" ? getCurrentUser() : null;
-
-  if (!user) {
-    return;
-  }
-
-  const confirmReject = window.confirm(
-    "Are you sure you want to reject this quotation?",
-  );
-
-  if (!confirmReject) {
-    return;
-  }
-
-  const requests = getDashboardQuotationRequests();
-
-  const requestIndex = requests.findIndex(
-    (request) =>
-      String(request.requestId) === String(requestId) &&
-      request.tourist &&
-      (request.tourist.id === user.id || request.tourist.email === user.email),
-  );
-
-  if (requestIndex === -1) {
-    alert("Quotation request could not be found.");
-
-    return;
-  }
-
-  const request = requests[requestIndex];
-
-  const quotation = getLatestQuotation(request);
-
-  /*
-       Update Request Status
-    */
-
-  request.status = "quotation_rejected";
-
-  /*
-       Update Quotation Status
-    */
-
-  if (quotation) {
-    quotation.status = "rejected";
-
-    quotation.rejectedAt = new Date().toISOString();
-  }
-
-  /*
-       Save
-    */
-
-  requests[requestIndex] = request;
-
-  saveDashboardQuotationRequests(requests);
-
-  /*
-       Refresh Dashboard
-    */
-
-  updateDashboardSummary();
-
-  renderQuotationRequests();
-
-  alert("Quotation rejected.");
+.quotation-status-badge.accepted {
+    background: #ecfdf3;
+    color: #047857;
 }
 
-/* ============================================================
-   16. ATTACH QUOTATION ACTION BUTTONS
-============================================================ */
 
-function attachQuotationActionButtons() {
-  /*
-       Acceptance Checkboxes
-    */
-
-  const checkboxes = document.querySelectorAll(
-    ".quotation-disclaimer-checkbox"
-  );
-
-  checkboxes.forEach((checkbox) => {
-    checkbox.addEventListener(
-      "change",
-
-      () => {
-        const requestId = checkbox.dataset.requestId;
-
-        const acceptButton = document.querySelector(
-          `.accept-quotation-button[data-request-id="${requestId}"]`
-        );
-
-        if (acceptButton) {
-          acceptButton.disabled = !checkbox.checked;
-        }
-      }
-    );
-  });
-
-  /*
-       Accept Buttons
-    */
-
-  const acceptButtons = document.querySelectorAll(".accept-quotation-button");
-
-  acceptButtons.forEach((button) => {
-    button.addEventListener(
-      "click",
-
-      () => {
-        const requestId = button.dataset.requestId;
-
-        if (!requestId) {
-          return;
-        }
-
-        acceptQuotation(requestId);
-      }
-    );
-  });
-
-  /*
-       Reject Buttons
-    */
-
-  const rejectButtons = document.querySelectorAll(".reject-quotation-button");
-
-  rejectButtons.forEach((button) => {
-    button.addEventListener(
-      "click",
-
-      () => {
-        const requestId = button.dataset.requestId;
-
-        if (!requestId) {
-          return;
-        }
-
-        rejectQuotation(requestId);
-      }
-    );
-  });
+.quotation-status-badge.rejected {
+    background: #fef2f2;
+    color: #b91c1c;
 }
 
+
 /* ============================================================
-   17. RENDER SELECTED GUIDE
+   6. GUIDE INFORMATION
 ============================================================ */
 
-function renderSelectedGuide() {
-  if (!selectedGuideContainer) {
-    return;
-  }
-
-  const selectedData = getDashboardSelectedGuide();
-
-  if (!selectedData || !selectedData.guide) {
-    selectedGuideContainer.textContent = "";
-
-    const noGuide = document.createElement("div");
-    noGuide.className = "no-selected-guide";
-
-    const icon = document.createElement("div");
-    icon.className = "no-selected-guide-icon";
-    icon.textContent = "🧑‍💼";
-    noGuide.appendChild(icon);
-
-    const title = document.createElement("h4");
-    title.textContent = "No Guide Selected Yet";
-    noGuide.appendChild(title);
-
-    const message = document.createElement("p");
-    message.textContent = "Choose a registered guide for your Sri Lanka journey.";
-    noGuide.appendChild(message);
-
-    const link = document.createElement("a");
-    link.href = "find-guides.html";
-    link.className = "dashboard-action-button";
-    link.textContent = "Find Registered Guides";
-    noGuide.appendChild(link);
-
-    selectedGuideContainer.appendChild(noGuide);
-    return;
-  }
-
-  const guide = selectedData.guide;
-  const request = selectedData.request;
-  const requestId = request ? request.requestId : "";
-
-  selectedGuideContainer.textContent = "";
-
-  const card = document.createElement("div");
-  card.className = "selected-guide-card";
-
-  const avatar = document.createElement("div");
-  avatar.className = "selected-guide-avatar";
-
-  if (guide.profileImage) {
-    const image = document.createElement("img");
-    image.src = guide.profileImage;
-    image.alt = guide.fullName || "Guide";
-    avatar.appendChild(image);
-  } else {
-    avatar.textContent = "🧑‍💼";
-  }
-
-  card.appendChild(avatar);
-
-  const info = document.createElement("div");
-  info.className = "selected-guide-info";
-
-  const guideName = document.createElement("h4");
-  guideName.textContent = guide.fullName || "Selected Guide";
-  info.appendChild(guideName);
-
-  const location = document.createElement("p");
-  location.textContent = `📍 ${guide.district || "Sri Lanka"}${
-    guide.province ? " · " + guide.province : ""
-  }`;
-  info.appendChild(location);
-
-  const languages = document.createElement("p");
-  languages.textContent = `🗣️ ${guide.languages || "Not specified"}`;
-  info.appendChild(languages);
-
-  const ratingReview = document.createElement("p");
-  ratingReview.textContent = `⭐ ${guide.rating || "N/A"} · 📝 ${
-    guide.reviewCount || 0
-  } Reviews`;
-  info.appendChild(ratingReview);
-
-  const status = document.createElement("span");
-  status.className = "selected-guide-status";
-  status.textContent = "✓ Guide Selected";
-  info.appendChild(status);
-
-  if (requestId) {
-    const requestLine = document.createElement("p");
-    requestLine.textContent = "Request: ";
-    const strong = document.createElement("strong");
-    strong.textContent = requestId;
-    requestLine.appendChild(strong);
-    info.appendChild(requestLine);
-  }
-
-  card.appendChild(info);
-  selectedGuideContainer.appendChild(card);
+.quotation-guide-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 12px;
+    background: #f9fafb;
 }
 
-/* ============================================================
-   18. RENDER QUOTATION REQUESTS
-============================================================ */
 
-function renderQuotationRequests() {
-  if (!quotationRequestsContainer) {
-    return;
-  }
-
-  const requests = getMyQuotationRequests();
-
-  /*
-       No Requests
-    */
-
-  if (requests.length === 0) {
-    quotationRequestsContainer.innerHTML = `
-
-            <div class="dashboard-empty-state">
-
-                <div class="dashboard-empty-state-icon">
-                    📋
-                </div>
-
-
-                <h4>
-                    No Quotation Requests Yet
-                </h4>
-
-
-                <p>
-
-                    Start planning your Sri Lanka journey
-                    and request a guide quotation.
-
-                </p>
-
-
-                <a
-                    href="trip-planner.html"
-                    class="dashboard-action-button"
-                >
-
-                    Plan My Journey
-
-                </a>
-
-            </div>
-
-        `;
-
-    return;
-  }
-
-  /*
-       Latest First
-    */
-
-  const sortedRequests = [...requests].reverse();
-
-  quotationRequestsContainer.innerHTML = "";
-
-  sortedRequests.forEach((request) => {
-    const card = document.createElement("article");
-
-    card.className = "quotation-request-card";
-
-    const destinations = Array.isArray(request.destinations)
-      ? request.destinations
-      : [];
-
-    const destinationNames = destinations
-
-      .map((destination) => destination.name || "Destination")
-
-      .join(", ");
-
-    const status = request.status || "pending";
-
-    /*
-               Latest quotation
-            */
-
-    const quotation = getLatestQuotation(request);
-
-    card.innerHTML = `
-
-                <div class="request-card-header">
-
-
-                    <div>
-
-                        <h4>
-
-                            🧾
-
-                            ${request.requestId || "Request"}
-
-                        </h4>
-
-
-                        <span class="request-id">
-
-                            ${
-                              request.createdAt
-                                ? formatDashboardDate(request.createdAt)
-                                : ""
-                            }
-
-                        </span>
-
-                    </div>
-
-
-                    <span
-                        class="request-status ${status}"
-                    >
-
-                        ${formatTouristRequestStatus(status)}
-
-                    </span>
-
-
-                </div>
-
-
-                <div class="request-details-grid">
-
-
-                    <div class="request-detail">
-
-                        <span>
-                            Destinations
-                        </span>
-
-
-                        <strong>
-
-                            ${destinationNames || "None"}
-
-                        </strong>
-
-                    </div>
-
-
-                    <div class="request-detail">
-
-                        <span>
-                            Travel Dates
-                        </span>
-
-
-                        <strong>
-
-                            ${
-                              request.startDate && request.endDate
-                                ? request.startDate + " → " + request.endDate
-                                : "Not selected"
-                            }
-
-                        </strong>
-
-                    </div>
-
-
-                    <div class="request-detail">
-
-                        <span>
-                            Travelers
-                        </span>
-
-
-                        <strong>
-
-                            ${request.travelers || "Not selected"}
-
-                        </strong>
-
-                    </div>
-
-
-                </div>
-
-
-                ${
-                  request.selectedGuide
-                    ? `
-
-                        <div class="request-selected-guide">
-
-                            🧑‍💼
-
-
-                            <strong>
-                                Selected Guide:
-                            </strong>
-
-
-                            ${request.selectedGuide.fullName || "Guide"}
-
-
-                            <br>
-
-
-                            📍
-
-
-                            ${request.selectedGuide.district || "Sri Lanka"}
-
-
-                            &nbsp;
-
-                            ·
-
-                            ⭐
-
-
-                            ${request.selectedGuide.rating || "N/A"}
-
-                        </div>
-
-                    `
-                    : `
-
-                        <div class="request-selected-guide">
-
-                            ⏳
-
-                            No guide selected yet.
-
-
-                            <br><br>
-
-
-                            <a
-                                href="find-guides.html"
-                                class="dashboard-action-button"
-                            >
-
-                                Find a Guide
-
-                            </a>
-
-                        </div>
-
-                    `
-                }
-
-
-                <!-- ==================================================
-                     QUOTATION AREA
-                ================================================== -->
-
-
-                <div class="request-quotation-area">
-
-                    ${
-                      quotation
-                        ? renderQuotation(request)
-                        : `
-
-                            <div class="quotation-not-received">
-
-                                <div class="quotation-not-received-icon">
-                                    ⏳
-                                </div>
-
-
-                                <div>
-
-                                    <strong>
-                                        Waiting for Guide Quotation
-                                    </strong>
-
-
-                                    <p>
-
-                                        Your request is waiting
-                                        for a registered guide
-                                        to send a quotation.
-
-                                    </p>
-
-                                </div>
-
-                            </div>
-
-                        `
-                    }
-
-                </div>
-
-            `;
-
-    quotationRequestsContainer.appendChild(card);
-  });
-
-  /*
-       Attach Accept / Reject
-       and Disclaimer Events
-    */
-
-  attachQuotationActionButtons();
+.quotation-guide-avatar {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #eef2ff;
+    font-size: 26px;
 }
 
-/* ============================================================
-   19. RENDER MY TRIP
-============================================================ */
 
-function renderDashboardTrip() {
-  if (!dashboardTripContainer) {
-    return;
-  }
-
-  const trip = getDashboardTrip();
-
-  /*
-       Empty Trip
-    */
-
-  if (trip.length === 0) {
-    dashboardTripContainer.innerHTML = `
-
-            <div class="dashboard-empty-state">
-
-                <div class="dashboard-empty-state-icon">
-                    🗺️
-                </div>
-
-
-                <h4>
-                    No Destinations Yet
-                </h4>
-
-
-                <p>
-
-                    Add destinations
-                    to your trip planner.
-
-                </p>
-
-
-                <a
-                    href="trip-planner.html"
-                    class="dashboard-action-button"
-                >
-
-                    Explore Destinations
-
-                </a>
-
-            </div>
-
-        `;
-
-    return;
-  }
-
-  dashboardTripContainer.innerHTML = "";
-
-  trip.forEach((place) => {
-    const card = document.createElement("article");
-
-    card.className = "dashboard-destination-card";
-
-    card.innerHTML = `
-
-                <img
-                    src="${place.image || ""}"
-                    alt="${place.name || "Destination"}"
-                >
-
-
-                <div
-                    class="dashboard-destination-info"
-                >
-
-
-                    <h4>
-
-                        ${place.name || "Destination"}
-
-                    </h4>
-
-
-                    <p>
-
-                        📍
-
-                        ${place.district || ""}
-
-                        ${place.province ? " · " + place.province : ""}
-
-                    </p>
-
-
-                    <p>
-
-                        ⭐
-
-                        ${place.rating || "N/A"}
-
-                    </p>
-
-
-                </div>
-
-            `;
-
-    dashboardTripContainer.appendChild(card);
-  });
+.quotation-guide-info strong {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 16px;
+    color: #1f2937;
 }
 
-/* ============================================================
-   20. LOGOUT
-============================================================ */
 
-function handleTouristLogout() {
-  if (typeof logoutUser === "function") {
-    logoutUser();
-
-    return;
-  }
-
-  localStorage.removeItem("exploreSriLankaCurrentUser");
-
-  sessionStorage.removeItem("exploreSriLankaCurrentUser");
-
-  window.location.href = "index.html";
+.quotation-guide-info p {
+    margin: 3px 0;
+    font-size: 13px;
+    color: #6b7280;
 }
 
+
 /* ============================================================
-   21. PAGE INITIALIZATION
+   7. QUOTATION PRICE
 ============================================================ */
 
-document.addEventListener(
-  "DOMContentLoaded",
+.quotation-price {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 20px;
+    padding: 18px;
+    border-radius: 12px;
+    background: #f8fafc;
+}
 
-  () => {
-    /*
-           Require Tourist Login
-        */
 
-    const user =
-      typeof requireAccountType === "function"
-        ? requireAccountType("tourist")
-        : null;
+.quotation-price span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7280;
+}
 
-    /*
-           Stop if not Tourist
-        */
 
-    if (!user) {
-      return;
+.quotation-price strong {
+    font-size: 24px;
+    font-weight: 800;
+    color: #111827;
+}
+
+
+/* ============================================================
+   8. QUOTATION DETAILS GRID
+============================================================ */
+
+.quotation-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 15px;
+}
+
+
+.quotation-detail {
+    padding: 14px;
+    border: 1px solid #f0f0f0;
+    border-radius: 10px;
+    background: #ffffff;
+}
+
+
+.quotation-detail span {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+
+.quotation-detail strong {
+    display: block;
+    font-size: 14px;
+    color: #374151;
+    word-break: break-word;
+}
+
+
+/* ============================================================
+   9. INCLUDED / EXCLUDED SERVICES
+============================================================ */
+
+.quotation-services {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 15px;
+}
+
+
+.quotation-service {
+    padding: 16px;
+    border-radius: 12px;
+}
+
+
+.quotation-service h6 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+
+.quotation-service p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre-line;
+}
+
+
+.quotation-service.included {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+}
+
+
+.quotation-service.included h6 {
+    color: #15803d;
+}
+
+
+.quotation-service.included p {
+    color: #166534;
+}
+
+
+.quotation-service.excluded {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+}
+
+
+.quotation-service.excluded h6 {
+    color: #b91c1c;
+}
+
+
+.quotation-service.excluded p {
+    color: #991b1b;
+}
+
+
+/* ============================================================
+   10. GUIDE NOTES
+============================================================ */
+
+.quotation-notes {
+    margin-top: 15px;
+    padding: 16px;
+    border-left: 4px solid #d1d5db;
+    border-radius: 8px;
+    background: #f9fafb;
+}
+
+
+.quotation-notes strong {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 14px;
+    color: #374151;
+}
+
+
+.quotation-notes p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #6b7280;
+    white-space: pre-line;
+}
+
+
+/* ============================================================
+   11. QUOTATION CREATED DATE
+============================================================ */
+
+.quotation-created {
+    margin-top: 15px;
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+
+/* ============================================================
+   12. QUOTATION ACTIONS
+============================================================ */
+
+.quotation-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+}
+
+
+.accept-quotation-button,
+.reject-quotation-button {
+    min-height: 44px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        opacity 0.2s ease;
+}
+
+
+.accept-quotation-button:hover,
+.reject-quotation-button:hover {
+    transform: translateY(-1px);
+}
+
+
+.accept-quotation-button {
+    flex: 1;
+    background: #15803d;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(21, 128, 61, 0.2);
+}
+
+
+.accept-quotation-button:hover {
+    background: #166534;
+}
+
+
+.reject-quotation-button {
+    flex: 1;
+    background: #ffffff;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+
+.reject-quotation-button:hover {
+    background: #fef2f2;
+}
+
+
+/* ============================================================
+   13. ACCEPTED / REJECTED RESULT
+============================================================ */
+
+.quotation-action-result {
+    margin-top: 20px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+}
+
+
+.quotation-action-result.quotation-accepted {
+    background: #ecfdf3;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+
+
+.quotation-action-result.quotation-rejected {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+
+/* ============================================================
+   14. CHAT BUTTON
+   Future Chat System
+============================================================ */
+
+.dashboard-chat-button {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 12px;
+    padding: 10px 18px;
+    border: 1px solid #d1d5db;
+    border-radius: 9px;
+    background: #f3f4f6;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+
+/*
+   Future:
+
+   quotation_accepted
+        ↓
+   Chat Button
+        ↓
+   Enable
+
+   .dashboard-chat-button:not(:disabled)
+*/
+
+.dashboard-chat-button:not(:disabled) {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+    cursor: pointer;
+    opacity: 1;
+}
+
+
+/* ============================================================
+   15. NO QUOTATION STATE
+============================================================ */
+
+.request-no-quotation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    padding: 25px;
+    border: 1px dashed #d1d5db;
+    border-radius: 12px;
+    background: #fafafa;
+    text-align: center;
+}
+
+
+.request-no-quotation strong {
+    margin-top: 8px;
+    color: #4b5563;
+    font-size: 15px;
+}
+
+
+.request-no-quotation p {
+    margin: 6px 0 0;
+    color: #9ca3af;
+    font-size: 13px;
+}
+/* ============================================================
+   TOURIST QUOTATION REVIEW
+   Guide Quotation → Tourist Review
+============================================================ */
+
+.quotation-review-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+
+/* ============================================================
+   QUOTATION CARD
+============================================================ */
+
+.tourist-quotation-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+
+/* ============================================================
+   QUOTATION HEADER
+============================================================ */
+
+.tourist-quotation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+
+.tourist-quotation-header h4 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    color: #1f2937;
+}
+
+
+.tourist-quotation-id {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+
+/* ============================================================
+   QUOTATION STATUS
+============================================================ */
+
+.tourist-quotation-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+.tourist-quotation-status.sent {
+    background: #fff7e6;
+    color: #9a6700;
+}
+
+
+.tourist-quotation-status.accepted {
+    background: #edf8f1;
+    color: #176044;
+}
+
+
+.tourist-quotation-status.rejected {
+    background: #fff0f0;
+    color: #b42318;
+}
+
+
+/* ============================================================
+   GUIDE INFORMATION
+============================================================ */
+
+.tourist-quotation-guide {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+
+.tourist-quotation-guide-avatar {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+
+.tourist-quotation-guide-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+.tourist-quotation-guide-info h5 {
+    margin: 0 0 5px;
+    font-size: 17px;
+    color: #1f2937;
+}
+
+
+.tourist-quotation-guide-info p {
+    margin: 3px 0;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+
+/* ============================================================
+   QUOTATION PRICE
+============================================================ */
+
+.tourist-quotation-price {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8fafc;
+    border-radius: 12px;
+    text-align: center;
+}
+
+
+.tourist-quotation-price span {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+
+.tourist-quotation-price strong {
+    display: block;
+    font-size: 30px;
+    font-weight: 700;
+    color: #176044;
+}
+
+
+/* ============================================================
+   QUOTATION DETAILS
+============================================================ */
+
+.tourist-quotation-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+}
+
+
+.tourist-quotation-detail {
+    padding: 15px;
+    background: #fafafa;
+    border-radius: 10px;
+}
+
+
+.tourist-quotation-detail span {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+
+.tourist-quotation-detail strong {
+    display: block;
+    color: #1f2937;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+
+/* ============================================================
+   INCLUDED / EXCLUDED
+============================================================ */
+
+.tourist-quotation-services {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+}
+
+
+.tourist-quotation-included,
+.tourist-quotation-excluded {
+    padding: 18px;
+    border-radius: 12px;
+}
+
+
+.tourist-quotation-included {
+    background: #edf8f1;
+    border: 1px solid #cce8d8;
+}
+
+
+.tourist-quotation-excluded {
+    background: #fff5f5;
+    border: 1px solid #f3d0d0;
+}
+
+
+.tourist-quotation-services h5 {
+    margin: 0 0 10px;
+    font-size: 15px;
+}
+
+
+.tourist-quotation-services p {
+    margin: 0;
+    color: #4b5563;
+    line-height: 1.7;
+    white-space: pre-line;
+}
+
+
+/* ============================================================
+   GUIDE NOTES
+============================================================ */
+
+.tourist-quotation-notes {
+    margin-top: 20px;
+    padding: 18px;
+    background: #fffaf0;
+    border-left: 4px solid #d6a84f;
+    border-radius: 8px;
+}
+
+
+.tourist-quotation-notes h5 {
+    margin: 0 0 8px;
+    font-size: 15px;
+    color: #374151;
+}
+
+
+.tourist-quotation-notes p {
+    margin: 0;
+    color: #4b5563;
+    line-height: 1.7;
+    white-space: pre-line;
+}
+
+
+/* ============================================================
+   ACCEPT / REJECT ACTIONS
+============================================================ */
+
+.tourist-quotation-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #eeeeee;
+}
+
+
+.accept-quotation-button,
+.reject-quotation-button {
+    min-width: 150px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+
+.accept-quotation-button {
+    background: #176044;
+    color: #ffffff;
+}
+
+
+.accept-quotation-button:hover {
+    background: #124b35;
+    transform: translateY(-1px);
+}
+
+
+.reject-quotation-button {
+    background: #fff0f0;
+    color: #b42318;
+    border: 1px solid #e5b8b8;
+}
+
+
+.reject-quotation-button:hover {
+    background: #ffe3e3;
+}
+
+
+/* ============================================================
+   ACCEPTED MESSAGE
+============================================================ */
+
+.quotation-accepted-message {
+    margin-top: 20px;
+    padding: 16px;
+    background: #edf8f1;
+    color: #176044;
+    border: 1px solid #cce8d8;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+
+.quotation-rejected-message {
+    margin-top: 20px;
+    padding: 16px;
+    background: #fff0f0;
+    color: #b42318;
+    border: 1px solid #f0caca;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+
+/* ============================================================
+   NO QUOTATION
+============================================================ */
+
+.no-quotation-state {
+    padding: 40px 20px;
+    text-align: center;
+    background: #fafafa;
+    border: 1px dashed #d1d5db;
+    border-radius: 14px;
+}
+
+
+.no-quotation-state-icon {
+    font-size: 42px;
+    margin-bottom: 12px;
+}
+
+
+.no-quotation-state h4 {
+    margin: 0 0 8px;
+    color: #374151;
+}
+
+
+.no-quotation-state p {
+    margin: 0;
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
+@media (max-width: 768px) {
+
+    .tourist-quotation-header {
+        flex-direction: column;
     }
 
-    /*
-           Update User
-        */
 
-    updateDashboardUser();
-
-    /*
-           Update Summary
-        */
-
-    updateDashboardSummary();
-
-    /*
-           Render Selected Guide
-        */
-
-    renderSelectedGuide();
-
-    /*
-           Render Quotation Requests
-
-           Includes:
-
-           Guide Quotations
-           Disclaimer
-           Accept
-           Reject
-        */
-
-    renderQuotationRequests();
-
-    /*
-           Render Trip
-        */
-
-    renderDashboardTrip();
-
-    /*
-           Logout
-        */
-
-    if (logoutButton) {
-      logoutButton.addEventListener(
-        "click",
-
-        handleTouristLogout,
-      );
+    .tourist-quotation-details {
+        grid-template-columns: 1fr;
     }
 
-    /*
-           Debug
-        */
 
-    console.log(
-      "Tourist Dashboard Loaded:",
+    .tourist-quotation-services {
+        grid-template-columns: 1fr;
+    }
 
-      user,
-    );
-  },
-);
+
+    .tourist-quotation-actions {
+        flex-direction: column;
+    }
+
+
+    .accept-quotation-button,
+    .reject-quotation-button {
+        width: 100%;
+    }
+
+}
+
+/* ============================================================
+   16. RESPONSIVE - TABLET
+============================================================ */
+
+@media (max-width: 768px) {
+
+    .quotation-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+
+    .quotation-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .quotation-services {
+        grid-template-columns: 1fr;
+    }
+
+
+    .quotation-actions {
+        flex-direction: column;
+    }
+
+
+    .accept-quotation-button,
+    .reject-quotation-button {
+        width: 100%;
+    }
+
+}
+
+
+/* ============================================================
+   17. RESPONSIVE - MOBILE
+============================================================ */
+
+@media (max-width: 480px) {
+
+    .dashboard-quotation-card {
+        padding: 16px;
+        border-radius: 12px;
+    }
+
+
+    .quotation-guide-info {
+        align-items: flex-start;
+    }
+
+
+    .quotation-price {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+
+    .quotation-price strong {
+        font-size: 21px;
+    }
+
+
+    .request-quotations-title {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+
+    .quotation-actions {
+        gap: 10px;
+    }
+
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
+@media (max-width: 768px) {
+
+    .dashboard-summary {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .dashboard-section-header {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+    }
+
+
+    .selected-guide-card {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+    }
+
+
+    .request-details-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .dashboard-hero-content {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+    }
+
+}
