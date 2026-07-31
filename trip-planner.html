@@ -35,79 +35,170 @@
          SITE HEADER
     ============================================================ -->
 
+    
+    <!-- ============================================================
+         SITE HEADER
+    ============================================================ -->
+    
     <header class="site-header">
-
-
+    
+    
         <!-- ========================================================
              BRAND
         ========================================================= -->
-
+    
         <div class="site-brand">
-
+    
             <a href="index.html" class="planner-brand-link">
-
+    
                 <div class="brand-icon">
-                    🇱🇰
+    
+                    <img src="images/logo.png" alt="LankaQuest Logo">
+    
                 </div>
-
-
+    
+    
                 <div class="brand-text">
-
+    
                     <h1>
                         LankaQuest
                     </h1>
-
+    
                     <p>
                         Discover the Wonder of Sri Lanka
                     </p>
-
+    
                 </div>
-
+    
             </a>
-
+    
         </div>
-
-
+    
+    
+    
         <!-- ========================================================
-             NAVIGATION
-        ========================================================= -->
-
-        <nav class="main-navigation" aria-label="Main Navigation">
-
-            <a href="index.html" class="nav-link">
-                Home
-            </a>
-
-
-            <a href="index.html#map" class="nav-link">
-                Explore Map
-            </a>
-
-
-            <a href="index.html#destinations" class="nav-link">
-                Destinations
-            </a>
-
-        </nav>
-
-
-        <!-- ========================================================
-             BACK TO MAP
-        ========================================================= -->
-
+             HEADER ACTIONS
+        ======================================================== -->
+    
         <div class="header-actions">
-
-            <a href="index.html" class="back-to-map-btn">
-
-                ←
-
-                Back to Explore
-
-            </a>
-
+    
+    
+            <!-- ====================================================
+                 MOBILE MENU BUTTON
+            ==================================================== -->
+    
+            <button type="button" id="mobileMenuButton" class="mobile-menu-button" aria-label="Open Menu"
+                aria-expanded="false">
+                ☰
+            </button>
+    
+    
+    
+            <!-- ====================================================
+                 MAIN NAVIGATION
+            ==================================================== -->
+    
+            <nav id="mobileMenu" class="mobile-menu" aria-label="Main Navigation">
+    
+    
+                <!-- ==================================================
+                     HOME
+                ================================================== -->
+    
+                <a href="index.html">
+    
+                    Home
+    
+                </a>
+    
+    
+    
+                <!-- ==================================================
+                     EXPLORE
+                ================================================== -->
+    
+                <a href="index.html#explore">
+    
+                    Explore
+    
+                </a>
+    
+    
+    
+                <!-- ==================================================
+                     DESTINATIONS
+                ================================================== -->
+    
+                <a href="attractions.html">
+    
+                    Destinations
+    
+                </a>
+    
+    
+    
+                <!-- ==================================================
+                     TRIP PLANNER
+                ================================================== -->
+    
+                <a href="trip-planner.html" class="nav-active">
+    
+                    Trip Planner
+    
+                </a>
+    
+    
+    
+                <!-- ==================================================
+                     LOGIN
+                ================================================== -->
+    
+                <a href="login.html" class="nav-login-button">
+    
+                    Login
+    
+                </a>
+    
+    
+    
+                <!-- ==================================================
+                     REGISTER
+                ================================================== -->
+    
+                <a href="register.html" class="nav-register-button">
+    
+                    Register
+    
+                </a>
+    
+    
+    
+                <!-- ==================================================
+                     MY TRIP
+                ================================================== -->
+    
+                <button type="button" id="myTripButton" class="my-trip-button">
+    
+                    ❤️
+    
+                    <span>
+                        My Trip
+                    </span>
+    
+                    <span id="tripCounter" class="trip-counter">
+                        0
+                    </span>
+    
+                </button>
+    
+    
+            </nav>
+    
         </div>
-
+    
     </header>
+  
+
 
 
 
@@ -720,18 +811,17 @@
 
 
     <!-- ============================================================
-     AUTHENTICATION CORE
-============================================================ -->
-
-    <script src="js/auth.js"></script>
-
-
+         AUTHENTICATION CORE
+    ============================================================ -->
+    
+    <script type="module" src="js/auth.js"></script>
+    
+    
     <!-- ============================================================
-     TRIP PLANNER LOGIC
-============================================================ -->
-
-    <script src="js/trip-planner.js"></script>
-
+         TRIP PLANNER LOGIC
+    ============================================================ -->
+    
+    <script type="module" src="js/trip-planner.js"></script>
 
 </body>
 

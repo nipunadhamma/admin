@@ -423,9 +423,55 @@ function createTouristSession(
    Therefore the Admin does NOT need a Firestore profile.
 ============================================================ */
 
+
+/* ============================================================
+   GOOGLE LOGIN
+   Firebase Authentication
+   +
+   LankaQuest Profile Detection
+
+   FLOW:
+
+   Google Login
+        ↓
+   Firebase Authentication
+        ↓
+   User Authenticated
+        ↓
+   Admin?
+      ↙     ↘
+    YES     NO
+     ↓       ↓
+  Admin   Check Guide
+            ↓
+         Check Tourist
+            ↓
+      Profile Exists?
+         ↙       ↘
+       YES       NO
+        ↓         ↓
+   Dashboard   Registration
+                  ↓
+        register.html?google=1
+
+
+   IMPORTANT:
+
+   If the Google user has no LankaQuest profile,
+   DO NOT sign the user out.
+
+   The authenticated Firebase user must remain
+   active so register.js can complete the
+   LankaQuest profile registration.
+============================================================ */
+
 async function googleLogin() {
 
     try {
+
+        /* ====================================================
+           GOOGLE AUTHENTICATION
+        ==================================================== */
 
         const result =
             await signInWithPopup(
@@ -434,8 +480,27 @@ async function googleLogin() {
             );
 
 
+        /* ====================================================
+           FIREBASE USER
+        ==================================================== */
+
         const firebaseUser =
             result.user;
+
+
+        if (!firebaseUser) {
+
+            return {
+
+                success:
+                    false,
+
+                message:
+                    "Google authentication failed."
+
+            };
+
+        }
 
 
         console.log(
@@ -516,6 +581,12 @@ async function googleLogin() {
                 guideSnap.data();
 
 
+            console.log(
+                "LankaQuest guide profile found.",
+                guideData
+            );
+
+
             const guideUser =
                 createGuideSession(
                     guideData,
@@ -568,6 +639,12 @@ async function googleLogin() {
                 touristSnap.data();
 
 
+            console.log(
+                "LankaQuest tourist profile found.",
+                touristData
+            );
+
+
             const touristUser =
                 createTouristSession(
                     touristData,
@@ -595,29 +672,63 @@ async function googleLogin() {
 
 
         /* ====================================================
-           PROFILE NOT FOUND
+           NO LANKAQUEST PROFILE
         ==================================================== */
 
-        await signOut(
-            auth
+        console.log(
+            "Google authentication successful."
         );
 
 
-        clearUserSession();
+        console.log(
+            "No LankaQuest profile found."
+        );
+
+
+        /*
+           IMPORTANT:
+
+           DO NOT call:
+
+           signOut(auth)
+
+           DO NOT call:
+
+           clearUserSession()
+
+           The Firebase Google authentication session
+           must remain active.
+
+           register.js will use the authenticated
+           Firebase user to complete registration.
+        */
 
 
         return {
 
             success:
-                false,
+                true,
 
-            message:
-                "Google account is authenticated, but no LankaQuest profile was found. Please complete registration."
+            user:
+                firebaseUser,
+
+            profile:
+                null,
+
+            accountType:
+                null,
+
+            needsRegistration:
+                true
 
         };
 
 
     } catch (error) {
+
+        /* ====================================================
+           GOOGLE LOGIN ERROR
+        ==================================================== */
 
         console.error(
             "Google Login Error:",
@@ -625,9 +736,9 @@ async function googleLogin() {
         );
 
 
-        /*
-           User closed the Google popup.
-        */
+        /* ====================================================
+           USER CLOSED POPUP
+        ==================================================== */
 
         if (
             error.code ===
@@ -647,9 +758,31 @@ async function googleLogin() {
         }
 
 
-        /*
-           Popup blocked.
-        */
+        /* ====================================================
+           POPUP ALREADY OPEN
+        ==================================================== */
+
+        if (
+            error.code ===
+            "auth/cancelled-popup-request"
+        ) {
+
+            return {
+
+                success:
+                    false,
+
+                message:
+                    "A Google sign-in window is already open."
+
+            };
+
+        }
+
+
+        /* ====================================================
+           POPUP BLOCKED
+        ==================================================== */
 
         if (
             error.code ===
@@ -669,9 +802,9 @@ async function googleLogin() {
         }
 
 
-        /*
-           Unauthorized domain.
-        */
+        /* ====================================================
+           UNAUTHORIZED DOMAIN
+        ==================================================== */
 
         if (
             error.code ===
@@ -691,6 +824,10 @@ async function googleLogin() {
         }
 
 
+        /* ====================================================
+           DEFAULT ERROR
+        ==================================================== */
+
         return {
 
             success:
@@ -705,6 +842,8 @@ async function googleLogin() {
     }
 
 }
+
+
 
 
 /* ============================================================

@@ -2875,3 +2875,382 @@ SMALL MOBILE
 
 
 }
+
+
+/* ============================================================
+   LANKAQUEST MAIN NAVIGATION
+   FINAL OVERRIDE
+============================================================ */
+
+
+/* ============================================================
+   NAVIGATION CONTAINER
+============================================================ */
+
+#mobileMenu.mobile-menu {
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: flex-end !important;
+
+    gap: 8px !important;
+
+    position: static !important;
+
+    width: auto !important;
+
+    height: auto !important;
+
+    padding: 0 !important;
+
+    margin: 0 !important;
+
+    background: transparent !important;
+
+    border: 0 !important;
+
+    box-shadow: none !important;
+}
+
+
+/* ============================================================
+   ALL NAV LINKS
+============================================================ */
+
+#mobileMenu.mobile-menu>a {
+
+    display: inline-flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    min-height: 42px !important;
+
+    padding: 10px 15px !important;
+
+    margin: 0 !important;
+
+    color: #222222 !important;
+
+    background: transparent !important;
+
+    border: 1px solid transparent !important;
+
+    border-radius: 8px !important;
+
+    font-size: 15px !important;
+
+    font-weight: 600 !important;
+
+    line-height: 1 !important;
+
+    text-decoration: none !important;
+
+    white-space: nowrap !important;
+
+    opacity: 1 !important;
+
+    box-shadow: none !important;
+
+    transform: none !important;
+
+}
+
+
+/* ============================================================
+   NORMAL NAV HOVER
+============================================================ */
+
+#mobileMenu.mobile-menu>a:not(.nav-login-button):not(.nav-register-button):hover {
+
+    color: #17613d !important;
+
+    background: #edf8f1 !important;
+
+}
+
+
+/* ============================================================
+   LOGIN BUTTON
+============================================================ */
+
+#mobileMenu.mobile-menu>a.nav-login-button {
+
+    display: inline-flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    min-height: 42px !important;
+
+    padding: 10px 18px !important;
+
+    color: #17613d !important;
+
+    background: #ffffff !important;
+
+    border: 2px solid #17613d !important;
+
+    border-radius: 8px !important;
+
+    font-weight: 700 !important;
+
+    text-decoration: none !important;
+
+    opacity: 1 !important;
+
+}
+
+
+/* ============================================================
+   LOGIN HOVER
+============================================================ */
+
+#mobileMenu.mobile-menu>a.nav-login-button:hover {
+
+    color: #ffffff !important;
+
+    background: #17613d !important;
+
+    border-color: #17613d !important;
+
+}
+
+
+/* ============================================================
+   REGISTER BUTTON
+============================================================ */
+
+#mobileMenu.mobile-menu>a.nav-register-button {
+
+    display: inline-flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    min-height: 42px !important;
+
+    padding: 10px 18px !important;
+
+    color: #ffffff !important;
+
+    background: #17613d !important;
+
+    border: 2px solid #17613d !important;
+
+    border-radius: 8px !important;
+
+    font-weight: 700 !important;
+
+    text-decoration: none !important;
+
+    opacity: 1 !important;
+
+}
+
+
+/* ============================================================
+   REGISTER HOVER
+============================================================ */
+
+#mobileMenu.mobile-menu>a.nav-register-button:hover {
+
+    color: #ffffff !important;
+
+    background: #0f4d30 !important;
+
+    border-color: #0f4d30 !important;
+
+}
+
+
+/* ============================================================
+   MY TRIP
+============================================================ */
+
+#mobileMenu.mobile-menu>button#myTripButton {
+
+    display: inline-flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    gap: 6px !important;
+
+    min-height: 42px !important;
+
+    padding: 10px 15px !important;
+
+    color: #222222 !important;
+
+    background: #ffffff !important;
+
+    border: 2px solid #d7d7d7 !important;
+
+    border-radius: 8px !important;
+
+    font-size: 15px !important;
+
+    font-weight: 600 !important;
+
+    cursor: pointer !important;
+
+    opacity: 1 !important;
+
+}
+
+
+/* ============================================================
+   MY TRIP HOVER
+============================================================ */
+
+#mobileMenu.mobile-menu>button#myTripButton:hover {
+
+    color: #17613d !important;
+
+    background: #edf8f1 !important;
+
+    border-color: #17613d !important;
+
+}
+
+
+/* ============================================================
+   TRIP COUNTER
+============================================================ */
+
+#mobileMenu.mobile-menu .trip-counter {
+
+    display: inline-flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    min-width: 21px !important;
+
+    height: 21px !important;
+
+    padding: 0 5px !important;
+
+    color: #ffffff !important;
+
+    background: #17613d !important;
+
+    border-radius: 50% !important;
+
+    font-size: 11px !important;
+
+    font-weight: 700 !important;
+
+}
+
+
+/* ============================================================
+   MOBILE MENU BUTTON
+============================================================ */
+
+.mobile-menu-button {
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 42px;
+
+    height: 42px;
+
+    padding: 0;
+
+    color: #222222 !important;
+
+    background: #ffffff !important;
+
+    border: 2px solid #d7d7d7 !important;
+
+    border-radius: 8px;
+
+    font-size: 22px;
+
+    cursor: pointer;
+
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 768px) {
+
+    .mobile-menu-button {
+
+        display: inline-flex !important;
+
+    }
+
+
+    #mobileMenu.mobile-menu {
+
+        display: none !important;
+
+        position: absolute !important;
+
+        top: calc(100% + 10px) !important;
+
+        right: 0 !important;
+
+        width: min(320px, calc(100vw - 24px)) !important;
+
+        height: auto !important;
+
+        padding: 14px !important;
+
+        flex-direction: column !important;
+
+        align-items: stretch !important;
+
+        gap: 8px !important;
+
+        background: #ffffff !important;
+
+        border: 1px solid #dddddd !important;
+
+        border-radius: 10px !important;
+
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+
+    }
+
+
+    #mobileMenu.mobile-menu.active,
+    #mobileMenu.mobile-menu.open,
+    #mobileMenu.mobile-menu.show {
+
+        display: flex !important;
+
+    }
+
+
+    #mobileMenu.mobile-menu>a,
+    #mobileMenu.mobile-menu>a.nav-login-button,
+    #mobileMenu.mobile-menu>a.nav-register-button,
+    #mobileMenu.mobile-menu>button#myTripButton {
+
+        width: 100% !important;
+
+        min-height: 44px !important;
+
+        box-sizing: border-box !important;
+
+    }
+
+}

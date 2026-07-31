@@ -14,32 +14,32 @@
    NORMAL REGISTRATION:
 
    Register Form
-        |
         ↓
    Firebase Authentication
-        |
         ↓
    Firebase UID
-        |
         ↓
    Firestore Profile
 
 
    GOOGLE REGISTRATION:
 
-   Google Authentication
-        |
+   Google Login
         ↓
-   Existing Firebase UID
-        |
+   Firebase Authentication
         ↓
-   Registration Form
-        |
+   register.html?google=1
+        ↓
+   Existing Firebase User
+        ↓
+   Tourist / Guide selection
         ↓
    Firestore Profile
+        ↓
+   Registration Complete
 
 
-   FIRESTORE:
+   COLLECTIONS:
 
    Tourist:
    lankaQuestTourists/{UID}
@@ -56,19 +56,21 @@
 
 import {
   auth,
-  db
+  db,
 } from "./firebase-config.js";
 
 
 import {
-  createUserWithEmailAndPassword
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 
 import {
   doc,
+  getDoc,
   setDoc,
-  serverTimestamp
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 
@@ -106,16 +108,32 @@ const registrationMessage =
   );
 
 
+const fullNameInput =
+  document.getElementById(
+    "fullName"
+  );
+
+
+const emailInput =
+  document.getElementById(
+    "email"
+  );
+
+
+const passwordInput =
+  document.getElementById(
+    "password"
+  );
+
+
+const confirmPasswordInput =
+  document.getElementById(
+    "confirmPassword"
+  );
+
+
 /* ============================================================
    GOOGLE REGISTRATION MODE
-
-   Normal:
-
-   register.html
-
-   Google:
-
-   register.html?google=1
 ============================================================ */
 
 const urlParams =
@@ -128,8 +146,65 @@ const isGoogleRegistration =
   urlParams.get("google") === "1";
 
 
+/*
+   This variable stores the authenticated
+   Firebase user.
+
+   For normal registration this will normally
+   be null before account creation.
+
+   For Google registration this must already
+   contain the authenticated Google user.
+*/
+
+let authenticatedUser = null;
+
+
 /* ============================================================
-   GET SELECTED ACCOUNT TYPE
+   MESSAGE SYSTEM
+============================================================ */
+
+function showRegistrationMessage(
+  message,
+  type = "success"
+) {
+
+  if (!registrationMessage) {
+    return;
+  }
+
+
+  registrationMessage.textContent =
+    message;
+
+
+  registrationMessage.style.display =
+    "block";
+
+
+  if (type === "error") {
+
+    registrationMessage.style.background =
+      "#fff0f0";
+
+    registrationMessage.style.color =
+      "#b42318";
+
+  } else {
+
+    registrationMessage.style.background =
+      "#edf8f1";
+
+    registrationMessage.style.color =
+      "#176044";
+
+  }
+
+}
+
+
+/* ============================================================
+   ACCOUNT TYPE
 ============================================================ */
 
 function getSelectedAccountType() {
@@ -153,13 +228,11 @@ function getSelectedAccountType() {
 
 function updateAccountTypeFields() {
 
-  const type =
+  const accountType =
     getSelectedAccountType();
 
 
-  if (
-    type === "tourist"
-  ) {
+  if (accountType === "tourist") {
 
     if (touristFields) {
 
@@ -178,9 +251,7 @@ function updateAccountTypeFields() {
 
     }
 
-  }
-
-  else {
+  } else {
 
     if (touristFields) {
 
@@ -221,229 +292,64 @@ accountTypeInputs.forEach(
 
 
 /* ============================================================
-   MESSAGE SYSTEM
+   GOOGLE REGISTRATION UI
 ============================================================ */
 
-function showRegistrationMessage(
-  message,
-  type = "success"
-) {
+function setupGoogleRegistrationUI() {
 
-  if (
-    !registrationMessage
-  ) {
-
+  if (!isGoogleRegistration) {
     return;
-
-  }
-
-
-  registrationMessage.textContent =
-    message;
-
-
-  registrationMessage.style.display =
-    "block";
-
-
-  if (
-    type === "error"
-  ) {
-
-    registrationMessage.style.background =
-      "#fff0f0";
-
-
-    registrationMessage.style.color =
-      "#b42318";
-
-  }
-
-  else {
-
-    registrationMessage.style.background =
-      "#edf8f1";
-
-
-    registrationMessage.style.color =
-      "#176044";
-
-  }
-
-}
-
-
-/* ============================================================
-   GET INPUT VALUE SAFELY
-============================================================ */
-
-function getInputValue(
-  id
-) {
-
-  const element =
-    document.getElementById(
-      id
-    );
-
-
-  if (!element) {
-
-    return "";
-
-  }
-
-
-  return element.value.trim();
-
-}
-
-
-/* ============================================================
-   SET INPUT VALUE SAFELY
-============================================================ */
-
-function setInputValue(
-  id,
-  value
-) {
-
-  const element =
-    document.getElementById(
-      id
-    );
-
-
-  if (!element) {
-
-    return;
-
-  }
-
-
-  element.value =
-    value || "";
-
-}
-
-
-/* ============================================================
-   PREPARE GOOGLE REGISTRATION FORM
-============================================================ */
-
-function prepareGoogleRegistration() {
-
-  if (
-    !isGoogleRegistration
-  ) {
-
-    return;
-
   }
 
 
   /*
-    Google registration requires
-    an already authenticated Firebase user.
+     Password is NOT required for Google
+     registration.
+
+     Firebase Authentication already has
+     the authenticated Google account.
   */
 
-  const firebaseUser =
-    auth.currentUser;
+  if (passwordInput) {
 
-
-  if (!firebaseUser) {
-
-    showRegistrationMessage(
-      "Your Google session could not be found. Please sign in with Google again.",
-      "error"
-    );
-
-
-    return;
-
-  }
-
-
-  /* ==========================================================
-     PRE-FILL GOOGLE DATA
-  ========================================================== */
-
-  const googleName =
-    firebaseUser.displayName ||
-    "";
-
-
-  const googleEmail =
-    firebaseUser.email ||
-    "";
-
-
-  setInputValue(
-    "fullName",
-    googleName
-  );
-
-
-  setInputValue(
-    "email",
-    googleEmail
-  );
-
-
-  /*
-    Google already authenticated the user.
-
-    Therefore password fields are not required
-    for Google registration.
-  */
-
-  const password =
-    document.getElementById(
-      "password"
-    );
-
-
-  const confirmPassword =
-    document.getElementById(
-      "confirmPassword"
-    );
-
-
-  if (password) {
-
-    password.required =
+    passwordInput.required =
       false;
 
-    password.disabled =
+    passwordInput.disabled =
       true;
+
+    passwordInput.value =
+      "";
 
   }
 
 
-  if (confirmPassword) {
+  if (confirmPasswordInput) {
 
-    confirmPassword.required =
+    confirmPasswordInput.required =
       false;
 
-    confirmPassword.disabled =
+    confirmPasswordInput.disabled =
       true;
+
+    confirmPasswordInput.value =
+      "";
 
   }
 
 
   /*
-    Google email is controlled by Firebase Auth.
-
-    User should not change it.
+     Make the email field read-only because
+     the email comes from Google Authentication.
   */
 
-  const emailInput =
-    document.getElementById(
-      "email"
-    );
+  if (
+    emailInput &&
+    authenticatedUser
+  ) {
 
-
-  if (emailInput) {
+    emailInput.value =
+      authenticatedUser.email || "";
 
     emailInput.readOnly =
       true;
@@ -451,106 +357,138 @@ function prepareGoogleRegistration() {
   }
 
 
-  showRegistrationMessage(
-    "Google account connected. Complete your profile information below.",
-    "success"
+  /*
+     Google display name can be used as the
+     initial full name.
+  */
+
+  if (
+    fullNameInput &&
+    authenticatedUser &&
+    authenticatedUser.displayName
+  ) {
+
+    if (!fullNameInput.value.trim()) {
+
+      fullNameInput.value =
+        authenticatedUser.displayName;
+
+    }
+
+  }
+
+
+  console.log(
+    "Google registration mode enabled."
   );
 
 }
 
 
 /* ============================================================
-   VALIDATE GOOGLE SESSION
+   CHECK EXISTING PROFILE
 ============================================================ */
 
-function validateGoogleSession() {
+async function checkExistingProfile(
+  uid
+) {
 
-  if (
-    !isGoogleRegistration
-  ) {
-
-    return true;
-
-  }
-
-
-  const firebaseUser =
-    auth.currentUser;
-
-
-  if (!firebaseUser) {
-
-    showRegistrationMessage(
-      "Google authentication session expired. Please return to login and try again.",
-      "error"
+  const touristRef =
+    doc(
+      db,
+      "lankaQuestTourists",
+      uid
     );
 
 
-    return false;
-
-  }
-
-
-  if (
-    !firebaseUser.email
-  ) {
-
-    showRegistrationMessage(
-      "Your Google account does not provide an email address.",
-      "error"
+  const touristSnap =
+    await getDoc(
+      touristRef
     );
 
 
-    return false;
+  if (touristSnap.exists()) {
+
+    return {
+      exists: true,
+      accountType: "tourist",
+      data: touristSnap.data(),
+    };
 
   }
 
 
-  return true;
+  const guideRef =
+    doc(
+      db,
+      "lankaQuestGuides",
+      uid
+    );
+
+
+  const guideSnap =
+    await getDoc(
+      guideRef
+    );
+
+
+  if (guideSnap.exists()) {
+
+    return {
+      exists: true,
+      accountType: "guide",
+      data: guideSnap.data(),
+    };
+
+  }
+
+
+  return {
+    exists: false,
+    accountType: null,
+    data: null,
+  };
 
 }
 
 
 /* ============================================================
-   REGISTER GOOGLE USER PROFILE
+   CREATE TOURIST PROFILE
 ============================================================ */
 
-async function registerGoogleProfile() {
-
-  /*
-    Google user must already be authenticated.
-  */
-
-  const firebaseUser =
-    auth.currentUser;
-
-
-  if (!firebaseUser) {
-
-    throw new Error(
-      "Google authentication session not found."
-    );
-
-  }
-
+async function createTouristProfile(
+  firebaseUser
+) {
 
   const uid =
     firebaseUser.uid;
 
 
-  const accountType =
-    getSelectedAccountType();
-
-
   const fullName =
-    getInputValue(
-      "fullName"
-    );
+    fullNameInput
+      ? fullNameInput.value.trim()
+      : "";
 
 
   const email =
     firebaseUser.email ||
-    "";
+    (
+      emailInput
+        ? emailInput.value.trim()
+        : ""
+    );
+
+
+  const countryElement =
+    document.getElementById(
+      "country"
+    );
+
+
+  const country =
+    countryElement
+      ? countryElement.value.trim()
+      : "";
 
 
   if (!fullName) {
@@ -562,149 +500,202 @@ async function registerGoogleProfile() {
   }
 
 
-  /* ==========================================================
-     COMMON PROFILE DATA
-  ========================================================== */
+  if (!email) {
 
-  const profileData = {
-
-    uid:
-      uid,
-
-    fullName:
-      fullName,
-
-    email:
-      email,
-
-    accountType:
-      accountType,
-
-    authProvider:
-      "google",
-
-    createdAt:
-      serverTimestamp()
-
-  };
-
-
-  /* ==========================================================
-     TOURIST
-  ========================================================== */
-
-  if (
-    accountType ===
-    "tourist"
-  ) {
-
-    const country =
-      getInputValue(
-        "country"
-      );
-
-
-    if (!country) {
-
-      throw new Error(
-        "Please select your country."
-      );
-
-    }
-
-
-    profileData.country =
-      country;
-
-
-    await setDoc(
-
-      doc(
-        db,
-        "lankaQuestTourists",
-        uid
-      ),
-
-      profileData
-
+    throw new Error(
+      "A valid email address is required."
     );
-
-
-    showRegistrationMessage(
-      "Tourist profile created successfully.",
-      "success"
-    );
-
-
-    setTimeout(
-      () => {
-
-        window.location.href =
-          "tourist-dashboard.html";
-
-      },
-      1200
-    );
-
-
-    return;
 
   }
 
 
   /* ==========================================================
-     GUIDE
+     TOURIST PROFILE DATA
   ========================================================== */
 
-  profileData.phone =
-    getInputValue(
+  const profileData = {
+
+    uid: uid,
+
+    fullName: fullName,
+
+    email: email,
+
+    accountType: "tourist",
+
+    country: country,
+
+    createdAt:
+      serverTimestamp(),
+
+  };
+
+
+  /* ==========================================================
+     FIRESTORE
+
+     lankaQuestTourists/{UID}
+  ========================================================== */
+
+  await setDoc(
+
+    doc(
+      db,
+      "lankaQuestTourists",
+      uid
+    ),
+
+    profileData
+
+  );
+
+
+  console.log(
+    "Tourist profile created:",
+    uid
+  );
+
+
+  return profileData;
+
+}
+
+
+/* ============================================================
+   CREATE GUIDE PROFILE
+============================================================ */
+
+async function createGuideProfile(
+  firebaseUser
+) {
+
+  const uid =
+    firebaseUser.uid;
+
+
+  const fullName =
+    fullNameInput
+      ? fullNameInput.value.trim()
+      : "";
+
+
+  const email =
+    firebaseUser.email ||
+    (
+      emailInput
+        ? emailInput.value.trim()
+        : ""
+    );
+
+
+  const phoneElement =
+    document.getElementById(
       "phone"
     );
 
 
-  profileData.district =
-    getInputValue(
+  const districtElement =
+    document.getElementById(
       "guideDistrict"
     );
 
 
-  profileData.languages =
-    getInputValue(
+  const languagesElement =
+    document.getElementById(
       "languages"
     );
 
 
-  profileData.experience =
-    getInputValue(
+  const experienceElement =
+    document.getElementById(
       "experience"
     );
 
 
-  /*
-    Guide verification always starts
-    in pending state.
-  */
-
-  profileData.verificationStatus =
-    "pending";
+  const phone =
+    phoneElement
+      ? phoneElement.value.trim()
+      : "";
 
 
-  profileData.status =
-    "pending";
+  const district =
+    districtElement
+      ? districtElement.value
+      : "";
 
 
-  /*
-    Additional fields used by the
-    guide/admin workflow.
-  */
-
-  profileData.profileStatus =
-    "inactive";
+  const languages =
+    languagesElement
+      ? languagesElement.value.trim()
+      : "";
 
 
-  profileData.isActive =
-    false;
+  const experience =
+    experienceElement
+      ? experienceElement.value
+      : "";
 
+
+  if (!fullName) {
+
+    throw new Error(
+      "Please enter your full name."
+    );
+
+  }
+
+
+  if (!email) {
+
+    throw new Error(
+      "A valid email address is required."
+    );
+
+  }
+
+
+  /* ==========================================================
+     GUIDE PROFILE DATA
+
+     These fields are important because the
+     Firestore rules require them during create.
+  ========================================================== */
+
+  const profileData = {
+
+    uid: uid,
+
+    fullName: fullName,
+
+    email: email,
+
+    accountType: "guide",
+
+    phone: phone,
+
+    district: district,
+
+    languages: languages,
+
+    experience: experience,
+
+    verificationStatus:
+      "pending",
+
+    status:
+      "pending",
+
+    createdAt:
+      serverTimestamp(),
+
+  };
+
+
+  /* ==========================================================
+     FIRESTORE
+
+     lankaQuestGuides/{UID}
+  ========================================================== */
 
   await setDoc(
 
@@ -719,78 +710,39 @@ async function registerGoogleProfile() {
   );
 
 
-  showRegistrationMessage(
-    "Guide registration submitted successfully. Your profile is now pending verification.",
-    "success"
+  console.log(
+    "Guide profile created:",
+    uid
   );
 
 
-  setTimeout(
-    () => {
-
-      window.location.href =
-        "guide-verification.html";
-
-    },
-    1500
-  );
+  return profileData;
 
 }
 
 
 /* ============================================================
-   REGISTER EMAIL/PASSWORD USER
+   NORMAL EMAIL/PASSWORD REGISTRATION
 ============================================================ */
 
-async function registerEmailPasswordUser() {
-
-  const accountType =
-    getSelectedAccountType();
-
-
-  const fullName =
-    getInputValue(
-      "fullName"
-    );
-
+async function registerWithEmailPassword() {
 
   const email =
-    getInputValue(
-      "email"
-    );
-
-
-  const passwordElement =
-    document.getElementById(
-      "password"
-    );
-
-
-  const confirmPasswordElement =
-    document.getElementById(
-      "confirmPassword"
-    );
+    emailInput
+      ? emailInput.value.trim()
+      : "";
 
 
   const password =
-    passwordElement
-      ? passwordElement.value
+    passwordInput
+      ? passwordInput.value
       : "";
 
 
   const confirmPassword =
-    confirmPasswordElement
-      ? confirmPasswordElement.value
+    confirmPasswordInput
+      ? confirmPasswordInput.value
       : "";
-
-
-  if (!fullName) {
-
-    throw new Error(
-      "Please enter your full name."
-    );
-
-  }
 
 
   if (!email) {
@@ -829,203 +781,162 @@ async function registerEmailPasswordUser() {
 
   const userCredential =
     await createUserWithEmailAndPassword(
-
       auth,
-
       email,
-
       password
-
     );
 
 
-  const firebaseUser =
-    userCredential.user;
-
-
-  const uid =
-    firebaseUser.uid;
-
-
-  /* ==========================================================
-     COMMON PROFILE DATA
-  ========================================================== */
-
-  const profileData = {
-
-    uid:
-      uid,
-
-    fullName:
-      fullName,
-
-    email:
-      email,
-
-    accountType:
-      accountType,
-
-    authProvider:
-      "password",
-
-    createdAt:
-      serverTimestamp()
-
-  };
-
-
-  /* ==========================================================
-     TOURIST PROFILE
-  ========================================================== */
-
-  if (
-    accountType ===
-    "tourist"
-  ) {
-
-    profileData.country =
-      getInputValue(
-        "country"
-      );
-
-
-    await setDoc(
-
-      doc(
-        db,
-        "lankaQuestTourists",
-        uid
-      ),
-
-      profileData
-
-    );
-
-
-    showRegistrationMessage(
-      "Tourist account created successfully. Please login.",
-      "success"
-    );
-
-
-    setTimeout(
-      () => {
-
-        window.location.href =
-          "login.html";
-
-      },
-      1500
-    );
-
-
-    return;
-
-  }
-
-
-  /* ==========================================================
-     GUIDE PROFILE
-  ========================================================== */
-
-  profileData.phone =
-    getInputValue(
-      "phone"
-    );
-
-
-  profileData.district =
-    getInputValue(
-      "guideDistrict"
-    );
-
-
-  profileData.languages =
-    getInputValue(
-      "languages"
-    );
-
-
-  profileData.experience =
-    getInputValue(
-      "experience"
-    );
-
-
-  profileData.verificationStatus =
-    "pending";
-
-
-  profileData.status =
-    "pending";
-
-
-  profileData.profileStatus =
-    "inactive";
-
-
-  profileData.isActive =
-    false;
-
-
-  await setDoc(
-
-    doc(
-      db,
-      "lankaQuestGuides",
-      uid
-    ),
-
-    profileData
-
-  );
-
-
-  showRegistrationMessage(
-    "Guide registration submitted successfully. Please login after verification.",
-    "success"
-  );
-
-
-  setTimeout(
-    () => {
-
-      window.location.href =
-        "login.html";
-
-    },
-    1500
-  );
+  return userCredential.user;
 
 }
 
 
 /* ============================================================
-   MAIN REGISTRATION FUNCTION
+   GOOGLE REGISTRATION
+============================================================ */
+
+async function registerWithGoogle() {
+
+  /*
+     Google user MUST already be authenticated.
+
+     This happens because auth.js sends the user
+     here after successful Google authentication.
+  */
+
+  const currentUser =
+    auth.currentUser;
+
+
+  if (!currentUser) {
+
+    throw new Error(
+      "Your Google session could not be found. Please return to the login page and sign in with Google again."
+    );
+
+  }
+
+
+  console.log(
+    "Authenticated Google user:",
+    currentUser.uid
+  );
+
+
+  console.log(
+    "Google email:",
+    currentUser.email
+  );
+
+
+  return currentUser;
+
+}
+
+
+/* ============================================================
+   MAIN REGISTRATION
 ============================================================ */
 
 async function registerUser() {
 
   try {
 
-    /*
-      Google registration
-    */
+    /* ========================================================
+       ACCOUNT TYPE
+    ======================================================== */
+
+    const accountType =
+      getSelectedAccountType();
+
 
     if (
-      isGoogleRegistration
+      accountType !== "tourist" &&
+      accountType !== "guide"
     ) {
 
-      if (
-        !validateGoogleSession()
-      ) {
+      throw new Error(
+        "Please select an account type."
+      );
 
-        return;
-
-      }
+    }
 
 
-      await registerGoogleProfile();
+    /* ========================================================
+       GET FIREBASE USER
+    ======================================================== */
+
+    let firebaseUser;
+
+
+    if (isGoogleRegistration) {
+
+      /*
+         Google account already authenticated.
+      */
+
+      firebaseUser =
+        await registerWithGoogle();
+
+    } else {
+
+      /*
+         Normal email/password registration.
+      */
+
+      firebaseUser =
+        await registerWithEmailPassword();
+
+    }
+
+
+    if (!firebaseUser) {
+
+      throw new Error(
+        "Firebase authentication failed."
+      );
+
+    }
+
+
+    /* ========================================================
+       CHECK WHETHER PROFILE ALREADY EXISTS
+    ======================================================== */
+
+    const existingProfile =
+      await checkExistingProfile(
+        firebaseUser.uid
+      );
+
+
+    if (existingProfile.exists) {
+
+      /*
+         Do not create duplicate profiles.
+      */
+
+      console.log(
+        "Existing LankaQuest profile found:",
+        existingProfile.accountType
+      );
+
+
+      showRegistrationMessage(
+        "A LankaQuest profile already exists for this Google account.",
+        "error"
+      );
+
+
+      setTimeout(
+        () => {
+
+          window.location.href =
+            "login.html";
+
+        },
+        1500
+      );
 
 
       return;
@@ -1033,15 +944,68 @@ async function registerUser() {
     }
 
 
-    /*
-      Normal email/password registration
-    */
+    /* ========================================================
+       CREATE FIRESTORE PROFILE
+    ======================================================== */
 
-    await registerEmailPasswordUser();
+    if (
+      accountType ===
+      "tourist"
+    ) {
 
-  }
+      await createTouristProfile(
+        firebaseUser
+      );
 
-  catch (error) {
+
+      showRegistrationMessage(
+        "Tourist account created successfully.",
+        "success"
+      );
+
+    } else {
+
+      await createGuideProfile(
+        firebaseUser
+      );
+
+
+      showRegistrationMessage(
+        "Guide registration submitted successfully. Your profile is pending verification.",
+        "success"
+      );
+
+    }
+
+
+    /* ========================================================
+       REGISTRATION COMPLETE
+    ======================================================== */
+
+    setTimeout(
+      () => {
+
+        if (
+          accountType ===
+          "tourist"
+        ) {
+
+          window.location.href =
+            "tourist-dashboard.html";
+
+        } else {
+
+          window.location.href =
+            "guide-verification.html";
+
+        }
+
+      },
+      1500
+    );
+
+
+  } catch (error) {
 
     console.error(
       "Registration Error:",
@@ -1103,6 +1067,8 @@ async function registerUser() {
           error.message ||
           "Registration failed.";
 
+        break;
+
     }
 
 
@@ -1120,9 +1086,7 @@ async function registerUser() {
    FORM SUBMIT
 ============================================================ */
 
-if (
-  registrationForm
-) {
+if (registrationForm) {
 
   registrationForm.addEventListener(
 
@@ -1133,13 +1097,125 @@ if (
       event.preventDefault();
 
 
-      await registerUser();
+      /*
+         Prevent duplicate submissions.
+      */
+
+      const submitButton =
+        registrationForm.querySelector(
+          'button[type="submit"]'
+        );
+
+
+      if (submitButton) {
+
+        submitButton.disabled =
+          true;
+
+      }
+
+
+      try {
+
+        await registerUser();
+
+      } finally {
+
+        /*
+           If registration succeeds,
+           navigation will happen shortly.
+
+           If it fails, unlock the button.
+        */
+
+        if (submitButton) {
+
+          submitButton.disabled =
+            false;
+
+        }
+
+      }
 
     }
 
   );
 
 }
+
+
+/* ============================================================
+   AUTH STATE
+============================================================ */
+
+onAuthStateChanged(
+  auth,
+  (user) => {
+
+    authenticatedUser =
+      user;
+
+
+    console.log(
+      "Registration Auth State:",
+      user
+        ? user.uid
+        : "No authenticated user"
+    );
+
+
+    /*
+       Google registration requires an
+       authenticated Firebase user.
+
+       If register.html?google=1 is opened
+       directly without a Google session,
+       send the user back to login.
+    */
+
+    if (
+      isGoogleRegistration &&
+      !user
+    ) {
+
+      showRegistrationMessage(
+        "Google authentication session was not found. Returning to login...",
+        "error"
+      );
+
+
+      setTimeout(
+        () => {
+
+          window.location.href =
+            "login.html";
+
+        },
+        1500
+      );
+
+
+      return;
+
+    }
+
+
+    /*
+       Once Firebase confirms the user,
+       populate Google registration fields.
+    */
+
+    if (
+      isGoogleRegistration &&
+      user
+    ) {
+
+      setupGoogleRegistrationUI();
+
+    }
+
+  }
+);
 
 
 /* ============================================================
@@ -1147,83 +1223,16 @@ if (
 ============================================================ */
 
 document.addEventListener(
-
   "DOMContentLoaded",
-
   () => {
 
     updateAccountTypeFields();
 
-
-    /*
-      IMPORTANT:
-
-      Firebase Auth currentUser may not be available
-      immediately when the page loads.
-
-      Therefore Google registration initialization
-      is handled through onAuthStateChanged below.
-    */
-
   }
-
 );
 
 
 /* ============================================================
-   FIREBASE AUTH STATE
-
-   Required for Google registration.
-
-   When:
-
-   register.html?google=1
-
-   is opened, wait for Firebase to restore
-   the authenticated Google user.
+   END REGISTER.JS
 ============================================================ */
 
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-
-
-if (
-  isGoogleRegistration
-) {
-
-  onAuthStateChanged(
-
-    auth,
-
-    (firebaseUser) => {
-
-      if (!firebaseUser) {
-
-        showRegistrationMessage(
-          "Google authentication session not found. Please return to login and sign in with Google again.",
-          "error"
-        );
-
-
-        return;
-
-      }
-
-
-      prepareGoogleRegistration();
-
-    }
-
-  );
-
-}
-
-
-/* ============================================================
-   EXPORT
-============================================================ */
-
-export {
-  registerUser
-};

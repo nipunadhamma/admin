@@ -159,6 +159,7 @@ if (loginForm) {
 }
 
 
+
 /* ============================================================
    5. GOOGLE LOGIN
 ============================================================ */
@@ -176,9 +177,8 @@ if (googleLoginButton) {
       /*
         Prevent multiple Google popup requests.
 
-        This is important because Firebase
-        signInWithPopup() allows only one active
-        popup operation at a time.
+        Firebase allows only one active popup
+        authentication operation at a time.
       */
 
       if (googleLoginInProgress) {
@@ -195,7 +195,8 @@ if (googleLoginButton) {
 
 
       /*
-        Prevent repeated clicks while popup is open.
+        Disable button while Google popup
+        authentication is running.
       */
 
       googleLoginButton.disabled = true;
@@ -217,17 +218,17 @@ if (googleLoginButton) {
         );
 
 
-        /*
-          Start Firebase Google authentication.
-        */
+        /* ====================================================
+           FIREBASE GOOGLE LOGIN
+        ==================================================== */
 
         const result =
           await googleLogin();
 
 
-        /*
-          Authentication failed.
-        */
+        /* ====================================================
+           LOGIN FAILED
+        ==================================================== */
 
         if (
           !result ||
@@ -240,14 +241,64 @@ if (googleLoginButton) {
             "error"
           );
 
+          return;
+        }
+
+
+        /* ====================================================
+           NEW GOOGLE USER
+           
+           Firebase Authentication succeeded,
+           but no LankaQuest profile exists.
+
+           IMPORTANT:
+
+           Do NOT call redirectAfterLogin().
+
+           Go to registration page instead.
+
+           Firebase Auth session remains active.
+        ==================================================== */
+
+        if (
+          result.needsRegistration === true
+        ) {
+
+          console.log(
+            "Google user has no LankaQuest profile."
+          );
+
+
+          showLoginMessage(
+            "Google account verified. Opening registration...",
+            "success"
+          );
+
+
+          /*
+            Small delay so the user can see
+            the success message before navigation.
+          */
+
+          setTimeout(
+            () => {
+
+              window.location.href =
+                "register.html?google=1";
+
+            },
+
+            500
+          );
+
 
           return;
         }
 
 
-        /*
-          Authentication successful.
-        */
+        /* ====================================================
+           EXISTING LANKAQUEST USER
+        ==================================================== */
 
         showLoginMessage(
           "Google login successful. Redirecting...",
@@ -256,7 +307,9 @@ if (googleLoginButton) {
 
 
         /*
-          Redirect based on account type.
+          Existing profile found.
+
+          redirectAfterLogin() decides:
 
           Admin
               ↓
@@ -285,12 +338,9 @@ if (googleLoginButton) {
         );
 
 
-        /*
-          Firebase may return this if another
-          popup request was started.
-
-          Do not show a confusing error to the user.
-        */
+        /* ====================================================
+           POPUP ALREADY OPEN
+        ==================================================== */
 
         if (
           error.code ===
@@ -302,14 +352,13 @@ if (googleLoginButton) {
             "error"
           );
 
-
           return;
         }
 
 
-        /*
-          User manually closed the popup.
-        */
+        /* ====================================================
+           USER CLOSED POPUP
+        ==================================================== */
 
         if (
           error.code ===
@@ -321,14 +370,13 @@ if (googleLoginButton) {
             "error"
           );
 
-
           return;
         }
 
 
-        /*
-          Browser blocked the popup.
-        */
+        /* ====================================================
+           POPUP BLOCKED
+        ==================================================== */
 
         if (
           error.code ===
@@ -340,14 +388,13 @@ if (googleLoginButton) {
             "error"
           );
 
-
           return;
         }
 
 
-        /*
-          Firebase domain configuration error.
-        */
+        /* ====================================================
+           UNAUTHORIZED DOMAIN
+        ==================================================== */
 
         if (
           error.code ===
@@ -359,14 +406,13 @@ if (googleLoginButton) {
             "error"
           );
 
-
           return;
         }
 
 
-        /*
-          General error.
-        */
+        /* ====================================================
+           GENERAL ERROR
+        ==================================================== */
 
         showLoginMessage(
           error.message ||
@@ -377,11 +423,10 @@ if (googleLoginButton) {
       } finally {
 
         /*
-          Always unlock the button after
-          the Google operation finishes.
+          Unlock the button after the operation.
 
-          If redirect happens, this code may run
-          immediately before navigation, which is fine.
+          If page navigation has already started,
+          the browser will simply leave this page.
         */
 
         googleLoginInProgress = false;
@@ -400,6 +445,8 @@ if (googleLoginButton) {
   );
 
 }
+
+
 
 
 /* ============================================================
