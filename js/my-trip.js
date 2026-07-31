@@ -1,44 +1,18 @@
 /* ============================================================
-   LANKAQUEST
-   MY TRIP SYSTEM
+   MY TRIP / TRIP PLANNER
 
-   Firebase First Architecture
+   Data Source:
+   localStorage
 
-   Authentication:
-   Firebase Authentication
-
-   Database:
-   Firebase Firestore
-
-   Collection:
-   lankaQuestTouristTrips
-
+   Storage Key:
+   sriLankaMyTrip
 ============================================================ */
 
 /* ============================================================
-   FIREBASE IMPORTS
+   STORAGE
 ============================================================ */
 
-import { auth, db } from "./firebase-config.js";
-
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  deleteDoc,
-  doc,
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-/* ============================================================
-   GLOBAL VARIABLES
-============================================================ */
-
-let currentTourist = null;
-
-let currentTrips = [];
+const MY_TRIP_KEY = "sriLankaMyTrip";
 
 /* ============================================================
    DOM ELEMENTS
@@ -58,232 +32,223 @@ const travelDays = document.getElementById("travelDays");
 
 const requestQuoteBtn = document.getElementById("requestQuoteBtn");
 
-let selectedTripId = null;
-
 /* ============================================================
-   AUTH CHECK
-
+   GET TRIP
 ============================================================ */
 
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    currentTourist = user;
+function getMyTrip() {
+  const savedTrip = localStorage.getItem(MY_TRIP_KEY);
 
-    console.log("Tourist:", user.uid);
-
-    await loadMyTrips();
-  } else {
-    showLoginRequired();
+  if (!savedTrip) {
+    return [];
   }
-});
 
-/* ============================================================
-   LOAD TOURIST TRIPS
-
-   Firestore:
-   lankaQuestTouristTrips
-
-============================================================ */
-
-async function loadMyTrips() {
   try {
-    const tripsRef = collection(db, "lankaQuestTouristTrips");
-
-    const q = query(
-      tripsRef,
-
-      where("touristId", "==", currentTourist.uid),
-    );
-
-    const snapshot = await getDocs(q);
-
-    currentTrips = [];
-
-    snapshot.forEach((item) => {
-      currentTrips.push({
-        id: item.id,
-
-        ...item.data(),
-      });
-    });
-
-    renderTrips();
+    return JSON.parse(savedTrip);
   } catch (error) {
-    console.error("Load Trips Error:", error);
+    console.error("Unable to load trip:", error);
 
-    showMessage("Unable to load trips");
+    return [];
   }
 }
 
 /* ============================================================
-   RENDER TRIPS
-
+   SAVE TRIP
 ============================================================ */
 
-function renderTrips() {
-  if (!tripDestinations) {
-    return;
-  }
+function saveMyTrip(trip) {
+  localStorage.setItem(
+    MY_TRIP_KEY,
 
-  tripDestinations.innerHTML = "";
+    JSON.stringify(trip),
+  );
+}
 
-  if (currentTrips.length === 0) {
+/* ============================================================
+   DISPLAY DESTINATIONS
+============================================================ */
+
+function renderDestinations() {
+  const trip = getMyTrip();
+
+  /*
+       Update Count
+    */
+
+  destinationCount.textContent = trip.length;
+
+  /*
+       Empty Trip
+    */
+
+  if (trip.length === 0) {
     tripDestinations.style.display = "none";
 
-    if (emptyTrip) {
-      emptyTrip.style.display = "block";
-    }
+    emptyTrip.style.display = "block";
 
-    if (tripStatus) {
-      tripStatus.textContent = "Empty";
-    }
-
-    destinationCount.textContent = 0;
+    tripStatus.textContent = "Empty";
 
     return;
   }
+
+  /*
+       Trip has places
+    */
 
   tripDestinations.style.display = "grid";
 
-  if (emptyTrip) {
-    emptyTrip.style.display = "none";
-  }
+  emptyTrip.style.display = "none";
 
   tripStatus.textContent = "Draft";
 
-  const trip = currentTrips[0];
+  /*
+       Clear old cards
+    */
 
-  selectedTripId = trip.id;
+  tripDestinations.innerHTML = "";
 
-  const destinations = trip.destinations || [];
+  /*
+       Create cards
+    */
 
-  destinationCount.textContent = destinations.length;
-
-  destinations.forEach((place) => {
+  trip.forEach((place) => {
     const card = document.createElement("article");
 
     card.className = "destination-card";
 
     card.innerHTML = `
 
-
                 <img
-
-                    src="${place.image || ""}"
-
+                    src="${place.image}"
                     alt="${place.name}"
-
                     loading="lazy"
-
                 >
 
 
-
-                <div class="destination-info">
-
+                <div
+                    class="destination-info"
+                >
 
                     <h3>
-
                         ${place.name}
-
                     </h3>
 
 
+                    <div>
+                        ${place.sinhalaName}
+                    </div>
 
-                    <p>
 
-                    📍
-                    ${place.district || ""}
+                    <p
+                        class="destination-location"
+                    >
 
-                    ·
+                        📍
 
-                    ${place.province || ""}
+                        ${place.district}
+
+                        ·
+
+                        ${place.province}
 
                     </p>
 
 
                     <button
-
+                        type="button"
                         class="remove-trip-btn"
-
-                        data-id="${place.id}"
-
+                        data-place-id="${place.id}"
                     >
 
                         Remove
 
                     </button>
 
-
-
                 </div>
-
 
             `;
 
-    const removeBtn = card.querySelector(".remove-trip-btn");
+    /*
+               Remove Button
+            */
 
-    removeBtn.addEventListener("click", () => {
-      removeDestination(place.id);
+    const removeButton = card.querySelector(".remove-trip-btn");
+
+    removeButton.addEventListener("click", () => {
+      removeFromTrip(place.id);
     });
 
     tripDestinations.appendChild(card);
   });
-
-  renderItinerary(trip.travelDays || 1);
 }
 
 /* ============================================================
-   REMOVE DESTINATION
-
-   Firestore Update Migration
-   will be connected here
-
+   REMOVE FROM TRIP
 ============================================================ */
 
-async function removeDestination(placeId) {
-  console.log("Remove destination:", placeId);
+function removeFromTrip(placeId) {
+  let trip = getMyTrip();
 
-  alert("Destination update will be connected with Firestore update.");
+  trip = trip.filter((place) => place.id !== placeId);
+
+  saveMyTrip(trip);
+
+  /*
+       Refresh UI
+    */
+
+  renderDestinations();
+
+  renderItinerary();
 }
 
 /* ============================================================
-   ITINERARY GENERATOR
-
+   CREATE ITINERARY
 ============================================================ */
 
-function renderItinerary(days) {
-  if (!travelDays) {
-    return;
-  }
-
-  travelDays.value = days;
+function renderItinerary() {
+  const days = Number(travelDays.value);
 
   dayCount.textContent = days;
 
-  const container = document.getElementById("itineraryContainer");
+  const itineraryContainer = document.getElementById("itineraryContainer");
 
-  if (!container) {
-    return;
-  }
+  itineraryContainer.innerHTML = "";
 
-  container.innerHTML = "";
+  /*
+       Create each day
+    */
 
-  for (let i = 1; i <= days; i++) {
-    const div = document.createElement("div");
+  for (let day = 1; day <= days; day++) {
+    const dayElement = document.createElement("div");
 
-    div.className = "itinerary-day";
+    dayElement.className = "itinerary-day";
 
-    div.innerHTML = `
+    dayElement.innerHTML = `
 
-            <h3>
+            <div
+                class="itinerary-day-header"
+            >
 
-                Day ${i}
+                <h3>
 
-            </h3>
+                    Day ${day}
+
+                </h3>
 
 
-            <div>
+                <span>
+
+                    📅
+
+                </span>
+
+            </div>
+
+
+            <div
+                class="day-destinations"
+            >
 
                 Drag destinations here
 
@@ -291,73 +256,62 @@ function renderItinerary(days) {
 
         `;
 
-    container.appendChild(div);
+    itineraryContainer.appendChild(dayElement);
   }
 }
 
 /* ============================================================
-   REQUEST GUIDE QUOTATION
-
+   TRAVEL DAYS CHANGE
 ============================================================ */
 
-if (requestQuoteBtn) {
-  requestQuoteBtn.addEventListener("click", () => {
-    if (!selectedTripId) {
-      alert("Please create a trip first.");
-
-      return;
-    }
-
-    window.location.href = `quotation-request.html?trip=${selectedTripId}`;
-  });
-}
+travelDays.addEventListener("change", () => {
+  renderItinerary();
+});
 
 /* ============================================================
-   LOGIN REQUIRED
-
+   REQUEST GUIDE QUOTE
 ============================================================ */
 
-function showLoginRequired() {
-  if (tripDestinations) {
-    tripDestinations.innerHTML = `
+requestQuoteBtn.addEventListener("click", () => {
+  const trip = getMyTrip();
 
+  /*
+           Prevent empty request
+        */
 
-            <div class="login-required">
+  if (trip.length === 0) {
+    alert("Please add at least one destination to your trip.");
 
-
-                <h2>
-
-                🔐 Login Required
-
-                </h2>
-
-
-                <p>
-
-                Please login to view your trips.
-
-                </p>
-
-
-                <a href="login.html">
-
-                Login
-
-                </a>
-
-
-            </div>
-
-
-        `;
+    return;
   }
-}
+
+  /*
+           Temporary version
+
+           Later:
+
+           Login
+           ↓
+           User Account
+           ↓
+           Guide Search
+           ↓
+           Quote Request
+        */
+
+  alert(
+    "Your trip plan is ready!\n\n" +
+      "Guide quote request system " +
+      "will be connected soon.",
+  );
+});
 
 /* ============================================================
-   MESSAGE
-
+   INITIALIZE
 ============================================================ */
 
-function showMessage(message) {
-  console.log(message);
-}
+document.addEventListener("DOMContentLoaded", () => {
+  renderDestinations();
+
+  renderItinerary();
+});

@@ -1,89 +1,96 @@
 /* ============================================================
-   TRIP PLANNER LOGIC
-   LankaQuest
-
-   FIREBASE-FIRST ARCHITECTURE
-
+   TRIP PLANNER
+   Explore Sri Lanka
 
    FLOW:
 
-   Firebase Authentication
-          |
-          ↓
-   Current User UID
-          |
-          ↓
-   lankaQuestTourists
-          |
-          ↓
+   Tourist
+      ↓
    Trip Planner
-          |
-          ↓
-   lankaQuestQuotationRequests
-          |
-          ↓
-   Guide Dashboard
+      ↓
+   Select Destinations
+      ↓
+   Add Travel Details
+      ↓
+   Request Guide Quotation
+      ↓
+   Login Check
+      ↓
+   Tourist Account Check
+      ↓
+   quotation-request.html
+      ↓
+   Submit Request
+      ↓
+   find-guides.html
+      ↓
+   Select Registered Guide
 
+   NOTE:
 
-   IMPORTANT:
+   Frontend Demo Architecture
 
-   ❌ localStorage database
-   ❌ JSON trip arrays
-
-   ✅ Firebase Auth
-   ✅ Firestore
-
+   Later:
+   Backend / API / Database
 ============================================================ */
 
 /* ============================================================
-   FIREBASE IMPORTS
+   1. STORAGE KEY
 ============================================================ */
 
-import { db } from "./firebase-config.js";
-
-import { getCurrentUser, redirectAfterLogin } from "./auth.js";
-
-import {
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  serverTimestamp,
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+const MY_TRIP_KEY = "sriLankaMyTrip";
 
 /* ============================================================
-   1. CURRENT TRIP STATE
-
-   Temporary UI state only.
-
-   Database:
-   Firestore
-
+   2. TRIP PLANNER DATA KEY
 ============================================================ */
 
-let currentTrip = [];
+/*
+   Travel details quotation-request.html
+   එකට pass කිරීමට මෙම key භාවිතා කරයි.
+*/
+
+const TRIP_PLANNER_DATA_KEY = "sriLankaTripPlannerData";
 
 /* ============================================================
-   2. CURRENT TOURIST
+   3. GET MY TRIP
 ============================================================ */
 
-function getCurrentTourist() {
-  const user = getCurrentUser();
+function getMyTrip() {
+  const savedTrip = localStorage.getItem(MY_TRIP_KEY);
 
-  if (!user) {
-    return null;
+  if (!savedTrip) {
+    return [];
   }
 
-  if (user.accountType !== "tourist") {
-    return null;
-  }
+  try {
+    const trip = JSON.parse(savedTrip);
 
-  return user;
+    if (!Array.isArray(trip)) {
+      return [];
+    }
+
+    return trip;
+  } catch (error) {
+    console.error("Trip data error:", error);
+
+    return [];
+  }
 }
 
 /* ============================================================
-   3. DOM ELEMENTS
+   4. SAVE MY TRIP
+============================================================ */
+
+function saveMyTrip(trip) {
+  localStorage.setItem(
+    MY_TRIP_KEY,
+
+    JSON.stringify(trip),
+  );
+}
+
+/* ============================================================
+   5. DOM ELEMENTS
 ============================================================ */
 
 const plannerDestinations = document.getElementById("plannerDestinations");
@@ -95,101 +102,23 @@ const plannerPlaceCount = document.getElementById("plannerPlaceCount");
 const summaryPlaceCount = document.getElementById("summaryPlaceCount");
 
 /* ============================================================
-   4. LOAD TOURIST TRIP DATA
-
-   Firestore:
-
-   lankaQuestTourists
-        |
-        UID
-        |
-        trips
-
-
-============================================================ */
-
-async function loadTouristTrip() {
-  const tourist = getCurrentTourist();
-
-  if (!tourist) {
-    console.warn("Tourist login required.");
-
-    currentTrip = [];
-
-    return;
-  }
-
-  try {
-    const tripRef = collection(
-      db,
-
-      "lankaQuestTouristTrips",
-    );
-
-    const tripQuery = query(
-      tripRef,
-
-      where(
-        "touristId",
-
-        "==",
-
-        tourist.uid,
-      ),
-    );
-
-    const snapshot = await getDocs(tripQuery);
-
-    currentTrip = [];
-
-    snapshot.forEach((doc) => {
-      currentTrip.push({
-        id: doc.id,
-
-        ...doc.data(),
-      });
-    });
-
-    console.log(
-      "Firebase Trip Data:",
-
-      currentTrip,
-    );
-  } catch (error) {
-    console.error(
-      "Trip loading error:",
-
-      error,
-    );
-
-    currentTrip = [];
-  }
-}
-
-/* ============================================================
-   5. GET CURRENT TRIP
-   Firebase State Only
-============================================================ */
-
-function getMyTrip(){
-
-    return currentTrip;
-
-}
-
-/* ============================================================
    6. RENDER DESTINATIONS
 ============================================================ */
 
 function renderPlannerDestinations() {
-
-    console.log("Planner Trip:", getMyTrip());
-
   const trip = getMyTrip();
+
+  /*
+       Clear old cards
+    */
 
   if (plannerDestinations) {
     plannerDestinations.innerHTML = "";
   }
+
+  /*
+       Update counters
+    */
 
   if (plannerPlaceCount) {
     plannerPlaceCount.textContent =
@@ -200,6 +129,10 @@ function renderPlannerDestinations() {
     summaryPlaceCount.textContent = trip.length;
   }
 
+  /*
+       Empty State
+    */
+
   if (trip.length === 0) {
     if (plannerEmptyState) {
       plannerEmptyState.style.display = "block";
@@ -208,1345 +141,503 @@ function renderPlannerDestinations() {
     return;
   }
 
+  /*
+       Hide Empty State
+    */
+
   if (plannerEmptyState) {
     plannerEmptyState.style.display = "none";
   }
 
-  trip.forEach(
-    (
-      place,
+  /*
+       Create Destination Cards
+    */
 
-      index,
-    ) => {
-      const card = document.createElement("div");
+  trip.forEach((place, index) => {
+    const card = document.createElement("div");
 
-      card.className = "planner-destination";
+    card.className = "planner-destination";
 
-      card.innerHTML = `
+    card.innerHTML = `
 
-
-            <img
-
-                src="${place.image || ""}"
-
-                alt="${place.name || "Destination"}"
-
-            >
+                <img
+                    src="${place.image || ""}"
+                    alt="${place.name || "Destination"}"
+                >
 
 
+                <div
+                    class="planner-destination-info"
+                >
 
-            <div class="planner-destination-info">
+                    <h4>
 
+                        ${index + 1}.
+                        ${place.name || "Unknown Destination"}
 
-
-                <h4>
-
-                ${index + 1}.
-
-                ${place.name || "Unknown"}
-
-                </h4>
+                    </h4>
 
 
+                    <p>
+
+                        📍
+
+                        ${place.district || ""}
+
+                        ${place.province ? " · " + place.province : ""}
+
+                    </p>
 
 
-                <p>
+                    <p>
 
-                📍
+                        ⭐
 
-                ${place.district || ""}
+                        ${place.rating || "N/A"}
 
-                ${place.province ? " · " + place.province : ""}
+                    </p>
 
-                </p>
-
-
+                </div>
 
 
-                <p>
+                <button
+                    type="button"
+                    class="remove-planner-place"
+                    data-place-id="${place.id}"
+                    title="Remove destination"
+                >
 
-                ⭐
+                    ×
 
-                ${place.rating || "N/A"}
-
-                </p>
-
-
-
-            </div>
-
-
+                </button>
 
             `;
 
-      if (plannerDestinations) {
-        plannerDestinations.appendChild(card);
-      }
-    },
-  );
+    /*
+               Remove Button
+            */
+
+    const removeButton = card.querySelector(".remove-planner-place");
+
+    if (removeButton) {
+      removeButton.addEventListener("click", () => {
+        removePlannerDestination(place.id);
+      });
+    }
+
+    /*
+               Add Card
+            */
+
+    if (plannerDestinations) {
+      plannerDestinations.appendChild(card);
+    }
+  });
 }
+
 /* ============================================================
    7. REMOVE DESTINATION
-
-   Firestore-first
-
-   Current UI state update
-
 ============================================================ */
 
+function removePlannerDestination(placeId) {
+  let trip = getMyTrip();
 
-async function removePlannerDestination(placeId){
+  /*
+       Remove selected place
+    */
 
+  trip = trip.filter((place) => place.id !== placeId);
 
-    currentTrip =
+  /*
+       Save updated trip
+    */
 
-        currentTrip.filter(
+  saveMyTrip(trip);
 
-            place =>
+  /*
+       Re-render
+    */
 
-                place.id !== placeId
-
-        );
-
-
-
-    renderPlannerDestinations();
-
-
-
+  renderPlannerDestinations();
 }
-
-
-
-
-
 
 /* ============================================================
    8. TRAVEL DATES
 ============================================================ */
 
+const startDate = document.getElementById("startDate");
 
-const startDate =
+const endDate = document.getElementById("endDate");
 
-document.getElementById(
-    "startDate"
-);
+const summaryDates = document.getElementById("summaryDates");
 
+function updateTravelDates() {
+  if (!startDate || !endDate || !summaryDates) {
+    return;
+  }
 
+  if (!startDate.value || !endDate.value) {
+    summaryDates.textContent = "Not selected";
 
-const endDate =
+    return;
+  }
 
-document.getElementById(
-    "endDate"
-);
-
-
-
-const summaryDates =
-
-document.getElementById(
-    "summaryDates"
-);
-
-
-
-
-
-
-function updateTravelDates(){
-
-
-
-    if(
-
-        !startDate ||
-
-        !endDate ||
-
-        !summaryDates
-
-    ){
-
-        return;
-
-    }
-
-
-
-
-
-    if(
-
-        !startDate.value ||
-
-        !endDate.value
-
-    ){
-
-
-        summaryDates.textContent =
-
-        "Not selected";
-
-
-        return;
-
-
-    }
-
-
-
-
-    summaryDates.textContent =
-
-
-        startDate.value +
-
-        " → " +
-
-        endDate.value;
-
-
-
+  summaryDates.textContent = startDate.value + " → " + endDate.value;
 }
 
-
-
-
-
-
-if(startDate){
-
-
-    startDate.addEventListener(
-
-        "change",
-
-        updateTravelDates
-
-    );
-
-
+if (startDate) {
+  startDate.addEventListener("change", updateTravelDates);
 }
 
-
-
-
-
-if(endDate){
-
-
-    endDate.addEventListener(
-
-        "change",
-
-        updateTravelDates
-
-    );
-
-
+if (endDate) {
+  endDate.addEventListener("change", updateTravelDates);
 }
-
-
-
-
-
-
 
 /* ============================================================
    9. TRAVELERS
 ============================================================ */
 
+const travelerCount = document.getElementById("travelerCount");
 
-const travelerCount =
+const summaryTravelers = document.getElementById("summaryTravelers");
 
-document.getElementById(
-    "travelerCount"
-);
-
-
-
-
-const summaryTravelers =
-
-document.getElementById(
-    "summaryTravelers"
-);
-
-
-
-
-
-
-if(travelerCount){
-
-
-    travelerCount.addEventListener(
-
-        "change",
-
-        ()=>{
-
-
-            if(summaryTravelers){
-
-
-                summaryTravelers.textContent =
-
-
-                travelerCount.value ||
-
-
-                "Not selected";
-
-
-            }
-
-
-        }
-
-    );
-
-
+if (travelerCount) {
+  travelerCount.addEventListener("change", () => {
+    if (summaryTravelers) {
+      summaryTravelers.textContent = travelerCount.value
+        ? travelerCount.value
+        : "Not selected";
+    }
+  });
 }
-
-
-
-
-
-
 
 /* ============================================================
    10. TRANSPORT
 ============================================================ */
 
+const transportOptions = document.querySelectorAll('input[name="transport"]');
 
-const transportOptions =
+const summaryTransport = document.getElementById("summaryTransport");
 
-
-document.querySelectorAll(
-
-'input[name="transport"]'
-
-);
-
-
-
-
-
-const summaryTransport =
-
-document.getElementById(
-    "summaryTransport"
-);
-
-
-
-
-
-
-transportOptions.forEach(
-
-option=>{
-
-
-    option.addEventListener(
-
-        "change",
-
-        ()=>{
-
-
-            if(summaryTransport){
-
-
-                summaryTransport.textContent =
-
-                option.value;
-
-
-            }
-
-
-        }
-
-
-    );
-
-
-}
-
-);
-
-
-
-
-
-
-
+transportOptions.forEach((option) => {
+  option.addEventListener("change", () => {
+    if (summaryTransport) {
+      summaryTransport.textContent = option.value;
+    }
+  });
+});
 
 /* ============================================================
    11. ACCOMMODATION
 ============================================================ */
 
-
-const accommodationOptions =
-
-
-document.querySelectorAll(
-
-'input[name="accommodation"]'
-
+const accommodationOptions = document.querySelectorAll(
+  'input[name="accommodation"]',
 );
 
+const summaryAccommodation = document.getElementById("summaryAccommodation");
 
-
-
-
-const summaryAccommodation =
-
-document.getElementById(
-    "summaryAccommodation"
-);
-
-
-
-
-
-
-
-accommodationOptions.forEach(
-
-option=>{
-
-
-    option.addEventListener(
-
-        "change",
-
-        ()=>{
-
-
-            if(summaryAccommodation){
-
-
-                summaryAccommodation.textContent =
-
-                option.value;
-
-
-            }
-
-
-        }
-
-
-    );
-
-
-}
-
-);
-
-
-
-
-
-
-
-
+accommodationOptions.forEach((option) => {
+  option.addEventListener("change", () => {
+    if (summaryAccommodation) {
+      summaryAccommodation.textContent = option.value;
+    }
+  });
+});
 
 /* ============================================================
-   12. SAVE TRIP TO FIRESTORE
-
-
-   Collection:
-
-   lankaQuestTouristTrips
-
-
-   Document:
-
-       touristId
-       destinations
-       startDate
-       endDate
-       travelers
-       transport
-       accommodation
-       specialRequests
-       createdAt
-
-
+   12. SAVE PLANNER DATA
 ============================================================ */
 
+/*
+   Trip Planner එකේ
+   Travel Details save කරයි.
 
+   quotation-request.html
+   එකෙන් මේ data load කරයි.
+*/
 
-async function saveTripPlannerData(){
+function saveTripPlannerData() {
+  const tripPlannerData = {
+    startDate: startDate ? startDate.value : "",
 
+    endDate: endDate ? endDate.value : "",
 
+    travelers: travelerCount ? travelerCount.value : "",
 
-    const tourist =
-
-        getCurrentTourist();
-
-
-
-
-    if(!tourist){
-
-
-        alert(
-
-        "Please login as tourist first."
-
-        );
-
-
-        return false;
-
-
-    }
-
-
-
-
-
-
-    const tripData = {
-
-
-
-        touristId:
-
-            tourist.uid,
-
-
-
-        destinations:
-
-            currentTrip,
-
-
-
-        startDate:
-
-            startDate
-
-            ?
-
-            startDate.value
-
-            :
-
-            "",
-
-
-
-        endDate:
-
-            endDate
-
-            ?
-
-            endDate.value
-
-            :
-
-            "",
-
-
-
-
-        travelers:
-
-            travelerCount
-
-            ?
-
-            travelerCount.value
-
-            :
-
-            "",
-
-
-
-
-        travelStyle:
-
-
-            document.getElementById(
-
-                "travelStyle"
-
-            )?.value || "",
-
-
-
-
-
-
-        transport:
-
-
-            document.querySelector(
-
-            'input[name="transport"]:checked'
-
-            )?.value || "",
-
-
-
-
-
-
-        accommodation:
-
-
-            document.querySelector(
-
-            'input[name="accommodation"]:checked'
-
-            )?.value || "",
-
-
-
-
-
-        specialRequests:
-
-
-            document.getElementById(
-
-            "specialRequests"
-
-            )?.value || "",
-
-
-
-
-
-        updatedAt:
-
-            serverTimestamp()
-
-
-
-
-    };
-
-
-
-
-
-
-    try{
-
-
-
-        await addDoc(
-
-
-            collection(
-
-                db,
-
-                "lankaQuestTouristTrips"
-
-            ),
-
-
-            tripData
-
-
-        );
-
-
-
-
-
-        console.log(
-
-            "Trip saved Firebase:",
-
-            tripData
-
-        );
-
-
-
-
-
-        return true;
-
-
-
-    }
-
-    catch(error){
-
-
-
-        console.error(
-
-            "Trip save error:",
-
-            error
-
-        );
-
-
-
-
-        alert(
-
-        "Unable to save trip details."
-
-        );
-
-
-
-        return false;
-
-
-
-    }
-
-
-
-
-}
-/* ============================================================
-   13. REQUEST GUIDE QUOTATION
-
-
-   FLOW:
-
-   Tourist
-      |
-      ↓
-   Trip Planner
-      |
-      ↓
-   Login Check
-      |
-      ↓
-   lankaQuestQuotationRequests
-      |
-      ↓
-   Guide Dashboard
-
-
-============================================================ */
-
-
-
-const requestQuoteButton =
-
-document.getElementById(
-
-    "requestQuoteButton"
-
-);
-
-
-
-
-
-
-
-if(requestQuoteButton){
-
-
-
-requestQuoteButton.addEventListener(
-
-
-"click",
-
-
-async ()=>{
-
-
-
-
-
-/* =====================================================
-   STEP 1
-
-   CHECK DESTINATIONS
-
-===================================================== */
-
-
-
-if(
-
-    currentTrip.length === 0
-
-){
-
-
-    alert(
-
-    "Please add destinations before requesting a quotation."
-
-    );
-
-
-    return;
-
-
-}
-
-
-
-
-
-
-
-
-/* =====================================================
-   STEP 2
-
-   CHECK AUTH
-
-===================================================== */
-
-
-if(
-
-typeof getCurrentUser !== "function"
-
-){
-
-
-    console.error(
-
-    "auth.js is not loaded."
-
-    );
-
-
-    alert(
-
-    "Authentication system unavailable."
-
-    );
-
-
-    return;
-
-
-}
-
-
-
-
-
-
-
-const currentUser =
-
-getCurrentUser();
-
-
-
-
-
-
-
-if(!currentUser){
-
-
-
-    window.location.href =
-
-
-    "login.html?redirect=quotation-request.html";
-
-
-
-    return;
-
-
-}
-
-
-
-
-
-
-
-
-
-/* =====================================================
-   STEP 3
-
-   TOURIST ONLY
-
-===================================================== */
-
-
-if(
-
-currentUser.accountType !== "tourist"
-
-){
-
-
-
-    alert(
-
-    "Only tourists can request guide quotations."
-
-    );
-
-
-
-    return;
-
-
-}
-
-
-
-
-
-
-
-
-
-
-/* =====================================================
-   STEP 4
-
-   CREATE FIRESTORE REQUEST
-
-
-   Collection:
-
-   lankaQuestQuotationRequests
-
-
-===================================================== */
-
-
-
-
-
-
-const quotationRequest = {
-
-
-
-    touristId:
-
-
-        currentUser.uid,
-
-
-
-    touristName:
-
-
-        currentUser.fullName || "",
-
-
-
-
-    touristEmail:
-
-
-        currentUser.email || "",
-
-
-
-
-
-    destinations:
-
-
-        currentTrip,
-
-
-
-
-
-    startDate:
-
-
-        startDate
-
-        ?
-
-        startDate.value
-
-        :
-
-        "",
-
-
-
-
-
-    endDate:
-
-
-        endDate
-
-        ?
-
-        endDate.value
-
-        :
-
-        "",
-
-
-
-
-
-    travelers:
-
-
-        travelerCount
-
-        ?
-
-        travelerCount.value
-
-        :
-
-        "",
-
-
-
-
-
-    travelStyle:
-
-
-        document.getElementById(
-
-            "travelStyle"
-
-        )?.value || "",
-
-
-
-
+    travelStyle: document.getElementById("travelStyle")?.value || "",
 
     transport:
-
-
-        document.querySelector(
-
-        'input[name="transport"]:checked'
-
-        )?.value || "",
-
-
-
-
+      document.querySelector('input[name="transport"]:checked')?.value || "",
 
     accommodation:
+      document.querySelector('input[name="accommodation"]:checked')?.value ||
+      "",
 
+    specialRequests: document.getElementById("specialRequests")?.value || "",
 
-        document.querySelector(
+    updatedAt: new Date().toISOString(),
+  };
 
-        'input[name="accommodation"]:checked'
+  /*
+       Save to localStorage
+    */
 
-        )?.value || "",
+  localStorage.setItem(
+    TRIP_PLANNER_DATA_KEY,
 
+    JSON.stringify(tripPlannerData),
+  );
 
-
-
-
-    specialRequests:
-
-
-        document.getElementById(
-
-            "specialRequests"
-
-        )?.value || "",
-
-
-
-
-
-    status:
-
-
-        "pending",
-
-
-
-
-
-    createdAt:
-
-
-        serverTimestamp(),
-
-
-
-
-
-    updatedAt:
-
-
-        serverTimestamp()
-
-
-
-};
-
-
-
-
-
-
-
-
-
-try{
-
-
-
-
-
-    const requestRef =
-
-
-
-    await addDoc(
-
-
-
-        collection(
-
-
-            db,
-
-
-            "lankaQuestQuotationRequests"
-
-
-        ),
-
-
-
-        quotationRequest
-
-
-
-    );
-
-
-
-
-
-
-
-    console.log(
-
-
-    "Quotation Request Created:",
-
-
-    requestRef.id
-
-
-
-    );
-
-
-
-
-
-
-
-
-    alert(
-
-    "Your quotation request has been sent successfully."
-
-    );
-
-
-
-
-
-
-
-
-
-    window.location.href =
-
-
-    "quotation-request.html";
-
-
-
-
-
-
-
+  console.log("Trip Planner Data Saved:", tripPlannerData);
 }
-
-catch(error){
-
-
-
-
-
-    console.error(
-
-
-    "Quotation Request Error:",
-
-
-    error
-
-
-
-    );
-
-
-
-
-
-
-    alert(
-
-    "Unable to send quotation request."
-
-    );
-
-
-
-}
-
-
-
-
-
-
-
-}
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-
 
 /* ============================================================
-   14. INITIALIZE TRIP PLANNER
-
-
+   13. REQUEST GUIDE QUOTATION
 ============================================================ */
 
+const requestQuoteButton = document.getElementById("requestQuoteButton");
 
+if (requestQuoteButton) {
+  requestQuoteButton.addEventListener("click", () => {
+    /* =================================================
+               STEP 1
+               GET SELECTED DESTINATIONS
+            ================================================= */
 
-document.addEventListener(
+    const trip = getMyTrip();
 
+    /*
+               Destination check
+            */
 
+    if (trip.length === 0) {
+      alert(
+        "Please add at least one destination before requesting a quotation.",
+      );
 
-"DOMContentLoaded",
+      return;
+    }
 
+    /* =================================================
+               STEP 2
+               SAVE TRAVEL DATA
+            ================================================= */
 
+    saveTripPlannerData();
 
-()=>{
+    /* =================================================
+               STEP 3
+               LOGIN CHECK
+            ================================================= */
 
+    /*
+               auth.js load වී තිබිය යුතුය.
 
+               getCurrentUser()
+               undefined නම්
+               clear error එකක් පෙන්වමු.
+            */
 
+    if (typeof getCurrentUser !== "function") {
+      console.error(
+        "getCurrentUser() is not available. Please load auth.js before trip-planner.js.",
+      );
 
+      alert("Authentication system is not available. Please refresh the page.");
 
+      return;
+    }
 
+    const currentUser = getCurrentUser();
 
-    renderPlannerDestinations();
+    /* =================================================
+               STEP 4
+               NOT LOGGED IN
+            ================================================= */
 
+    if (!currentUser) {
+      /*
+                   Login Page
 
+                   Login Success වූ පසු
+                   quotation-request.html
+                   වෙත යයි.
+                */
 
+      window.location.href = "login.html?redirect=quotation-request.html";
 
+      return;
+    }
 
+    /* =================================================
+               STEP 5
+               TOURIST ACCOUNT CHECK
+            ================================================= */
 
+    /*
+               Quotation Request
+               කරන්න පුළුවන් Tourist
+               account එකකට පමණි.
+            */
 
-    updateTravelDates();
+    if (currentUser.accountType !== "tourist") {
+      alert("Only Tourist accounts can request guide quotations.");
 
+      /*
+                   Guide නම්
+                   Guide Dashboard
 
+                   වෙනත් account නම්
+                   තමන්ගේ dashboard
+                */
 
+      if (typeof redirectAfterLogin === "function") {
+        redirectAfterLogin(currentUser);
+      } else {
+        window.location.href = "index.html";
+      }
 
+      return;
+    }
 
+    /* =================================================
+               STEP 6
+               OPEN QUOTATION REQUEST
+            ================================================= */
 
-    console.log(
+    /*
+               Tourist Login වී ඇත.
 
-    "LankaQuest Trip Planner Loaded"
+               දැන් quotation request
+               page එකට යයි.
+            */
 
-    );
-
-
-
-
-
-
+    window.location.href = "quotation-request.html";
+  });
 }
 
-);
-
-
-
-
-
-
-
-
 /* ============================================================
-   15. FIRESTORE ERROR HANDLING NOTE
-
-
-   REQUIRED FIRESTORE RULES:
-
-
-   lankaQuestQuotationRequests
-
-
-   Tourist:
-
-   create allowed
-
-
-   Guide:
-
-   read assigned requests only
-
-
-
+   14. INITIALIZE
 ============================================================ */
 
-/* ============================================================
-   EXPORT FUNCTIONS
-============================================================ */
+document.addEventListener("DOMContentLoaded", () => {
+  /*
+           Render selected destinations
+        */
 
-window.getMyTrip =
-    getMyTrip;
+  renderPlannerDestinations();
 
+  /*
+           Load existing planner data
+           if available
+        */
 
-window.saveTripPlannerData =
-    saveTripPlannerData;
+  const savedPlannerData = localStorage.getItem(TRIP_PLANNER_DATA_KEY);
 
+  if (savedPlannerData) {
+    try {
+      const data = JSON.parse(savedPlannerData);
 
-window.renderPlannerDestinations =
-    renderPlannerDestinations;
+      /*
+                   Start Date
+                */
+
+      if (startDate && data.startDate) {
+        startDate.value = data.startDate;
+      }
+
+      /*
+                   End Date
+                */
+
+      if (endDate && data.endDate) {
+        endDate.value = data.endDate;
+      }
+
+      /*
+                   Travelers
+                */
+
+      if (travelerCount && data.travelers) {
+        travelerCount.value = data.travelers;
+      }
+
+      /*
+                   Travel Style
+                */
+
+      const travelStyle = document.getElementById("travelStyle");
+
+      if (travelStyle && data.travelStyle) {
+        travelStyle.value = data.travelStyle;
+      }
+
+      /*
+                   Transport
+                */
+
+      if (data.transport) {
+        const transport = document.querySelector(
+          `input[name="transport"][value="${data.transport}"]`,
+        );
+
+        if (transport) {
+          transport.checked = true;
+        }
+      }
+
+      /*
+                   Accommodation
+                */
+
+      if (data.accommodation) {
+        const accommodation = document.querySelector(
+          `input[name="accommodation"][value="${data.accommodation}"]`,
+        );
+
+        if (accommodation) {
+          accommodation.checked = true;
+        }
+      }
+
+      /*
+                   Special Requests
+                */
+
+      const specialRequests = document.getElementById("specialRequests");
+
+      if (specialRequests && data.specialRequests) {
+        specialRequests.value = data.specialRequests;
+      }
+
+      /*
+                   Update Summary
+                */
+
+      updateTravelDates();
+
+      if (travelerCount && summaryTravelers) {
+        summaryTravelers.textContent = travelerCount.value
+          ? travelerCount.value
+          : "Not selected";
+      }
+
+      if (summaryTransport && data.transport) {
+        summaryTransport.textContent = data.transport;
+      }
+
+      if (summaryAccommodation && data.accommodation) {
+        summaryAccommodation.textContent = data.accommodation;
+      }
+    } catch (error) {
+      console.error(
+        "Unable to load saved Trip Planner data:",
+
+        error,
+      );
+    }
+  }
+
+  console.log("Trip Planner Loaded");
+});
