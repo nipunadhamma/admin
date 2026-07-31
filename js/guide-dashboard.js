@@ -42,6 +42,8 @@ FIREBASE IMPORTS
 
 import { db } from "./firebase-config.js";
 
+import { getCurrentUser, logoutUser, redirectAfterLogin } from "./auth.js";
+
 import {
   doc,
   getDoc,
@@ -94,39 +96,7 @@ NOT BUSINESS DATA
 ============================================================ */
 
 function getDashboardCurrentUser() {
-  /*
-       Prefer auth.js
-    */
-
-  if (typeof getCurrentUser === "function") {
-    const user = getCurrentUser();
-
-    if (user) {
-      return user;
-    }
-  }
-
-  /*
-       Fallback session
-    */
-
-  let savedUser = localStorage.getItem(GUIDE_CURRENT_USER_KEY);
-
-  if (!savedUser) {
-    savedUser = sessionStorage.getItem(GUIDE_CURRENT_USER_KEY);
-  }
-
-  if (!savedUser) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(savedUser);
-  } catch (error) {
-    console.error("Current user parse error:", error);
-
-    return null;
-  }
+  return getCurrentUser();
 }
 
 /* ============================================================
@@ -1802,7 +1772,8 @@ async function loadGuideDashboard(){
 
             typeof redirectAfterLogin === "function"
 
-        ){
+        )
+        {
 
 
             redirectAfterLogin(

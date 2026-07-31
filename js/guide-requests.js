@@ -54,6 +54,8 @@ import {
     db
 } from "./firebase-config.js";
 
+import { getCurrentUser, logoutUser } from "./auth.js";
+
 import {
     collection,
     doc,
@@ -62,6 +64,8 @@ import {
     updateDoc,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+
 
 
 /* ============================================================
@@ -261,37 +265,32 @@ function getRequestIdFromURL() {
     );
 }
 
-
 /* ============================================================
-   6. GET CURRENT USER
+   GET AUTHENTICATED FIREBASE USER
 ============================================================ */
 
 function getAuthenticatedUser() {
 
-    /*
-       auth.js creates the application session.
+    try {
 
-       We intentionally use the existing
-       getCurrentUser() function if available.
-    */
+        const user =
+            getCurrentUser();
 
-    if (
-        typeof window.getCurrentUser ===
-        "function"
-    ) {
-
-        return window.getCurrentUser();
+        return user || null;
 
     }
+    catch (error) {
 
+        console.error(
+            "Unable to get authenticated user:",
+            error
+        );
 
-    console.error(
-        "getCurrentUser() is not available."
-    );
+        return null;
 
-
-    return null;
+    }
 }
+
 
 
 /* ============================================================
