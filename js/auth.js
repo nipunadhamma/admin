@@ -1,5 +1,5 @@
-/* ============================================================
 
+/* ============================================================
    AUTHENTICATION CORE
    LankaQuest
 
@@ -13,1516 +13,1477 @@
         Firebase UID
             |
             ↓
-        Firestore Profile
-
-        lankaQuestGuides
-        lankaQuestTourists
-
+       Firestore Profile
             |
             ↓
-
-        Session Cache Only
-
-        exploreSriLankaCurrentUser
-
+       Session Cache
             |
             ↓
+          Dashboard
 
-        Dashboard
 
+   ACCOUNT TYPES:
+
+   ADMIN
+      ↓
+   admin-guides.html
+
+   TOURIST
+      ↓
+   tourist-dashboard.html
+
+   APPROVED GUIDE
+      ↓
+   guide-dashboard.html
+
+   PENDING / REJECTED / INACTIVE GUIDE
+      ↓
+   guide-verification.html
 
    IMPORTANT:
 
-   localStorage is NOT database.
-
-   It is only temporary login session storage.
+   localStorage/sessionStorage are ONLY session cache.
+   They are NOT the database.
 
 ============================================================ */
+
 
 /* ============================================================
    FIREBASE IMPORTS
 ============================================================ */
 
-import { auth, db } from "./firebase-config.js";
+import {
+    auth,
+    db
+} from "./firebase-config.js";
+
 
 import {
-  signInWithEmailAndPassword,
-  signOut,
-  GoogleAuthProvider,
-  signInWithPopup,
+    signInWithEmailAndPassword,
+    signOut,
+    GoogleAuthProvider,
+    signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
+
 import {
-  doc,
-  getDoc,
+    doc,
+    getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
+
 /* ============================================================
-   SESSION KEY ONLY
-
-   NOT DATABASE
-
+   ADMIN CONFIGURATION
 ============================================================ */
 
-const AUTH_USER_KEY = "exploreSriLankaCurrentUser";
+const ADMIN_EMAIL =
+    "kalawanesangamaji@gmail.com";
 
-const googleProvider = new GoogleAuthProvider();
+
+/* ============================================================
+   SESSION KEY
+
+   This is ONLY a login-session cache.
+============================================================ */
+
+const AUTH_USER_KEY =
+    "exploreSriLankaCurrentUser";
+
+
+/* ============================================================
+   GOOGLE PROVIDER
+============================================================ */
+
+const googleProvider =
+    new GoogleAuthProvider();
+
 
 /* ============================================================
    GET CURRENT USER
 
-   Reads current login session
-
+   Reads application session cache.
 ============================================================ */
 
 function getCurrentUser() {
-  let savedUser = localStorage.getItem(AUTH_USER_KEY);
 
-  if (!savedUser) {
-    savedUser = sessionStorage.getItem(AUTH_USER_KEY);
-  }
+    let savedUser =
+        localStorage.getItem(
+            AUTH_USER_KEY
+        );
 
-  if (!savedUser) {
-    return null;
-  }
 
-  try {
-    return JSON.parse(savedUser);
-  } catch (error) {
-    console.error(
-      "User session error:",
+    if (!savedUser) {
 
-      error,
-    );
+        savedUser =
+            sessionStorage.getItem(
+                AUTH_USER_KEY
+            );
 
-    clearUserSession();
+    }
 
-    return null;
-  }
+
+    if (!savedUser) {
+
+        return null;
+
+    }
+
+
+    try {
+
+        return JSON.parse(
+            savedUser
+        );
+
+    } catch (error) {
+
+        console.error(
+            "User session error:",
+            error
+        );
+
+
+        clearUserSession();
+
+
+        return null;
+
+    }
+
 }
+
 
 /* ============================================================
    SAVE CURRENT USER
 
-   Session cache only
-
+   Session cache only.
 ============================================================ */
 
 function saveCurrentUser(
-  user,
-
-  remember = true,
+    user,
+    remember = true
 ) {
-  clearUserSession();
 
-  const storage = remember ? localStorage : sessionStorage;
+    clearUserSession();
 
-  storage.setItem(
-    AUTH_USER_KEY,
 
-    JSON.stringify(user),
-  );
+    const storage =
+        remember
+            ? localStorage
+            : sessionStorage;
+
+
+    storage.setItem(
+        AUTH_USER_KEY,
+        JSON.stringify(user)
+    );
+
 }
+
 
 /* ============================================================
    CLEAR USER SESSION
-
 ============================================================ */
 
 function clearUserSession() {
-  localStorage.removeItem(AUTH_USER_KEY);
 
-  sessionStorage.removeItem(AUTH_USER_KEY);
+    localStorage.removeItem(
+        AUTH_USER_KEY
+    );
+
+
+    sessionStorage.removeItem(
+        AUTH_USER_KEY
+    );
+
 }
+
+
+/* ============================================================
+   CHECK ADMIN FIREBASE USER
+
+   IMPORTANT:
+
+   Firebase Authentication is the source of identity.
+
+   Admin email:
+   kalawanesangamaji@gmail.com
+
+   Email must also be verified.
+============================================================ */
+
+function isAdminFirebaseUser(
+    firebaseUser
+) {
+
+    if (!firebaseUser) {
+
+        return false;
+
+    }
+
+
+    const email =
+        String(
+            firebaseUser.email || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    return (
+        email ===
+        ADMIN_EMAIL.toLowerCase()
+        &&
+        firebaseUser.emailVerified === true
+    );
+
+}
+
+
+/* ============================================================
+   CREATE ADMIN SESSION
+
+   Admin does NOT need a Firestore profile document.
+
+   Admin identity comes from Firebase Authentication.
+============================================================ */
+
+function createAdminSession(
+    firebaseUser
+) {
+
+    return {
+
+        uid:
+            firebaseUser.uid,
+
+        id:
+            firebaseUser.uid,
+
+        email:
+            firebaseUser.email || ADMIN_EMAIL,
+
+        fullName:
+            firebaseUser.displayName ||
+            "LankaQuest Administrator",
+
+        accountType:
+            "admin",
+
+        role:
+            "admin",
+
+        emailVerified:
+            firebaseUser.emailVerified === true
+
+    };
+
+}
+
 
 /* ============================================================
    CREATE GUIDE SESSION OBJECT
 
-
    Firestore:
-
    lankaQuestGuides/{UID}
-
 ============================================================ */
 
 function createGuideSession(
-  guide,
-
-  uid,
+    guide,
+    uid
 ) {
-  return {
-    uid: uid,
 
-    id: uid,
+    return {
 
-    guideId: uid,
+        uid:
+            uid,
 
-    accountType: "guide",
+        id:
+            uid,
 
-    fullName: guide.fullName || "",
+        guideId:
+            uid,
 
-    email: guide.email || "",
+        accountType:
+            "guide",
 
-    phone: guide.phone || "",
+        fullName:
+            guide.fullName || "",
 
-    province: guide.province || "",
+        email:
+            guide.email || "",
 
-    district: guide.district || "",
+        phone:
+            guide.phone || "",
 
-    languages: Array.isArray(guide.languages) ? guide.languages : [],
+        province:
+            guide.province || "",
 
-    specializations: Array.isArray(guide.specializations)
-      ? guide.specializations
-      : [],
+        district:
+            guide.district || "",
 
-    experience: guide.experience || "",
+        languages:
+            Array.isArray(
+                guide.languages
+            )
+                ? guide.languages
+                : [],
 
-    areasCovered: guide.areasCovered || "",
+        specializations:
+            Array.isArray(
+                guide.specializations
+            )
+                ? guide.specializations
+                : [],
 
-    profileImage: guide.profileImage || "",
+        experience:
+            guide.experience || "",
 
-    verificationStatus: guide.verificationStatus || "pending",
+        areasCovered:
+            guide.areasCovered || "",
 
-    status: guide.status || "pending",
+        profileImage:
+            guide.profileImage || "",
 
-    profileStatus: guide.profileStatus || "inactive",
+        verificationStatus:
+            guide.verificationStatus ||
+            "pending",
 
-    isActive: guide.isActive === true,
+        status:
+            guide.status ||
+            "pending",
 
-    rating: guide.rating || 0,
+        profileStatus:
+            guide.profileStatus ||
+            "inactive",
 
-    reviewCount: guide.reviewCount || 0,
-  };
+        isActive:
+            guide.isActive === true,
+
+        rating:
+            guide.rating || 0,
+
+        reviewCount:
+            guide.reviewCount || 0
+
+    };
+
 }
+
 
 /* ============================================================
    CREATE TOURIST SESSION OBJECT
 
-
    Firestore:
-
    lankaQuestTourists/{UID}
-
 ============================================================ */
 
 function createTouristSession(
-  tourist,
-
-  uid,
+    tourist,
+    uid
 ) {
-  return {
-    uid: uid,
 
-    id: uid,
+    return {
 
-    accountType: "tourist",
+        uid:
+            uid,
 
-    fullName: tourist.fullName || "",
+        id:
+            uid,
 
-    email: tourist.email || "",
+        accountType:
+            "tourist",
 
-    phone: tourist.phone || "",
+        fullName:
+            tourist.fullName || "",
 
-    country: tourist.country || "",
-  };
+        email:
+            tourist.email || "",
+
+        phone:
+            tourist.phone || "",
+
+        country:
+            tourist.country || ""
+
+    };
+
 }
+
 
 /* ============================================================
    GOOGLE LOGIN
 
-   Firebase Authentication
-          |
-          ↓
-   Google Account
-          |
-          ↓
-   Firebase UID
-          |
-          ↓
-   Firestore Profile
+   IMPORTANT FIX:
 
-   lankaQuestTourists
-   lankaQuestGuides
+   Admin Google account is handled BEFORE checking
+   lankaQuestGuides or lankaQuestTourists.
 
+   Therefore the Admin does NOT need a Firestore profile.
 ============================================================ */
 
+async function googleLogin() {
 
-async function googleLogin(){
-
-
-    try{
-
-
-        const provider =
-            new GoogleAuthProvider();
-
-
+    try {
 
         const result =
             await signInWithPopup(
-
                 auth,
-
-                provider
-
+                googleProvider
             );
-
 
 
         const firebaseUser =
             result.user;
 
 
-
-        const uid =
-            firebaseUser.uid;
-
-
-
         console.log(
             "Google UID:",
-            uid
+            firebaseUser.uid
         );
 
 
+        console.log(
+            "Google Email:",
+            firebaseUser.email
+        );
 
-        /*
-            CHECK GUIDE PROFILE
 
-            lankaQuestGuides/{UID}
+        /* ====================================================
+           ADMIN CHECK
+        ==================================================== */
 
-        */
+        if (
+            isAdminFirebaseUser(
+                firebaseUser
+            )
+        ) {
 
+            const adminUser =
+                createAdminSession(
+                    firebaseUser
+                );
+
+
+            saveCurrentUser(
+                adminUser,
+                true
+            );
+
+
+            console.log(
+                "Admin Google login successful."
+            );
+
+
+            return {
+
+                success:
+                    true,
+
+                user:
+                    adminUser
+
+            };
+
+        }
+
+
+        /* ====================================================
+           GUIDE PROFILE CHECK
+        ==================================================== */
 
         const guideRef =
             doc(
-
                 db,
-
                 "lankaQuestGuides",
-
-                uid
-
+                firebaseUser.uid
             );
-
 
 
         const guideSnap =
             await getDoc(
-
                 guideRef
-
             );
 
 
-
-        if(
+        if (
             guideSnap.exists()
-        ){
-
+        ) {
 
             const guideData =
                 guideSnap.data();
 
 
-
             const guideUser =
                 createGuideSession(
-
                     guideData,
-
-                    uid
-
+                    firebaseUser.uid
                 );
 
 
-
             saveCurrentUser(
-
                 guideUser,
-
                 true
-
             );
-
 
 
             return {
 
-                success:true,
+                success:
+                    true,
 
-                user:guideUser
+                user:
+                    guideUser
 
             };
-
 
         }
 
 
-
-
-
-        /*
-            CHECK TOURIST PROFILE
-
-            lankaQuestTourists/{UID}
-
-        */
-
+        /* ====================================================
+           TOURIST PROFILE CHECK
+        ==================================================== */
 
         const touristRef =
             doc(
-
                 db,
-
                 "lankaQuestTourists",
-
-                uid
-
+                firebaseUser.uid
             );
-
 
 
         const touristSnap =
             await getDoc(
-
                 touristRef
-
             );
 
 
-
-        if(
+        if (
             touristSnap.exists()
-        ){
-
+        ) {
 
             const touristData =
                 touristSnap.data();
 
 
-
             const touristUser =
                 createTouristSession(
-
                     touristData,
-
-                    uid
-
+                    firebaseUser.uid
                 );
 
 
-
             saveCurrentUser(
-
                 touristUser,
-
                 true
-
             );
-
 
 
             return {
 
+                success:
+                    true,
 
-                success:true,
-
-
-                user:touristUser
-
+                user:
+                    touristUser
 
             };
-
 
         }
 
 
+        /* ====================================================
+           PROFILE NOT FOUND
+        ==================================================== */
 
-
-
-        /*
-            Firebase account exists
-
-            But Firestore profile missing
-
-        */
-
-
-        await signOut(auth);
-
-
-
-        return {
-
-
-            success:false,
-
-
-            message:
-
-            "Google account registered but profile not found. Please complete registration."
-
-
-        };
-
-
-
-    }
-
-
-
-    catch(error){
-
-
-        console.error(
-
-            "Google Login Error:",
-
-            error
-
+        await signOut(
+            auth
         );
 
 
+        clearUserSession();
+
 
         return {
 
-
-            success:false,
-
+            success:
+                false,
 
             message:
-
-            error.message || 
-            "Google login failed."
-
+                "Google account is authenticated, but no LankaQuest profile was found. Please complete registration."
 
         };
 
 
-    }
+    } catch (error) {
 
-
-}
-/* ============================================================
-   FIREBASE LOGIN
-
-   FLOW:
-
-   Email + Password
-
-        ↓
-
-   Firebase Authentication
-
-        ↓
-
-   Firebase UID
-
-        ↓
-
-   Firestore Profile
-
-        ↓
-
-   Create Session
-
-============================================================ */
-
-
-async function firebaseLogin(
-
-    email,
-
-    password,
-
-    remember = true ){
-
-
-    try{
+        console.error(
+            "Google Login Error:",
+            error
+        );
 
 
         /*
-            Firebase Authentication Login
+           User closed the Google popup.
         */
 
+        if (
+            error.code ===
+            "auth/popup-closed-by-user"
+        ) {
+
+            return {
+
+                success:
+                    false,
+
+                message:
+                    "Google sign-in was cancelled."
+
+            };
+
+        }
+
+
+        /*
+           Popup blocked.
+        */
+
+        if (
+            error.code ===
+            "auth/popup-blocked"
+        ) {
+
+            return {
+
+                success:
+                    false,
+
+                message:
+                    "Google sign-in popup was blocked by the browser."
+
+            };
+
+        }
+
+
+        /*
+           Unauthorized domain.
+        */
+
+        if (
+            error.code ===
+            "auth/unauthorized-domain"
+        ) {
+
+            return {
+
+                success:
+                    false,
+
+                message:
+                    "This website domain is not authorized for Google sign-in in Firebase Authentication."
+
+            };
+
+        }
+
+
+        return {
+
+            success:
+                false,
+
+            message:
+                error.message ||
+                "Google login failed."
+
+        };
+
+    }
+
+}
+
+
+/* ============================================================
+   FIREBASE EMAIL + PASSWORD LOGIN
+
+   IMPORTANT FIX:
+
+   Admin account is checked immediately after Firebase Auth.
+
+   Admin does NOT need a Firestore profile.
+============================================================ */
+
+async function firebaseLogin(
+    email,
+    password,
+    remember = true
+) {
+
+    try {
+
+        const normalizedEmail =
+            String(
+                email || ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        /* ====================================================
+           FIREBASE AUTHENTICATION
+        ==================================================== */
 
         const userCredential =
-
             await signInWithEmailAndPassword(
-
                 auth,
-
-                email,
-
+                normalizedEmail,
                 password
-
             );
-
 
 
         const firebaseUser =
-
             userCredential.user;
 
 
-
         const uid =
-
             firebaseUser.uid;
 
 
+        console.log(
+            "Firebase UID:",
+            uid
+        );
 
 
         console.log(
-
-            "Firebase UID:",
-
-            uid
-
+            "Firebase Email:",
+            firebaseUser.email
         );
 
 
-
-
-
         /* ====================================================
-           CHECK GUIDE PROFILE
-
-
-           Firestore:
-
-           lankaQuestGuides
-
-           Document:
-
-           UID
-
+           ADMIN CHECK
         ==================================================== */
 
+        if (
+            isAdminFirebaseUser(
+                firebaseUser
+            )
+        ) {
 
-        const guideRef =
-
-            doc(
-
-                db,
-
-                "lankaQuestGuides",
-
-                uid
-
-            );
-
-
-
-
-        const guideSnap =
-
-            await getDoc(
-
-                guideRef
-
-            );
-
-
-
-
-
-        if(
-
-            guideSnap.exists()
-
-        ){
-
-
-
-            const guideData =
-
-                guideSnap.data();
-
-
-
-
-            const guideUser =
-
-                createGuideSession(
-
-                    guideData,
-
-                    uid
-
+            const adminUser =
+                createAdminSession(
+                    firebaseUser
                 );
 
 
-
-
-
             saveCurrentUser(
-
-                guideUser,
-
+                adminUser,
                 remember
-
             );
 
 
-
+            console.log(
+                "Admin email/password login successful."
+            );
 
 
             return {
 
+                success:
+                    true,
 
-                success:true,
-
-
-                user:guideUser
-
+                user:
+                    adminUser
 
             };
 
-
-
         }
-
-
-
-
-
-        /* ====================================================
-           CHECK TOURIST PROFILE
-
-
-           Firestore:
-
-           lankaQuestTourists
-
-           Document:
-
-           UID
-
-        ==================================================== */
-
-
-
-        const touristRef =
-
-            doc(
-
-                db,
-
-                "lankaQuestTourists",
-
-                uid
-
-            );
-
-
-
-
-
-        const touristSnap =
-
-            await getDoc(
-
-                touristRef
-
-            );
-
-
-
-
-
-
-        if(
-
-            touristSnap.exists()
-
-        ){
-
-
-
-            const touristData =
-
-                touristSnap.data();
-
-
-
-
-
-            const touristUser =
-
-                createTouristSession(
-
-                    touristData,
-
-                    uid
-
-                );
-
-
-
-
-
-            saveCurrentUser(
-
-                touristUser,
-
-                remember
-
-            );
-
-
-
-
-
-            return {
-
-
-                success:true,
-
-
-                user:touristUser
-
-
-            };
-
-
-
-        }
-
-
-
-
-
 
 
         /*
-            Firebase account exists
+           If the email belongs to the Admin address but
+           Firebase says the email is not verified, do not
+           create an Admin session.
 
-            But Firestore profile missing
-
+           This matches the Firestore Rules requirement.
         */
 
+        if (
+            normalizedEmail ===
+            ADMIN_EMAIL.toLowerCase()
+            &&
+            firebaseUser.emailVerified !== true
+        ) {
 
+            await signOut(
+                auth
+            );
+
+
+            clearUserSession();
+
+
+            return {
+
+                success:
+                    false,
+
+                message:
+                    "Admin email must be verified before administrator access is allowed."
+
+            };
+
+        }
+
+
+        /* ====================================================
+           GUIDE PROFILE CHECK
+        ==================================================== */
+
+        const guideRef =
+            doc(
+                db,
+                "lankaQuestGuides",
+                uid
+            );
+
+
+        const guideSnap =
+            await getDoc(
+                guideRef
+            );
+
+
+        if (
+            guideSnap.exists()
+        ) {
+
+            const guideData =
+                guideSnap.data();
+
+
+            const guideUser =
+                createGuideSession(
+                    guideData,
+                    uid
+                );
+
+
+            saveCurrentUser(
+                guideUser,
+                remember
+            );
+
+
+            return {
+
+                success:
+                    true,
+
+                user:
+                    guideUser
+
+            };
+
+        }
+
+
+        /* ====================================================
+           TOURIST PROFILE CHECK
+        ==================================================== */
+
+        const touristRef =
+            doc(
+                db,
+                "lankaQuestTourists",
+                uid
+            );
+
+
+        const touristSnap =
+            await getDoc(
+                touristRef
+            );
+
+
+        if (
+            touristSnap.exists()
+        ) {
+
+            const touristData =
+                touristSnap.data();
+
+
+            const touristUser =
+                createTouristSession(
+                    touristData,
+                    uid
+                );
+
+
+            saveCurrentUser(
+                touristUser,
+                remember
+            );
+
+
+            return {
+
+                success:
+                    true,
+
+                user:
+                    touristUser
+
+            };
+
+        }
+
+
+        /* ====================================================
+           FIREBASE ACCOUNT EXISTS BUT PROFILE DOES NOT
+        ==================================================== */
 
         await signOut(
-
             auth
-
         );
 
 
-
+        clearUserSession();
 
 
         return {
 
-
-            success:false,
-
+            success:
+                false,
 
             message:
-
-            "Account profile not found. Please contact support."
-
-
+                "Account profile not found. Please contact support."
 
         };
 
 
-
-    }
-
-
-
-    catch(error){
-
-
+    } catch (error) {
 
         console.error(
-
             "Firebase Login Error:",
-
             error
-
         );
-
-
 
 
         let message =
-
             "Login failed. Please try again.";
 
 
-
-
-
-
-
-        if(
-
+        if (
             error.code ===
-
             "auth/user-not-found"
-
-        ){
-
+        ) {
 
             message =
-
-            "No account found with this email.";
-
+                "No account found with this email.";
 
         }
 
 
-
-
-
-        else if(
-
+        else if (
             error.code ===
-
             "auth/wrong-password"
-
-        ){
-
+        ) {
 
             message =
-
-            "Incorrect password.";
-
+                "Incorrect password.";
 
         }
 
 
-
-
-
-
-        else if(
-
+        else if (
             error.code ===
-
             "auth/invalid-credential"
-
-        ){
-
+        ) {
 
             message =
-
-            "Invalid email or password.";
-
+                "Invalid email or password.";
 
         }
 
 
-
-
-
-
-        else if(
-
+        else if (
             error.code ===
-
             "auth/invalid-email"
-
-        ){
-
+        ) {
 
             message =
-
-            "Invalid email address.";
-
+                "Invalid email address.";
 
         }
 
 
+        else if (
+            error.code ===
+            "auth/user-disabled"
+        ) {
+
+            message =
+                "This account has been disabled.";
+
+        }
 
 
+        else if (
+            error.code ===
+            "auth/too-many-requests"
+        ) {
+
+            message =
+                "Too many login attempts. Please try again later.";
+
+        }
+
+
+        else if (
+            error.code ===
+            "auth/network-request-failed"
+        ) {
+
+            message =
+                "Network error. Please check your internet connection.";
+
+        }
 
 
         return {
 
+            success:
+                false,
 
-            success:false,
-
-
-            message:message
-
-
+            message:
+                message
 
         };
 
-
-
     }
 
-
 }
-
-
-
-
-
-
 
 
 /* ============================================================
    LOGIN USER WRAPPER
 
    Compatible with login.js
-
 ============================================================ */
 
-
 async function loginUser(
-
     email,
-
     password,
-
     remember = true
-
-){
-
+) {
 
     return await firebaseLogin(
-
         email,
-
         password,
-
         remember
-
     );
 
-
 }
-
-
-
-
-
-
 
 
 /* ============================================================
    LOGOUT USER
 
-
-   Firebase Auth Logout
-
-   + Clear Session
-
+   Firebase Auth logout
+   +
+   Clear application session
 ============================================================ */
 
+async function logoutUser() {
 
-async function logoutUser(){
-
-
-
-    try{
-
-
+    try {
 
         await signOut(
-
             auth
-
         );
-
-
-
 
 
         clearUserSession();
 
 
-
-
-
         window.location.href =
-
             "index.html";
 
 
-
-
-    }
-
-
-    catch(error){
-
-
+    } catch (error) {
 
         console.error(
-
             "Logout Error:",
-
             error
-
         );
-
-
 
     }
 
-
 }
+
+
 /* ============================================================
    REQUIRE ACCOUNT TYPE
 
-
-   Used in:
+   Used by:
 
    tourist-dashboard.js
-
    guide-dashboard.js
-
-
 ============================================================ */
 
-
 function requireAccountType(
-
     requiredType
-
-){
-
+) {
 
     const user =
-
         getCurrentUser();
 
 
-
-
-
-    if(!user){
-
+    if (!user) {
 
         window.location.href =
-
             "login.html";
 
 
         return null;
 
-
     }
 
 
-
-
-
-
-    if(
-
-        user.accountType !== requiredType
-
-    ){
-
-
+    if (
+        user.accountType !==
+        requiredType
+    ) {
 
         alert(
-
             "Access denied."
-
         );
-
 
 
         redirectAfterLogin(
-
             user
-
         );
-
 
 
         return null;
 
-
-
     }
-
-
-
-
 
 
     return user;
 
-
 }
 
 
+/* ============================================================
+   REQUIRE ADMIN
+
+   Use this on future Admin pages if required.
+
+   IMPORTANT:
+
+   This is only a client-side navigation check.
+   Firestore Security Rules remain the real protection.
+============================================================ */
+
+function requireAdmin() {
+
+    const user =
+        getCurrentUser();
 
 
+    if (!user) {
+
+        window.location.href =
+            "login.html";
 
 
+        return null;
 
+    }
+
+
+    if (
+        user.accountType !==
+        "admin"
+        ||
+        user.email.toLowerCase() !==
+        ADMIN_EMAIL.toLowerCase()
+    ) {
+
+        alert(
+            "Administrator access denied."
+        );
+
+
+        redirectAfterLogin(
+            user
+        );
+
+
+        return null;
+
+    }
+
+
+    return user;
+
+}
 
 
 /* ============================================================
    GUIDE DASHBOARD ACCESS CHECK
 
-
-   Only approved active guides
-
-
+   Only approved active guides.
 ============================================================ */
 
-
 function canAccessGuideDashboard(
-
     user
+) {
 
-){
-
-
-    if(!user){
-
+    if (!user) {
 
         return false;
-
 
     }
 
 
-
-
-
-    if(
-
-        user.accountType !== "guide"
-
-    ){
-
+    if (
+        user.accountType !==
+        "guide"
+    ) {
 
         return false;
 
-
     }
-
-
-
 
 
     return (
 
-
-        user.verificationStatus === "approved"
-
-
-        &&
-
-
-        user.status === "approved"
-
+        user.verificationStatus ===
+            "approved"
 
         &&
 
-
-        user.profileStatus === "active"
-
+        user.status ===
+            "approved"
 
         &&
 
+        user.profileStatus ===
+            "active"
+
+        &&
 
         user.isActive === true
 
-
     );
 
-
-
 }
-
-
-
-
-
-
-
 
 
 /* ============================================================
    REDIRECT AFTER LOGIN
 
+   Admin
+       ↓
+   admin-guides.html
 
    Tourist
-        ↓
+       ↓
    tourist-dashboard.html
 
-
    Approved Guide
-        ↓
+       ↓
    guide-dashboard.html
 
-
-   Pending Guide
-        ↓
+   Pending / Rejected / Inactive Guide
+       ↓
    guide-verification.html
-
-
 ============================================================ */
 
-
 function redirectAfterLogin(
-
     user
+) {
 
-){
-
-
-
-    if(!user){
-
+    if (!user) {
 
         window.location.href =
-
             "login.html";
 
 
         return;
 
+    }
+
+
+    /* ========================================================
+       ADMIN
+    ======================================================== */
+
+    if (
+        user.accountType ===
+        "admin"
+        &&
+        String(
+            user.email || ""
+        )
+        .toLowerCase() ===
+        ADMIN_EMAIL.toLowerCase()
+    ) {
+
+        window.location.href =
+            "admin-guides.html";
+
+
+        return;
 
     }
 
 
+    /* ========================================================
+       TOURIST
+    ======================================================== */
 
-
-
-
-
-    /*
-        TOURIST
-    */
-
-
-    if(
-
-        user.accountType === "tourist"
-
-    ){
-
-
+    if (
+        user.accountType ===
+        "tourist"
+    ) {
 
         window.location.href =
-
             "tourist-dashboard.html";
 
 
         return;
 
-
     }
 
 
+    /* ========================================================
+       GUIDE
+    ======================================================== */
 
+    if (
+        user.accountType ===
+        "guide"
+    ) {
 
-
-
-
-
-
-    /*
-        GUIDE
-    */
-
-
-    if(
-
-        user.accountType === "guide"
-
-    ){
-
-
-
-        if(
-
+        if (
             canAccessGuideDashboard(
-
                 user
-
             )
-
-        ){
-
-
+        ) {
 
             window.location.href =
-
                 "guide-dashboard.html";
 
 
             return;
 
-
         }
 
 
-
-
-
-
         /*
-            Pending
-
-            Rejected
-
-            Inactive
-
+           Pending
+           Rejected
+           Inactive
         */
 
-
-
         window.location.href =
-
             "guide-verification.html";
 
 
         return;
 
-
-
     }
 
 
-
-
-
-
-
-
-    /*
-        UNKNOWN ACCOUNT
-
-    */
-
+    /* ========================================================
+       UNKNOWN ACCOUNT
+    ======================================================== */
 
     window.location.href =
-
         "index.html";
 
-
 }
-
-
-
-
-
-
-
 
 
 /* ============================================================
    CHECK LOGIN STATUS
 
-
+   Application session cache.
 ============================================================ */
 
-
-function isLoggedIn(){
-
+function isLoggedIn() {
 
     return (
-
-        getCurrentUser() !== null
-
+        getCurrentUser() !==
+        null
     );
 
-
 }
-
-
-
-
-
-
-
 
 
 /* ============================================================
    RESTORE USER SESSION
 
-
+   This does not authenticate a user by itself.
+   Firebase Authentication remains the real identity system.
 ============================================================ */
 
-
-function restoreUserSession(){
-
-
+function restoreUserSession() {
 
     const user =
-
         getCurrentUser();
 
 
-
-
-
-
-    if(user){
-
-
+    if (user) {
 
         console.log(
-
             "Active User:",
-
             user
-
         );
 
-
-
     }
-
-
 
 }
 
 
-
-
-
-
-
-
-
 /* ============================================================
    INITIALIZE AUTH
-
-
 ============================================================ */
-
 
 restoreUserSession();
 
 
-
-
-
-
-
-
 /* ============================================================
    EXPORTS
-
-
 ============================================================ */
 
-
 export {
-  getCurrentUser,
-  loginUser,
-  logoutUser,
-  requireAccountType,
-  redirectAfterLogin,
-  isLoggedIn,
-  googleLogin,
+
+    getCurrentUser,
+
+    loginUser,
+
+    logoutUser,
+
+    requireAccountType,
+
+    requireAdmin,
+
+    redirectAfterLogin,
+
+    isLoggedIn,
+
+    googleLogin
+
 };
+

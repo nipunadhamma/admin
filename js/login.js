@@ -158,57 +158,249 @@ if (loginForm) {
   );
 }
 
+
 /* ============================================================
    5. GOOGLE LOGIN
 ============================================================ */
 
+let googleLoginInProgress = false;
+
+
 if (googleLoginButton) {
+
   googleLoginButton.addEventListener(
     "click",
 
     async () => {
-      try {
-        showLoginMessage(
-          "Connecting Google account...",
 
-          "success",
+      /*
+        Prevent multiple Google popup requests.
+
+        This is important because Firebase
+        signInWithPopup() allows only one active
+        popup operation at a time.
+      */
+
+      if (googleLoginInProgress) {
+
+        console.log(
+          "Google login already in progress."
         );
 
-        const result = await googleLogin();
+        return;
+      }
 
-        if (!result || !result.success) {
+
+      googleLoginInProgress = true;
+
+
+      /*
+        Prevent repeated clicks while popup is open.
+      */
+
+      googleLoginButton.disabled = true;
+
+
+      const originalButtonText =
+        googleLoginButton.textContent;
+
+
+      googleLoginButton.textContent =
+        "Connecting to Google...";
+
+
+      try {
+
+        showLoginMessage(
+          "Connecting Google account...",
+          "success"
+        );
+
+
+        /*
+          Start Firebase Google authentication.
+        */
+
+        const result =
+          await googleLogin();
+
+
+        /*
+          Authentication failed.
+        */
+
+        if (
+          !result ||
+          !result.success
+        ) {
+
           showLoginMessage(
-            result.message || "Google login failed.",
-
-            "error",
+            result?.message ||
+            "Google login failed.",
+            "error"
           );
+
 
           return;
         }
 
+
+        /*
+          Authentication successful.
+        */
+
         showLoginMessage(
           "Google login successful. Redirecting...",
-
-          "success",
+          "success"
         );
 
-        redirectAfterLogin(result.user);
+
+        /*
+          Redirect based on account type.
+
+          Admin
+              ↓
+          admin-guides.html
+
+          Tourist
+              ↓
+          tourist-dashboard.html
+
+          Guide
+              ↓
+          guide-dashboard.html
+          or guide-verification.html
+        */
+
+        redirectAfterLogin(
+          result.user
+        );
+
+
       } catch (error) {
+
         console.error(
           "Google Login Error:",
-
-          error,
+          error
         );
+
+
+        /*
+          Firebase may return this if another
+          popup request was started.
+
+          Do not show a confusing error to the user.
+        */
+
+        if (
+          error.code ===
+          "auth/cancelled-popup-request"
+        ) {
+
+          showLoginMessage(
+            "Google sign-in is already in progress. Please wait.",
+            "error"
+          );
+
+
+          return;
+        }
+
+
+        /*
+          User manually closed the popup.
+        */
+
+        if (
+          error.code ===
+          "auth/popup-closed-by-user"
+        ) {
+
+          showLoginMessage(
+            "Google sign-in was cancelled.",
+            "error"
+          );
+
+
+          return;
+        }
+
+
+        /*
+          Browser blocked the popup.
+        */
+
+        if (
+          error.code ===
+          "auth/popup-blocked"
+        ) {
+
+          showLoginMessage(
+            "Google sign-in popup was blocked by the browser. Please allow popups for this site.",
+            "error"
+          );
+
+
+          return;
+        }
+
+
+        /*
+          Firebase domain configuration error.
+        */
+
+        if (
+          error.code ===
+          "auth/unauthorized-domain"
+        ) {
+
+          showLoginMessage(
+            "This website domain is not authorized for Google sign-in in Firebase.",
+            "error"
+          );
+
+
+          return;
+        }
+
+
+        /*
+          General error.
+        */
 
         showLoginMessage(
+          error.message ||
           "Google login failed.",
-
-          "error",
+          "error"
         );
+
+      } finally {
+
+        /*
+          Always unlock the button after
+          the Google operation finishes.
+
+          If redirect happens, this code may run
+          immediately before navigation, which is fine.
+        */
+
+        googleLoginInProgress = false;
+
+
+        googleLoginButton.disabled =
+          false;
+
+
+        googleLoginButton.textContent =
+          originalButtonText;
+
       }
-    },
+
+    }
   );
+
 }
+
 
 /* ============================================================
    6. FORGOT PASSWORD

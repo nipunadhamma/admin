@@ -1,243 +1,171 @@
-<!DOCTYPE html>
 
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
 
-    
     <meta charset="UTF-8">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>
-        Create Account | LankaQuest
-    </title>
+    <meta name="description" content="Create your LankaQuest Tourist or Guide account.">
+
+    <title>LankaQuest - Register</title>
 
 
-    <!-- ============================================================
-     MAIN SITE CSS
-============================================================= -->
+    <!-- =========================================================
+       STYLES
+  ========================================================== -->
 
     <link rel="stylesheet" href="css/style.css">
 
-
-    <!-- ============================================================
-     REGISTRATION PAGE CSS
-============================================================= -->
-
     <link rel="stylesheet" href="css/register.css">
-    
 
 </head>
 
+
 <body>
 
-    
-    <!-- ============================================================
-     SITE HEADER
-============================================================= -->
+
+    <!-- =========================================================
+       HEADER
+  ========================================================== -->
 
     <header class="site-header">
 
+        <div class="container header-container">
 
-        <!-- BRAND -->
-
-        <div class="site-brand">
-
-            <a href="index.html" class="planner-brand-link">
-
-                <div class="brand-icon">
-                    🇱🇰
-                </div>
-
-                <div class="brand-text">
-
-                    <h1>
-                        LankaQuest
-                    </h1>
-
-                    <p>
-                        Discover the Wonder of Sri Lanka
-                    </p>
-
-                </div>
-
-            </a>
-
-        </div>
-
-
-        <!-- NAVIGATION -->
-
-        <nav class="main-navigation" aria-label="Main Navigation">
-
-            <a href="index.html" class="nav-link">
-                Home
+            <a href="index.html" class="logo">
+                LankaQuest
             </a>
 
 
-            <a href="index.html#map" class="nav-link">
-                Explore Map
-            </a>
+            <nav class="main-nav">
 
+                <a href="index.html">
+                    Home
+                </a>
 
-            <a href="trip-planner.html" class="nav-link">
-                My Trip
-            </a>
+                <a href="attractions.html">
+                    Attractions
+                </a>
 
-        </nav>
+                <a href="find-guides.html">
+                    Find Guides
+                </a>
 
+                <a href="login.html">
+                    Login
+                </a>
 
-        <!-- HEADER ACTION -->
-
-        <div class="header-actions">
-
-            <a href="login.html" class="back-to-map-btn">
-
-                Login
-
-            </a>
+            </nav>
 
         </div>
 
     </header>
 
 
+    <!-- =========================================================
+       REGISTER PAGE
+  ========================================================== -->
 
-    <!-- ============================================================
-     REGISTRATION PAGE
-============================================================= -->
-
-    <main class="register-page">
-
-
-        <!-- ========================================================
-         REGISTRATION CARD
-    ========================================================= -->
-
-        <section class="register-card">
+    <main class="auth-page">
 
 
-            <!-- ====================================================
-             PAGE HEADER
+        <div class="auth-container">
+
+
+            <!-- =====================================================
+           REGISTER CARD
+      ====================================================== -->
+
+            <section class="auth-card">
+
+
+                <!-- ===================================================
+             TITLE
         ==================================================== -->
 
-            <div class="register-header">
+                <div class="auth-header">
 
-                <div class="register-icon">
-                    🇱🇰
-                </div>
+                    <h1>
+                        Create Your Account
+                    </h1>
 
-                <h2>
-                    Create Your Account
-                </h2>
-
-                <p>
-                    Join Explore Sri Lanka and start planning
-                    your perfect journey.
-                </p>
-
-            </div>
-
-
-
-            <!-- ====================================================
-             ACCOUNT TYPE SELECTION
-        ==================================================== -->
-
-            <div class="account-type-section">
-
-                <h3>
-                    Choose Account Type
-                </h3>
-
-                <p class="account-type-description">
-                    Select how you want to use Explore Sri Lanka.
-                </p>
-
-
-                <div class="account-type-options">
-
-
-                    <!-- TOURIST -->
-
-                    <label class="account-type-card">
-
-                        <input type="radio" name="accountType" value="tourist" checked>
-
-                        <span class="account-type-icon">
-                            🧳
-                        </span>
-
-                        <span class="account-type-content">
-
-                            <strong>
-                                Tourist
-                            </strong>
-
-                            <small>
-                                Discover destinations,
-                                plan trips and request
-                                guide quotations.
-                            </small>
-
-                        </span>
-
-                    </label>
-
-
-
-                    <!-- GUIDE -->
-
-                    <label class="account-type-card">
-
-                        <input type="radio" name="accountType" value="guide">
-
-                        <span class="account-type-icon">
-                            🧑‍💼
-                        </span>
-
-                        <span class="account-type-content">
-
-                            <strong>
-                                Tour Guide
-                            </strong>
-
-                            <small>
-                                Register as a guide,
-                                receive trip requests
-                                and send quotations.
-                            </small>
-
-                        </span>
-
-                    </label>
+                    <p>
+                        Join LankaQuest and start planning your
+                        Sri Lankan journey.
+                    </p>
 
                 </div>
 
-            </div>
+
+                <!-- ===================================================
+             REGISTRATION MESSAGE
+        ==================================================== -->
+
+                <div id="registrationMessage" class="auth-message" style="display: none;"></div>
 
 
-
-            <!-- ====================================================
+                <!-- ===================================================
              REGISTRATION FORM
-        ========================================================= -->
+        ==================================================== -->
 
-            <form id="registrationForm" class="registration-form">
-
-
-                <!-- =================================================
-                 COMMON ACCOUNT INFORMATION
-            ================================================== -->
-
-                <div class="form-section">
-
-                    <h3>
-                        Account Information
-                    </h3>
+                <form id="registrationForm" novalidate>
 
 
-                    <!-- Full Name -->
+                    <!-- =================================================
+               ACCOUNT TYPE
+          ================================================== -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Account Type
+                        </label>
+
+
+                        <div class="account-type-options">
+
+
+                            <!-- =============================================
+                   TOURIST
+              ============================================== -->
+
+                            <label class="account-type-option">
+
+                                <input type="radio" name="accountType" value="tourist" checked>
+
+                                <span>
+                                    🧳 Tourist
+                                </span>
+
+                            </label>
+
+
+                            <!-- =============================================
+                   GUIDE
+              ============================================== -->
+
+                            <label class="account-type-option">
+
+                                <input type="radio" name="accountType" value="guide">
+
+                                <span>
+                                    🧑‍💼 Tour Guide
+                                </span>
+
+                            </label>
+
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+               COMMON INFORMATION
+          ================================================== -->
 
                     <div class="form-group">
 
@@ -245,12 +173,15 @@
                             Full Name
                         </label>
 
-                        <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+                        <input type="text" id="fullName" name="fullName" placeholder="Enter your full name"
+                            autocomplete="name" required>
 
                     </div>
 
 
-                    <!-- Email -->
+                    <!-- =================================================
+               EMAIL
+          ================================================== -->
 
                     <div class="form-group">
 
@@ -258,12 +189,15 @@
                             Email Address
                         </label>
 
-                        <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                        <input type="email" id="email" name="email" placeholder="Enter your email address"
+                            autocomplete="email" required>
 
                     </div>
 
 
-                    <!-- Password -->
+                    <!-- =================================================
+               PASSWORD
+          ================================================== -->
 
                     <div class="form-group">
 
@@ -272,12 +206,14 @@
                         </label>
 
                         <input type="password" id="password" name="password" placeholder="Create a password"
-                            minlength="6" required>
+                            autocomplete="new-password" minlength="6" required>
 
                     </div>
 
 
-                    <!-- Confirm Password -->
+                    <!-- =================================================
+               CONFIRM PASSWORD
+          ================================================== -->
 
                     <div class="form-group">
 
@@ -286,277 +222,283 @@
                         </label>
 
                         <input type="password" id="confirmPassword" name="confirmPassword"
-                            placeholder="Confirm your password" minlength="6" required>
+                            placeholder="Confirm your password" autocomplete="new-password" minlength="6" required>
 
                     </div>
+
+
+                    <!-- =================================================
+               TOURIST FIELDS
+          ================================================== -->
+
+                    <div id="touristFields">
+
+
+                        <div class="form-group">
+
+                            <label for="country">
+                                Country
+                            </label>
+
+                            <input type="text" id="country" name="country" placeholder="Enter your country"
+                                autocomplete="country-name">
+
+                        </div>
+
+
+                    </div>
+
+
+                    <!-- =================================================
+               GUIDE FIELDS
+          ================================================= -->
+
+                    <div id="guideFields" class="hidden">
+
+
+                        <!-- ===============================================
+                 PHONE
+            ================================================ -->
+
+                        <div class="form-group">
+
+                            <label for="phone">
+                                Phone Number
+                            </label>
+
+                            <input type="tel" id="phone" name="phone" placeholder="Enter your phone number"
+                                autocomplete="tel">
+
+                        </div>
+
+
+                        <!-- ===============================================
+                 DISTRICT
+            ================================================ -->
+
+                        <div class="form-group">
+
+                            <label for="guideDistrict">
+                                District
+                            </label>
+
+                            <select id="guideDistrict" name="guideDistrict">
+
+                                <option value="">
+                                    Select your district
+                                </option>
+
+                                <option value="Ampara">
+                                    Ampara
+                                </option>
+
+                                <option value="Anuradhapura">
+                                    Anuradhapura
+                                </option>
+
+                                <option value="Badulla">
+                                    Badulla
+                                </option>
+
+                                <option value="Batticaloa">
+                                    Batticaloa
+                                </option>
+
+                                <option value="Colombo">
+                                    Colombo
+                                </option>
+
+                                <option value="Galle">
+                                    Galle
+                                </option>
+
+                                <option value="Gampaha">
+                                    Gampaha
+                                </option>
+
+                                <option value="Hambantota">
+                                    Hambantota
+                                </option>
+
+                                <option value="Jaffna">
+                                    Jaffna
+                                </option>
+
+                                <option value="Kalutara">
+                                    Kalutara
+                                </option>
+
+                                <option value="Kandy">
+                                    Kandy
+                                </option>
+
+                                <option value="Kegalle">
+                                    Kegalle
+                                </option>
+
+                                <option value="Kilinochchi">
+                                    Kilinochchi
+                                </option>
+
+                                <option value="Kurunegala">
+                                    Kurunegala
+                                </option>
+
+                                <option value="Mannar">
+                                    Mannar
+                                </option>
+
+                                <option value="Matale">
+                                    Matale
+                                </option>
+
+                                <option value="Matara">
+                                    Matara
+                                </option>
+
+                                <option value="Monaragala">
+                                    Monaragala
+                                </option>
+
+                                <option value="Mullaitivu">
+                                    Mullaitivu
+                                </option>
+
+                                <option value="Nuwara Eliya">
+                                    Nuwara Eliya
+                                </option>
+
+                                <option value="Polonnaruwa">
+                                    Polonnaruwa
+                                </option>
+
+                                <option value="Puttalam">
+                                    Puttalam
+                                </option>
+
+                                <option value="Ratnapura">
+                                    Ratnapura
+                                </option>
+
+                                <option value="Trincomalee">
+                                    Trincomalee
+                                </option>
+
+                                <option value="Vavuniya">
+                                    Vavuniya
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- ===============================================
+                 LANGUAGES
+            ================================================ -->
+
+                        <div class="form-group">
+
+                            <label for="languages">
+                                Languages
+                            </label>
+
+                            <input type="text" id="languages" name="languages"
+                                placeholder="e.g. English, Sinhala, Tamil">
+
+                        </div>
+
+
+                        <!-- ===============================================
+                 EXPERIENCE
+            ================================================ -->
+
+                        <div class="form-group">
+
+                            <label for="experience">
+                                Experience
+                            </label>
+
+                            <select id="experience" name="experience">
+
+                                <option value="">
+                                    Select experience
+                                </option>
+
+                                <option value="Less than 1 year">
+                                    Less than 1 year
+                                </option>
+
+                                <option value="1-3 years">
+                                    1-3 years
+                                </option>
+
+                                <option value="3-5 years">
+                                    3-5 years
+                                </option>
+
+                                <option value="5-10 years">
+                                    5-10 years
+                                </option>
+
+                                <option value="10+ years">
+                                    10+ years
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <!-- =================================================
+               SUBMIT
+          ================================================== -->
+
+                    <button type="submit" class="auth-button">
+                        Create Account
+                    </button>
+
+
+                </form>
+
+
+                <!-- ===================================================
+             LOGIN LINK
+        ==================================================== -->
+
+                <div class="auth-footer">
+
+                    <p>
+
+                        Already have an account?
+
+                        <a href="login.html">
+                            Login
+                        </a>
+
+                    </p>
 
                 </div>
 
 
+            </section>
 
-                <!-- =================================================
-                 TOURIST INFORMATION
-            ================================================== -->
 
-                <div id="touristFields" class="form-section account-fields">
+        </div>
 
-                    <h3>
-                        🧳 Tourist Information
-                    </h3>
-
-
-                    <!-- Country -->
-
-                    <div class="form-group">
-
-                        <label for="country">
-                            Country
-                        </label>
-
-                        <input type="text" id="country" name="country" placeholder="Your country">
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- =================================================
-                 GUIDE INFORMATION
-            ================================================== -->
-
-                <div id="guideFields" class="form-section account-fields hidden">
-
-                    <h3>
-                        🧑‍💼 Guide Information
-                    </h3>
-
-
-                    <!-- Phone -->
-
-                    <div class="form-group">
-
-                        <label for="phone">
-                            Phone Number
-                        </label>
-
-                        <input type="tel" id="phone" name="phone" placeholder="+94 XX XXX XXXX">
-
-                    </div>
-
-
-                    <!-- District -->
-
-                    <div class="form-group">
-
-                        <label for="guideDistrict">
-                            Operating District
-                        </label>
-
-                        <select id="guideDistrict" name="guideDistrict">
-
-                            <option value="">
-                                Select District
-                            </option>
-
-                            <option>
-                                Colombo
-                            </option>
-
-                            <option>
-                                Kandy
-                            </option>
-
-                            <option>
-                                Galle
-                            </option>
-
-                            <option>
-                                Matara
-                            </option>
-
-                            <option>
-                                Nuwara Eliya
-                            </option>
-
-                            <option>
-                                Badulla
-                            </option>
-
-                            <option>
-                                Anuradhapura
-                            </option>
-
-                            <option>
-                                Polonnaruwa
-                            </option>
-
-                            <option>
-                                Dambulla
-                            </option>
-
-                            <option>
-                                Ratnapura
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <!-- Languages -->
-
-                    <div class="form-group">
-
-                        <label for="languages">
-                            Languages You Speak
-                        </label>
-
-                        <input type="text" id="languages" name="languages" placeholder="English, Sinhala, Hindi...">
-
-                    </div>
-
-
-                    <!-- Experience -->
-
-                    <div class="form-group">
-
-                        <label for="experience">
-                            Years of Guiding Experience
-                        </label>
-
-                        <select id="experience" name="experience">
-
-                            <option value="">
-                                Select Experience
-                            </option>
-
-                            <option value="0-1">
-                                Less than 1 year
-                            </option>
-
-                            <option value="1-3">
-                                1 - 3 years
-                            </option>
-
-                            <option value="3-5">
-                                3 - 5 years
-                            </option>
-
-                            <option value="5-10">
-                                5 - 10 years
-                            </option>
-
-                            <option value="10+">
-                                More than 10 years
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <!-- Guide Note -->
-
-                    <div class="guide-registration-note">
-
-                        <strong>
-                            🛡️ Guide Verification
-                        </strong>
-
-                        <p>
-                            Guide accounts may require verification
-                            before receiving quotation requests.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- =================================================
-                 TERMS
-            ================================================== -->
-
-                <div class="terms-group">
-
-                    <label>
-
-                        <input type="checkbox" id="agreeTerms" required>
-
-                        <span>
-
-                            I agree to the
-                            <a href="#">
-                                Terms & Conditions
-                            </a>
-                            and
-                            <a href="#">
-                                Privacy Policy
-                            </a>.
-
-                        </span>
-
-                    </label>
-
-                </div>
-
-
-
-                <!-- =================================================
-                 REGISTER BUTTON
-            ================================================== -->
-
-                <button type="submit" class="register-submit-button">
-
-                    Create Account
-
-                    →
-
-                </button>
-
-
-                <!-- =================================================
-                 LOGIN LINK
-            ================================================== -->
-
-                <p class="login-link">
-
-                    Already have an account?
-
-                    <a href="login.html">
-                        Login here
-                    </a>
-
-                </p>
-
-
-                <!-- =================================================
-                 STATUS MESSAGE
-            ================================================== -->
-
-                <div id="registrationMessage" class="registration-message"></div>
-
-
-            </form>
-
-        </section>
 
     </main>
 
 
+    <!-- =========================================================
+       FIREBASE / REGISTRATION SCRIPT
+  ========================================================== -->
 
-    <!-- ============================================================
-     JAVASCRIPT
-============================================================= -->
+    <script type="module" src="js/register.js"></script>
 
-<!-- ============================================================
-     REGISTER MODULE
-============================================================= -->
-
-<script type="module" src="js/register.js"></script>
-    
 
 </body>
 
