@@ -1,0 +1,2396 @@
+/* ============================================================
+   LANKAQUEST
+   GUIDE REGISTRATION PAGE
+   guide-register.css
+============================================================ */
+
+
+/* ============================================================
+   1. ROOT VARIABLES
+============================================================ */
+
+:root {
+
+    --lq-primary:
+        #174a3c;
+
+    --lq-primary-dark:
+        #10372c;
+
+    --lq-primary-light:
+        #226b55;
+
+    --lq-accent:
+        #d6a84f;
+
+    --lq-accent-light:
+        #f1d99b;
+
+    --lq-cream:
+        #f5f2e8;
+
+    --lq-white:
+        #ffffff;
+
+    --lq-text:
+        #333333;
+
+    --lq-text-light:
+        #6b7280;
+
+    --lq-border:
+        #dedbd0;
+
+    --lq-input:
+        #faf9f4;
+
+    --lq-success:
+        #218739;
+
+    --lq-danger:
+        #c0392b;
+
+    --lq-shadow:
+        0 10px 35px rgba(0,
+            0,
+            0,
+            0.08);
+
+    --lq-radius:
+        14px;
+
+}
+
+
+/* ============================================================
+   2. GLOBAL RESET
+============================================================ */
+
+.guide-registration-page *,
+.site-header *,
+.site-footer * {
+
+    box-sizing:
+        border-box;
+
+}
+
+
+/* ============================================================
+   3. BODY
+============================================================ */
+
+body {
+
+    margin:
+        0;
+
+    font-family:
+        Arial,
+        sans-serif;
+
+    background:
+        var(--lq-cream);
+
+    color:
+        var(--lq-text);
+
+}
+
+
+/* ============================================================
+   4. HEADER
+============================================================ */
+
+.site-header {
+
+    width:
+        100%;
+
+    background:
+        var(--lq-primary);
+
+    color:
+        var(--lq-white);
+
+    position:
+        relative;
+
+    z-index:
+        1000;
+
+}
+
+
+.header-container {
+
+    max-width:
+        1200px;
+
+    margin:
+        0 auto;
+
+    padding:
+        16px 24px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        30px;
+
+}
+
+
+/* ============================================================
+   5. SITE LOGO
+============================================================ */
+
+.site-logo {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    gap:
+        9px;
+
+    color:
+        var(--lq-white);
+
+    text-decoration:
+        none;
+
+    font-size:
+        25px;
+
+    font-weight:
+        700;
+
+}
+
+
+.logo-icon {
+
+    font-size:
+        27px;
+
+}
+
+
+.logo-text {
+
+    letter-spacing:
+        0.3px;
+
+}
+
+
+/* ============================================================
+   6. MAIN NAVIGATION
+============================================================ */
+
+.main-navigation {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        25px;
+
+}
+
+
+.main-navigation a {
+
+    color:
+        var(--lq-white);
+
+    text-decoration:
+        none;
+
+    font-size:
+        15px;
+
+    font-weight:
+        500;
+
+    transition:
+        color 0.2s ease;
+
+}
+
+
+.main-navigation a:hover {
+
+    color:
+        var(--lq-accent-light);
+
+}
+
+
+/* ============================================================
+   7. MOBILE MENU BUTTON
+============================================================ */
+
+.mobile-menu-button {
+
+    display:
+        none;
+
+    border:
+        none;
+
+    background:
+        transparent;
+
+    color:
+        var(--lq-white);
+
+    font-size:
+        27px;
+
+    cursor:
+        pointer;
+
+}
+
+
+/* ============================================================
+   8. MOBILE NAVIGATION
+============================================================ */
+
+.mobile-navigation {
+
+    display:
+        none;
+
+    background:
+        var(--lq-primary-dark);
+
+    padding:
+        15px 20px;
+
+}
+
+
+.mobile-navigation a {
+
+    display:
+        block;
+
+    padding:
+        12px 10px;
+
+    color:
+        var(--lq-white);
+
+    text-decoration:
+        none;
+
+    border-bottom:
+        1px solid rgba(255,
+            255,
+            255,
+            0.1);
+
+}
+
+
+/* ============================================================
+   9. HERO SECTION
+============================================================ */
+
+.guide-registration-hero {
+
+    min-height:
+        330px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    padding:
+        60px 20px;
+
+    background:
+        linear-gradient(135deg,
+            #174a3c,
+            #226b55);
+
+    color:
+        var(--lq-white);
+
+    text-align:
+        center;
+
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
+}
+
+
+.guide-registration-hero::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    width:
+        450px;
+
+    height:
+        450px;
+
+    border-radius:
+        50%;
+
+    background:
+        rgba(255,
+            255,
+            255,
+            0.04);
+
+    top:
+        -250px;
+
+    right:
+        -100px;
+
+}
+
+
+.guide-registration-hero::after {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    width:
+        350px;
+
+    height:
+        350px;
+
+    border-radius:
+        50%;
+
+    background:
+        rgba(214,
+            168,
+            79,
+            0.08);
+
+    bottom:
+        -220px;
+
+    left:
+        -80px;
+
+}
+
+
+.guide-hero-content {
+
+    max-width:
+        760px;
+
+    position:
+        relative;
+
+    z-index:
+        2;
+
+}
+
+
+.guide-hero-badge {
+
+    display:
+        inline-block;
+
+    padding:
+        8px 18px;
+
+    margin-bottom:
+        18px;
+
+    border:
+        1px solid rgba(255,
+            255,
+            255,
+            0.35);
+
+    border-radius:
+        30px;
+
+    background:
+        rgba(255,
+            255,
+            255,
+            0.08);
+
+    font-size:
+        14px;
+
+}
+
+
+.guide-hero-content h1 {
+
+    margin:
+        0 0 18px;
+
+    font-size:
+        clamp(32px,
+            5vw,
+            52px);
+
+    line-height:
+        1.15;
+
+}
+
+
+.guide-hero-content p {
+
+    max-width:
+        680px;
+
+    margin:
+        0 auto;
+
+    font-size:
+        17px;
+
+    line-height:
+        1.7;
+
+    color:
+        rgba(255,
+            255,
+            255,
+            0.9);
+
+}
+
+
+/* ============================================================
+   10. REGISTRATION CONTAINER
+============================================================ */
+
+.guide-registration-container {
+
+    width:
+        min(100% - 40px,
+            1050px);
+
+    margin:
+        -45px auto 70px;
+
+    position:
+        relative;
+
+    z-index:
+        5;
+
+}
+
+
+/* ============================================================
+   11. PROGRESS INDICATOR
+============================================================ */
+
+.registration-progress {
+
+    background:
+        var(--lq-white);
+
+    padding:
+        25px 35px;
+
+    border-radius:
+        var(--lq-radius);
+
+    box-shadow:
+        var(--lq-shadow);
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    margin-bottom:
+        25px;
+
+}
+
+
+.progress-step {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        9px;
+
+    color:
+        var(--lq-text-light);
+
+    font-size:
+        14px;
+
+    white-space:
+        nowrap;
+
+}
+
+
+.progress-number {
+
+    width:
+        34px;
+
+    height:
+        34px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        50%;
+
+    background:
+        #e8e6dd;
+
+    color:
+        #777;
+
+    font-weight:
+        700;
+
+}
+
+
+.progress-step.active {
+
+    color:
+        var(--lq-primary);
+
+    font-weight:
+        700;
+
+}
+
+
+.progress-step.active .progress-number {
+
+    background:
+        var(--lq-primary);
+
+    color:
+        var(--lq-white);
+
+}
+
+
+.progress-line {
+
+    width:
+        70px;
+
+    height:
+        2px;
+
+    margin:
+        0 15px;
+
+    background:
+        #e2dfd5;
+
+}
+
+
+/* ============================================================
+   12. FORM
+============================================================ */
+
+.guide-registration-form {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        25px;
+
+}
+
+
+/* ============================================================
+   13. REGISTRATION SECTION
+============================================================ */
+
+.registration-section {
+
+    background:
+        var(--lq-white);
+
+    padding:
+        35px;
+
+    border-radius:
+        var(--lq-radius);
+
+    box-shadow:
+        var(--lq-shadow);
+
+}
+
+
+.section-heading {
+
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    gap:
+        15px;
+
+    padding-bottom:
+        25px;
+
+    margin-bottom:
+        25px;
+
+    border-bottom:
+        1px solid var(--lq-border);
+
+}
+
+
+.section-icon {
+
+    width:
+        48px;
+
+    height:
+        48px;
+
+    flex-shrink:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        12px;
+
+    background:
+        #edf4f0;
+
+    font-size:
+        23px;
+
+}
+
+
+.section-heading h2 {
+
+    margin:
+        0 0 6px;
+
+    color:
+        var(--lq-primary);
+
+    font-size:
+        24px;
+
+}
+
+
+.section-heading p {
+
+    margin:
+        0;
+
+    color:
+        var(--lq-text-light);
+
+    font-size:
+        14px;
+
+}
+
+
+/* ============================================================
+   14. FORM GRID
+============================================================ */
+
+.form-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(2,
+            minmax(0,
+                1fr));
+
+    gap:
+        22px;
+
+}
+
+
+.form-group {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        8px;
+
+}
+
+
+.form-group.full-width {
+
+    grid-column:
+        1 / -1;
+
+}
+
+
+/* ============================================================
+   15. LABELS
+============================================================ */
+
+.form-group label {
+
+    font-size:
+        14px;
+
+    font-weight:
+        700;
+
+    color:
+        #3d433f;
+
+}
+
+
+.form-group label span {
+
+    color:
+        var(--lq-danger);
+
+}
+
+
+/* ============================================================
+   16. INPUTS
+============================================================ */
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="tel"],
+.form-group input[type="date"],
+.form-group input[type="password"],
+.form-group select,
+.form-group textarea {
+
+    width:
+        100%;
+
+    padding:
+        13px 15px;
+
+    border:
+        1px solid var(--lq-border);
+
+    border-radius:
+        9px;
+
+    background:
+        var(--lq-input);
+
+    color:
+        var(--lq-text);
+
+    font-family:
+        inherit;
+
+    font-size:
+        15px;
+
+    outline:
+        none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+
+}
+
+
+.form-group textarea {
+
+    resize:
+        vertical;
+
+    min-height:
+        100px;
+
+    line-height:
+        1.6;
+
+}
+
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+
+    border-color:
+        var(--lq-primary-light);
+
+    background:
+        var(--lq-white);
+
+    box-shadow:
+        0 0 0 3px rgba(34,
+            107,
+            85,
+            0.12);
+
+}
+
+
+/* ============================================================
+   17. FORM HINT
+============================================================ */
+
+.form-hint {
+
+    font-size:
+        12px;
+
+    color:
+        var(--lq-text-light);
+
+    line-height:
+        1.5;
+
+}
+
+
+/* ============================================================
+   18. FORM ERROR
+============================================================ */
+
+.form-error {
+
+    display:
+        none;
+
+    color:
+        var(--lq-danger);
+
+    font-size:
+        12px;
+
+}
+
+
+.form-group.has-error input,
+.form-group.has-error select,
+.form-group.has-error textarea {
+
+    border-color:
+        var(--lq-danger);
+
+}
+
+
+.form-group.has-error .form-error {
+
+    display:
+        block;
+
+}
+
+
+/* ============================================================
+   19. CHECKBOX GRID
+============================================================ */
+
+.checkbox-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(4,
+            minmax(0,
+                1fr));
+
+    gap:
+        10px;
+
+}
+
+
+.checkbox-option {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        9px;
+
+    min-height:
+        48px;
+
+    padding:
+        10px 12px;
+
+    border:
+        1px solid var(--lq-border);
+
+    border-radius:
+        9px;
+
+    background:
+        var(--lq-input);
+
+    cursor:
+        pointer;
+
+    transition:
+        all 0.2s ease;
+
+}
+
+
+.checkbox-option:hover {
+
+    border-color:
+        var(--lq-primary-light);
+
+    background:
+        #f0f6f2;
+
+}
+
+
+.checkbox-option input {
+
+    width:
+        17px;
+
+    height:
+        17px;
+
+    accent-color:
+        var(--lq-primary);
+
+    cursor:
+        pointer;
+
+}
+
+
+.checkbox-option span {
+
+    color:
+        #444;
+
+    font-size:
+        13px;
+
+}
+
+
+/* ============================================================
+   20. FILE INPUT
+============================================================ */
+
+.form-group input[type="file"] {
+
+    width:
+        100%;
+
+    padding:
+        14px;
+
+    border:
+        2px dashed var(--lq-border);
+
+    border-radius:
+        10px;
+
+    background:
+        var(--lq-input);
+
+    cursor:
+        pointer;
+
+    color:
+        var(--lq-text-light);
+
+    font-size:
+        13px;
+
+}
+
+
+.form-group input[type="file"]:hover {
+
+    border-color:
+        var(--lq-primary-light);
+
+    background:
+        #f0f6f2;
+
+}
+
+
+.form-group input[type="file"]::file-selector-button {
+
+    margin-right:
+        12px;
+
+    padding:
+        8px 13px;
+
+    border:
+        none;
+
+    border-radius:
+        7px;
+
+    background:
+        var(--lq-primary);
+
+    color:
+        var(--lq-white);
+
+    cursor:
+        pointer;
+
+}
+
+
+/* ============================================================
+   21. VERIFICATION NOTICE
+============================================================ */
+
+.verification-notice {
+
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    gap:
+        15px;
+
+    margin-top:
+        25px;
+
+    padding:
+        18px;
+
+    border:
+        1px solid #d8e7df;
+
+    border-radius:
+        10px;
+
+    background:
+        #f1f8f4;
+
+}
+
+
+.notice-icon {
+
+    font-size:
+        23px;
+
+}
+
+
+.verification-notice h3 {
+
+    margin:
+        0 0 6px;
+
+    color:
+        var(--lq-primary);
+
+    font-size:
+        15px;
+
+}
+
+
+.verification-notice p {
+
+    margin:
+        0;
+
+    color:
+        #59645e;
+
+    font-size:
+        13px;
+
+    line-height:
+        1.6;
+
+}
+
+
+/* ============================================================
+   22. MEMBERSHIP PACKAGE
+============================================================ */
+
+.membership-package {
+
+    border:
+        2px solid var(--lq-border);
+
+    border-radius:
+        15px;
+
+    padding:
+        28px;
+
+    background:
+        #fcfbf7;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+
+}
+
+
+.membership-package.selected {
+
+    border-color:
+        var(--lq-primary);
+
+    box-shadow:
+        0 8px 25px rgba(23,
+            74,
+            60,
+            0.1);
+
+}
+
+
+.package-header {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        flex-start;
+
+    gap:
+        25px;
+
+    padding-bottom:
+        22px;
+
+    border-bottom:
+        1px solid var(--lq-border);
+
+}
+
+
+.package-badge {
+
+    display:
+        inline-block;
+
+    margin-bottom:
+        9px;
+
+    padding:
+        5px 10px;
+
+    border-radius:
+        20px;
+
+    background:
+        var(--lq-accent);
+
+    color:
+        #3e2d0d;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.5px;
+
+}
+
+
+.package-header h3 {
+
+    margin:
+        0 0 7px;
+
+    color:
+        var(--lq-primary);
+
+    font-size:
+        21px;
+
+}
+
+
+.package-header p {
+
+    margin:
+        0;
+
+    color:
+        var(--lq-text-light);
+
+    font-size:
+        14px;
+
+}
+
+
+.package-price {
+
+    text-align:
+        right;
+
+}
+
+
+.price-label {
+
+    display:
+        block;
+
+    margin-bottom:
+        5px;
+
+    color:
+        var(--lq-text-light);
+
+    font-size:
+        12px;
+
+}
+
+
+.package-price strong {
+
+    color:
+        var(--lq-primary);
+
+    font-size:
+        16px;
+
+}
+
+
+/* ============================================================
+   23. PACKAGE BENEFITS
+============================================================ */
+
+.package-benefits {
+
+    padding:
+        22px 0;
+
+}
+
+
+.package-benefits h4 {
+
+    margin:
+        0 0 15px;
+
+    color:
+        #3c433f;
+
+    font-size:
+        15px;
+
+}
+
+
+.package-benefits ul {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(2,
+            minmax(0,
+                1fr));
+
+    gap:
+        10px 25px;
+
+    margin:
+        0;
+
+    padding:
+        0;
+
+    list-style:
+        none;
+
+}
+
+
+.package-benefits li {
+
+    color:
+        #4f5a54;
+
+    font-size:
+        13px;
+
+    line-height:
+        1.5;
+
+}
+
+
+/* ============================================================
+   24. PACKAGE RADIO
+============================================================ */
+
+.package-select-option {
+
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    gap:
+        10px;
+
+    padding:
+        15px;
+
+    border-radius:
+        9px;
+
+    background:
+        #edf4f0;
+
+    color:
+        var(--lq-primary);
+
+    font-size:
+        14px;
+
+    font-weight:
+        600;
+
+    cursor:
+        pointer;
+
+}
+
+
+.package-select-option input {
+
+    width:
+        18px;
+
+    height:
+        18px;
+
+    margin-top:
+        1px;
+
+    accent-color:
+        var(--lq-primary);
+
+}
+
+
+/* ============================================================
+   25. REGISTRATION CONSENT
+============================================================ */
+
+.registration-consent {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        14px;
+
+    padding:
+        25px;
+
+    border:
+        1px solid var(--lq-border);
+
+    border-radius:
+        var(--lq-radius);
+
+    background:
+        var(--lq-white);
+
+}
+
+
+.consent-option {
+
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    gap:
+        11px;
+
+    color:
+        #555;
+
+    font-size:
+        13px;
+
+    line-height:
+        1.6;
+
+    cursor:
+        pointer;
+
+}
+
+
+.consent-option input {
+
+    width:
+        18px;
+
+    height:
+        18px;
+
+    margin-top:
+        2px;
+
+    flex-shrink:
+        0;
+
+    accent-color:
+        var(--lq-primary);
+
+}
+
+
+.consent-option a {
+
+    color:
+        var(--lq-primary-light);
+
+    font-weight:
+        700;
+
+    text-decoration:
+        none;
+
+}
+
+
+.consent-option a:hover {
+
+    text-decoration:
+        underline;
+
+}
+
+
+.required-mark {
+
+    color:
+        var(--lq-danger);
+
+}
+
+
+/* ============================================================
+   26. SUBMISSION NOTICE
+============================================================ */
+
+.submission-notice {
+
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    gap:
+        12px;
+
+    padding:
+        16px 18px;
+
+    border-left:
+        4px solid var(--lq-accent);
+
+    background:
+        #fffaf0;
+
+    border-radius:
+        7px;
+
+}
+
+
+.submission-icon {
+
+    font-size:
+        19px;
+
+}
+
+
+.submission-notice p {
+
+    margin:
+        0;
+
+    color:
+        #655d4e;
+
+    font-size:
+        13px;
+
+    line-height:
+        1.6;
+
+}
+
+
+/* ============================================================
+   27. FORM ACTIONS
+============================================================ */
+
+.form-actions {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        20px;
+
+    padding:
+        25px;
+
+    background:
+        var(--lq-white);
+
+    border-radius:
+        var(--lq-radius);
+
+    box-shadow:
+        var(--lq-shadow);
+
+}
+
+
+.secondary-action-button {
+
+    color:
+        var(--lq-primary);
+
+    font-size:
+        13px;
+
+    text-decoration:
+        none;
+
+}
+
+
+.secondary-action-button strong {
+
+    text-decoration:
+        underline;
+
+}
+
+
+.primary-action-button {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        12px;
+
+    min-width:
+        240px;
+
+    padding:
+        14px 25px;
+
+    border:
+        none;
+
+    border-radius:
+        9px;
+
+    background:
+        var(--lq-primary);
+
+    color:
+        var(--lq-white);
+
+    font-family:
+        inherit;
+
+    font-size:
+        15px;
+
+    font-weight:
+        700;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+}
+
+
+.primary-action-button:hover {
+
+    background:
+        var(--lq-primary-dark);
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 8px 20px rgba(23,
+            74,
+            60,
+            0.2);
+
+}
+
+
+.primary-action-button:active {
+
+    transform:
+        translateY(0);
+
+}
+
+
+/* ============================================================
+   28. FORM STATUS MESSAGE
+============================================================ */
+
+.form-status-message {
+
+    display:
+        none;
+
+    padding:
+        14px 18px;
+
+    border-radius:
+        9px;
+
+    font-size:
+        14px;
+
+    line-height:
+        1.5;
+
+}
+
+
+.form-status-message.success {
+
+    display:
+        block;
+
+    background:
+        #eaf7ed;
+
+    border:
+        1px solid #b9dfc0;
+
+    color:
+        #216b2e;
+
+}
+
+
+.form-status-message.error {
+
+    display:
+        block;
+
+    background:
+        #fff0ee;
+
+    border:
+        1px solid #efc0ba;
+
+    color:
+        #a12f24;
+
+}
+
+
+/* ============================================================
+   29. FOOTER
+============================================================ */
+
+.site-footer {
+
+    background:
+        var(--lq-primary-dark);
+
+    color:
+        var(--lq-white);
+
+}
+
+
+.footer-container {
+
+    max-width:
+        1200px;
+
+    margin:
+        0 auto;
+
+    padding:
+        45px 25px 30px;
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    gap:
+        40px;
+
+}
+
+
+.footer-logo {
+
+    color:
+        var(--lq-white);
+
+    font-size:
+        22px;
+
+    font-weight:
+        700;
+
+    text-decoration:
+        none;
+
+}
+
+
+.footer-brand p {
+
+    margin:
+        12px 0 0;
+
+    color:
+        rgba(255,
+            255,
+            255,
+            0.7);
+
+    font-size:
+        13px;
+
+}
+
+
+.footer-links {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        20px;
+
+}
+
+
+.footer-links a {
+
+    color:
+        rgba(255,
+            255,
+            255,
+            0.75);
+
+    font-size:
+        13px;
+
+    text-decoration:
+        none;
+
+}
+
+
+.footer-links a:hover {
+
+    color:
+        var(--lq-accent-light);
+
+}
+
+
+.footer-bottom {
+
+    padding:
+        18px 20px;
+
+    border-top:
+        1px solid rgba(255,
+            255,
+            255,
+            0.1);
+
+    text-align:
+        center;
+
+}
+
+
+.footer-bottom p {
+
+    margin:
+        0;
+
+    color:
+        rgba(255,
+            255,
+            255,
+            0.55);
+
+    font-size:
+        12px;
+
+}
+
+
+/* ============================================================
+   30. TABLET RESPONSIVE
+============================================================ */
+
+@media (max-width: 900px) {
+
+    .main-navigation {
+
+        display:
+            none;
+
+    }
+
+
+    .mobile-menu-button {
+
+        display:
+            block;
+
+    }
+
+
+    .mobile-navigation.active {
+
+        display:
+            block;
+
+    }
+
+
+    .checkbox-grid {
+
+        grid-template-columns:
+            repeat(2,
+                minmax(0,
+                    1fr));
+
+    }
+
+
+    .registration-progress {
+
+        padding:
+            20px;
+
+    }
+
+
+    .progress-line {
+
+        width:
+            35px;
+
+        margin:
+            0 8px;
+
+    }
+
+
+    .progress-label {
+
+        display:
+            none;
+
+    }
+
+}
+
+
+/* ============================================================
+   31. MOBILE RESPONSIVE
+============================================================ */
+
+@media (max-width: 650px) {
+
+    .header-container {
+
+        padding:
+            14px 18px;
+
+    }
+
+
+    .site-logo {
+
+        font-size:
+            21px;
+
+    }
+
+
+    .guide-registration-hero {
+
+        min-height:
+            290px;
+
+        padding:
+            50px 20px;
+
+    }
+
+
+    .guide-hero-content h1 {
+
+        font-size:
+            32px;
+
+    }
+
+
+    .guide-hero-content p {
+
+        font-size:
+            14px;
+
+        line-height:
+            1.6;
+
+    }
+
+
+    .guide-registration-container {
+
+        width:
+            calc(100% - 24px);
+
+        margin-top:
+            -30px;
+
+        margin-bottom:
+            40px;
+
+    }
+
+
+    .registration-progress {
+
+        padding:
+            15px 10px;
+
+    }
+
+
+    .progress-step {
+
+        flex:
+            1;
+
+        justify-content:
+            center;
+
+    }
+
+
+    .progress-number {
+
+        width:
+            30px;
+
+        height:
+            30px;
+
+        font-size:
+            12px;
+
+    }
+
+
+    .progress-line {
+
+        width:
+            20px;
+
+        margin:
+            0 4px;
+
+    }
+
+
+    .registration-section {
+
+        padding:
+            22px 18px;
+
+    }
+
+
+    .section-heading {
+
+        gap:
+            10px;
+
+    }
+
+
+    .section-icon {
+
+        width:
+            42px;
+
+        height:
+            42px;
+
+        font-size:
+            19px;
+
+    }
+
+
+    .section-heading h2 {
+
+        font-size:
+            20px;
+
+    }
+
+
+    .section-heading p {
+
+        font-size:
+            13px;
+
+    }
+
+
+    .form-grid {
+
+        grid-template-columns:
+            1fr;
+
+        gap:
+            18px;
+
+    }
+
+
+    .form-group.full-width {
+
+        grid-column:
+            auto;
+
+    }
+
+
+    .checkbox-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .package-header {
+
+        flex-direction:
+            column;
+
+        gap:
+            15px;
+
+    }
+
+
+    .package-price {
+
+        text-align:
+            left;
+
+    }
+
+
+    .package-benefits ul {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .membership-package {
+
+        padding:
+            20px;
+
+    }
+
+
+    .registration-consent {
+
+        padding:
+            18px;
+
+    }
+
+
+    .form-actions {
+
+        flex-direction:
+            column-reverse;
+
+        align-items:
+            stretch;
+
+        padding:
+            20px;
+
+    }
+
+
+    .primary-action-button {
+
+        width:
+            100%;
+
+        min-width:
+            0;
+
+    }
+
+
+    .secondary-action-button {
+
+        text-align:
+            center;
+
+    }
+
+
+    .footer-container {
+
+        flex-direction:
+            column;
+
+        padding:
+            35px 20px 25px;
+
+    }
+
+
+    .footer-links {
+
+        flex-direction:
+            column;
+
+        align-items:
+            flex-start;
+
+        gap:
+            12px;
+
+    }
+
+}
+
+
+/* ============================================================
+   32. SMALL MOBILE
+============================================================ */
+
+@media (max-width: 400px) {
+
+    .guide-registration-hero {
+
+        padding:
+            40px 15px;
+
+    }
+
+
+    .guide-hero-content h1 {
+
+        font-size:
+            28px;
+
+    }
+
+
+    .guide-registration-container {
+
+        width:
+            calc(100% - 16px);
+
+    }
+
+
+    .registration-section {
+
+        padding:
+            18px 14px;
+
+    }
+
+
+    .registration-progress {
+
+        padding:
+            12px 5px;
+
+    }
+
+
+    .progress-line {
+
+        width:
+            12px;
+
+    }
+
+}

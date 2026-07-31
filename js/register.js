@@ -1,478 +1,315 @@
 /* ============================================================
-REGISTRATION SYSTEM
-Explore Sri Lanka
+   LANKAQUEST
+   REGISTRATION SYSTEM
 
-Account Types:
+   Firebase First Architecture
 
-🧳 Tourist
-🧑‍💼 Guide
 
-Future Architecture:
+   Account Types:
 
-Registration
-↓
-Authentication Backend
-↓
-Account Type
-↓
-Tourist Dashboard / Guide Dashboard
+   🧳 Tourist
+   🧑‍💼 Guide
+
+
+   FLOW:
+
+   Register Form
+        |
+        ↓
+   Firebase Authentication
+        |
+        ↓
+   Firebase UID
+        |
+        ↓
+   Firestore Profile
+
+   Tourist:
+   lankaQuestTourists/{UID}
+
+
+   Guide:
+   lankaQuestGuides/{UID}
+
 ============================================================ */
 
 /* ============================================================
+   FIREBASE IMPORTS
+============================================================ */
 
-1. DOM ELEMENTS
-   ============================================================ */
+import { auth, db } from "./firebase-config.js";
 
-const registrationForm =
-document.getElementById(
-"registrationForm"
-);
+import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-const accountTypeInputs =
-document.querySelectorAll(
-'input[name="accountType"]'
-);
-
-const touristFields =
-document.getElementById(
-"touristFields"
-);
-
-const guideFields =
-document.getElementById(
-"guideFields"
-);
-
-const registrationMessage =
-document.getElementById(
-"registrationMessage"
-);
+import {
+  doc,
+  setDoc,
+  serverTimestamp,
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 /* ============================================================
-2. GET SELECTED ACCOUNT TYPE
+   DOM ELEMENTS
+============================================================ */
+
+const registrationForm = document.getElementById("registrationForm");
+
+const accountTypeInputs = document.querySelectorAll(
+  'input[name="accountType"]',
+);
+
+const touristFields = document.getElementById("touristFields");
+
+const guideFields = document.getElementById("guideFields");
+
+const registrationMessage = document.getElementById("registrationMessage");
+
+/* ============================================================
+   ACCOUNT TYPE
 ============================================================ */
 
 function getSelectedAccountType() {
+  const selected = document.querySelector('input[name="accountType"]:checked');
 
-
-const selected =
-    document.querySelector(
-        'input[name="accountType"]:checked'
-    );
-
-
-return selected
-    ? selected.value
-    : "tourist";
-
-
+  return selected ? selected.value : "tourist";
 }
 
 /* ============================================================
-3. SWITCH ACCOUNT TYPE
+   SWITCH ACCOUNT FIELDS
+
 ============================================================ */
 
 function updateAccountTypeFields() {
+  const type = getSelectedAccountType();
 
+  if (type === "tourist") {
+    touristFields.classList.remove("hidden");
 
-const accountType =
-    getSelectedAccountType();
+    guideFields.classList.add("hidden");
+  } else {
+    touristFields.classList.add("hidden");
 
-
-/*
-   Tourist Account
-*/
-
-if (
-    accountType === "tourist"
-) {
-
-    touristFields.classList.remove(
-        "hidden"
-    );
-
-
-    guideFields.classList.add(
-        "hidden"
-    );
-
-
-    /*
-       Guide fields required නොවෙන්න
-    */
-
-    document
-        .getElementById("phone")
-        .required = false;
-
-
-    document
-        .getElementById("guideDistrict")
-        .required = false;
-
-
-    document
-        .getElementById("languages")
-        .required = false;
-
-
-    document
-        .getElementById("experience")
-        .required = false;
-
+    guideFields.classList.remove("hidden");
+  }
 }
 
+accountTypeInputs.forEach((input) => {
+  input.addEventListener("change", updateAccountTypeFields);
+});
 
-/*
-   Guide Account
-*/
+/* ============================================================
+   MESSAGE SYSTEM
 
-else {
+============================================================ */
 
-    touristFields.classList.add(
-        "hidden"
-    );
+function showRegistrationMessage(message, type = "success") {
+  if (!registrationMessage) {
+    return;
+  }
 
+  registrationMessage.textContent = message;
 
-    guideFields.classList.remove(
-        "hidden"
-    );
+  registrationMessage.style.display = "block";
 
+  if (type === "error") {
+    registrationMessage.style.background = "#fff0f0";
 
-    /*
-       Guide fields required කරන්න
-    */
+    registrationMessage.style.color = "#b42318";
+  } else {
+    registrationMessage.style.background = "#edf8f1";
 
-    document
-        .getElementById("phone")
-        .required = true;
-
-
-    document
-        .getElementById("guideDistrict")
-        .required = true;
-
-
-    document
-        .getElementById("languages")
-        .required = true;
-
-
-    document
-        .getElementById("experience")
-        .required = true;
-
-}
-
-
+    registrationMessage.style.color = "#176044";
+  }
 }
 
 /* ============================================================
-4. ACCOUNT TYPE EVENTS
+   REGISTER USER
+
 ============================================================ */
 
-accountTypeInputs.forEach(
-input => {
+async function registerUser() {
+  try {
+    const accountType = getSelectedAccountType();
 
+    const fullName = document.getElementById("fullName").value.trim();
 
-    input.addEventListener(
-        "change",
-        updateAccountTypeFields
-    );
+    const email = document.getElementById("email").value.trim();
 
-}
+    const password = document.getElementById("password").value;
 
+    const confirmPassword = document.getElementById("confirmPassword").value;
 
-);
-
-/* ============================================================
-5. SHOW MESSAGE
-============================================================ */
-
-function showRegistrationMessage(
-message,
-type = "success"
-) {
-
-
-registrationMessage.textContent =
-    message;
-
-
-registrationMessage.style.display =
-    "block";
-
-
-if (
-    type === "error"
-) {
-
-    registrationMessage.style.background =
-        "#fff0f0";
-
-    registrationMessage.style.color =
-        "#b42318";
-
-}
-
-else {
-
-    registrationMessage.style.background =
-        "#edf8f1";
-
-    registrationMessage.style.color =
-        "#176044";
-
-}
-
-
-}
-
-/* ============================================================
-6. FORM SUBMIT
-============================================================ */
-
-registrationForm.addEventListener(
-"submit",
-event => {
-
-
-    /*
-       Default form submit stop කරන්න
-    */
-
-    event.preventDefault();
-
-
-    /*
-       Account Type
-    */
-
-    const accountType =
-        getSelectedAccountType();
-
-
-    /*
-       Common Data
-    */
-
-    const fullName =
-        document
-            .getElementById("fullName")
-            .value
-            .trim();
-
-
-    const email =
-        document
-            .getElementById("email")
-            .value
-            .trim();
-
-
-    const password =
-        document
-            .getElementById("password")
-            .value;
-
-
-    const confirmPassword =
-        document
-            .getElementById("confirmPassword")
-            .value;
-
-
-    /*
-       Password Check
-    */
-
-    if (
-        password !==
-        confirmPassword
-    ) {
-
-        showRegistrationMessage(
-            "Passwords do not match.",
-            "error"
-        );
-
-        return;
-
+    if (password !== confirmPassword) {
+      throw new Error("Passwords do not match.");
     }
 
-
     /*
-       Basic Account Object
-    */
+            Firebase Authentication
 
-    const account = {
+            Password is stored securely
+            by Firebase
 
-        accountType:
-            accountType,
-
-        fullName:
-            fullName,
-
-        email:
-            email,
-
-        /*
-           IMPORTANT:
-           Real application එකේ password
-           මෙහෙම store කරන්න එපා.
-
-           Backend authentication system
-           එකකට connect කළ යුතුයි.
         */
 
-        createdAt:
-            new Date().toISOString()
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
 
+      email,
+
+      password,
+    );
+
+    const firebaseUser = userCredential.user;
+
+    const uid = firebaseUser.uid;
+
+    /* ====================================================
+           COMMON PROFILE DATA
+        ==================================================== */
+
+    const profileData = {
+      uid: uid,
+
+      fullName: fullName,
+
+      email: email,
+
+      accountType: accountType,
+
+      createdAt: serverTimestamp(),
     };
 
+    /* ====================================================
+           TOURIST PROFILE
 
-    /*
-       Tourist Data
-    */
+           Collection:
 
-    if (
-        accountType === "tourist"
-    ) {
+           lankaQuestTourists
 
-        account.country =
-            document
-                .getElementById("country")
-                .value
-                .trim();
+        ==================================================== */
 
+    if (accountType === "tourist") {
+      profileData.country = document.getElementById("country").value.trim();
+
+      await setDoc(
+        doc(
+          db,
+
+          "lankaQuestTourists",
+
+          uid,
+        ),
+
+        profileData,
+      );
+
+      showRegistrationMessage("Tourist account created successfully.");
+
+      setTimeout(
+        () => {
+          window.location.href = "login.html";
+        },
+
+        1500,
+      );
+    } else {
+
+    /* ====================================================
+           GUIDE PROFILE
+
+           Collection:
+
+           lankaQuestGuides
+
+        ==================================================== */
+      profileData.phone = document.getElementById("phone").value.trim();
+
+      profileData.district = document.getElementById("guideDistrict").value;
+
+      profileData.languages = document.getElementById("languages").value.trim();
+
+      profileData.experience = document.getElementById("experience").value;
+
+      profileData.verificationStatus = "pending";
+
+      profileData.status = "pending";
+
+      await setDoc(
+        doc(
+          db,
+
+          "lankaQuestGuides",
+
+          uid,
+        ),
+
+        profileData,
+      );
+
+      showRegistrationMessage("Guide registration submitted successfully.");
+
+      setTimeout(
+        () => {
+          window.location.href = "login.html";
+        },
+
+        1500,
+      );
+    }
+  } catch (error) {
+    console.error("Registration Error:", error);
+
+    let message = "Registration failed.";
+
+    switch (error.code) {
+      case "auth/email-already-in-use":
+        message = "Email already registered.";
+
+        break;
+
+      case "auth/invalid-email":
+        message = "Invalid email address.";
+
+        break;
+
+      case "auth/weak-password":
+        message = "Password is too weak.";
+
+        break;
+
+      default:
+        message = error.message;
     }
 
-
-    /*
-       Guide Data
-    */
-
-    if (
-        accountType === "guide"
-    ) {
-
-        account.phone =
-            document
-                .getElementById("phone")
-                .value
-                .trim();
-
-
-        account.district =
-            document
-                .getElementById(
-                    "guideDistrict"
-                )
-                .value;
-
-
-        account.languages =
-            document
-                .getElementById("languages")
-                .value
-                .trim();
-
-
-        account.experience =
-            document
-                .getElementById("experience")
-                .value;
-
-
-        /*
-           New Guide Account
-           Default Verification Status
-        */
-
-        account.verificationStatus =
-            "pending";
-
-
-        /*
-           Guide Account
-           Default Active Status
-        */
-
-        account.status =
-            "pending";
-
-    }
-
-
-    /*
-       Future Backend API
-       මෙතැනින් backend එකට
-       registration request යවන්න පුළුවන්.
-    */
-
-    console.log(
-        "Registration Data:",
-        account
-    );
-
-
-    /*
-       Temporary Success Message
-    */
-
-    if (
-        accountType === "guide"
-    ) {
-
-        showRegistrationMessage(
-            "Guide registration submitted successfully. Your account will be reviewed for verification."
-        );
-
-    }
-
-    else {
-
-        showRegistrationMessage(
-            "Tourist account registration prepared successfully."
-        );
-
-    }
-
-
-    /*
-       Future:
-
-       API call
-
-       registerUser(account)
-
-       Then redirect:
-
-       Tourist
-       → tourist-dashboard.html
-
-       Guide
-       → guide-dashboard.html
-
-    */
-
+    showRegistrationMessage(message, "error");
+  }
 }
 
+/* ============================================================
+   FORM SUBMIT
 
-);
+============================================================ */
+
+if (registrationForm) {
+  registrationForm.addEventListener(
+    "submit",
+
+    (event) => {
+      event.preventDefault();
+
+      registerUser();
+    },
+  );
+}
 
 /* ============================================================
-7. INITIALIZE
+   INITIALIZE
+
 ============================================================ */
 
 document.addEventListener(
-"DOMContentLoaded",
-() => {
+  "DOMContentLoaded",
 
-
+  () => {
     updateAccountTypeFields();
-
-}
-
-
+  },
 );

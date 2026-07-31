@@ -1,553 +1,641 @@
 /* ============================================================
    TOURIST DASHBOARD LOGIC
-   Explore Sri Lanka
+   LankaQuest
 
-   FLOW:
+   FIREBASE FIRST VERSION
 
-   Tourist
-      ↓
-   Trip Planner
-      ↓
-   Quotation Request
-      ↓
-   Guide Sends Quotation
-      ↓
-   Tourist Dashboard
-      ↓
-   View Quotation
-      ↓
-   Tourist Disclaimer
-      ↓
-   Accept / Reject
-      ↓
-   Accepted
-      ↓
-   Chat Can Be Enabled Later
+   Architecture:
 
-   FRONTEND DEMO ARCHITECTURE
+   Firebase Authentication
+          ↓
+   Firebase UID
+          ↓
+   Firestore
+
+   Collections:
+
+   lankaQuestTourists
+   lankaQuestTouristTrips
+   lankaQuestQuotationRequests
+   lankaQuestQuotations
+
+
+   NO localStorage
+   NO sessionStorage
+   NO JSON DATABASE
+
 ============================================================ */
-
 
 /* ============================================================
-   1. STORAGE KEYS
+   1. FIREBASE IMPORTS
 ============================================================ */
 
-const DASHBOARD_TRIP_KEY =
-    "sriLankaMyTrip";
+import { auth, db } from "./firebase-config.js";
 
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-const DASHBOARD_REQUESTS_KEY =
-    "exploreSriLankaQuotationRequests";
-
-
-const DASHBOARD_SELECTED_GUIDE_KEY =
-    "exploreSriLankaSelectedGuide";
-
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  orderBy,
+  getDocs,
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 /* ============================================================
-   2. DOM ELEMENTS
+   2. FIRESTORE COLLECTIONS
 ============================================================ */
 
-const headerUserName =
-    document.getElementById(
-        "headerUserName"
-    );
+const TOURIST_COLLECTION = "lankaQuestTourists";
 
+const TRIP_COLLECTION = "lankaQuestTouristTrips";
 
-const welcomeUserName =
-    document.getElementById(
-        "welcomeUserName"
-    );
-
-
-const logoutButton =
-    document.getElementById(
-        "logoutButton"
-    );
-
-
-const dashboardTripCount =
-    document.getElementById(
-        "dashboardTripCount"
-    );
-
-
-const dashboardRequestCount =
-    document.getElementById(
-        "dashboardRequestCount"
-    );
-
-
-const dashboardGuideCount =
-    document.getElementById(
-        "dashboardGuideCount"
-    );
-
-
-const selectedGuideContainer =
-    document.getElementById(
-        "selectedGuideContainer"
-    );
-
-
-const quotationRequestsContainer =
-    document.getElementById(
-        "quotationRequestsContainer"
-    );
-
-
-const dashboardTripContainer =
-    document.getElementById(
-        "dashboardTripContainer"
-    );
-
+const REQUEST_COLLECTION = "lankaQuestQuotationRequests";
 
 /* ============================================================
-   3. GET MY TRIP
+   3. CURRENT USER
 ============================================================ */
 
-function getDashboardTrip() {
+let currentFirebaseUser = null;
 
-    const savedTrip =
-        localStorage.getItem(
-            DASHBOARD_TRIP_KEY
-        );
+let currentTouristProfile = null;
 
+/* ============================================================
+   4. DOM ELEMENTS
+============================================================ */
 
-    if (!savedTrip) {
+const headerUserName = document.getElementById("headerUserName");
 
-        return [];
+const welcomeUserName = document.getElementById("welcomeUserName");
 
+const logoutButton = document.getElementById("logoutButton");
+
+const dashboardTripCount = document.getElementById("dashboardTripCount");
+
+const dashboardRequestCount = document.getElementById("dashboardRequestCount");
+
+const dashboardGuideCount = document.getElementById("dashboardGuideCount");
+
+const dashboardTripContainer = document.getElementById(
+  "dashboardTripContainer",
+);
+
+const quotationRequestsContainer = document.getElementById(
+  "quotationRequestsContainer",
+);
+
+const selectedGuideContainer = document.getElementById(
+  "selectedGuideContainer",
+);
+
+/* ============================================================
+   5. GET FIREBASE TOURIST PROFILE
+============================================================ */
+
+async function getTouristProfile(uid) {
+  try {
+    const touristRef = doc(db, TOURIST_COLLECTION, uid);
+
+    const touristSnap = await getDoc(touristRef);
+
+    if (touristSnap.exists()) {
+      return {
+        id: uid,
+
+        ...touristSnap.data(),
+      };
     }
 
+    console.warn("Tourist profile not found");
 
-    try {
+    return null;
+  } catch (error) {
+    console.error("Tourist profile loading error:", error);
 
-        const trip =
-            JSON.parse(
-                savedTrip
-            );
-
-
-        return Array.isArray(trip)
-
-            ? trip
-
-            : [];
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "Dashboard trip error:",
-            error
-        );
-
-
-        return [];
-
-    }
-
+    return null;
+  }
 }
 
-
 /* ============================================================
-   4. GET ALL QUOTATION REQUESTS
+   6. GET TOURIST TRIP FROM FIRESTORE
 ============================================================ */
 
-function getDashboardQuotationRequests() {
+async function getTouristTrip(uid) {
+  try {
+    const tripRef = doc(db, TRIP_COLLECTION, uid);
 
-    const savedRequests =
-        localStorage.getItem(
-            DASHBOARD_REQUESTS_KEY
-        );
+    const tripSnap = await getDoc(tripRef);
 
+    if (tripSnap.exists()) {
+      const data = tripSnap.data();
 
-    if (!savedRequests) {
+      return {
+        destinations: Array.isArray(data.destinations) ? data.destinations : [],
 
-        return [];
+        startDate: data.startDate || "",
 
+        endDate: data.endDate || "",
+
+        travelers: data.travelers || "",
+
+        travelStyle: data.travelStyle || "",
+
+        transport: data.transport || "",
+
+        accommodation: data.accommodation || "",
+
+        specialRequests: data.specialRequests || "",
+      };
     }
 
+    return {
+      destinations: [],
 
-    try {
+      startDate: "",
 
-        const requests =
-            JSON.parse(
-                savedRequests
-            );
+      endDate: "",
 
+      travelers: "",
 
-        return Array.isArray(requests)
+      travelStyle: "",
 
-            ? requests
+      transport: "",
 
-            : [];
+      accommodation: "",
 
-    }
+      specialRequests: "",
+    };
+  } catch (error) {
+    console.error("Firestore trip loading error:", error);
 
-    catch (error) {
-
-        console.error(
-
-            "Dashboard quotation request error:",
-
-            error
-
-        );
-
-
-        return [];
-
-    }
-
+    return {
+      destinations: [],
+    };
+  }
 }
 
-
 /* ============================================================
-   5. SAVE ALL QUOTATION REQUESTS
-============================================================ */
-
-function saveDashboardQuotationRequests(
-    requests
-) {
-
-    localStorage.setItem(
-
-        DASHBOARD_REQUESTS_KEY,
-
-        JSON.stringify(
-            requests
-        )
-
-    );
-
-}
-
-
-/* ============================================================
-   6. GET CURRENT TOURIST REQUESTS
-============================================================ */
-
-function getMyQuotationRequests() {
-
-    const user =
-
-        typeof getCurrentUser ===
-        "function"
-
-            ?
-
-        getCurrentUser()
-
-            :
-
-        null;
-
-
-    if (!user) {
-
-        return [];
-
-    }
-
-
-    const requests =
-        getDashboardQuotationRequests();
-
-
-    /*
-       Only current tourist requests
-    */
-
-    return requests.filter(
-
-        request =>
-
-            request.tourist &&
-
-            (
-
-                request.tourist.id ===
-                user.id
-
-                ||
-
-                request.tourist.email ===
-                user.email
-
-            )
-
-    );
-
-}
-
-
-/* ============================================================
-   7. GET SELECTED GUIDE
-============================================================ */
-
-function getDashboardSelectedGuide() {
-
-    /*
-       First check quotation requests.
-
-       Latest selected guide
-       is the most accurate data.
-    */
-
-    const requests =
-        getMyQuotationRequests();
-
-
-    const selectedRequests =
-
-        requests.filter(
-
-            request =>
-                request.selectedGuide
-
-        );
-
-
-    if (
-        selectedRequests.length > 0
-    ) {
-
-        /*
-           Latest selected guide
-        */
-
-        const latestRequest =
-
-            selectedRequests[
-                selectedRequests.length - 1
-            ];
-
-
-        return {
-
-            guide:
-                latestRequest.selectedGuide,
-
-
-            request:
-                latestRequest
-
-        };
-
-    }
-
-
-    /*
-       Fallback to
-       Selected Guide Storage
-    */
-
-    const savedGuide =
-
-        localStorage.getItem(
-
-            DASHBOARD_SELECTED_GUIDE_KEY
-
-        );
-
-
-    if (!savedGuide) {
-
-        return null;
-
-    }
-
-
-    try {
-
-        return {
-
-            guide:
-                JSON.parse(
-                    savedGuide
-                ),
-
-
-            request:
-                null
-
-        };
-
-    }
-
-    catch (error) {
-
-        console.error(
-
-            "Selected guide data error:",
-
-            error
-
-        );
-
-
-        return null;
-
-    }
-
-}
-
-
-/* ============================================================
-   8. UPDATE USER INFORMATION
+   7. UPDATE DASHBOARD USER DISPLAY
 ============================================================ */
 
 function updateDashboardUser() {
+  if (!currentTouristProfile) {
+    return;
+  }
 
-    const user =
+  const name =
+    currentTouristProfile.fullName || currentTouristProfile.email || "Tourist";
 
-        typeof getCurrentUser ===
-        "function"
+  if (headerUserName) {
+    headerUserName.textContent = name;
+  }
 
-            ?
-
-        getCurrentUser()
-
-            :
-
-        null;
-
-
-    if (!user) {
-
-        return;
-
-    }
-
-
-    const displayName =
-
-        user.fullName
-
-        ||
-
-        user.email
-
-        ||
-
-        "Tourist";
-
-
-    if (
-        headerUserName
-    ) {
-
-        headerUserName.textContent =
-            displayName;
-
-    }
-
-
-    if (
-        welcomeUserName
-    ) {
-
-        welcomeUserName.textContent =
-            displayName;
-
-    }
-
+  if (welcomeUserName) {
+    welcomeUserName.textContent = name;
+  }
 }
+
+/* ============================================================
+   8. RENDER MY TRIP
+============================================================ */
+
+async function renderDashboardTrip() {
+  if (!dashboardTripContainer || !currentFirebaseUser) {
+    return;
+  }
+
+  const trip = await getTouristTrip(currentFirebaseUser.uid);
+
+  const destinations = trip.destinations || [];
+
+  if (dashboardTripCount) {
+    dashboardTripCount.textContent = destinations.length;
+  }
+
+  if (destinations.length === 0) {
+    dashboardTripContainer.innerHTML = `
+
+
+        <div class="dashboard-empty-state">
+
+
+            🗺️
+
+
+            <h4>
+
+                No Destinations Yet
+
+            </h4>
+
+
+
+            <p>
+
+                Start planning your Sri Lanka journey.
+
+            </p>
+
+
+
+            <a
+
+            href="trip-planner.html"
+
+            class="dashboard-action-button"
+
+            >
+
+                Explore Destinations
+
+            </a>
+
+
+        </div>
+
+
+        `;
+
+    return;
+  }
+
+  dashboardTripContainer.innerHTML = "";
+
+  destinations.forEach((place) => {
+    const card = document.createElement("article");
+
+    card.className = "dashboard-destination-card";
+
+    card.innerHTML = `
+
+
+            <img
+
+            src="${place.image || ""}"
+
+            alt="${place.name || "Destination"}"
+
+            loading="lazy"
+
+            >
+
+
+
+            <h4>
+
+            ${place.name || "Destination"}
+
+            </h4>
+
+
+
+            <p>
+
+            📍
+
+            ${place.district || ""}
+
+            ${place.province ? " · " + place.province : ""}
+
+
+            </p>
+
+
+            `;
+
+    dashboardTripContainer.appendChild(card);
+  });
+}
+
+/* ============================================================
+   PART 01 END
+============================================================ */
+/* ============================================================
+   TOURIST DASHBOARD LOGIC
+   PART 02
+
+   FIRESTORE QUOTATION SYSTEM
+
+   FLOW:
+
+   Guide
+      ↓
+   Send Quotation
+      ↓
+   lankaQuestQuotationRequests
+      ↓
+   Tourist Dashboard
+      ↓
+   Accept / Reject
+      ↓
+   Firestore Update
+
+============================================================ */
 
 
 /* ============================================================
-   9. UPDATE SUMMARY
+   9. GET TOURIST QUOTATION REQUESTS
 ============================================================ */
 
-function updateDashboardSummary() {
 
-    const trip =
-        getDashboardTrip();
+async function getMyQuotationRequests(){
 
 
-    const requests =
-        getMyQuotationRequests();
+    if(
+        !currentFirebaseUser
+    ){
+
+        return [];
+
+    }
 
 
-    const selectedGuideRequests =
 
-        requests.filter(
 
-            request =>
-                request.selectedGuide
+    try{
+
+
+        const requestsQuery =
+
+        query(
+
+            collection(
+
+                db,
+
+                REQUEST_COLLECTION
+
+            ),
+
+
+            where(
+
+                "touristId",
+
+                "==",
+
+                currentFirebaseUser.uid
+
+            ),
+
+
+            orderBy(
+
+                "createdAt",
+
+                "desc"
+
+            )
 
         );
 
 
-    if (
-        dashboardTripCount
-    ) {
 
-        dashboardTripCount.textContent =
-            trip.length;
+
+        const snapshot =
+
+        await getDocs(
+            requestsQuery
+        );
+
+
+
+
+        const requests = [];
+
+
+
+
+        snapshot.forEach(
+
+            document => {
+
+
+                requests.push({
+
+
+                    firebaseId:
+
+                        document.id,
+
+
+                    ...document.data()
+
+
+                });
+
+
+            }
+
+        );
+
+
+
+
+        return requests;
+
+
 
     }
 
 
-    if (
-        dashboardRequestCount
-    ) {
-
-        dashboardRequestCount.textContent =
-            requests.length;
-
-    }
+    catch(error){
 
 
-    if (
-        dashboardGuideCount
-    ) {
+        console.error(
 
-        dashboardGuideCount.textContent =
+            "Quotation request loading error:",
 
-            selectedGuideRequests.length;
+            error
+
+        );
+
+
+
+        return [];
+
 
     }
+
+
 
 }
 
 
+
+
+
 /* ============================================================
-   10. FORMAT REQUEST STATUS
+   10. GET LATEST QUOTATION
 ============================================================ */
 
-function formatTouristRequestStatus(
-    status
-) {
 
-    const statusMap = {
+function getLatestQuotation(
+    request
+){
 
-        pending:
-            "Pending",
 
-        guide_selected:
-            "Guide Selected",
+    if(
 
-        quotation_sent:
-            "Quotation Received",
+        !request ||
 
-        quotation_accepted:
-            "Quotation Accepted",
+        !Array.isArray(
 
-        quotation_rejected:
-            "Quotation Rejected"
+            request.quotations
 
-    };
+        )
+
+    ){
+
+        return null;
+
+    }
+
+
+
+    if(
+
+        request.quotations.length === 0
+
+    ){
+
+        return null;
+
+    }
+
 
 
     return (
 
-        statusMap[
-            status
+        request.quotations[
+
+            request.quotations.length - 1
+
         ]
+
+    );
+
+
+}
+
+
+
+
+
+/* ============================================================
+   11. FORMAT DATE
+============================================================ */
+
+
+function formatDashboardDate(
+    value
+){
+
+
+    if(
+        !value
+    ){
+
+        return "Not specified";
+
+    }
+
+
+
+    try{
+
+
+        if(
+            value.toDate
+        ){
+
+            return value
+
+            .toDate()
+
+            .toLocaleDateString();
+
+
+        }
+
+
+
+        return new Date(value)
+
+        .toLocaleDateString();
+
+
+
+    }
+
+
+    catch(error){
+
+
+        return "Not specified";
+
+
+    }
+
+
+
+}
+
+
+
+
+
+/* ============================================================
+   12. STATUS TEXT
+============================================================ */
+
+
+function formatRequestStatus(
+    status
+){
+
+
+    const statusMap = {
+
+
+        pending:
+
+            "Pending",
+
+
+
+        quotation_sent:
+
+            "Quotation Received",
+
+
+
+        quotation_accepted:
+
+            "Quotation Accepted",
+
+
+
+        quotation_rejected:
+
+            "Quotation Rejected",
+
+
+
+        guide_selected:
+
+            "Guide Selected"
+
+
+    };
+
+
+
+    return (
+
+        statusMap[status]
 
         ||
 
@@ -555,2136 +643,1598 @@ function formatTouristRequestStatus(
 
     );
 
-}
 
-
-/* ============================================================
-   11. FORMAT DATE
-============================================================ */
-
-function formatDashboardDate(
-    date
-) {
-
-    if (!date) {
-
-        return "";
-
-    }
-
-
-    try {
-
-        return new Date(
-            date
-        ).toLocaleDateString();
-
-    }
-
-    catch (error) {
-
-        return date;
-
-    }
 
 }
 
 
-/* ============================================================
-   12. GET LATEST QUOTATION
-============================================================ */
 
-function getLatestQuotation(
-    request
-) {
-
-    if (
-        !request
-    ) {
-
-        return null;
-
-    }
-
-
-    /*
-       Quotations are saved
-       by guide-requests.js
-       inside request.quotations
-    */
-
-    if (
-
-        !Array.isArray(
-            request.quotations
-        )
-
-        ||
-
-        request.quotations.length === 0
-
-    ) {
-
-        return null;
-
-    }
-
-
-    /*
-       Get latest quotation
-    */
-
-    return (
-
-        request.quotations[
-            request.quotations.length - 1
-        ]
-
-    );
-
-}
 
 
 /* ============================================================
-   13. RENDER QUOTATION
+   13. RENDER QUOTATION CARD
 ============================================================ */
+
 
 function renderQuotation(
     request
-) {
+){
+
+
 
     const quotation =
+
         getLatestQuotation(
             request
         );
 
 
-    /*
-       No quotation yet
-    */
 
-    if (
+
+
+    if(
         !quotation
-    ) {
+    ){
+
 
         return `
 
-            <div class="quotation-not-received">
 
-                <div class="quotation-not-received-icon">
-                    ⏳
-                </div>
+        <div class="quotation-not-received">
 
 
-                <div>
+            <h4>
 
-                    <strong>
-                        Waiting for Guide Quotation
-                    </strong>
+            ⏳ Waiting for Guide Quotation
+
+            </h4>
 
 
-                    <p>
 
-                        Your request has been sent.
-                        A registered guide has not
-                        sent a quotation yet.
+            <p>
 
-                    </p>
+            A registered guide has not sent
+            a quotation yet.
 
-                </div>
+            </p>
 
-            </div>
+
+        </div>
+
 
         `;
 
+
     }
+
+
+
 
 
     const guide =
+
         quotation.guide || {};
 
 
-    const quotationStatus =
-        quotation.status || "sent";
 
 
-    /*
-       Accepted
-    */
-
-    if (
-        request.status ===
-        "quotation_accepted"
-    ) {
-
-        return `
-
-            <div class="tourist-quotation-card quotation-accepted">
-
-                <div class="quotation-card-header">
-
-                    <div>
-
-                        <span class="quotation-label">
-                            💰 Guide Quotation
-                        </span>
-
-
-                        <h4>
-
-                            ${guide.fullName || "Registered Guide"}
-
-                        </h4>
-
-                    </div>
-
-
-                    <span class="quotation-status-badge accepted">
-
-                        ✓ Accepted
-
-                    </span>
-
-                </div>
-
-
-                <div class="quotation-price">
-
-                    ${quotation.amount || "0"}
-
-                    ${quotation.currency || ""}
-
-                </div>
-
-
-                <p class="quotation-validity">
-
-                    Valid until:
-
-                    <strong>
-                        ${formatDashboardDate(
-                            quotation.validUntil
-                        )}
-                    </strong>
-
-                </p>
-
-
-                <div class="quotation-accepted-message">
-
-                    ✓ You have accepted this quotation.
-
-                    <br>
-
-                    The guide can now be contacted
-                    through the chat system.
-
-                </div>
-
-
-                <!--
-                    Chat button will be connected
-                    in the next phase.
-                -->
-
-                <button
-                    type="button"
-                    class="quotation-chat-button"
-                    disabled
-                >
-
-                    💬 Chat with Guide
-
-                    <span>
-                        Coming Soon
-                    </span>
-
-                </button>
-
-            </div>
-
-        `;
-
-    }
-
-
-    /*
-       Rejected
-    */
-
-    if (
-        request.status ===
-        "quotation_rejected"
-    ) {
-
-        return `
-
-            <div class="tourist-quotation-card quotation-rejected">
-
-                <div class="quotation-card-header">
-
-                    <div>
-
-                        <span class="quotation-label">
-                            💰 Guide Quotation
-                        </span>
-
-
-                        <h4>
-
-                            ${guide.fullName || "Registered Guide"}
-
-                        </h4>
-
-                    </div>
-
-
-                    <span class="quotation-status-badge rejected">
-
-                        ✕ Rejected
-
-                    </span>
-
-                </div>
-
-
-                <div class="quotation-rejected-message">
-
-                    You have rejected this quotation.
-
-                </div>
-
-            </div>
-
-        `;
-
-    }
-
-
-    /*
-       New Quotation
-       Tourist must review
-    */
 
     return `
 
-        <div class="tourist-quotation-card quotation-pending">
 
-            <div class="quotation-card-header">
+    <div class="tourist-quotation-card">
 
-                <div>
 
-                    <span class="quotation-label">
+        <div class="quotation-card-header">
 
-                        💰 New Guide Quotation
 
-                    </span>
+            <h4>
 
-
-                    <h4>
-
-                        ${guide.fullName || "Registered Guide"}
-
-                    </h4>
-
-
-                    <p class="quotation-guide-location">
-
-                        📍
-
-                        ${guide.district || "Sri Lanka"}
-
-                        ${
-                            guide.province
-
-                                ? " · " +
-                                  guide.province
-
-                                : ""
-                        }
-
-                    </p>
-
-                </div>
-
-
-                <span class="quotation-status-badge">
-
-                    New Quotation
-
-                </span>
-
-            </div>
-
-
-            <!-- ==================================================
-                 PRICE
-            ================================================== -->
-
-            <div class="quotation-price-section">
-
-                <span>
-                    Quotation Amount
-                </span>
-
-
-                <strong>
-
-                    ${quotation.amount || "0"}
-
-                    ${quotation.currency || ""}
-
-                </strong>
-
-            </div>
-
-
-            <!-- ==================================================
-                 QUOTATION DETAILS
-            ================================================== -->
-
-            <div class="quotation-details-grid">
-
-
-                <div class="quotation-detail-item">
-
-                    <span>
-                        Valid Until
-                    </span>
-
-                    <strong>
-
-                        ${formatDashboardDate(
-                            quotation.validUntil
-                        )}
-
-                    </strong>
-
-                </div>
-
-
-                <div class="quotation-detail-item">
-
-                    <span>
-                        Guide Languages
-                    </span>
-
-                    <strong>
-
-                        ${guide.languages || "Not specified"}
-
-                    </strong>
-
-                </div>
-
-
-            </div>
-
-
-            <!-- ==================================================
-                 INCLUDED SERVICES
-            ================================================== -->
-
-            <div class="quotation-service-section">
-
-                <h5>
-                    ✓ Included Services
-                </h5>
-
-
-                <p>
-
-                    ${
-                        quotation.included
-
-                            ?
-
-                        quotation.included
-
-                            :
-
-                        "Not specified"
-
-                    }
-
-                </p>
-
-            </div>
-
-
-            <!-- ==================================================
-                 EXCLUDED SERVICES
-            ================================================== -->
-
-            <div class="quotation-service-section">
-
-                <h5>
-                    ✕ Excluded Services
-                </h5>
-
-
-                <p>
-
-                    ${
-                        quotation.excluded
-
-                            ?
-
-                        quotation.excluded
-
-                            :
-
-                        "Not specified"
-
-                    }
-
-                </p>
-
-            </div>
-
-
-            <!-- ==================================================
-                 GUIDE NOTES
-            ================================================== -->
+            🧑‍💼
 
             ${
-                quotation.notes
 
-                    ?
+                guide.fullName ||
 
-                `
+                "Registered Guide"
 
-                    <div class="quotation-service-section">
-
-                        <h5>
-                            📝 Guide Notes
-                        </h5>
+            }
 
 
-                        <p>
+            </h4>
 
-                            ${quotation.notes}
 
-                        </p>
 
-                    </div>
+            <span class="request-status">
 
-                `
 
-                    :
+            ${
+
+                formatRequestStatus(
+
+                    request.status
+
+                )
+
+            }
+
+
+            </span>
+
+
+        </div>
+
+
+
+
+        <div class="quotation-price">
+
+
+            ${
+
+                quotation.amount ||
+
+                "0"
+
+            }
+
+
+            ${
+
+                quotation.currency ||
 
                 ""
 
             }
 
 
-            <!-- ==================================================
-                 TOURIST DISCLAIMER
-            ================================================== -->
-
-            <div class="tourist-quotation-disclaimer">
-
-                <div class="disclaimer-title">
-
-                    ⚠️ Important Notice
-
-                </div>
+        </div>
 
 
-                <p>
-
-                    Explore Sri Lanka is a platform
-                    that connects tourists and
-                    independent registered guides.
-
-                    <br><br>
-
-                    The website does not provide,
-                    guarantee or control the travel
-                    services offered by guides and
-                    does not accept responsibility
-                    for any financial transaction,
-                    payment, agreement, loss, damage,
-                    dispute or personal matter between
-                    the tourist and the guide.
-
-                    <br><br>
-
-                    Any quotation, payment or service
-                    agreement is made directly between
-                    the tourist and the guide.
-
-                </p>
 
 
-                <!-- ==================================================
-                     ACCEPTANCE CHECKBOX
-                ================================================== -->
-
-                <label class="quotation-acceptance-checkbox">
-
-                    <input
-                        type="checkbox"
-                        class="quotation-disclaimer-checkbox"
-                        data-request-id="${request.requestId}"
-                    >
+        <div class="quotation-details">
 
 
-                    <span>
+            <p>
 
-                        I have read and understood
-                        the above notice and agree
-                        to proceed with this quotation
-                        directly with the guide.
+            📍
 
-                    </span>
+            ${
 
-                </label>
+                guide.district ||
 
-            </div>
+                "Sri Lanka"
 
-
-            <!-- ==================================================
-                 ACTION BUTTONS
-            ================================================== -->
-
-            <div class="quotation-action-buttons">
+            }
 
 
-                <button
-                    type="button"
-                    class="accept-quotation-button"
-                    data-request-id="${request.requestId}"
-                    disabled
-                >
-
-                    ✓ Accept Quotation
-
-                </button>
+            </p>
 
 
-                <button
-                    type="button"
-                    class="reject-quotation-button"
-                    data-request-id="${request.requestId}"
-                >
 
-                    ✕ Reject Quotation
+            <p>
 
-                </button>
+            🗣️
+
+            ${
+
+                Array.isArray(
+
+                    guide.languages
+
+                )
+
+                ?
+
+                guide.languages.join(", ")
+
+                :
+
+                "Not specified"
+
+            }
 
 
-            </div>
+            </p>
 
 
-            <div
-                class="quotation-action-message"
-                id="quotationMessage-${request.requestId}"
-            ></div>
+
+            <p>
+
+            📅 Valid Until:
+
+            ${
+
+                formatDashboardDate(
+
+                    quotation.validUntil
+
+                )
+
+            }
+
+
+            </p>
 
 
         </div>
 
+
+
+
+
+        <div class="quotation-actions">
+
+
+            <button
+
+            class="accept-quotation-button"
+
+            data-request-id="${request.requestId}"
+
+            >
+
+            ✓ Accept
+
+            </button>
+
+
+
+
+
+            <button
+
+            class="reject-quotation-button"
+
+            data-request-id="${request.requestId}"
+
+            >
+
+            ✕ Reject
+
+            </button>
+
+
+
+        </div>
+
+
+
+    </div>
+
+
     `;
 
+
 }
+
+
+
+
 
 
 /* ============================================================
    14. ACCEPT QUOTATION
 ============================================================ */
 
-function acceptQuotation(
-requestId
-) {
 
-    const user =
-
-        typeof getCurrentUser ===
-        "function"
-
-            ?
-
-        getCurrentUser()
-
-            :
-
-        null;
+async function acceptQuotation(
+    requestId
+){
 
 
-    if (!user) {
-
-        return;
-
-    }
+    try{
 
 
-    const requests =
-        getDashboardQuotationRequests();
+        const requests =
+
+            await getMyQuotationRequests();
 
 
-    const requestIndex =
 
-        requests.findIndex(
 
-            request =>
+        const request =
 
-                String(
-                    request.requestId
-                )
+        requests.find(
 
-                ===
+            item =>
 
-                String(
-                    requestId
-                )
-
-                &&
-
-                request.tourist
-
-                &&
-
-                (
-
-                    request.tourist.id ===
-                    user.id
-
-                    ||
-
-                    request.tourist.email ===
-                    user.email
-
-                )
+            item.requestId === requestId
 
         );
 
 
-    if (
-        requestIndex === -1
-    ) {
 
-        alert(
-            "Quotation request could not be found."
-        );
 
+        if(
+            !request
+        ){
 
-        return;
-
-    }
-
-
-    const request =
-        requests[
-            requestIndex
-        ];
-
-
-    const quotation =
-        getLatestQuotation(
-            request
-        );
-
-
-    if (
-        !quotation
-    ) {
-
-        alert(
-            "No quotation is available for this request."
-        );
-
-
-        return;
-
-    }
-
-
-    /*
-       Update Status
-    */
-
-    request.status =
-        "quotation_accepted";
-
-
-    /*
-       Update Quotation Status
-    */
-
-    quotation.status =
-        "accepted";
-
-
-    /*
-       Acceptance Timestamp
-    */
-
-    quotation.acceptedAt =
-
-        new Date().toISOString();
-
-
-    /*
-       Save
-    */
-
-    requests[
-        requestIndex
-    ] = request;
-
-
-    saveDashboardQuotationRequests(
-        requests
-    );
-
-
-    /*
-       Refresh Dashboard
-    */
-
-    updateDashboardSummary();
-
-    renderSelectedGuide();
-
-    renderQuotationRequests();
-
-
-    alert(
-
-        "Quotation accepted successfully. You can now proceed with the guide."
-
-    );
-
-}
-
-
-/* ============================================================
-   15. REJECT QUOTATION
-============================================================ */
-
-function rejectQuotation(
-requestId
-) {
-
-    const user =
-
-        typeof getCurrentUser ===
-        "function"
-
-            ?
-
-        getCurrentUser()
-
-            :
-
-        null;
-
-
-    if (!user) {
-
-        return;
-
-    }
-
-
-    const confirmReject =
-
-        window.confirm(
-
-            "Are you sure you want to reject this quotation?"
-
-        );
-
-
-    if (!confirmReject) {
-
-        return;
-
-    }
-
-
-    const requests =
-        getDashboardQuotationRequests();
-
-
-    const requestIndex =
-
-        requests.findIndex(
-
-            request =>
-
-                String(
-                    request.requestId
-                )
-
-                ===
-
-                String(
-                    requestId
-                )
-
-                &&
-
-                request.tourist
-
-                &&
-
-                (
-
-                    request.tourist.id ===
-                    user.id
-
-                    ||
-
-                    request.tourist.email ===
-                    user.email
-
-                )
-
-        );
-
-
-    if (
-        requestIndex === -1
-    ) {
-
-        alert(
-            "Quotation request could not be found."
-        );
-
-
-        return;
-
-    }
-
-
-    const request =
-        requests[
-            requestIndex
-        ];
-
-
-    const quotation =
-        getLatestQuotation(
-            request
-        );
-
-
-    /*
-       Update Request Status
-    */
-
-    request.status =
-        "quotation_rejected";
-
-
-    /*
-       Update Quotation Status
-    */
-
-    if (
-        quotation
-    ) {
-
-        quotation.status =
-            "rejected";
-
-
-        quotation.rejectedAt =
-
-            new Date().toISOString();
-
-    }
-
-
-    /*
-       Save
-    */
-
-    requests[
-        requestIndex
-    ] = request;
-
-
-    saveDashboardQuotationRequests(
-        requests
-    );
-
-
-    /*
-       Refresh Dashboard
-    */
-
-    updateDashboardSummary();
-
-    renderQuotationRequests();
-
-
-    alert(
-
-        "Quotation rejected."
-
-    );
-
-}
-
-
-/* ============================================================
-   16. ATTACH QUOTATION ACTION BUTTONS
-============================================================ */
-
-function attachQuotationActionButtons() {
-
-    /*
-       Acceptance Checkboxes
-    */
-
-    const checkboxes =
-
-        document.querySelectorAll(
-
-            ".quotation-disclaimer-checkbox"
-
-        );
-
-
-    checkboxes.forEach(
-
-        checkbox => {
-
-            checkbox.addEventListener(
-
-                "change",
-
-                () => {
-
-                    const requestId =
-
-                        checkbox.dataset.requestId;
-
-
-                    const acceptButton =
-
-                        document.querySelector(
-
-                            `.accept-quotation-button[data-request-id="${requestId}"]`
-
-                        );
-
-
-                    if (
-                        acceptButton
-                    ) {
-
-                        acceptButton.disabled =
-
-                            !checkbox.checked;
-
-                    }
-
-                }
-
+            alert(
+                "Request not found."
             );
-
-        }
-
-    );
-
-
-    /*
-       Accept Buttons
-    */
-
-    const acceptButtons =
-
-        document.querySelectorAll(
-
-            ".accept-quotation-button"
-
-        );
-
-
-    acceptButtons.forEach(
-
-        button => {
-
-            button.addEventListener(
-
-                "click",
-
-                () => {
-
-                    const requestId =
-
-                        button.dataset.requestId;
-
-
-                    if (
-                        !requestId
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    acceptQuotation(
-                        requestId
-                    );
-
-                }
-
-            );
-
-        }
-
-    );
-
-
-    /*
-       Reject Buttons
-    */
-
-    const rejectButtons =
-
-        document.querySelectorAll(
-
-            ".reject-quotation-button"
-
-        );
-
-
-    rejectButtons.forEach(
-
-        button => {
-
-            button.addEventListener(
-
-                "click",
-
-                () => {
-
-                    const requestId =
-
-                        button.dataset.requestId;
-
-
-                    if (
-                        !requestId
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    rejectQuotation(
-                        requestId
-                    );
-
-                }
-
-            );
-
-        }
-
-    );
-
-}
-
-
-/* ============================================================
-   17. RENDER SELECTED GUIDE
-============================================================ */
-
-function renderSelectedGuide() {
-
-    if (
-        !selectedGuideContainer
-    ) {
-
-        return;
-
-    }
-
-
-    const selectedData =
-        getDashboardSelectedGuide();
-
-
-    /*
-       No Selected Guide
-    */
-
-    if (
-
-        !selectedData
-
-        ||
-
-        !selectedData.guide
-
-    ) {
-
-        selectedGuideContainer.innerHTML = `
-
-            <div class="no-selected-guide">
-
-                <div class="no-selected-guide-icon">
-                    🧑‍💼
-                </div>
-
-
-                <h4>
-                    No Guide Selected Yet
-                </h4>
-
-
-                <p>
-
-                    Choose a registered guide
-                    for your Sri Lanka journey.
-
-                </p>
-
-
-                <a
-                    href="find-guides.html"
-                    class="dashboard-action-button"
-                >
-
-                    Find Registered Guides
-
-                </a>
-
-            </div>
-
-        `;
-
-
-        return;
-
-    }
-
-
-    const guide =
-        selectedData.guide;
-
-
-    const request =
-        selectedData.request;
-
-
-    const requestId =
-
-        request
-
-            ?
-
-        request.requestId
-
-            :
-
-        "";
-
-
-    selectedGuideContainer.innerHTML = `
-
-        <div class="selected-guide-card">
-
-
-            <div class="selected-guide-avatar">
-
-                ${
-                    guide.profileImage
-
-                        ?
-
-                    `
-
-                        <img
-                            src="${guide.profileImage}"
-                            alt="${guide.fullName || "Guide"}"
-                        >
-
-                    `
-
-                        :
-
-                    "🧑‍💼"
-
-                }
-
-            </div>
-
-
-            <div class="selected-guide-info">
-
-
-                <h4>
-
-                    ${guide.fullName || "Selected Guide"}
-
-                </h4>
-
-
-                <p>
-
-                    📍
-
-                    ${guide.district || "Sri Lanka"}
-
-                    ${
-                        guide.province
-
-                            ?
-
-                        " · " +
-                        guide.province
-
-                            :
-
-                        ""
-
-                    }
-
-                </p>
-
-
-                <p>
-
-                    🗣️
-
-                    ${guide.languages || "Not specified"}
-
-                </p>
-
-
-                <p>
-
-                    ⭐
-
-                    ${guide.rating || "N/A"}
-
-                    &nbsp;
-
-                    ·
-
-                    &nbsp;
-
-                    📝
-
-                    ${guide.reviewCount || 0}
-
-                    Reviews
-
-                </p>
-
-
-                <span class="selected-guide-status">
-
-                    ✓ Guide Selected
-
-                </span>
-
-
-                ${
-                    requestId
-
-                        ?
-
-                    `
-
-                        <p>
-
-                            Request:
-
-                            <strong>
-                                ${requestId}
-                            </strong>
-
-                        </p>
-
-                    `
-
-                        :
-
-                    ""
-
-                }
-
-
-            </div>
-
-
-        </div>
-
-    `;
-
-}
-
-
-/* ============================================================
-   18. RENDER QUOTATION REQUESTS
-============================================================ */
-
-function renderQuotationRequests() {
-
-    if (
-        !quotationRequestsContainer
-    ) {
-
-        return;
-
-    }
-
-
-    const requests =
-        getMyQuotationRequests();
-
-
-    /*
-       No Requests
-    */
-
-    if (
-        requests.length === 0
-    ) {
-
-        quotationRequestsContainer.innerHTML = `
-
-            <div class="dashboard-empty-state">
-
-                <div class="dashboard-empty-state-icon">
-                    📋
-                </div>
-
-
-                <h4>
-                    No Quotation Requests Yet
-                </h4>
-
-
-                <p>
-
-                    Start planning your Sri Lanka journey
-                    and request a guide quotation.
-
-                </p>
-
-
-                <a
-                    href="trip-planner.html"
-                    class="dashboard-action-button"
-                >
-
-                    Plan My Journey
-
-                </a>
-
-            </div>
-
-        `;
-
-
-        return;
-
-    }
-
-
-    /*
-       Latest First
-    */
-
-    const sortedRequests =
-
-        [...requests].reverse();
-
-
-    quotationRequestsContainer.innerHTML =
-        "";
-
-
-    sortedRequests.forEach(
-
-        request => {
-
-            const card =
-                document.createElement(
-                    "article"
-                );
-
-
-            card.className =
-                "quotation-request-card";
-
-
-            const destinations =
-
-                Array.isArray(
-                    request.destinations
-                )
-
-                    ?
-
-                request.destinations
-
-                    :
-
-                [];
-
-
-            const destinationNames =
-
-                destinations
-
-                    .map(
-
-                        destination =>
-
-                            destination.name
-
-                            ||
-
-                            "Destination"
-
-                    )
-
-                    .join(
-                        ", "
-                    );
-
-
-            const status =
-
-                request.status
-
-                ||
-
-                "pending";
-
-
-            /*
-               Latest quotation
-            */
-
-            const quotation =
-                getLatestQuotation(
-                    request
-                );
-
-
-            card.innerHTML = `
-
-                <div class="request-card-header">
-
-
-                    <div>
-
-                        <h4>
-
-                            🧾
-
-                            ${request.requestId || "Request"}
-
-                        </h4>
-
-
-                        <span class="request-id">
-
-                            ${
-                                request.createdAt
-
-                                    ?
-
-                                formatDashboardDate(
-                                    request.createdAt
-                                )
-
-                                    :
-
-                                ""
-
-                            }
-
-                        </span>
-
-                    </div>
-
-
-                    <span
-                        class="request-status ${status}"
-                    >
-
-                        ${formatTouristRequestStatus(
-                            status
-                        )}
-
-                    </span>
-
-
-                </div>
-
-
-                <div class="request-details-grid">
-
-
-                    <div class="request-detail">
-
-                        <span>
-                            Destinations
-                        </span>
-
-
-                        <strong>
-
-                            ${
-                                destinationNames
-
-                                    ||
-
-                                "None"
-
-                            }
-
-                        </strong>
-
-                    </div>
-
-
-                    <div class="request-detail">
-
-                        <span>
-                            Travel Dates
-                        </span>
-
-
-                        <strong>
-
-                            ${
-                                request.startDate &&
-                                request.endDate
-
-                                    ?
-
-                                request.startDate +
-                                " → " +
-                                request.endDate
-
-                                    :
-
-                                "Not selected"
-
-                            }
-
-                        </strong>
-
-                    </div>
-
-
-                    <div class="request-detail">
-
-                        <span>
-                            Travelers
-                        </span>
-
-
-                        <strong>
-
-                            ${
-                                request.travelers
-
-                                    ||
-
-                                "Not selected"
-
-                            }
-
-                        </strong>
-
-                    </div>
-
-
-                </div>
-
-
-                ${
-                    request.selectedGuide
-
-                        ?
-
-                    `
-
-                        <div class="request-selected-guide">
-
-                            🧑‍💼
-
-
-                            <strong>
-                                Selected Guide:
-                            </strong>
-
-
-                            ${
-                                request.selectedGuide.fullName
-
-                                    ||
-
-                                "Guide"
-
-                            }
-
-
-                            <br>
-
-
-                            📍
-
-
-                            ${
-                                request.selectedGuide.district
-
-                                    ||
-
-                                "Sri Lanka"
-
-                            }
-
-
-                            &nbsp;
-
-                            ·
-
-                            ⭐
-
-
-                            ${
-                                request.selectedGuide.rating
-
-                                    ||
-
-                                "N/A"
-
-                            }
-
-                        </div>
-
-                    `
-
-                        :
-
-                    `
-
-                        <div class="request-selected-guide">
-
-                            ⏳
-
-                            No guide selected yet.
-
-
-                            <br><br>
-
-
-                            <a
-                                href="find-guides.html"
-                                class="dashboard-action-button"
-                            >
-
-                                Find a Guide
-
-                            </a>
-
-                        </div>
-
-                    `
-
-                }
-
-
-                <!-- ==================================================
-                     QUOTATION AREA
-                ================================================== -->
-
-
-                <div class="request-quotation-area">
-
-                    ${
-                        quotation
-
-                            ?
-
-                        renderQuotation(
-                            request
-                        )
-
-                            :
-
-                        `
-
-                            <div class="quotation-not-received">
-
-                                <div class="quotation-not-received-icon">
-                                    ⏳
-                                </div>
-
-
-                                <div>
-
-                                    <strong>
-                                        Waiting for Guide Quotation
-                                    </strong>
-
-
-                                    <p>
-
-                                        Your request is waiting
-                                        for a registered guide
-                                        to send a quotation.
-
-                                    </p>
-
-                                </div>
-
-                            </div>
-
-                        `
-
-                    }
-
-                </div>
-
-            `;
-
-
-            quotationRequestsContainer.appendChild(
-                card
-            );
-
-        }
-
-    );
-
-
-    /*
-       Attach Accept / Reject
-       and Disclaimer Events
-    */
-
-    attachQuotationActionButtons();
-
-}
-
-
-/* ============================================================
-   19. RENDER MY TRIP
-============================================================ */
-
-function renderDashboardTrip() {
-
-    if (
-        !dashboardTripContainer
-    ) {
-
-        return;
-
-    }
-
-
-    const trip =
-        getDashboardTrip();
-
-
-    /*
-       Empty Trip
-    */
-
-    if (
-        trip.length === 0
-    ) {
-
-        dashboardTripContainer.innerHTML = `
-
-            <div class="dashboard-empty-state">
-
-                <div class="dashboard-empty-state-icon">
-                    🗺️
-                </div>
-
-
-                <h4>
-                    No Destinations Yet
-                </h4>
-
-
-                <p>
-
-                    Add destinations
-                    to your trip planner.
-
-                </p>
-
-
-                <a
-                    href="trip-planner.html"
-                    class="dashboard-action-button"
-                >
-
-                    Explore Destinations
-
-                </a>
-
-            </div>
-
-        `;
-
-
-        return;
-
-    }
-
-
-    dashboardTripContainer.innerHTML =
-        "";
-
-
-    trip.forEach(
-
-        place => {
-
-            const card =
-                document.createElement(
-                    "article"
-                );
-
-
-            card.className =
-                "dashboard-destination-card";
-
-
-            card.innerHTML = `
-
-                <img
-                    src="${place.image || ""}"
-                    alt="${place.name || "Destination"}"
-                >
-
-
-                <div
-                    class="dashboard-destination-info"
-                >
-
-
-                    <h4>
-
-                        ${place.name || "Destination"}
-
-                    </h4>
-
-
-                    <p>
-
-                        📍
-
-                        ${place.district || ""}
-
-                        ${
-                            place.province
-
-                                ?
-
-                            " · " +
-                            place.province
-
-                                :
-
-                            ""
-
-                        }
-
-                    </p>
-
-
-                    <p>
-
-                        ⭐
-
-                        ${place.rating || "N/A"}
-
-                    </p>
-
-
-                </div>
-
-            `;
-
-
-            dashboardTripContainer.appendChild(
-                card
-            );
-
-        }
-
-    );
-
-}
-
-
-/* ============================================================
-   20. LOGOUT
-============================================================ */
-
-function handleTouristLogout() {
-
-    if (
-        typeof logoutUser ===
-        "function"
-    ) {
-
-        logoutUser();
-
-
-        return;
-
-    }
-
-
-    localStorage.removeItem(
-
-        "exploreSriLankaCurrentUser"
-
-    );
-
-
-    sessionStorage.removeItem(
-
-        "exploreSriLankaCurrentUser"
-
-    );
-
-
-    window.location.href =
-        "index.html";
-
-}
-
-
-/* ============================================================
-   21. PAGE INITIALIZATION
-============================================================ */
-
-document.addEventListener(
-
-    "DOMContentLoaded",
-
-    () => {
-
-        /*
-           Require Tourist Login
-        */
-
-        const user =
-
-            typeof requireAccountType ===
-            "function"
-
-                ?
-
-            requireAccountType(
-                "tourist"
-            )
-
-                :
-
-            null;
-
-
-        /*
-           Stop if not Tourist
-        */
-
-        if (
-            !user
-        ) {
 
             return;
 
         }
 
 
-        /*
-           Update User
-        */
-
-        updateDashboardUser();
 
 
-        /*
-           Update Summary
-        */
 
-        updateDashboardSummary();
+        await updateDoc(
 
+            doc(
 
-        /*
-           Render Selected Guide
-        */
+                db,
 
-        renderSelectedGuide();
+                REQUEST_COLLECTION,
 
+                request.firebaseId
 
-        /*
-           Render Quotation Requests
-
-           Includes:
-
-           Guide Quotations
-           Disclaimer
-           Accept
-           Reject
-        */
-
-        renderQuotationRequests();
+            ),
 
 
-        /*
-           Render Trip
-        */
-
-        renderDashboardTrip();
+            {
 
 
-        /*
-           Logout
-        */
+                status:
 
-        if (
-            logoutButton
-        ) {
+                    "quotation_accepted",
 
-            logoutButton.addEventListener(
 
-                "click",
 
-                handleTouristLogout
+                updatedAt:
 
+                    new Date()
+
+
+
+            }
+
+
+        );
+
+
+
+
+
+        alert(
+
+            "Quotation accepted successfully."
+
+        );
+
+
+
+
+
+        await renderQuotationRequests();
+
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(
+
+            "Accept quotation error:",
+
+            error
+
+        );
+
+
+
+        alert(
+
+            "Unable to accept quotation."
+
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+
+/* ============================================================
+   15. REJECT QUOTATION
+============================================================ */
+
+
+async function rejectQuotation(
+    requestId
+){
+
+
+    try{
+
+
+        const requests =
+
+            await getMyQuotationRequests();
+
+
+
+
+        const request =
+
+        requests.find(
+
+            item =>
+
+            item.requestId === requestId
+
+        );
+
+
+
+
+        if(
+            !request
+        ){
+
+            alert(
+                "Request not found."
             );
+
+            return;
 
         }
 
 
-        /*
-           Debug
-        */
 
-        console.log(
 
-            "Tourist Dashboard Loaded:",
 
-            user
+        await updateDoc(
+
+            doc(
+
+                db,
+
+                REQUEST_COLLECTION,
+
+                request.firebaseId
+
+            ),
+
+
+            {
+
+
+                status:
+
+                    "quotation_rejected",
+
+
+
+                updatedAt:
+
+                    new Date()
+
+
+
+            }
+
 
         );
 
+
+
+
+
+        alert(
+
+            "Quotation rejected."
+
+        );
+
+
+
+
+
+        await renderQuotationRequests();
+
+
+
     }
 
+
+    catch(error){
+
+
+        console.error(
+
+            "Reject quotation error:",
+
+            error
+
+        );
+
+
+
+        alert(
+
+            "Unable to reject quotation."
+
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+
+/* ============================================================
+   16. RENDER QUOTATION REQUESTS
+
+   (continued in PART 03)
+
+============================================================ */
+/* ============================================================
+   TOURIST DASHBOARD LOGIC
+   PART 03
+
+   FIRESTORE DASHBOARD RENDER
+
+============================================================ */
+
+
+/* ============================================================
+   16. RENDER QUOTATION REQUESTS
+============================================================ */
+
+
+async function renderQuotationRequests(){
+
+
+    if(
+        !quotationRequestsContainer
+    ){
+
+        return;
+
+    }
+
+
+
+
+    const requests =
+
+        await getMyQuotationRequests();
+
+
+
+
+
+    if(
+        dashboardRequestCount
+    ){
+
+        dashboardRequestCount.textContent =
+
+            requests.length;
+
+    }
+
+
+
+
+
+
+    if(
+        requests.length === 0
+    ){
+
+
+        quotationRequestsContainer.innerHTML = `
+
+
+        <div class="dashboard-empty-state">
+
+
+            <div>
+
+                📋
+
+            </div>
+
+
+
+            <h4>
+
+                No Quotation Requests Yet
+
+            </h4>
+
+
+
+            <p>
+
+                Start planning your Sri Lanka journey.
+
+            </p>
+
+
+
+            <a
+
+            href="trip-planner.html"
+
+            class="dashboard-action-button"
+
+            >
+
+                Plan My Journey
+
+            </a>
+
+
+        </div>
+
+
+        `;
+
+
+        return;
+
+
+    }
+
+
+
+
+
+    quotationRequestsContainer.innerHTML = "";
+
+
+
+
+
+
+    requests.forEach(
+
+        request => {
+
+
+
+            const card =
+
+            document.createElement(
+                "article"
+            );
+
+
+
+            card.className =
+
+            "quotation-request-card";
+
+
+
+
+
+            const destinations =
+
+                Array.isArray(
+
+                    request.destinations
+
+                )
+
+                ?
+
+                request.destinations
+
+                :
+
+                [];
+
+
+
+
+
+
+            const destinationNames =
+
+                destinations.map(
+
+                    place =>
+
+                    place.name ||
+
+                    "Destination"
+
+                )
+
+                .join(", ");
+
+
+
+
+
+
+            card.innerHTML = `
+
+
+
+            <div class="request-card-header">
+
+
+                <h4>
+
+                    🧾
+
+                    ${
+
+                    request.requestId ||
+
+                    "Request"
+
+                    }
+
+                </h4>
+
+
+
+
+                <span class="request-status">
+
+
+                    ${
+
+                    formatRequestStatus(
+
+                        request.status
+
+                    )
+
+                    }
+
+
+                </span>
+
+
+            </div>
+
+
+
+
+
+
+
+            <div class="request-details-grid">
+
+
+
+                <div>
+
+
+                    <span>
+
+                    Destinations
+
+                    </span>
+
+
+
+                    <strong>
+
+                    ${
+
+                    destinationNames ||
+
+                    "None"
+
+                    }
+
+
+                    </strong>
+
+
+                </div>
+
+
+
+
+
+
+                <div>
+
+
+                    <span>
+
+                    Travel Dates
+
+                    </span>
+
+
+
+                    <strong>
+
+
+                    ${
+
+                    request.startDate &&
+
+                    request.endDate
+
+
+                    ?
+
+
+                    request.startDate +
+
+                    " → " +
+
+                    request.endDate
+
+
+                    :
+
+
+                    "Not selected"
+
+
+                    }
+
+
+                    </strong>
+
+
+                </div>
+
+
+
+
+
+
+                <div>
+
+
+                    <span>
+
+                    Travelers
+
+                    </span>
+
+
+
+                    <strong>
+
+
+                    ${
+
+                    request.travelers ||
+
+                    "Not selected"
+
+
+                    }
+
+
+                    </strong>
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+
+
+
+
+            <div class="request-quotation-area">
+
+
+                ${
+
+                renderQuotation(
+
+                    request
+
+                )
+
+
+                }
+
+
+            </div>
+
+
+
+            `;
+
+
+
+
+
+            quotationRequestsContainer.appendChild(
+
+                card
+
+            );
+
+
+
+        }
+
+
+    );
+
+
+
+
+
+    attachQuotationButtons();
+
+
+
+}
+
+
+
+
+
+
+/* ============================================================
+   17. ATTACH QUOTATION BUTTON EVENTS
+============================================================ */
+
+
+function attachQuotationButtons(){
+
+
+
+    document
+
+    .querySelectorAll(
+
+        ".accept-quotation-button"
+
+    )
+
+    .forEach(
+
+        button => {
+
+
+            button.addEventListener(
+
+                "click",
+
+                ()=>{
+
+
+                    acceptQuotation(
+
+                        button.dataset.requestId
+
+                    );
+
+
+                }
+
+            );
+
+
+        }
+
+
+    );
+
+
+
+
+
+
+
+    document
+
+    .querySelectorAll(
+
+        ".reject-quotation-button"
+
+    )
+
+    .forEach(
+
+        button => {
+
+
+            button.addEventListener(
+
+                "click",
+
+                ()=>{
+
+
+                    rejectQuotation(
+
+                        button.dataset.requestId
+
+                    );
+
+
+                }
+
+            );
+
+
+        }
+
+
+    );
+
+
+
+}
+
+
+
+
+
+
+/* ============================================================
+   18. RENDER SELECTED GUIDE
+============================================================ */
+
+
+async function renderSelectedGuide(){
+
+
+
+    if(
+        !selectedGuideContainer
+    ){
+
+        return;
+
+    }
+
+
+
+
+
+    const requests =
+
+        await getMyQuotationRequests();
+
+
+
+
+
+    const selectedRequest =
+
+        requests.find(
+
+            request =>
+
+            request.selectedGuide
+
+        );
+
+
+
+
+
+
+    if(
+        !selectedRequest
+    ){
+
+
+
+        selectedGuideContainer.innerHTML = `
+
+
+        <div class="no-selected-guide">
+
+
+            <div>
+
+            🧑‍💼
+
+            </div>
+
+
+
+            <h4>
+
+            No Guide Selected Yet
+
+            </h4>
+
+
+
+            <p>
+
+            Select a registered guide
+            for your journey.
+
+            </p>
+
+
+
+            <a
+
+            href="find-guides.html"
+
+            class="dashboard-action-button"
+
+            >
+
+            Find Guides
+
+            </a>
+
+
+
+        </div>
+
+
+        `;
+
+
+        if(
+            dashboardGuideCount
+        ){
+
+            dashboardGuideCount.textContent = 0;
+
+        }
+
+
+        return;
+
+
+    }
+
+
+
+
+
+
+    const guide =
+
+        selectedRequest.selectedGuide;
+
+
+
+
+
+
+
+    selectedGuideContainer.innerHTML = `
+
+
+
+    <div class="selected-guide-card">
+
+
+
+        <h4>
+
+        🧑‍💼
+
+        ${
+
+        guide.fullName ||
+
+        "Guide"
+
+        }
+
+
+        </h4>
+
+
+
+        <p>
+
+
+        📍
+
+        ${
+
+        guide.district ||
+
+        "Sri Lanka"
+
+        }
+
+
+        </p>
+
+
+
+        <p>
+
+
+        🗣️
+
+        ${
+
+        Array.isArray(
+
+            guide.languages
+
+        )
+
+
+        ?
+
+
+        guide.languages.join(", ")
+
+
+        :
+
+
+        "Not specified"
+
+
+        }
+
+
+        </p>
+
+
+
+        <span>
+
+
+        ✓ Guide Selected
+
+
+        </span>
+
+
+
+    </div>
+
+
+
+    `;
+
+
+
+
+    if(
+        dashboardGuideCount
+    ){
+
+        dashboardGuideCount.textContent = 1;
+
+    }
+
+
+
+}
+
+
+
+
+
+
+/* ============================================================
+   19. UPDATE DASHBOARD SUMMARY
+============================================================ */
+
+
+async function updateDashboardSummary(){
+
+
+
+    if(
+        !currentFirebaseUser
+    ){
+
+        return;
+
+    }
+
+
+
+
+
+    const trip =
+
+        await getTouristTrip(
+
+            currentFirebaseUser.uid
+
+        );
+
+
+
+
+
+    const requests =
+
+        await getMyQuotationRequests();
+
+
+
+
+
+
+
+    if(
+        dashboardTripCount
+    ){
+
+        dashboardTripCount.textContent =
+
+        (
+
+            trip.destinations ||
+
+            []
+
+        )
+
+        .length;
+
+
+    }
+
+
+
+
+
+
+    if(
+        dashboardRequestCount
+    ){
+
+        dashboardRequestCount.textContent =
+
+            requests.length;
+
+    }
+
+
+
+}
+
+
+
+
+
+
+/* ============================================================
+   20. FIREBASE LOGOUT
+============================================================ */
+
+
+async function handleLogout(){
+
+
+
+    try{
+
+
+        const {
+
+            signOut
+
+        } = await import(
+
+        "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js"
+
+        );
+
+
+
+
+
+        await signOut(
+
+            auth
+
+        );
+
+
+
+
+
+        window.location.href =
+
+            "index.html";
+
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(
+
+            "Logout error:",
+
+            error
+
+        );
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+/* ============================================================
+   21. PAGE INITIALIZATION
+============================================================ */
+
+
+onAuthStateChanged(
+
+    auth,
+
+
+    async(user)=>{
+
+
+
+        if(
+            !user
+        ){
+
+
+            window.location.href =
+
+                "login.html";
+
+
+            return;
+
+
+        }
+
+
+
+
+
+        currentFirebaseUser = user;
+
+
+
+
+
+        currentTouristProfile =
+
+            await getTouristProfile(
+
+                user.uid
+
+            );
+
+
+
+
+
+
+        if(
+            !currentTouristProfile
+        ){
+
+
+            console.error(
+
+                "Tourist profile missing"
+
+            );
+
+
+            return;
+
+
+        }
+
+
+
+
+
+
+
+        updateDashboardUser();
+
+
+
+
+        await updateDashboardSummary();
+
+
+
+
+        await renderDashboardTrip();
+
+
+
+
+        await renderSelectedGuide();
+
+
+
+
+        await renderQuotationRequests();
+
+
+
+
+
+
+
+        console.log(
+
+            "LankaQuest Tourist Dashboard Loaded",
+
+            user.uid
+
+        );
+
+
+
+    }
+
+
 );
+
+
+
+
+
+
+/* ============================================================
+   22. LOGOUT BUTTON
+============================================================ */
+
+
+if(
+    logoutButton
+){
+
+
+    logoutButton.addEventListener(
+
+        "click",
+
+        handleLogout
+
+    );
+
+
+}
+
+
+/* ============================================================
+   END
+============================================================ */

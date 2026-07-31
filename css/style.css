@@ -74,6 +74,270 @@ body {
         0 5px 20px rgba(0, 0, 0, 0.2);
 }
 
+/* ============================================================
+MAP TOGGLE BUTTON
+============================================================ */
+
+.map-toggle-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 25px 0;
+}
+
+.map-toggle-button {
+    padding: 12px 28px;
+
+     border: none;
+    border-radius: 30px;
+
+    background: #174a3c;
+    color: white;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+   
+}
+
+.map-toggle-button:hover {
+    transform: translateY(-2px);
+}
+
+/* ============================================================
+INTERACTIVE MAP CTA
+============================================================ */
+
+.map-toggle-wrapper {
+
+     display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 18px;
+
+    margin: 35px auto;
+
+    padding: 30px 20px;
+
+    max-width: 700px;
+    
+}
+
+/* ============================================================
+MAP CTA NOTE
+============================================================ */
+
+.map-toggle-note {
+
+     display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    text-align: left;
+    
+}
+
+.map-toggle-note-icon {
+
+     display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 58px;
+
+    height: 58px;
+
+    flex-shrink: 0;
+
+    font-size: 30px;
+
+    background: #e6f0eb;
+
+    border-radius: 50%;
+    
+}
+
+.map-toggle-note-content h3 {
+
+     margin: 0 0 6px;
+
+    color: #174a3c;
+
+    font-size: 22px;
+   
+}
+
+.map-toggle-note-content p {
+
+     margin: 0;
+
+    color: #666;
+
+    font-size: 15px;
+
+    line-height: 1.6;
+    
+}
+
+/* ============================================================
+MAP BUTTON
+============================================================ */
+
+.map-toggle-button {
+
+     display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 12px;
+
+    min-width: 250px;
+
+    padding: 15px 28px;
+
+    border: none;
+
+    border-radius: 50px;
+
+    background: #174a3c;
+
+    color: white;
+
+    font-size: 17px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 8px 20px rgba(23, 74, 60, 0.25);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        background 0.25s ease;
+    
+}
+
+/* ============================================================
+BUTTON HOVER
+============================================================ */
+
+.map-toggle-button:hover {
+
+     transform: translateY(-3px);
+
+    background: #21634f;
+
+    box-shadow:
+        0 12px 28px rgba(23, 74, 60, 0.35);
+   
+}
+
+/* ============================================================
+BUTTON ICON
+============================================================ */
+
+.map-button-icon {
+
+     font-size: 21px;
+   
+}
+
+/* ============================================================
+BUTTON ARROW
+============================================================ */
+
+.map-button-arrow {
+
+     font-size: 22px;
+
+    transition:
+        transform 0.25s ease;
+    
+}
+
+.map-toggle-button:hover .map-button-arrow {
+
+     transform: translateX(5px);
+   
+}
+
+/* ============================================================
+MAP HIDDEN
+============================================================ */
+
+.map-section.hidden {
+
+     display: none;
+   
+}
+
+/* ============================================================
+MOBILE
+============================================================ */
+
+@media (max-width: 600px) {
+
+    .map-toggle-wrapper {
+
+        padding: 25px 15px;
+
+    }
+
+
+    .map-toggle-note {
+
+        align-items: flex-start;
+
+    }
+
+
+    .map-toggle-note-content h3 {
+
+        font-size: 18px;
+
+    }
+
+
+    .map-toggle-note-content p {
+
+        font-size: 14px;
+
+    }
+
+
+    .map-toggle-button {
+
+        width: 100%;
+
+        max-width: 320px;
+
+    }
+
+    
+}
+
+/* ============================================================
+MAP HIDDEN STATE
+============================================================ */
+
+.map-section.hidden {
+    display: none;
+}
 /* =========================
    Tourist Popup
 ========================= */
@@ -176,53 +440,6 @@ body {
     font-size: 16px;
 }
 
-
-/* --- Desktop සහ සාමාන්‍ය පෙනුම --- */
-.site-brand {
-    display: flex;
-    align-items: center;
-    gap: 15px; /* ලාංඡනය සහ අක්ෂර අතර පරතරය */
-    padding: 10px 0;
-}
-
-.brand-icon img {
-    width: 50px;       /* ඩෙස්ක්ටොප් එක සඳහා ලාංඡනයේ පළල */
-    height: 50px;      /* ඩෙස්ක්ටොප් එක සඳහා ලාංඡනයේ උස */
-    object-fit: contain;
-}
-
-.brand-text h1 {
-    font-size: 24px;   /* මාතෘකාවේ ප්‍රමාණය */
-    margin: 0;
-    color: #2c3e50;
-}
-
-.brand-text p {
-    font-size: 14px;   /* උප මාතෘකාවේ ප්‍රමාණය */
-    margin: 5px 0 0 0;
-    color: #666;
-}
-
-/* --- Mobile සඳහා විශේෂ CSS (තිරය 768px හෝ අඩු නම්) --- */
-@media screen and (max-width: 768px) {
-    .site-brand {
-        gap: 10px; /* මොබයිල් එකේදී පරතරය ටිකක් අඩු කිරීම */
-        padding: 5px 0;
-    }
-
-    .brand-icon img {
-        width: 38px;  /* මොබයිල් එකේදී ලාංඡනය කුඩා කරගැනීමට */
-        height: 38px;
-    }
-
-    .brand-text h1 {
-        font-size: 18px; /* මොබයිල් එකට ගැළපෙන ලෙස අකුරු ප්‍රමාණය අඩු කිරීම */
-    }
-
-    .brand-text p {
-        font-size: 12px;
-    }
-}
 
 /* ==================================================
    SEARCH BOX
@@ -1562,105 +1779,6 @@ body {
 
 }
 
-/* ============================================================
-   tourist LOGIN BUTTON
-============================================================ */
-
-.tourist-login-button {
-
-    display: inline-flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 8px;
-
-    padding: 10px 16px;
-
-    background: #ffffff;
-
-    color: #1f5f4a;
-
-    border: 1px solid #1f5f4a;
-
-    border-radius: 8px;
-
-    font-size: 14px;
-
-    font-weight: 600;
-
-    text-decoration: none;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        border-color 0.2s ease,
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-
-}
-
-
-/* ============================================================
-   HOVER
-============================================================ */
-
-.tourist-login-button:hover {
-
-    background: #1f5f4a;
-
-    color: #ffffff;
-
-    border-color: #1f5f4a;
-
-    transform: translateY(-1px);
-
-    box-shadow:
-        0 4px 12px rgba(0, 0, 0, 0.12);
-
-}
-
-
-/* ============================================================
-   ACTIVE
-============================================================ */
-
-.tourist-login-button:active {
-
-    transform: translateY(0);
-
-    box-shadow: none;
-
-}
-
-
-/* ============================================================
-   tourist LOGIN ICON
-============================================================ */
-
-.tourist-login-button:first-letter {
-
-    font-size: 17px;
-
-}
-/* ============================================================
-   MOBILE
-============================================================ */
-
-@media (max-width: 768px) {
-
-    .tourist-login-button {
-
-        padding: 9px 12px;
-
-        font-size: 13px;
-
-    }
-
-}
 
 /* ============================================================
    RESPONSIVE
@@ -1848,6 +1966,171 @@ body {
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
+/* ============================================================
+   tourist LOGIN BUTTON
+============================================================ */
+
+.tourist-login-button {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 10px 16px;
+
+    background: #ffffff;
+
+    color: #1f5f4a;
+
+    border: 1px solid #1f5f4a;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+}
+
+
+/* ============================================================
+   HOVER
+============================================================ */
+
+.tourist-login-button:hover {
+
+    background: #1f5f4a;
+
+    color: #ffffff;
+
+    border-color: #1f5f4a;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.12);
+
+}
+
+
+/* ============================================================
+   ACTIVE
+============================================================ */
+
+.tourist-login-button:active {
+
+    transform: translateY(0);
+
+    box-shadow: none;
+
+}
+
+
+/* ============================================================
+   GUIDE LOGIN ICON
+============================================================ */
+
+.tourist-login-button:first-letter {
+
+    font-size: 17px;
+
+}
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 768px) {
+
+    .tourist-login-button {
+
+        padding: 9px 12px;
+
+        font-size: 13px;
+
+    }
+
+}
+
+/* --- Desktop සහ සාමාන්‍ය පෙනුම --- */
+.site-brand {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    /* ලාංඡනය සහ අක්ෂර අතර පරතරය */
+    padding: 10px 0;
+}
+
+.brand-icon img {
+    width: 50px;
+    /* ඩෙස්ක්ටොප් එක සඳහා ලාංඡනයේ පළල */
+    height: 50px;
+    /* ඩෙස්ක්ටොප් එක සඳහා ලාංඡනයේ උස */
+    object-fit: contain;
+}
+
+.brand-text h1 {
+    font-size: 24px;
+    /* මාතෘකාවේ ප්‍රමාණය */
+    margin: 0;
+    color: #2c3e50;
+}
+
+.brand-text p {
+    font-size: 14px;
+    /* උප මාතෘකාවේ ප්‍රමාණය */
+    margin: 5px 0 0 0;
+    color: #666;
+}
+
+/* --- Mobile සඳහා විශේෂ CSS (තිරය 768px හෝ අඩු නම්) --- */
+@media screen and (max-width: 768px) {
+    .site-brand {
+        gap: 10px;
+        /* මොබයිල් එකේදී පරතරය ටිකක් අඩු කිරීම */
+        padding: 5px 0;
+    }
+
+    .brand-icon img {
+        width: 38px;
+        /* මොබයිල් එකේදී ලාංඡනය කුඩා කරගැනීමට */
+        height: 38px;
+    }
+
+    .brand-text h1 {
+        font-size: 18px;
+        /* මොබයිල් එකට ගැළපෙන ලෙස අකුරු ප්‍රමාණය අඩු කිරීම */
+    }
+
+    .brand-text p {
+        font-size: 12px;
+    }
+}
 /* ============================================================
    HEADER MENU
 ============================================================ */
@@ -1922,8 +2205,7 @@ body {
         border-radius: 14px;
 
         box-shadow:
-            0 12px 35px
-            rgba(0, 0, 0, 0.15);
+            0 12px 35px rgba(0, 0, 0, 0.15);
 
         flex-direction: column;
 
@@ -1954,5 +2236,642 @@ body {
 
         text-align: center;
     }
+
+}
+
+
+/* ============================================================
+LANKAQUEST FOOTER
+============================================================ */
+
+/* ============================================================
+FOOTER MAIN
+============================================================ */
+
+.site-footer {
+
+     width: 100%;
+
+    margin-top: 60px;
+
+    background:
+        #123b31;
+
+    color:
+        #ffffff;
+    
+}
+
+/* ============================================================
+FOOTER CONTAINER
+============================================================ */
+
+.footer-container {
+
+     width: 100%;
+
+    max-width: 1200px;
+
+    margin:
+        0 auto;
+
+    padding:
+        60px 30px 50px;
+
+    display: grid;
+
+    grid-template-columns:
+        2fr 1fr 1.3fr 1.5fr;
+
+    gap:
+        50px;
+    
+}
+
+/* ============================================================
+FOOTER COLUMNS
+============================================================ */
+
+.footer-column {
+
+     min-width: 0;
+    
+}
+
+.footer-column h3 {
+
+     margin:
+        0 0 22px;
+
+    color:
+        #ffffff;
+
+    font-size:
+        18px;
+
+    font-weight:
+        700;
+
+    line-height:
+        1.4;
+    
+}
+
+/* ============================================================
+FOOTER BRAND
+============================================================ */
+
+.footer-brand {
+
+     max-width:
+        330px;
+    
+}
+
+/* ============================================================
+FOOTER LOGO
+============================================================ */
+
+.footer-logo {
+
+     display:
+        inline-block;
+
+    margin-bottom:
+        18px;
+
+    color:
+        #ffffff;
+
+    font-size:
+        30px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.5px;
+
+    text-decoration:
+        none;
+
+    transition:
+        opacity 0.25s ease;
+    
+}
+
+.footer-logo:hover {
+
+     opacity:
+        0.8;
+    
+}
+
+/* ============================================================
+FOOTER DESCRIPTION
+============================================================ */
+
+.footer-brand p {
+
+     margin:
+        0;
+
+    color:
+        rgba(255,
+            255,
+            255,
+            0.75);
+
+    font-size:
+        15px;
+
+    line-height:
+        1.8;
+    
+}
+
+/* ============================================================
+FOOTER LINKS LIST
+============================================================ */
+
+.footer-column ul {
+
+     margin:
+        0;
+
+    padding:
+        0;
+
+    list-style:
+        none;
+   
+}
+
+.footer-column ul li {
+
+     margin-bottom:
+        12px;
+    
+}
+
+.footer-column ul li:last-child {
+
+     margin-bottom:
+        0;
+    
+}
+
+/* ============================================================
+FOOTER LINKS
+============================================================ */
+
+.footer-column ul li a {
+
+     color:
+        rgba(255,
+            255,
+            255,
+            0.72);
+
+    font-size:
+        15px;
+
+    line-height:
+        1.6;
+
+    text-decoration:
+        none;
+
+    transition:
+        color 0.25s ease,
+        padding-left 0.25s ease;
+    
+}
+
+.footer-column ul li a:hover {
+
+     color:
+        #ffffff;
+
+    padding-left:
+        5px;
+    
+}
+
+/* ============================================================
+FOOTER CONTACT
+============================================================ */
+
+.footer-contact li {
+
+     display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    gap:
+        8px;
+
+    color:
+        rgba(255,
+            255,
+            255,
+            0.75);
+
+    font-size:
+        15px;
+
+    line-height:
+        1.6;
+    
+}
+
+.footer-contact li a {
+
+     padding-left:
+        0 !important;
+    
+}
+
+/* ============================================================
+SOCIAL MEDIA
+============================================================ */
+
+.footer-social {
+
+     display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+    margin-top:
+        25px;
+    
+}
+
+.footer-social a {
+
+     width:
+        40px;
+
+    height:
+        40px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border:
+        1px solid rgba(255,
+            255,
+            255,
+            0.25);
+
+    border-radius:
+        50%;
+
+    background:
+        rgba(255,
+            255,
+            255,
+            0.08);
+
+    color:
+        #ffffff;
+
+    font-size:
+        17px;
+
+    font-weight:
+        700;
+
+    text-decoration:
+        none;
+
+    transition:
+        background 0.25s ease,
+        border-color 0.25s ease,
+        transform 0.25s ease;
+    
+}
+
+.footer-social a:hover {
+
+     background:
+        rgba(255,
+            255,
+            255,
+            0.2);
+
+    border-color:
+        rgba(255,
+            255,
+            255,
+            0.6);
+
+    transform:
+        translateY(-3px);
+    
+}
+
+/* ============================================================
+FOOTER BOTTOM
+============================================================ */
+
+.footer-bottom {
+
+     border-top:
+        1px solid rgba(255,
+            255,
+            255,
+            0.12);
+    
+}
+
+.footer-bottom-container {
+
+ width:
+        100%;
+
+    max-width:
+        1200px;
+
+    margin:
+        0 auto;
+
+    padding:
+        20px 30px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        20px;
+    
+}
+
+.footer-bottom p {
+
+     margin:
+        0;
+
+    color:
+        rgba(255,
+            255,
+            255,
+            0.6);
+
+    font-size:
+        14px;
+
+    line-height:
+        1.6;
+    
+}
+
+/* ============================================================
+LEGAL LINKS
+============================================================ */
+
+.footer-legal {
+
+     display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+    
+}
+
+.footer-legal a {
+
+     color:
+        rgba(255,
+            255,
+            255,
+            0.6);
+
+    font-size:
+        14px;
+
+    text-decoration:
+        none;
+
+    transition:
+        color 0.25s ease;
+    
+}
+
+.footer-legal a:hover {
+
+     color:
+        #ffffff;
+    
+}
+
+.footer-legal span {
+
+     color:
+        rgba(255,
+            255,
+            255,
+            0.3);
+    
+}
+
+/* ============================================================
+TABLET
+============================================================ */
+
+@media (max-width: 900px) {
+
+     .footer-container {
+
+        grid-template-columns:
+            1fr 1fr;
+
+        gap:
+            40px;
+
+        padding:
+            50px 25px 40px;
+
+    }
+
+
+    .footer-brand {
+
+        max-width:
+            100%;
+
+    }
+
+
+    .footer-bottom-container {
+
+        padding:
+            20px 25px;
+
+    }
+
+    
+}
+
+/* ============================================================
+MOBILE
+============================================================ */
+
+@media (max-width: 600px) {
+
+     .site-footer {
+
+        margin-top:
+            40px;
+
+    }
+
+
+    .footer-container {
+
+        grid-template-columns:
+            1fr;
+
+        gap:
+            35px;
+
+        padding:
+            45px 20px 35px;
+
+    }
+
+
+    .footer-column h3 {
+
+        margin-bottom:
+            16px;
+
+        font-size:
+            17px;
+
+    }
+
+
+    .footer-logo {
+
+        font-size:
+            28px;
+
+    }
+
+
+    .footer-brand p {
+
+        font-size:
+            14px;
+
+        line-height:
+            1.7;
+
+    }
+
+
+    .footer-social {
+
+        margin-top:
+            20px;
+
+    }
+
+
+    .footer-bottom-container {
+
+        flex-direction:
+            column;
+
+        align-items:
+            center;
+
+        justify-content:
+            center;
+
+        text-align:
+            center;
+
+        padding:
+            20px;
+
+    }
+
+
+    .footer-legal {
+
+        flex-wrap:
+            wrap;
+
+        justify-content:
+            center;
+
+    }
+
+    
+}
+
+/* ============================================================
+SMALL MOBILE
+============================================================ */
+
+@media (max-width: 380px) {
+
+     .footer-container {
+
+        padding:
+            40px 16px 30px;
+
+    }
+
+
+    .footer-bottom-container {
+
+        padding:
+            18px 16px;
+
+    }
+
+
+    .footer-legal {
+
+        gap:
+            7px;
+
+    }
+
+
+    .footer-legal a,
+    .footer-bottom p {
+
+        font-size:
+            13px;
+
+    }
+
 
 }

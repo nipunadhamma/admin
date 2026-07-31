@@ -1,596 +1,233 @@
-
 /* ============================================================
    LOGIN PAGE LOGIC
-   Explore Sri Lanka
+   LankaQuest
 
-   NORMAL LOGIN FLOW:
-
-   Tourist
-      ↓
-   Tourist Dashboard
-
-   Guide
-      ↓
-   Guide Dashboard
+   FIREBASE AUTH VERSION
 
 
-   QUOTATION FLOW:
+   LOGIN METHODS:
 
-   Trip Planner
-      ↓
-   Request Quotation
-      ↓
-   Login Required
-      ↓
-   login.html?redirect=quotation-request.html
-      ↓
-   Successful Tourist Login
-      ↓
-   quotation-request.html
+   1. Email + Password
+
+   2. Google Login
 
 
-   FIND GUIDE FLOW:
+   FLOW:
 
-   Find Guides
-      ↓
-   Select Guide
-      ↓
-   Login Required
-      ↓
-   login.html?redirect=find-guides.html
-      ↓
-   Successful Tourist Login
-      ↓
-   find-guides.html
+   Firebase Authentication
+          |
+          ↓
+   Firebase UID
+          |
+          ↓
+   Firestore Profile
+
+      lankaQuestTourists
+      lankaQuestGuides
+
+          |
+          ↓
+   Create Session
+
+          |
+          ↓
+   Redirect Dashboard
+
 
 ============================================================ */
 
+import { loginUser, googleLogin, redirectAfterLogin } from "./auth.js";
 
 /* ============================================================
    1. DOM ELEMENTS
 ============================================================ */
 
-const loginForm =
-    document.getElementById(
-        "loginForm"
-    );
+const loginForm = document.getElementById("loginForm");
 
+const loginEmail = document.getElementById("loginEmail");
 
-const loginEmail =
-    document.getElementById(
-        "loginEmail"
-    );
+const loginPassword = document.getElementById("loginPassword");
 
+const rememberMe = document.getElementById("rememberMe");
 
-const loginPassword =
-    document.getElementById(
-        "loginPassword"
-    );
+const loginMessage = document.getElementById("loginMessage");
 
+const togglePassword = document.getElementById("togglePassword");
 
-const rememberMe =
-    document.getElementById(
-        "rememberMe"
-    );
-
-
-const loginMessage =
-    document.getElementById(
-        "loginMessage"
-    );
-
-
-const togglePassword =
-    document.getElementById(
-        "togglePassword"
-    );
-
+const googleLoginButton = document.getElementById("googleLoginButton");
 
 /* ============================================================
-   2. SHOW LOGIN MESSAGE
+   2. SHOW MESSAGE
 ============================================================ */
 
 function showLoginMessage(
+  message,
 
-    message,
-
-    type = "error"
-
+  type = "error",
 ) {
+  if (!loginMessage) {
+    return;
+  }
 
-    if (!loginMessage) {
+  loginMessage.textContent = message;
 
-        return;
+  loginMessage.style.display = "block";
 
-    }
+  if (type === "success") {
+    loginMessage.style.background = "#edf8f1";
 
+    loginMessage.style.color = "#176044";
+  } else {
+    loginMessage.style.background = "#fff0f0";
 
-    loginMessage.textContent =
-        message;
-
-
-    loginMessage.style.display =
-        "block";
-
-
-    /*
-       Success
-    */
-
-    if (
-        type ===
-        "success"
-    ) {
-
-        loginMessage.style.background =
-            "#edf8f1";
-
-
-        loginMessage.style.color =
-            "#176044";
-
-    }
-
-
-    /*
-       Error
-    */
-
-    else {
-
-        loginMessage.style.background =
-            "#fff0f0";
-
-
-        loginMessage.style.color =
-            "#b42318";
-
-    }
-
+    loginMessage.style.color = "#b42318";
+  }
 }
 
-
 /* ============================================================
-   3. PASSWORD VISIBILITY
+   3. PASSWORD SHOW / HIDE
 ============================================================ */
 
-if (
+if (togglePassword && loginPassword) {
+  togglePassword.addEventListener(
+    "click",
 
-    togglePassword &&
+    () => {
+      if (loginPassword.type === "password") {
+        loginPassword.type = "text";
 
-    loginPassword
+        togglePassword.textContent = "🙈";
+      } else {
+        loginPassword.type = "password";
 
-) {
-
-    togglePassword.addEventListener(
-
-        "click",
-
-        () => {
-
-            if (
-
-                loginPassword.type ===
-                "password"
-
-            ) {
-
-                loginPassword.type =
-                    "text";
-
-
-                togglePassword.textContent =
-                    "🙈";
-
-            }
-
-            else {
-
-                loginPassword.type =
-                    "password";
-
-
-                togglePassword.textContent =
-                    "👁️";
-
-            }
-
-        }
-
-    );
-
+        togglePassword.textContent = "👁️";
+      }
+    },
+  );
 }
 
-
 /* ============================================================
-   4. LOGIN FORM
+   4. EMAIL PASSWORD LOGIN
 ============================================================ */
 
 if (loginForm) {
+  loginForm.addEventListener(
+    "submit",
 
-    loginForm.addEventListener(
+    async (event) => {
+      event.preventDefault();
 
-        "submit",
+      const email = loginEmail.value.trim();
 
-        event => {
+      const password = loginPassword.value;
 
-            /*
-               Prevent Reload
-            */
+      const remember = rememberMe.checked;
 
-            event.preventDefault();
+      showLoginMessage(
+        "Logging in...",
 
+        "success",
+      );
 
-            /*
-               Get Email
-            */
+      const result = await loginUser(
+        email,
 
-            const email =
+        password,
 
-                loginEmail
+        remember,
+      );
 
-                    ? loginEmail.value.trim()
+      if (!result || !result.success) {
+        showLoginMessage(
+          result?.message || "Login failed.",
 
-                    : "";
+          "error",
+        );
 
+        return;
+      }
 
-            /*
-               Get Password
-            */
+      showLoginMessage(
+        "Login successful. Redirecting...",
 
-            const password =
+        "success",
+      );
 
-                loginPassword
-
-                    ? loginPassword.value
-
-                    : "";
-
-
-            /*
-               Remember Me
-            */
-
-            const remember =
-
-                rememberMe
-
-                    ? rememberMe.checked
-
-                    : true;
-
-
-            /* ====================================================
-               EMPTY CHECK
-            ==================================================== */
-
-            if (
-
-                !email ||
-
-                !password
-
-            ) {
-
-                showLoginMessage(
-
-                    "Please enter your email and password.",
-
-                    "error"
-
-                );
-
-                return;
-
-            }
-
-
-            /* ====================================================
-               LOGIN
-            ==================================================== */
-
-            const result =
-
-                loginUser(
-
-                    email,
-
-                    password,
-
-                    remember
-
-                );
-
-
-            /* ====================================================
-               LOGIN FAILED
-            ==================================================== */
-
-            if (
-
-                !result ||
-
-                !result.success
-
-            ) {
-
-                showLoginMessage(
-
-                    result &&
-                    result.message
-
-                        ? result.message
-
-                        : "Invalid email or password.",
-
-                    "error"
-
-                );
-
-                return;
-
-            }
-
-
-            /* ====================================================
-               LOGIN SUCCESS
-            ==================================================== */
-
-            showLoginMessage(
-
-                "Login successful. Redirecting...",
-
-                "success"
-
-            );
-
-
-            /* ====================================================
-               GET REDIRECT
-            ==================================================== */
-
-            const urlParams =
-
-                new URLSearchParams(
-
-                    window.location.search
-
-                );
-
-
-            const redirectPage =
-
-                urlParams.get(
-
-                    "redirect"
-
-                );
-
-
-            /* ====================================================
-               REDIRECT
-            ==================================================== */
-
-            setTimeout(
-
-                () => {
-
-                    /* =================================================
-                       1. QUOTATION REQUEST FLOW
-                    ================================================= */
-
-                    if (
-
-                        redirectPage ===
-                        "quotation-request.html"
-
-                    ) {
-
-                        /*
-                           Only Tourist
-                        */
-
-                        if (
-
-                            result.user.accountType ===
-                            "tourist"
-
-                        ) {
-
-                            window.location.href =
-
-                                "quotation-request.html";
-
-                            return;
-
-                        }
-
-
-                        /*
-                           Guide cannot submit
-                           Tourist quotation request.
-                        */
-
-                        alert(
-
-                            "Only Tourist accounts can submit quotation requests."
-
-                        );
-
-
-                        /*
-                           Keep Guide in
-                           Guide Dashboard
-                        */
-
-                        if (
-
-                            result.user.accountType ===
-                            "guide"
-
-                        ) {
-
-                            window.location.href =
-
-                                "guide-dashboard.html";
-
-                            return;
-
-                        }
-
-
-                        return;
-
-                    }
-
-
-                    /* =================================================
-                       2. FIND GUIDES FLOW
-                    ================================================= */
-
-                    if (
-
-                        redirectPage ===
-                        "find-guides.html"
-
-                    ) {
-
-                        /*
-                           Only Tourist
-                        */
-
-                        if (
-
-                            result.user.accountType ===
-                            "tourist"
-
-                        ) {
-
-                            window.location.href =
-
-                                "find-guides.html";
-
-                            return;
-
-                        }
-
-
-                        /*
-                           Guide cannot select
-                           guide as Tourist.
-                        */
-
-                        alert(
-
-                            "Only Tourist accounts can select a guide."
-
-                        );
-
-
-                        if (
-
-                            result.user.accountType ===
-                            "guide"
-
-                        ) {
-
-                            window.location.href =
-
-                                "guide-dashboard.html";
-
-                            return;
-
-                        }
-
-
-                        return;
-
-                    }
-
-
-                    /* =================================================
-                       3. NORMAL LOGIN FLOW
-                    ================================================= */
-
-                    if (
-
-                        typeof redirectAfterLogin ===
-                        "function"
-
-                    ) {
-
-                        redirectAfterLogin(
-
-                            result.user
-
-                        );
-
-                        return;
-
-                    }
-
-
-                    /*
-                       Fallback
-                    */
-
-                    window.location.href =
-                        "index.html";
-
-                },
-
-                700
-
-            );
-
-        }
-
-    );
-
+      redirectAfterLogin(result.user);
+    },
+  );
 }
-
 
 /* ============================================================
-   5. FORGOT PASSWORD
+   5. GOOGLE LOGIN
 ============================================================ */
 
-const forgotPassword =
+if (googleLoginButton) {
+  googleLoginButton.addEventListener(
+    "click",
 
-    document.getElementById(
+    async () => {
+      try {
+        showLoginMessage(
+          "Connecting Google account...",
 
-        "forgotPassword"
+          "success",
+        );
 
-    );
+        const result = await googleLogin();
 
+        if (!result || !result.success) {
+          showLoginMessage(
+            result.message || "Google login failed.",
 
-if (forgotPassword) {
+            "error",
+          );
 
-    forgotPassword.addEventListener(
-
-        "click",
-
-        event => {
-
-            /*
-               Prevent Default
-            */
-
-            event.preventDefault();
-
-
-            /*
-               Temporary Demo Message
-            */
-
-            alert(
-
-                "Password recovery will be connected to the authentication backend in the next phase."
-
-            );
-
+          return;
         }
 
-    );
+        showLoginMessage(
+          "Google login successful. Redirecting...",
 
+          "success",
+        );
+
+        redirectAfterLogin(result.user);
+      } catch (error) {
+        console.error(
+          "Google Login Error:",
+
+          error,
+        );
+
+        showLoginMessage(
+          "Google login failed.",
+
+          "error",
+        );
+      }
+    },
+  );
 }
 
+/* ============================================================
+   6. FORGOT PASSWORD
+============================================================ */
+
+const forgotPassword = document.getElementById("forgotPassword");
+
+if (forgotPassword) {
+  forgotPassword.addEventListener(
+    "click",
+
+    (event) => {
+      event.preventDefault();
+
+      alert("Password reset will be connected with Firebase Auth.");
+    },
+  );
+}
+
+/* ============================================================
+   END LOGIN.JS
+============================================================ */

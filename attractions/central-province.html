@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+        content="Explore the best tourist attractions in Sri Lanka's Central Province including Kandy, Matale and Nuwara Eliya.">
+
+    <title>
+        Central Province Attractions | LankaQuest
+    </title>
+
+
+    <!-- ========================================================
+     COMMON PROVINCE GUIDE CSS
+========================================================= -->
+
+    <link rel="stylesheet" href="../css/province-guide.css">
+
+
+    <style>
+        /*
+       Message notification
+    */
+
+        .province-guide-message {
+
+            position: fixed;
+
+            right: 24px;
+
+            bottom: 24px;
+
+            z-index: 9999;
+
+            max-width: 360px;
+
+            padding: 14px 18px;
+
+            border-radius: 12px;
+
+            background: #123c35;
+
+            color: white;
+
+            box-shadow:
+                0 15px 35px rgba(0, 0, 0, 0.18);
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            opacity: 0;
+
+            transform:
+                translateY(20px);
+
+            pointer-events: none;
+
+            transition:
+                0.3s ease;
+
+        }
+
+
+        .province-guide-message.show {
+
+            opacity: 1;
+
+            transform:
+                translateY(0);
+
+        }
+
+
+        .province-guide-message.success {
+
+            background:
+                #16745f;
+
+        }
+
+
+        .province-guide-message.info {
+
+            background:
+                #2c5d78;
+
+        }
+    </style>
+    
+
+</head>
+
+<body>
+
+   
+    <div class="province-guide-page">
+
+
+        <!-- ========================================================
+         NAVIGATION
+    ========================================================= -->
+
+        <header class="province-guide-nav">
+
+            <div class="province-guide-nav-inner">
+
+
+                <!-- BRAND -->
+
+                <a href="../index.html" class="guide-brand">
+
+                    <div class="guide-brand-icon">
+
+                        🇱🇰
+
+                    </div>
+
+
+                    <div class="guide-brand-text">
+
+                        <span class="guide-brand-title">
+
+                            LankaQuest
+
+                        </span>
+
+
+                        <span class="guide-brand-subtitle">
+
+                            Discover Sri Lanka. Create Your Journey.
+
+                        </span>
+
+                    </div>
+
+                </a>
+
+
+                <!-- ACTIONS -->
+
+                <div>
+
+                    <a href="../attractions.html" class="guide-back-button">
+
+                        ←
+
+                        <span>
+                            All Provinces
+                        </span>
+
+                    </a>
+
+
+                    <button type="button" id="provinceMyTripButton" class="guide-back-button"
+                        style="border:0; cursor:pointer; margin-left:6px;">
+
+                        ❤️
+
+                        <span>
+                            My Trip
+                        </span>
+
+                        <span id="provinceTripCounter">
+                            0
+                        </span>
+
+                    </button>
+
+                </div>
+
+
+            </div>
+
+        </header>
+
+
+
+        <!-- ========================================================
+         HERO
+    ========================================================= -->
+
+        <section class="province-hero">
+
+
+            <div class="province-hero-content">
+
+
+                <div class="province-breadcrumb">
+
+                    <a href="../index.html">
+                        Home
+                    </a>
+
+                    <span>
+                        /
+                    </span>
+
+                    <a href="../attractions.html">
+                        Attractions
+                    </a>
+
+                    <span>
+                        /
+                    </span>
+
+                    <span>
+                        Central Province
+                    </span>
+
+                </div>
+
+
+                <h1>
+                    Explore Central Province
+                </h1>
+
+
+                <p class="province-hero-description">
+
+                    Discover the cultural heart and scenic highlands
+                    of Sri Lanka, from the sacred city of Kandy and
+                    the ancient heritage of Matale to the misty tea
+                    country landscapes of Nuwara Eliya.
+
+                </p>
+
+
+                <div class="province-hero-meta">
+
+                    <span class="province-meta-item">
+
+                        📍 3 Districts
+
+                    </span>
+
+
+                    <span class="province-meta-item">
+
+                        🏛️ Heritage
+
+                    </span>
+
+
+                    <span class="province-meta-item">
+
+                        ⛰️ Mountains
+
+                    </span>
+
+
+                    <span class="province-meta-item">
+
+                        🍃 Tea Country
+
+                    </span>
+
+
+                    <span class="province-meta-item">
+
+                        💧 Waterfalls
+
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ========================================================
+         MAIN CONTENT
+    ========================================================= -->
+
+        <main class="province-content">
+
+
+            <!-- ====================================================
+             INTRODUCTION
+        ===================================================== -->
+
+            <section class="province-introduction">
+
+                <span class="province-introduction-label">
+
+                    LankaQuest Travel Guide
+
+                </span>
+
+
+                <h2>
+
+                    The Cultural Heart of Sri Lanka
+
+                </h2>
+
+
+                <p>
+
+                    Central Province is a spectacular combination
+                    of ancient heritage, sacred places, dramatic
+                    mountains, tea plantations, cool highland
+                    towns and cascading waterfalls. From the
+                    historic city of Kandy to the archaeological
+                    treasures of Matale and the picturesque
+                    landscapes of Nuwara Eliya, this region offers
+                    some of Sri Lanka's most memorable travel
+                    experiences.
+
+                </p>
+
+            </section>
+
+
+
+            <!-- ====================================================
+             1. KANDY DISTRICT
+        ===================================================== -->
+
+            <section class="district-section">
+
+
+                <div class="district-header">
+
+
+                    <div class="district-title-group">
+
+                        <h2>
+                            Kandy District
+                        </h2>
+
+                        <p>
+
+                            The spiritual and cultural heart of
+                            Sri Lanka, famous for the Temple of
+                            the Sacred Tooth Relic, Kandy Lake,
+                            historic landmarks and mountain scenery.
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="district-number">
+                        01
+                    </div>
+
+
+                </div>
+
+
+
+                <div class="attractions-grid">
+
+
+                    <!-- Temple of the Sacred Tooth Relic -->
+
+                    <article class="attraction-card">
+
+
+                        <div class="attraction-card-content">
+
+
+                            <span class="attraction-category">
+
+                                🏛️ Sacred Heritage
+
+                            </span>
+
+
+                            <h3>
+                                Temple of the Sacred Tooth Relic
+                            </h3>
+
+
+                            <p class="attraction-description">
+
+                                One of Sri Lanka's most important
+                                Buddhist pilgrimage sites, located
+                                within the historic royal complex
+                                of Kandy and home to the sacred
+                                Tooth Relic of the Buddha.
+
+                            </p>
+
+
+                            <div class="attraction-location">
+
+                                📍 Kandy, Kandy District
+
+                            </div>
+
+
+                            <div class="attraction-actions">
+
+                                <a class="attraction-button attraction-map-button"
+                                    href="https://www.google.com/maps/search/?api=1&query=Temple+of+the+Sacred+Tooth+Relic+Kandy+Sri+Lanka"
+                                    target="_blank" rel="noopener">
+
+                                    🗺️ View Map
+
+                                </a>
+
+
+                                <button type="button" class="attraction-button attraction-trip-button"
+                                    data-id="central-temple-of-the-sacred-tooth-relic"
+                                    data-name="Temple of the Sacred Tooth Relic" data-district="Kandy"
+                                    data-province="Central Province" data-category="Sacred Heritage">
+
+                                    ❤️ Add Trip
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+
+                    <!-- Kandy Lake -->
+
+                    <article class="attraction-card">
+
+
+                        <div class="attraction-card-content">
+
+
+                            <span class="attraction-category">
+
+                                🌊 Scenic
+
+                            </span>
+
+
+                            <h3>
+                                Kandy Lake
+                            </h3>
+
+
+                            <p class="attraction-description">
+
+                                A peaceful artificial lake in the
+                                centre of Kandy, surrounded by
+                                historic buildings, temples and
+                                beautiful walking paths.
+
+                            </p>
+
+
+                            <div class="attraction-location">
+
+                                📍 Kandy, Kandy District
+
+                            </div>
+
+
+                            <div class="attraction-actions">
+
+                                <a class="attraction-button attraction-map-button"
+                                    href="https://www.google.com/maps/search/?api=1&query=Kandy+Lake+Sri+Lanka"
+                                    target="_blank" rel="noopener">
+
+                                    🗺️ View Map
+
+                                </a>
+
+
+                                <button type="button" class="attraction-button attraction-trip-button"
+                                    data-id="central-kandy-lake" data-name="Kandy Lake" data-district="Kandy"
+                                    data-province="Central Province" data-category="Scenic">
+
+                                    ❤️ Add Trip
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+
+                    <!-- Bahirawakanda Temple -->
+
+                    <article class="attraction-card">
+
+
+                        <div class="attraction-card-content">
+
+
+                            <span class="attraction-category">
+
+                                🏛️ Buddhist Heritage
+
+                            </span>
+
+
+                            <h3>
+                                Bahirawakanda Sri Maha Bodhi Temple
+                            </h3>
+
+
+                            <p class="attraction-description">
+
+                                A prominent hilltop Buddhist temple
+                                overlooking Kandy, offering impressive
+                                views across the city and surrounding
+                                central highlands.
+
+                            </p>
+
+
+                            <div class="attraction-location">
+
+                                📍 Kandy, Kandy District
+
+                            </div>
+
+
+                            <div class="attraction-actions">
+
+                                <a class="attraction-button attraction-map-button"
+                                    href="https://www.google.com/maps/search/?api=1&query=Bahirawakanda+Sri+Maha+Bodhi+Temple+Kandy+Sri+Lanka"
+                                    target="_blank" rel="noopener">
+
+                                    🗺️ View Map
+
+                                </a>
+
+
+                                <button type="button" class="attraction-button attraction-trip-button"
+                                    data-id="central-bahirawakanda" data-name="Bahirawakanda Sri Maha Bodhi Temple"
+                                    data-district="Kandy" data-province="Central Province"
+                                    data-category="Buddhist Heritage">
+
+                                    ❤️ Add Trip
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+
+                    <!-- Udawattakele -->
+
+                    <article class="attraction-card">
+
+
+                        <div class="attraction-card-content">
+
+
+                            <span class="attraction-category">
+
+                                🌿 Nature
+
+                            </span>
+
+
+                            <h3>
+                                Udawattakele Forest Reserve
+                            </h3>
+
+
+                            <p class="attraction-description">
+
+                                A historic forest reserve above Kandy
+                                offering shaded walking trails,
+                                rich biodiversity and a peaceful
+                                escape close to the city.
+
+                            </p>
+
+
+                            <div class="attraction-location">
+
+                                📍 Kandy, Kandy District
+
+                            </div>
+
+
+                            <div class="attraction-actions">
+
+                                <a class="attraction-button attraction-map-button"
+                                    href="https://www.google.com/maps/search/?api=1&query=Udawattakele+Forest+Reserve+Kandy+Sri+Lanka"
+                                    target="_blank" rel="noopener">
+
+                                    🗺️ View Map
+
+                                </a>
+
+
+                                <button type="button" class="attraction-button attraction-trip-button"
+                                    data-id="central-udawattakele" data-name="Udawattakele Forest Reserve"
+                                    data-district="Kandy" data-province="Central Province" data-category="Nature">
+
+                                    ❤️ Add Trip
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+                </div>
+
+            </section>
+
+
+
+            <!-- ====================================================
+             2. MATALE DISTRICT
+        ===================================================== -->
+
+            <section class="district-section">
+
+
+                <div class="district-header">
+
+
+                    <div class="district-title-group">
+
+                        <h2>
+                            Matale District
+                        </h2>
+
+                        <p>
+
+                            A region of ancient Buddhist heritage,
+                            spice gardens, dramatic mountain scenery
+                            and unique cultural landmarks.
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="district-number">
+                        02
+                    </div>
+
+
+                </div>
+
+
+
+                <div class="attractions-grid">
+
+
+                    <!-- Aluvihara -->
+
+                    <article class="attraction-card">
+
+
+                        <div class="attraction-card-content">
+
+
+                            <span class="attraction-category">
+
+                                🏛️ Ancient Heritage
+
+                            </span>
+
+
+                            <h3>
+                                Aluvihara Rock Temple
+                            </h3>
+
+
+                            <p class="attraction-description">
+
+                                A historic Buddhist cave temple
+                                complex associated with the recording
+                                of the teachings of the Buddha on
+                                ola-leaf manuscripts.
+
+                            </p>
+
+
+                            <div class="attraction-location">
+
+                                📍 Matale, Matale District
+
+                            </div>
+
+
+                            <div class="attraction-actions">
+
+                                <a class="attraction-button attraction-map-button"
+                                    href="https://www.google.com/maps/search/?api=1&query=Aluvihara+Rock+Temple+Matale+Sri+Lanka"
+                                    target="_blank" rel="noopener">
+
+                                    🗺️ View Map
+
+                                </a>
+
+
+                                <button type="button" class="attraction-button attraction-trip-button"
+                                    data-id="central-aluvihara" data-name="Aluvihara Rock Temple" data-district="Matale"
+                                    data-province="Central Province" data-category="Ancient Heritage">
+
+                                    ❤️ Add Trip
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+
+                    <!-- Nalanda Gedige -->
+
+                    <article class="attraction-card">
+
+
+                        <div class="attraction-card-content">
+
+
+                            <span class="attraction-category">
+
+                                🏛️ Heritage
+
+                            </span>
+
+
+                            <h3>
+                                Nalanda Gedige
+                            </h3>
+
+
+                            <p class="attraction-description">
+
+                                An unusual ancient stone monument
+                                combining Buddhist and Hindu
+                                architectural influences, located
+                                in a scenic setting near Matale.
+
+                            </p>
+
+
+                            <div class="attraction-location">
+
+                                📍 Matale District
+
+                            </div>
+
+
+                            <div class="attraction-actions">
+
+
+                                <a class="attraction-button attraction-map-button"
+                                    href="https://www.google.com/maps/search/?api=1&query=Nalanda+Gedige+Sri+Lanka"
+                                    target="_blank" rel="noopener">
+
+                                    🗺️ View Map
+
+                                </a>
+
+
+                                <button type="button" class="attraction-button attraction-trip-button"
+                                    data-id="central-nalanda-gedige" data-name="Nalanda Gedige" data-district="Matale"
+                                    data-province="Central Province" data-category="Heritage">
+
+                                    ❤️ Add Trip
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+
+                    <!-- Riverston -->
+
+                    <article class="attraction-card">
+
+
+                        <div class="attraction-card-content">
+
+
+                            <span class="attraction-category">
+
+                                ⛰️ Mountain Escape
+
+                            </span>
+
+
+                            <h3>
+                                Riverston
+                            </h3>
+
+
+                            <p class="attraction-description">
+
+                                A spectacular mountain destination
+                                in the Matale highlands, known for
+                                misty landscapes, hiking routes and
+                                panoramic views across the Knuckles
+                                region.
+
+                            </p>
+
+
+                            <div class="attraction-location">
+
+                                📍 Matale District
+
+                            </div>
+
+
+                            <div class="attraction-actions">
+
+
+                                <a class="attraction-button attraction-map-button"
+                                    href="https://www.google.com/maps/search/?api=1&query=Riverston+Matale+Sri+Lanka"
+                                    target="_blank" rel="noopener">
+
+                                    🗺️ View Map
+
+                                </a>
+
+
+                                <button type="button" class="attraction-button attraction-trip-button"
+                                    data-id="central-riverston" data-name="Riverston" data-district="Matale"
+                                    data-province="Central Province" data-category="Mountain Escape">
+
+                                    ❤️ Add Trip
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+
+                    <!-- Sembuwatta Lake -->
+
+                    <article class="attraction-card">
+
+
+                        <div class="attraction-card-content">
+
+
+                            <span class="attraction-category">
+
+                                💧 Scenic Nature
+
+                            </span>
+
+
+                            <h3>
+                                Sembuwatta Lake
+                            </h3>
+
+
+                            <p class="attraction-description">
+
+                                A beautiful mountain lake surrounded
+                                by lush tea country and forested hills,
+                                offering a relaxing highland escape
+                                in the Matale region.
+
+                            </p>
+
+
+                            <div class="attraction-location">
+
+                                📍 Elkaduwa, Matale District
+
+                            </div>
+
+
+                            <div class="attraction-actions">
+
+
+                                <a class="attraction-button attraction-map-button"
+                                    href="https://www.google.com/maps/search/?api=1&query=Sembuwatta+Lake+Sri+Lanka"
+                                    target="_blank" rel="noopener">
+
+                                    🗺️ View Map
+
+                                </a>
+
+
+                                <button type="button" class="attraction-button attraction-trip-button"
+                                    data-id="central-sembuwatta-lake" data-name="Sembuwatta Lake" data-district="Matale"
+                                    data-province="Central Province" data-category="Scenic Nature">
+
+                                    ❤️ Add Trip
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+                </div>
+
+            </section>
+
+
+
+            <!-- ====================================================
+             3. NUWARA ELIYA DISTRICT
+        ===================================================== -->
+
+            <section class="district-section">
+
+
+                <div class="district-header">
+
+
+                    <div class="district-title-group">
+
+                        <h2>
+                            Nuwara Eliya District
+                        </h2>
+
+                        <p>
+
+                            The cool and scenic tea country of Sri Lanka,
+                            famous for misty mountains, waterfalls,
+                            lakes and colonial-era highland charm.
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="district-number">
+                        03
+                    </div>
+
+
+                </div>
+
+
+
+                <div class="attractions-grid">
+
+
+                    <!-- Gregory Lake -->
+
+                    <article class="attraction-card">
+
+
+                        <div class="attraction-card-content">
+
+
+                            <span class="attraction-category">
+
+                                🌊 Lake & Scenic
+
+                            </span>
+
+
+                            <h3>
+                                Gregory Lake
+                            </h3>
+
+
+                            <p class="attraction-description">
+
+                                A scenic reservoir in the heart of
+                                Nuwara Eliya, surrounded by green hills
+                                and popular for relaxing walks and
+                                outdoor activities.
+
+                            </p>
+
+
+                            <div class="attraction-location">
+
+                                📍 Nuwara Eliya, Nuwara Eliya District
+
+                            </div>
+
+
+                            <div class="attraction-actions">
+
+
+                                <a class="attraction-button attraction-map-button"
+                                    href="https://www.google.com/maps/search/?api=1&query=Gregory+Lake+Nuwara+Eliya+Sri+Lanka"
+                                    target="_blank" rel="noopener">
+
+                                    🗺️ View Map
+
+                                </a>
+
+
+                                <button type="button" class="attraction-button attraction-trip-button"
+                                    data-id="central-gregory-lake" data-name="Gregory Lake" data-district="Nuwara Eliya"
+                                    data-province="Central Province" data-category="Lake & Scenic">
+
+                                    ❤️ Add Trip
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+
+                    <!-- Horton Plains -->
+
+                    <article class="attraction-card">
+
+
+                        <div class="attraction-card-content">
+
+
+                            <span class="attraction-category">
+
+                                🌿 National Park
+
+                            </span>
+
+
+                            <h3>
+                                Horton Plains National Park
+                            </h3>
+
+
+                            <p class="attraction-description">
+
+                                A spectacular highland national park
+                                featuring grasslands, cloud forests,
+                                mountain trails and the famous World's
+                                End viewpoint.
+
+                            </p>
+
+
+                            <div class="attraction-location">
+
+                                📍 Ohiya, Nuwara Eliya District
+
+                            </div>
+
+
+                            <div class="attraction-actions">
+
+
+                                <a class="attraction-button attraction-map-button"
+                                    href="https://www.google.com/maps/search/?api=1&query=Horton+Plains+National+Park+Sri+Lanka"
+                                    target="_blank" rel="noopener">
+
+                                    🗺️ View Map
+
+                                </a>
+
+
+                                <button type="button" class="attraction-button attraction-trip-button"
+                                    data-id="central-horton-plains" data-name="Horton Plains National Park"
+                                    data-district="Nuwara Eliya" data-province="Central Province"
+                                    data-category="National Park">
+
+                                    ❤️ Add Trip
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+
+                    <!-- Hakgala Botanical Garden -->
+
+                    <article class="attraction-card">
+
+
+                        <div class="attraction-card-content">
+
+
+                            <span class="attraction-category">
+
+                                🌺 Gardens
+
+                            </span>
+
+
+                            <h3>
+                                Hakgala Botanical Garden
+                            </h3>
+
+
+                            <p class="attraction-description">
+
+                                A beautiful highland botanical garden
+                                featuring landscaped grounds, colourful
+                                flowers and cool mountain surroundings
+                                near Nuwara Eliya.
+
+                            </p>
+
+
+                            <div class="attraction-location">
+
+                                📍 Hakgala, Nuwara Eliya District
+
+                            </div>
+
+
+                            <div class="attraction-actions">
+
+
+                                <a class="attraction-button attraction-map-button"
+                                    href="https://www.google.com/maps/search/?api=1&query=Hakgala+Botanical+Garden+Sri+Lanka"
+                                    target="_blank" rel="noopener">
+
+                                    🗺️ View Map
+
+                                </a>
+
+
+                                <button type="button" class="attraction-button attraction-trip-button"
+                                    data-id="central-hakgala-botanical-garden" data-name="Hakgala Botanical Garden"
+                                    data-district="Nuwara Eliya" data-province="Central Province"
+                                    data-category="Gardens">
+
+                                    ❤️ Add Trip
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+
+                    <!-- Ramboda Falls -->
+
+                    <article class="attraction-card">
+
+
+                        <div class="attraction-card-content">
+
+
+                            <span class="attraction-category">
+
+                                💧 Waterfall
+
+                            </span>
+
+
+                            <h3>
+                                Ramboda Falls
+                            </h3>
+
+
+                            <p class="attraction-description">
+
+                                A dramatic waterfall surrounded by
+                                lush mountain scenery along the route
+                                between Kandy and Nuwara Eliya, making
+                                it a popular stop on highland journeys.
+
+                            </p>
+
+
+                            <div class="attraction-location">
+
+                                📍 Ramboda, Nuwara Eliya District
+
+                            </div>
+
+
+                            <div class="attraction-actions">
+
+
+                                <a class="attraction-button attraction-map-button"
+                                    href="https://www.google.com/maps/search/?api=1&query=Ramboda+Falls+Sri+Lanka"
+                                    target="_blank" rel="noopener">
+
+                                    🗺️ View Map
+
+                                </a>
+
+
+                                <button type="button" class="attraction-button attraction-trip-button"
+                                    data-id="central-ramboda-falls" data-name="Ramboda Falls"
+                                    data-district="Nuwara Eliya" data-province="Central Province"
+                                    data-category="Waterfall">
+
+                                    ❤️ Add Trip
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+
+                    <!-- Tea Plantation -->
+
+                    <article class="attraction-card">
+
+
+                        <div class="attraction-card-content">
+
+
+                            <span class="attraction-category">
+
+                                🍃 Tea Country
+
+                            </span>
+
+
+                            <h3>
+                                Nuwara Eliya Tea Country
+                            </h3>
+
+
+                            <p class="attraction-description">
+
+                                Explore the rolling green tea estates
+                                surrounding Nuwara Eliya and experience
+                                the landscapes that helped establish
+                                Sri Lanka as one of the world's famous
+                                tea-producing regions.
+
+                            </p>
+
+
+                            <div class="attraction-location">
+
+                                📍 Nuwara Eliya District
+
+                            </div>
+
+
+                            <div class="attraction-actions">
+
+
+                                <a class="attraction-button attraction-map-button"
+                                    href="https://www.google.com/maps/search/?api=1&query=Tea+Plantation+Nuwara+Eliya+Sri+Lanka"
+                                    target="_blank" rel="noopener">
+
+                                    🗺️ View Map
+
+                                </a>
+
+
+                                <button type="button" class="attraction-button attraction-trip-button"
+                                    data-id="central-nuwara-eliya-tea-country" data-name="Nuwara Eliya Tea Country"
+                                    data-district="Nuwara Eliya" data-province="Central Province"
+                                    data-category="Tea Country">
+
+                                    ❤️ Add Trip
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+                </div>
+
+            </section>
+
+
+        </main>
+
+
+
+        <!-- ========================================================
+         MESSAGE NOTIFICATION
+    ========================================================= -->
+
+        <div id="provinceGuideMessage" class="province-guide-message" role="status" aria-live="polite">
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- ========================================================
+     COMMON PROVINCE GUIDE JS
+========================================================= -->
+
+    <script type="module" src="../js/province-guide.js"></script>
+    
+
+</body>
+
+</html>

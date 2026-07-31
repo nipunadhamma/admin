@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+        content="Explore Sri Lanka's most beautiful tourist attractions by province. Discover beaches, heritage sites, wildlife, nature and unforgettable experiences.">
+
+    <title>
+        Attractions | LankaQuest
+    </title>
+
+
+    <!-- ============================================================
+         MAIN PROJECT CSS
+    ============================================================= -->
+
+    <link rel="stylesheet" href="css/style.css">
+
+
+    <!-- ============================================================
+         ATTRACTIONS PAGE CSS
+    ============================================================= -->
+
+    <link rel="stylesheet" href="css/attractions.css">
+
+</head>
+
+
+<body>
+
+
+    <!-- ============================================================
+     SITE HEADER
+============================================================= -->
+
+    <header class="site-header">
+
+
+        <!-- BRAND -->
+
+        <div class="site-brand">
+
+            <a href="index.html" class="brand-link">
+
+                <div class="brand-icon">
+
+                    <img src="images/logo.png" alt="LankaQuest Logo">
+
+                </div>
+
+
+                <div class="brand-text">
+
+                    <h1>
+                        LankaQuest
+                    </h1>
+
+                    <p>
+                        Discover Sri Lanka. Create Your Journey.
+                    </p>
+
+                </div>
+
+            </a>
+
+        </div>
+
+
+
+        <!-- NAVIGATION -->
+
+        <nav class="main-navigation" id="mainNavigation">
+
+            <a href="index.html">
+                Home
+            </a>
+
+            <a href="index.html#map">
+                Explore Map
+            </a>
+
+            <a href="attractions.html" class="active">
+                Attractions
+            </a>
+
+            <a href="trip-planner.html">
+                My Trip
+            </a>
+
+        </nav>
+
+
+
+        <!-- HEADER ACTIONS -->
+
+        <div class="header-actions">
+
+
+            <a href="login.html?redirect=guide-dashboard.html" class="guide-login-button">
+
+                🧑‍💼
+
+                <span>
+                    Guide Login
+                </span>
+
+            </a>
+
+
+            <a href="login.html?redirect=tourist-dashboard.html" class="tourist-login-button">
+
+                👤
+
+                <span>
+                    Tourist Login
+                </span>
+
+            </a>
+
+
+            <button type="button" id="myTripButton" class="my-trip-button">
+
+                ❤️
+
+                <span>
+                    My Trip
+                </span>
+
+                <span id="tripCounter" class="trip-counter">
+                    0
+                </span>
+
+            </button>
+
+
+            <!-- MOBILE MENU -->
+
+            <button type="button" id="mobileMenuButton" class="mobile-menu-button" aria-label="Open Menu"
+                aria-expanded="false">
+
+                ☰
+
+            </button>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- ============================================================
+     MAIN CONTENT
+============================================================= -->
+
+    <main class="attractions-page">
+
+
+        <!-- ========================================================
+         HERO
+    ========================================================= -->
+
+        <section class="attractions-hero">
+
+
+            <div class="hero-overlay"></div>
+
+
+            <div class="attractions-hero-content">
+
+
+                <span class="hero-eyebrow">
+                    🇱🇰 Explore Sri Lanka
+                </span>
+
+
+                <h2>
+                    Discover the Wonders of Sri Lanka
+                </h2>
+
+
+                <p>
+                    Explore beautiful beaches, ancient heritage,
+                    wildlife, mountains and unforgettable experiences
+                    across all nine provinces.
+                </p>
+
+
+                <!-- SEARCH -->
+
+                <div class="attraction-search-box">
+
+                    <span>
+                        🔎
+                    </span>
+
+                    <input type="search" id="attractionSearch" placeholder="Search provinces or attractions..."
+                        autocomplete="off">
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ========================================================
+         FILTER / QUICK NAVIGATION
+    ========================================================= -->
+
+        <section class="attraction-tools">
+
+
+            <div class="section-container">
+
+
+                <div class="section-heading">
+
+                    <span class="section-eyebrow">
+                        Explore by Region
+                    </span>
+
+                    <h2>
+                        Choose a Province
+                    </h2>
+
+                    <p>
+                        Select a province and discover its
+                        most memorable attractions.
+                    </p>
+
+                </div>
+
+
+                <!-- Province Buttons -->
+
+                <div class="province-filter" id="provinceFilter">
+
+                    <button type="button" class="province-filter-button active" data-province="all">
+                        All Provinces
+                    </button>
+
+                    <button type="button" class="province-filter-button" data-province="western">
+                            Western
+                        <a href="attractions/western-province.html">
+                        
+                    </a>
+                    </button>
+
+                    <button type="button" class="province-filter-button" data-province="central">
+                        Central 
+                        
+                        <a href="attractions/southern-province.html">
+                            
+                        </a>
+                    </button>
+
+                    <button type="button" class="province-filter-button" data-province="southern">
+                        
+                        Southern 
+                        <a href="attractions/central-province.html">
+                            
+                        </a>
+                        
+                    </button>
+
+                    <button type="button" class="province-filter-button" data-province="northern">
+                        Northern
+                        <a href="attractions/northern-province.html"></a>
+                    </button>
+
+                    <button type="button" class="province-filter-button" data-province="eastern">
+                        Eastern
+                        <a href="attractions/eastern-province.html"></a>
+                    </button>
+
+                    <button type="button" class="province-filter-button" data-province="north-central">
+                        North Central
+                    </button>
+
+                    <button type="button" class="province-filter-button" data-province="north-western">
+                        North Western
+                    </button>
+
+                    <button type="button" class="province-filter-button" data-province="uva">
+                        Uva
+                    </button>
+
+                    <button type="button" class="province-filter-button" data-province="sabaragamuwa">
+                        Sabaragamuwa
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ========================================================
+         PROVINCES
+    ========================================================= -->
+
+        <section class="provinces-section">
+
+
+            <div class="section-container">
+
+
+                <div id="provinceGrid" class="province-grid">
+
+
+                    <!-- ==================================================
+                     EASTERN PROVINCE
+                =================================================== -->
+
+                    <article class="province-card" data-province="eastern"
+                        data-search="eastern province trincomalee batticaloa ampara nilaveli arugam bay pasikudah">
+
+
+                        <div class="province-card-image">
+
+                            <img src="images/attractions/eastern.jpg" alt="Eastern Province Sri Lanka" loading="lazy">
+
+
+                            <span class="province-card-badge">
+                                ⭐ Featured
+                            </span>
+
+                        </div>
+
+
+                        <div class="province-card-content">
+
+
+                            <span class="province-label">
+                                Eastern Province
+                            </span>
+
+
+                            <h3>
+                                The Enchanting East
+                            </h3>
+
+
+                            <p>
+                                Discover pristine beaches,
+                                historic temples, marine adventures,
+                                wildlife and world-class surfing.
+                            </p>
+
+
+                            <div class="province-card-meta">
+
+                                <span>
+                                    📍 3 Districts
+                                </span>
+
+                                <span>
+                                    🏖️ Beaches
+                                </span>
+
+                            </div>
+
+
+                            <a href="eastern-province.html" class="province-view-button">
+
+                                Explore Eastern Province
+
+                                <span>
+                                    →
+                                </span>
+
+                            </a>
+
+                        </div>
+
+                    </article>
+
+
+
+                    <!-- ==================================================
+                     WESTERN PROVINCE
+                =================================================== -->
+
+                    <article class="province-card" data-province="western"
+                        data-search="western province colombo gampaha kalutara">
+
+                        <div class="province-card-image">
+
+                            <div class="province-placeholder">
+                                🌆
+                            </div>
+
+                        </div>
+
+                        <div class="province-card-content">
+
+                            <span class="province-label">
+                                Western Province
+                            </span>
+
+                            <h3>
+                                Urban Life & Coastal Charm
+                            </h3>
+
+                            <p>
+                                Explore Colombo, coastal towns,
+                                cultural landmarks and vibrant city life.
+                            </p>
+
+                            <div class="province-card-meta">
+
+                                <span>
+                                    📍 3 Districts
+                                </span>
+
+                                <span>
+                                    🌆 City
+                                </span>
+
+                            </div>
+
+                            <a href="#" class="province-view-button disabled-link">
+                                Coming Soon →
+                            </a>
+
+                        </div>
+
+                    </article>
+
+
+
+                    <!-- ==================================================
+                     CENTRAL PROVINCE
+                =================================================== -->
+
+                    <article class="province-card" data-province="central"
+                        data-search="central province kandy matale nuwara eliya">
+
+                        <div class="province-card-image">
+
+                            <div class="province-placeholder">
+                                ⛰️
+                            </div>
+
+                        </div>
+
+                        <div class="province-card-content">
+
+                            <span class="province-label">
+                                Central Province
+                            </span>
+
+                            <h3>
+                                Mountains & Heritage
+                            </h3>
+
+                            <p>
+                                Experience misty mountains,
+                                tea country and ancient cultural treasures.
+                            </p>
+
+                            <div class="province-card-meta">
+
+                                <span>
+                                    📍 3 Districts
+                                </span>
+
+                                <span>
+                                    ⛰️ Scenic
+                                </span>
+
+                            </div>
+
+                            <a href="#" class="province-view-button disabled-link">
+                                Coming Soon →
+                            </a>
+
+                        </div>
+
+                    </article>
+
+
+
+                    <!-- ==================================================
+                     SOUTHERN PROVINCE
+                =================================================== -->
+
+                    <article class="province-card" data-province="southern"
+                        data-search="southern province galle matara hambantota">
+
+                        <div class="province-card-image">
+
+                            <div class="province-placeholder">
+                                🌊
+                            </div>
+
+                        </div>
+
+                        <div class="province-card-content">
+
+                            <span class="province-label">
+                                Southern Province
+                            </span>
+
+                            <h3>
+                                Coast, Forts & Wildlife
+                            </h3>
+
+                            <p>
+                                Discover golden beaches,
+                                historic forts and spectacular wildlife.
+                            </p>
+
+                            <div class="province-card-meta">
+
+                                <span>
+                                    📍 3 Districts
+                                </span>
+
+                                <span>
+                                    🌊 Coastal
+                                </span>
+
+                            </div>
+
+                            <a href="#" class="province-view-button disabled-link">
+                                Coming Soon →
+                            </a>
+
+                        </div>
+
+                    </article>
+
+
+                </div>
+
+
+                <!-- NO RESULTS -->
+
+                <div id="noProvinceResults" class="no-province-results" hidden>
+
+                    <div>
+                        🔎
+                    </div>
+
+                    <h3>
+                        No attractions found
+                    </h3>
+
+                    <p>
+                        Try another province or search term.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- ============================================================
+     MAIN PROJECT JS
+============================================================= -->
+
+    <script src="js/places.js"></script>
+
+
+    <!-- ============================================================
+     ATTRACTIONS JS
+============================================================= -->
+
+    <script type="module" src="js/attractions.js"></script>
+
+</body>
+
+</html>

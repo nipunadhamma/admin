@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <!-- =========================================================
+         BASIC META
+    ========================================================== -->
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+        content="Register as a professional tour guide with LankaQuest and connect with travelers exploring Sri Lanka.">
+
+    <meta name="keywords"
+        content="LankaQuest, Sri Lanka tour guide registration, tourist guide, Sri Lanka travel guide">
+
+    <meta name="author" content="LankaQuest">
+
+    <title>Guide Registration | LankaQuest</title>
+
+    <link rel="icon" type="image/png" href="images/logo/favicon.png">
+
+    <!-- GLOBAL CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- GUIDE REGISTRATION CSS -->
+    <link rel="stylesheet" href="css/guide-register.css">
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================================================
+         HEADER
+    ========================================================== -->
+
+    <header class="site-header">
+
+        <div class="header-container">
+
+            <!-- BRAND -->
+
+            <a href="index.html" class="site-logo">
+
+                <span class="logo-icon">
+                    🌴
+                </span>
+
+                <span class="logo-text">
+                    LankaQuest
+                </span>
+
+            </a>
+
+
+            <!-- NAVIGATION -->
+
+            <nav class="main-navigation" aria-label="Main Navigation">
+
+                <a href="index.html">
+                    Home
+                </a>
+
+                <a href="attractions.html">
+                    Attractions
+                </a>
+
+                <a href="trip-planner.html">
+                    Trip Planner
+                </a>
+
+                <a href="login.html">
+                    Login
+                </a>
+
+            </nav>
+
+
+            <!-- MOBILE MENU -->
+
+            <button type="button" class="mobile-menu-button" id="mobileMenuButton" aria-label="Open navigation menu">
+                ☰
+            </button>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- =========================================================
+         MOBILE NAVIGATION
+    ========================================================== -->
+
+    <nav class="mobile-navigation" id="mobileNavigation">
+
+        <a href="index.html">
+            Home
+        </a>
+
+        <a href="attractions.html">
+            Attractions
+        </a>
+
+        <a href="trip-planner.html">
+            Trip Planner
+        </a>
+
+        <a href="login.html">
+            Login
+        </a>
+
+    </nav>
+
+
+
+    <!-- =========================================================
+         MAIN CONTENT
+    ========================================================== -->
+
+    <main class="guide-registration-page">
+
+
+        <!-- =====================================================
+             HERO
+        ====================================================== -->
+
+        <section class="guide-registration-hero">
+
+            <div class="guide-hero-content">
+
+                <span class="guide-hero-badge">
+                    🧭 Become a LankaQuest Guide
+                </span>
+
+                <h1>
+                    Share Sri Lanka.
+                    <br>
+                    Guide the Journey.
+                </h1>
+
+                <p>
+                    Join LankaQuest as a professional tour guide
+                    and connect with travelers who want to discover
+                    the beauty, culture and heritage of Sri Lanka.
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =====================================================
+             REGISTRATION CONTAINER
+        ====================================================== -->
+
+        <section class="guide-registration-container">
+
+
+            <!-- =================================================
+                 PROGRESS
+            ================================================== -->
+
+            <div class="registration-progress" id="registrationProgress">
+
+                <div class="progress-step active">
+
+                    <span class="progress-number">
+                        1
+                    </span>
+
+                    <span class="progress-label">
+                        Personal
+                    </span>
+
+                </div>
+
+
+                <div class="progress-line"></div>
+
+
+                <div class="progress-step">
+
+                    <span class="progress-number">
+                        2
+                    </span>
+
+                    <span class="progress-label">
+                        Professional
+                    </span>
+
+                </div>
+
+
+                <div class="progress-line"></div>
+
+
+                <div class="progress-step">
+
+                    <span class="progress-number">
+                        3
+                    </span>
+
+                    <span class="progress-label">
+                        Documents
+                    </span>
+
+                </div>
+
+
+                <div class="progress-line"></div>
+
+
+                <div class="progress-step">
+
+                    <span class="progress-number">
+                        4
+                    </span>
+
+                    <span class="progress-label">
+                        Membership
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 MAIN REGISTRATION FORM
+            ================================================== -->
+
+            <form id="guideRegistrationForm" class="guide-registration-form" enctype="multipart/form-data" novalidate>
+
+
+                <!-- =================================================
+                     SECTION 1
+                     PERSONAL INFORMATION
+                ================================================== -->
+
+                <section class="registration-section" id="personalInformationSection">
+
+                    <div class="section-heading">
+
+                        <span class="section-icon">
+                            👤
+                        </span>
+
+                        <div>
+
+                            <h2>
+                                Personal Information
+                            </h2>
+
+                            <p>
+                                Tell us a little about yourself.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-grid">
+
+
+                        <!-- fullName -->
+
+                        <div class="form-group full-width">
+
+                            <label for="fullName">
+                                Full Name
+                                <span>*</span>
+                            </label>
+
+                            <input type="text" id="fullName" name="fullName" placeholder="Enter your full name"
+                                autocomplete="name" required>
+
+                            <small class="form-error"></small>
+
+                        </div>
+
+
+
+                        <!-- email -->
+
+                        <div class="form-group">
+
+                            <label for="email">
+                                Email Address
+                                <span>*</span>
+                            </label>
+
+                            <input type="email" id="email" name="email" placeholder="example@email.com"
+                                autocomplete="email" required>
+
+                            <small class="form-hint">
+                                We will use this email for application updates.
+                            </small>
+
+                            <small class="form-error"></small>
+
+                        </div>
+
+
+
+                        <!-- phone -->
+
+                        <div class="form-group">
+
+                            <label for="phone">
+                                Phone Number
+                                <span>*</span>
+                            </label>
+
+                            <input type="tel" id="phone" name="phone" placeholder="+94 XX XXX XXXX" autocomplete="tel"
+                                required>
+
+                            <small class="form-error"></small>
+
+                        </div>
+
+
+
+                        <!-- nic -->
+
+                        <div class="form-group">
+
+                            <label for="nic">
+                                NIC Number
+                            </label>
+
+                            <input type="text" id="nic" name="nic" placeholder="Enter NIC number">
+
+                            <small class="form-error"></small>
+
+                        </div>
+
+
+
+                        <!-- passport -->
+
+                        <div class="form-group">
+
+                            <label for="passport">
+                                Passport Number
+                            </label>
+
+                            <input type="text" id="passport" name="passport" placeholder="Enter passport number">
+
+                            <small class="form-error"></small>
+
+                        </div>
+
+
+
+                        <!-- dateOfBirth -->
+
+                        <div class="form-group">
+
+                            <label for="dateOfBirth">
+                                Date of Birth
+                            </label>
+
+                            <input type="date" id="dateOfBirth" name="dateOfBirth">
+
+                        </div>
+
+
+
+                        <!-- address -->
+
+                        <div class="form-group full-width">
+
+                            <label for="address">
+                                Address
+                                <span>*</span>
+                            </label>
+
+                            <textarea id="address" name="address" rows="3" placeholder="Enter your residential address"
+                                required></textarea>
+
+                            <small class="form-error"></small>
+
+                        </div>
+
+
+
+                        <!-- district -->
+
+                        <div class="form-group">
+
+                            <label for="district">
+                                District
+                                <span>*</span>
+                            </label>
+
+                            <select id="district" name="district" required>
+
+                                <option value="">
+                                    Select District
+                                </option>
+
+                                <option value="Colombo">
+                                    Colombo
+                                </option>
+
+                                <option value="Kandy">
+                                    Kandy
+                                </option>
+
+                                <option value="Galle">
+                                    Galle
+                                </option>
+
+                                <option value="Matara">
+                                    Matara
+                                </option>
+
+                                <option value="Nuwara Eliya">
+                                    Nuwara Eliya
+                                </option>
+
+                                <option value="Badulla">
+                                    Badulla
+                                </option>
+
+                                <option value="Ratnapura">
+                                    Ratnapura
+                                </option>
+
+                                <option value="Anuradhapura">
+                                    Anuradhapura
+                                </option>
+
+                                <option value="Polonnaruwa">
+                                    Polonnaruwa
+                                </option>
+
+                                <option value="Jaffna">
+                                    Jaffna
+                                </option>
+
+                                <option value="Trincomalee">
+                                    Trincomalee
+                                </option>
+
+                                <option value="Batticaloa">
+                                    Batticaloa
+                                </option>
+
+                                <option value="Kurunegala">
+                                    Kurunegala
+                                </option>
+
+                                <option value="Puttalam">
+                                    Puttalam
+                                </option>
+
+                                <option value="Other">
+                                    Other
+                                </option>
+
+                            </select>
+
+                            <small class="form-error"></small>
+
+                        </div>
+
+
+
+                        <!-- province -->
+
+                        <div class="form-group">
+
+                            <label for="province">
+                                Province
+                                <span>*</span>
+                            </label>
+
+                            <select id="province" name="province" required>
+
+                                <option value="">
+                                    Select Province
+                                </option>
+
+                                <option value="Western">
+                                    Western Province
+                                </option>
+
+                                <option value="Central">
+                                    Central Province
+                                </option>
+
+                                <option value="Southern">
+                                    Southern Province
+                                </option>
+
+                                <option value="Northern">
+                                    Northern Province
+                                </option>
+
+                                <option value="Eastern">
+                                    Eastern Province
+                                </option>
+
+                                <option value="North Western">
+                                    North Western Province
+                                </option>
+
+                                <option value="North Central">
+                                    North Central Province
+                                </option>
+
+                                <option value="Uva">
+                                    Uva Province
+                                </option>
+
+                                <option value="Sabaragamuwa">
+                                    Sabaragamuwa Province
+                                </option>
+
+                            </select>
+
+                            <small class="form-error"></small>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     SECTION 2
+                     PROFESSIONAL INFORMATION
+                ================================================== -->
+
+                <section class="registration-section" id="professionalInformationSection">
+
+                    <div class="section-heading">
+
+                        <span class="section-icon">
+                            🧭
+                        </span>
+
+                        <div>
+
+                            <h2>
+                                Professional Information
+                            </h2>
+
+                            <p>
+                                Help travelers understand your experience and expertise.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-grid">
+
+
+                        <!-- guideLicenseNumber -->
+
+                        <div class="form-group">
+
+                            <label for="guideLicenseNumber">
+                                Guide License Number
+                            </label>
+
+                            <input type="text" id="guideLicenseNumber" name="guideLicenseNumber"
+                                placeholder="Enter guide license number">
+
+                        </div>
+
+
+
+                        <!-- experience -->
+
+                        <div class="form-group">
+
+                            <label for="experience">
+                                Years of Experience
+                                <span>*</span>
+                            </label>
+
+                            <select id="experience" name="experience" required>
+
+                                <option value="">
+                                    Select Experience
+                                </option>
+
+                                <option value="0-1">
+                                    Less than 1 year
+                                </option>
+
+                                <option value="1-3">
+                                    1 – 3 years
+                                </option>
+
+                                <option value="3-5">
+                                    3 – 5 years
+                                </option>
+
+                                <option value="5-10">
+                                    5 – 10 years
+                                </option>
+
+                                <option value="10+">
+                                    More than 10 years
+                                </option>
+
+                            </select>
+
+                            <small class="form-error"></small>
+
+                        </div>
+
+
+
+                        <!-- languages -->
+
+                        <div class="form-group full-width">
+
+                            <label>
+                                Languages You Speak
+                                <span>*</span>
+                            </label>
+
+                            <div class="checkbox-grid">
+
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="languages" value="Sinhala">
+                                    <span>Sinhala</span>
+                                </label>
+
+
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="languages" value="English">
+                                    <span>English</span>
+                                </label>
+
+
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="languages" value="Tamil">
+                                    <span>Tamil</span>
+                                </label>
+
+
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="languages" value="Hindi">
+                                    <span>Hindi</span>
+                                </label>
+
+
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="languages" value="German">
+                                    <span>German</span>
+                                </label>
+
+
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="languages" value="French">
+                                    <span>French</span>
+                                </label>
+
+
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="languages" value="Chinese">
+                                    <span>Chinese</span>
+                                </label>
+
+
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="languages" value="Other">
+                                    <span>Other</span>
+                                </label>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- specializations -->
+
+                        <div class="form-group full-width">
+
+                            <label>
+                                Tour Specializations
+                                <span>*</span>
+                            </label>
+
+                            <div class="checkbox-grid">
+
+
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="specializations" value="Cultural Tours">
+                                    <span>
+                                        🏛️ Cultural Tours
+                                    </span>
+                                </label>
+
+
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="specializations" value="Heritage">
+                                    <span>
+                                        🏯 Heritage
+                                    </span>
+                                </label>
+
+
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="specializations" value="Wildlife">
+                                    <span>
+                                        🐘 Wildlife
+                                    </span>
+                                </label>
+
+
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="specializations" value="Nature">
+                                    <span>
+                                        🌿 Nature
+                                    </span>
+                                </label>
+
+
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="specializations" value="Hiking">
+                                    <span>
+                                        🥾 Hiking
+                                    </span>
+                                </label>
+
+
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="specializations" value="Adventure">
+                                    <span>
+                                        🧗 Adventure
+                                    </span>
+                                </label>
+
+
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="specializations" value="Beach">
+                                    <span>
+                                        🏖️ Beach Tours
+                                    </span>
+                                </label>
+
+
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="specializations" value="Photography">
+                                    <span>
+                                        📸 Photography
+                                    </span>
+                                </label>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- areasCovered -->
+
+                        <div class="form-group full-width">
+
+                            <label for="areasCovered">
+                                Main Areas You Cover
+                                <span>*</span>
+                            </label>
+
+                            <textarea id="areasCovered" name="areasCovered" rows="3"
+                                placeholder="Example: Kandy, Sigiriya, Dambulla, Nuwara Eliya..." required></textarea>
+
+                            <small class="form-error"></small>
+
+                        </div>
+
+
+
+                        <!-- qualifications -->
+
+                        <div class="form-group full-width">
+
+                            <label for="qualifications">
+                                Qualifications & Certifications
+                            </label>
+
+                            <textarea id="qualifications" name="qualifications" rows="4"
+                                placeholder="List your relevant qualifications, training and certifications..."></textarea>
+
+                        </div>
+
+
+
+                        <!-- bio -->
+
+                        <div class="form-group full-width">
+
+                            <label for="bio">
+                                About You
+                                <span>*</span>
+                            </label>
+
+                            <textarea id="bio" name="bio" rows="5" maxlength="1000"
+                                placeholder="Tell travelers about yourself, your guiding experience and what makes your tours special..."
+                                required></textarea>
+
+                            <small class="form-hint">
+                                Maximum 1000 characters.
+                            </small>
+
+                            <small class="form-error"></small>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     SECTION 3
+                     DOCUMENTS
+                ================================================== -->
+
+                <section class="registration-section" id="documentsSection">
+
+                    <div class="section-heading">
+
+                        <span class="section-icon">
+                            📄
+                        </span>
+
+                        <div>
+
+                            <h2>
+                                Documents & Verification
+                            </h2>
+
+                            <p>
+                                Upload documents required for LankaQuest verification.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-grid">
+
+
+                        <!-- profileImage -->
+
+                        <div class="form-group full-width">
+
+                            <label for="profileImage">
+                                Profile Photo
+                                <span>*</span>
+                            </label>
+
+                            <input type="file" id="profileImage" name="profileImage"
+                                accept="image/jpeg,image/png,image/webp" required>
+
+                            <small class="form-hint">
+                                Recommended: Clear professional photo. JPG, PNG or WebP.
+                            </small>
+
+                            <small class="form-error"></small>
+
+                        </div>
+
+
+
+                        <!-- identityDocument -->
+
+                        <div class="form-group">
+
+                            <label for="identityDocument">
+                                NIC / Passport Copy
+                                <span>*</span>
+                            </label>
+
+                            <input type="file" id="identityDocument" name="identityDocument"
+                                accept=".jpg,.jpeg,.png,.pdf" required>
+
+                            <small class="form-hint">
+                                JPG, PNG or PDF.
+                            </small>
+
+                            <small class="form-error"></small>
+
+                        </div>
+
+
+
+                        <!-- guideLicenseDocument -->
+
+                        <div class="form-group">
+
+                            <label for="guideLicenseDocument">
+                                Guide License / Certificate
+                            </label>
+
+                            <input type="file" id="guideLicenseDocument" name="guideLicenseDocument"
+                                accept=".jpg,.jpeg,.png,.pdf">
+
+                            <small class="form-hint">
+                                Upload your guide license or relevant certification.
+                            </small>
+
+                        </div>
+
+
+
+                        <!-- additionalDocuments -->
+
+                        <div class="form-group full-width">
+
+                            <label for="additionalDocuments">
+                                Additional Documents
+                            </label>
+
+                            <input type="file" id="additionalDocuments" name="additionalDocuments"
+                                accept=".jpg,.jpeg,.png,.pdf" multiple>
+
+                            <small class="form-hint">
+                                Upload any additional certificates or supporting documents.
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- VERIFICATION NOTICE -->
+
+                    <div class="verification-notice">
+
+                        <div class="notice-icon">
+                            🔐
+                        </div>
+
+                        <div>
+
+                            <h3>
+                                Your information is reviewed securely
+                            </h3>
+
+                            <p>
+                                Documents submitted through this application
+                                will be reviewed by the LankaQuest administration
+                                team during the verification process.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     SECTION 4
+                     MEMBERSHIP
+                ================================================== -->
+
+                <section class="registration-section" id="membershipSection">
+
+                    <div class="section-heading">
+
+                        <span class="section-icon">
+                            ⭐
+                        </span>
+
+                        <div>
+
+                            <h2>
+                                1-Year Guide Membership
+                            </h2>
+
+                            <p>
+                                Choose the annual LankaQuest Guide membership.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="membership-package selected">
+
+
+                        <div class="package-header">
+
+                            <div>
+
+                                <span class="package-badge">
+                                    RECOMMENDED
+                                </span>
+
+                                <h3>
+                                    LankaQuest Professional Guide
+                                </h3>
+
+                                <p>
+                                    1 Year Registration Package
+                                </p>
+
+                            </div>
+
+
+                            <div class="package-price">
+
+                                <span class="price-label">
+                                    Annual Membership
+                                </span>
+
+                                <strong>
+                                    Price to be confirmed
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="package-benefits">
+
+                            <h4>
+                                Membership Benefits
+                            </h4>
+
+                            <ul>
+
+                                <li>
+                                    ✓ Verified LankaQuest Guide Profile
+                                </li>
+
+                                <li>
+                                    ✓ Public Guide Profile
+                                </li>
+
+                                <li>
+                                    ✓ Access to Guide Dashboard
+                                </li>
+
+                                <li>
+                                    ✓ Receive Tourist Quotation Requests
+                                </li>
+
+                                <li>
+                                    ✓ Send Tour Quotations
+                                </li>
+
+                                <li>
+                                    ✓ Display Your Tour Specializations
+                                </li>
+
+                                <li>
+                                    ✓ Display Your Service Areas
+                                </li>
+
+                                <li>
+                                    ✓ Guide Availability Status
+                                </li>
+
+                                <li>
+                                    ✓ Tourist Reviews & Ratings
+                                </li>
+
+                            </ul>
+
+                        </div>
+
+
+                        <label class="package-select-option">
+
+                            <input type="radio" name="package" id="package" value="1-year" checked required>
+
+                            <span>
+                                I want to apply for the 1-Year LankaQuest Guide Membership.
+                            </span>
+
+                        </label>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     ACCOUNT INFORMATION
+                ================================================== -->
+
+                <section class="registration-section" id="accountSection">
+
+                    <div class="section-heading">
+
+                        <span class="section-icon">
+                            🔐
+                        </span>
+
+                        <div>
+
+                            <h2>
+                                Create Your Guide Account
+                            </h2>
+
+                            <p>
+                                You will use these details to access your Guide Dashboard.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-grid">
+
+
+                        <!-- PASSWORD -->
+
+                        <div class="form-group">
+
+                            <label for="password">
+                                Password
+                                <span>*</span>
+                            </label>
+
+                            <input type="password" id="password" name="password" placeholder="Create a secure password"
+                                autocomplete="new-password" minlength="8" required>
+
+                            <small class="form-hint">
+                                Minimum 8 characters.
+                            </small>
+
+                            <small class="form-error"></small>
+
+                        </div>
+
+
+
+                        <!-- CONFIRM PASSWORD -->
+
+                        <div class="form-group">
+
+                            <label for="confirmPassword">
+                                Confirm Password
+                                <span>*</span>
+                            </label>
+
+                            <input type="password" id="confirmPassword" name="confirmPassword"
+                                placeholder="Confirm your password" autocomplete="new-password" minlength="8" required>
+
+                            <small class="form-error"></small>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     TERMS & CONDITIONS
+                ================================================== -->
+
+                <section class="registration-consent">
+
+
+                    <label class="consent-option">
+
+                        <input type="checkbox" id="termsAgreement" name="termsAgreement" required>
+
+                        <span>
+
+                            I have read and agree to the
+
+                            <a href="terms-conditions.html" target="_blank">
+                                LankaQuest Terms & Conditions
+                            </a>
+
+                            and
+
+                            <a href="privacy-policy.html" target="_blank">
+                                Privacy Policy
+                            </a>
+
+                            <span class="required-mark">
+                                *
+                            </span>
+
+                        </span>
+
+                    </label>
+
+
+
+                    <label class="consent-option">
+
+                        <input type="checkbox" id="verificationConsent" name="verificationConsent" required>
+
+                        <span>
+
+                            I confirm that the information and documents
+                            provided in this application are accurate and
+                            belong to me.
+
+                            <span class="required-mark">
+                                *
+                            </span>
+
+                        </span>
+
+                    </label>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     SUBMISSION NOTICE
+                ================================================== -->
+
+                <div class="submission-notice">
+
+                    <span class="submission-icon">
+                        ℹ️
+                    </span>
+
+                    <p>
+
+                        After submitting your application, the LankaQuest
+                        administration team will review your information
+                        and documents. Your Guide account will only be
+                        activated after successful verification and approval.
+
+                    </p>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     FORM ACTIONS
+                ================================================== -->
+
+                <div class="form-actions">
+
+
+                    <a href="login.html" class="secondary-action-button">
+
+                        Already have an account?
+
+                        <strong>
+                            Login
+                        </strong>
+
+                    </a>
+
+
+                    <button type="submit" id="submitGuideApplication" class="primary-action-button">
+
+                        Submit Guide Application
+
+                        <span>
+                            →
+                        </span>
+
+                    </button>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     FORM STATUS MESSAGE
+                ================================================== -->
+
+                <div id="formStatusMessage" class="form-status-message" role="alert" aria-live="polite"></div>
+
+
+            </form>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- =========================================================
+         FOOTER
+    ========================================================== -->
+
+    <footer class="site-footer">
+
+        <div class="footer-container">
+
+
+            <div class="footer-brand">
+
+                <a href="index.html" class="footer-logo">
+                    🌴 LankaQuest
+                </a>
+
+                <p>
+                    Discover Sri Lanka.
+                    Experience the journey.
+                </p>
+
+            </div>
+
+
+            <div class="footer-links">
+
+                <a href="privacy-policy.html">
+                    Privacy Policy
+                </a>
+
+                <a href="terms-conditions.html">
+                    Terms & Conditions
+                </a>
+
+                <a href="login.html">
+                    Login
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-bottom">
+
+            <p>
+                © 2026 LankaQuest. All rights reserved.
+            </p>
+
+        </div>
+
+    </footer>
+
+
+
+    <!-- =========================================================
+         JAVASCRIPT
+    ========================================================== -->
+
+    <script type="module" src="js/guide-register.js"></script>
+
+    <script src="js/mobile-menu.js"></script>
+
+
+</body>
+
+</html>

@@ -9,24 +9,8 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-     <!-- Google Translate Widget Container -->
-<div id="google_translate_element" style="margin: 15px 0;"></div>
-
-<!-- Google Translate Script -->
-<script type="text/javascript">
-    function googleTranslateElementInit() {
-        new google.translate.TranslateElement({
-            pageLanguage: 'en', // ඔබගේ වෙබ් අඩවියේ මූලික භාෂාව (ප්‍රධාන භාෂාව) මෙහි සඳහන් කරන්න
-            includedLanguages: 'si,ta,en,hi,fr,de', // පරිශීලකයින්ට ලබා දීමට අවශ්‍ය භාෂා (සිංහල, දෙමළ, ඉංග්‍රීසි ආදී වශයෙන් කැමති තරම් එකතු කළ හැක)
-            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-            autoDisplay: false
-        }, 'google_translate_element');
-    }
-</script>
-<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-
     <title>
-        Request Guide Quotation | Explore Sri Lanka
+        Request Guide Quotation | LankaQuest
     </title>
 
 
@@ -65,14 +49,14 @@
             <a href="index.html" class="planner-brand-link">
 
                 <div class="brand-icon">
-                    <img src="images/logo.png" alt="Logo">
+                    🇱🇰
                 </div>
 
 
                 <div class="brand-text">
 
                     <h1>
-                        Explore Sri Lanka
+                        LankaQuest
                     </h1>
 
                     <p>
@@ -495,18 +479,12 @@
 
 
 
-    <!-- ============================================================
-         AUTHENTICATION CORE
-    ============================================================= -->
-
-    <script src="js/auth.js"></script>
+<!-- Firebase Auth -->
+<script type="module" src="js/auth.js"></script>
 
 
-    <!-- ============================================================
-         QUOTATION REQUEST LOGIC
-    ============================================================= -->
-
-    <script src="js/quotation-request.js"></script>
+<!-- Quotation Request -->
+<script type="module" src="js/quotation-request.js"></script>
 
 
 </body>

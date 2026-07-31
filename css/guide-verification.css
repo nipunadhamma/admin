@@ -1,0 +1,470 @@
+/* ============================================================
+   GUIDE VERIFICATION PAGE
+   LankaQuest
+============================================================ */
+
+
+/* =========================
+   RESET
+========================= */
+
+* {
+
+    box-sizing: border-box;
+
+    margin: 0;
+
+    padding: 0;
+
+    font-family:
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+}
+
+
+
+body {
+
+    min-height: 100vh;
+
+    background:
+        linear-gradient(135deg,
+            #f1f8e9,
+            #e3f2fd);
+
+}
+
+
+
+/* =========================
+   HEADER
+========================= */
+
+
+.verification-header {
+
+    height: 70px;
+
+    background:
+        #ffffff;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 40px;
+
+    box-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.08);
+
+}
+
+
+
+.logo {
+
+    font-size: 24px;
+
+    font-weight: 700;
+
+    color:
+        #00695c;
+
+}
+
+
+
+
+#logoutButton {
+
+
+    border: none;
+
+    background:
+        #d32f2f;
+
+    color:
+        white;
+
+    padding:
+        10px 22px;
+
+    border-radius:
+        8px;
+
+    cursor:
+        pointer;
+
+    font-size:
+        15px;
+
+}
+
+
+#logoutButton:hover {
+
+    background:
+        #b71c1c;
+
+}
+
+
+
+/* =========================
+   MAIN CONTAINER
+========================= */
+
+
+.verification-container {
+
+
+    min-height:
+        calc(100vh - 70px);
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    padding:
+        30px;
+
+}
+
+
+
+
+/* =========================
+   CARD
+========================= */
+
+
+.verification-card {
+
+
+    width:
+        100%;
+
+    max-width:
+        650px;
+
+    background:
+        white;
+
+    border-radius:
+        18px;
+
+    padding:
+        40px;
+
+    text-align:
+        center;
+
+    box-shadow:
+
+        0 15px 40px rgba(0, 0, 0, 0.12);
+
+}
+
+
+
+/* =========================
+   ICON
+========================= */
+
+
+.icon {
+
+
+    font-size:
+        65px;
+
+    margin-bottom:
+        15px;
+
+}
+
+
+
+
+h1 {
+
+
+    color:
+        #00695c;
+
+    margin-bottom:
+        15px;
+
+}
+
+
+
+.welcome-text {
+
+
+    font-size:
+        18px;
+
+    margin-bottom:
+        20px;
+
+}
+
+
+
+#guideName {
+
+
+    font-weight:
+        700;
+
+    color:
+        #1565c0;
+
+}
+
+
+
+
+.verification-card p {
+
+
+    color:
+        #555;
+
+    line-height:
+        1.6;
+
+}
+
+
+
+
+/* =========================
+   STATUS BOX
+========================= */
+
+
+.status-box {
+
+
+    margin-top:
+        30px;
+
+    background:
+        #f8f9fa;
+
+    border-radius:
+        12px;
+
+    padding:
+        20px;
+
+    text-align:
+        left;
+
+}
+
+
+
+.status-box h3 {
+
+
+    margin-bottom:
+        15px;
+
+    color:
+        #333;
+
+}
+
+
+
+.status-item {
+
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    padding:
+        12px 0;
+
+    border-bottom:
+        1px solid #ddd;
+
+}
+
+
+
+.status-item:last-child {
+
+
+    border-bottom:
+        none;
+
+}
+
+
+
+.status-item strong {
+
+
+    color:
+        #ef6c00;
+
+}
+
+
+
+
+/* =========================
+   INFO BOX
+========================= */
+
+
+.info-box {
+
+
+    margin-top:
+        25px;
+
+    text-align:
+        left;
+
+    background:
+        #e8f5e9;
+
+    padding:
+        20px;
+
+    border-radius:
+        12px;
+
+}
+
+
+
+.info-box h3 {
+
+
+    margin-bottom:
+        12px;
+
+    color:
+        #2e7d32;
+
+}
+
+
+
+.info-box li {
+
+
+    margin:
+        8px 0;
+
+    color:
+        #444;
+
+}
+
+
+
+
+
+/* =========================
+   BUTTON
+========================= */
+
+
+#refreshStatusButton {
+
+
+    margin-top:
+        30px;
+
+    width:
+        100%;
+
+    padding:
+        14px;
+
+    border:
+        none;
+
+    border-radius:
+        10px;
+
+    background:
+        #00695c;
+
+    color:
+        white;
+
+    font-size:
+        16px;
+
+    cursor:
+        pointer;
+
+}
+
+
+
+#refreshStatusButton:hover {
+
+
+    background:
+        #004d40;
+
+}
+
+
+
+/* =========================
+   MOBILE
+========================= */
+
+
+@media(max-width:600px) {
+
+
+    .verification-header {
+
+
+        padding:
+            0 20px;
+
+    }
+
+
+    .logo {
+
+        font-size:
+            20px;
+
+    }
+
+
+    .verification-card {
+
+
+        padding:
+            25px;
+
+    }
+
+
+}

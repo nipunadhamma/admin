@@ -1,1178 +1,328 @@
-
 /* ============================================================
-   QUOTATION REQUEST PAGE LOGIC
-   Explore Sri Lanka
+   LANKAQUEST
+   QUOTATION REQUEST PAGE
+
+   FIREBASE FIRST ARCHITECTURE
+
 
    FLOW:
 
-   Tourist
-      ↓
-   Trip Planner
-      ↓
-   Save Planner Data
-      ↓
-   Login Check
-      ↓
-   Login
-      ↓
-   Quotation Request
-      ↓
-   Submit Request
-      ↓
-   Save Request to localStorage
-      ↓
-   Find Registered Guides
-      ↓
-   Tourist Selects Guide
-      ↓
-   Guide Dashboard
+   Tourist Login
+        |
+        ↓
+   Firebase Authentication
+        |
+        ↓
+   Load Trip
+        |
+        ↓
+   lankaQuestTouristTrips
+        |
+        ↓
+   Create Request
+        |
+        ↓
+   lankaQuestQuotationRequests
+        |
+        ↓
+   Find Guides
 
-   FRONTEND DEMO ARCHITECTURE
+
 ============================================================ */
-
 
 /* ============================================================
-   1. STORAGE KEYS
+   FIREBASE IMPORTS
 ============================================================ */
 
-const MY_TRIP_KEY =
-    "sriLankaMyTrip";
+import { auth, db } from "./firebase-config.js";
 
-const PLANNER_DATA_KEY =
-    "sriLankaTripPlannerData";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-const QUOTATION_REQUESTS_KEY =
-    "exploreSriLankaQuotationRequests";
-
+import {
+  collection,
+  addDoc,
+  getDoc,
+  doc,
+  serverTimestamp,
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 /* ============================================================
-   2. DOM ELEMENTS
+   FIRESTORE COLLECTIONS
 ============================================================ */
 
-const quotationDestinations =
-    document.getElementById(
-        "quotationDestinations"
-    );
+const TRIP_COLLECTION = "lankaQuestTouristTrips";
 
-
-const quotationPlaceCount =
-    document.getElementById(
-        "quotationPlaceCount"
-    );
-
-
-const quotationStartDate =
-    document.getElementById(
-        "quotationStartDate"
-    );
-
-
-const quotationEndDate =
-    document.getElementById(
-        "quotationEndDate"
-    );
-
-
-const quotationTravelers =
-    document.getElementById(
-        "quotationTravelers"
-    );
-
-
-const quotationTravelStyle =
-    document.getElementById(
-        "quotationTravelStyle"
-    );
-
-
-const quotationTransport =
-    document.getElementById(
-        "quotationTransport"
-    );
-
-
-const quotationAccommodation =
-    document.getElementById(
-        "quotationAccommodation"
-    );
-
-
-const quotationSpecialRequests =
-    document.getElementById(
-        "quotationSpecialRequests"
-    );
-
-
-const summaryQuotationPlaces =
-    document.getElementById(
-        "summaryQuotationPlaces"
-    );
-
-
-const summaryQuotationDates =
-    document.getElementById(
-        "summaryQuotationDates"
-    );
-
-
-const summaryQuotationTravelers =
-    document.getElementById(
-        "summaryQuotationTravelers"
-    );
-
-
-const submitQuotationButton =
-    document.getElementById(
-        "submitQuotationButton"
-    );
-
+const QUOTATION_COLLECTION = "lankaQuestQuotationRequests";
 
 /* ============================================================
-   3. GET MY TRIP
+   GLOBAL VARIABLES
 ============================================================ */
 
-function getQuotationTrip() {
+let currentTourist = null;
 
-    const savedTrip =
-        localStorage.getItem(
-            MY_TRIP_KEY
-        );
+let currentTrip = null;
+
+/* ============================================================
+   DOM ELEMENTS
+============================================================ */
+
+const quotationDestinations = document.getElementById("quotationDestinations");
+
+const quotationPlaceCount = document.getElementById("quotationPlaceCount");
+
+const quotationStartDate = document.getElementById("quotationStartDate");
+
+const quotationEndDate = document.getElementById("quotationEndDate");
+
+const quotationTravelers = document.getElementById("quotationTravelers");
+
+const quotationTravelStyle = document.getElementById("quotationTravelStyle");
+
+const quotationTransport = document.getElementById("quotationTransport");
+
+const quotationAccommodation = document.getElementById(
+  "quotationAccommodation",
+);
+
+const quotationSpecialRequests = document.getElementById(
+  "quotationSpecialRequests",
+);
+
+const submitQuotationButton = document.getElementById("submitQuotationButton");
+
+/* ============================================================
+   AUTH CHECK
+
+============================================================ */
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    currentTourist = user;
+
+    await loadTrip();
+  } else {
+    window.location.href = "login.html?redirect=quotation-request.html";
+  }
+});
+
+/* ============================================================
+   LOAD TOURIST TRIP
+
+   Firestore:
+   lankaQuestTouristTrips
 
 
-    if (!savedTrip) {
+============================================================ */
 
-        return [];
+async function loadTrip() {
+  try {
+    const tripId = getTripIdFromURL();
 
+    if (!tripId) {
+      showError("Trip not found");
+
+      return;
     }
 
+    const tripRef = doc(db, TRIP_COLLECTION, tripId);
 
-    try {
+    const snapshot = await getDoc(tripRef);
 
-        const trip =
-            JSON.parse(
-                savedTrip
-            );
+    if (!snapshot.exists()) {
+      showError("Trip does not exist");
 
-
-        return Array.isArray(trip)
-
-            ? trip
-
-            : [];
-
+      return;
     }
 
-    catch (error) {
+    const data = snapshot.data();
 
-        console.error(
-            "My Trip data error:",
-            error
-        );
+    if (data.touristId !== currentTourist.uid) {
+      showError("Access denied");
 
-
-        return [];
-
+      return;
     }
 
+    currentTrip = {
+      id: snapshot.id,
+
+      ...data,
+    };
+
+    renderQuotationData();
+  } catch (error) {
+    console.error("Trip loading error:", error);
+
+    showError("Unable to load trip");
+  }
 }
 
-
 /* ============================================================
-   4. GET PLANNER DATA
+   GET TRIP ID
+
 ============================================================ */
 
-function getPlannerData() {
+function getTripIdFromURL() {
+  const params = new URLSearchParams(window.location.search);
 
-    const savedData =
-        localStorage.getItem(
-            PLANNER_DATA_KEY
-        );
-
-
-    if (!savedData) {
-
-        return {};
-
-    }
-
-
-    try {
-
-        return JSON.parse(
-            savedData
-        );
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "Planner data error:",
-            error
-        );
-
-
-        return {};
-
-    }
-
+  return params.get("trip");
 }
 
-
 /* ============================================================
-   5. GET QUOTATION REQUESTS
+   RENDER DATA
+
 ============================================================ */
 
-function getQuotationRequests() {
+function renderQuotationData() {
+  const destinations = currentTrip.destinations || [];
 
-    const savedRequests =
-        localStorage.getItem(
-            QUOTATION_REQUESTS_KEY
-        );
+  if (quotationPlaceCount) {
+    quotationPlaceCount.textContent =
+      destinations.length + (destinations.length === 1 ? " Place" : " Places");
+  }
 
+  if (quotationDestinations) {
+    quotationDestinations.innerHTML = "";
 
-    if (!savedRequests) {
+    destinations.forEach((place) => {
+      const card = document.createElement("div");
 
-        return [];
+      card.className = "quotation-destination-card";
 
-    }
+      card.innerHTML = `
 
+                    <img
 
-    try {
+                    src="${place.image || ""}"
 
-        const requests =
-            JSON.parse(
-                savedRequests
-            );
+                    alt="${place.name}"
 
-
-        return Array.isArray(requests)
-
-            ? requests
-
-            : [];
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "Quotation request data error:",
-            error
-        );
-
-
-        return [];
-
-    }
-
-}
-
-
-/* ============================================================
-   6. SAVE QUOTATION REQUESTS
-============================================================ */
-
-function saveQuotationRequests(
-    requests
-) {
-
-    localStorage.setItem(
-
-        QUOTATION_REQUESTS_KEY,
-
-        JSON.stringify(
-            requests
-        )
-
-    );
-
-}
-
-
-/* ============================================================
-   7. RENDER DESTINATIONS
-============================================================ */
-
-function renderQuotationDestinations() {
-
-    const trip =
-        getQuotationTrip();
-
-
-    /*
-       Clear Existing
-    */
-
-    if (
-        quotationDestinations
-    ) {
-
-        quotationDestinations.innerHTML =
-            "";
-
-    }
-
-
-    /*
-       Update Place Count
-    */
-
-    if (
-        quotationPlaceCount
-    ) {
-
-        quotationPlaceCount.textContent =
-
-            trip.length +
-
-            (
-                trip.length === 1
-
-                    ? " Place"
-
-                    : " Places"
-
-            );
-
-    }
-
-
-    /*
-       Update Summary Count
-    */
-
-    if (
-        summaryQuotationPlaces
-    ) {
-
-        summaryQuotationPlaces.textContent =
-            trip.length;
-
-    }
-
-
-    /*
-       Empty Trip
-    */
-
-    if (
-        trip.length === 0
-    ) {
-
-        if (
-            quotationDestinations
-        ) {
-
-            quotationDestinations.innerHTML = `
-
-                <div class="quotation-empty-state">
-
-                    <div>
-                        🗺️
-                    </div>
-
-                    <h3>
-                        No destinations selected
-                    </h3>
-
-                    <p>
-                        Please return to My Trip
-                        and select destinations.
-                    </p>
-
-                    <a
-                        href="trip-planner.html"
-                        class="quotation-back-trip-button"
                     >
 
-                        ← Back to My Trip
-
-                    </a>
-
-                </div>
-
-            `;
-
-        }
-
-
-        return;
-
-    }
-
-
-    /*
-       Create Destination Cards
-    */
-
-    trip.forEach(
-
-        (
-            place,
-            index
-        ) => {
-
-
-            const card =
-                document.createElement(
-                    "div"
-                );
-
-
-            card.className =
-                "quotation-destination-card";
-
-
-            card.innerHTML = `
-
-                <div class="quotation-destination-number">
-
-                    ${index + 1}
-
-                </div>
-
-
-                <img
-                    src="${place.image || ""}"
-                    alt="${place.name || "Destination"}"
-                >
-
-
-                <div class="quotation-destination-info">
 
                     <h4>
 
-                        ${place.name || "Unknown Destination"}
+                    ${place.name}
 
                     </h4>
 
 
                     <p>
 
-                        📍
-
-                        ${place.district || ""}
-
-                        ${
-                            place.province
-
-                                ? " · " +
-                                  place.province
-
-                                : ""
-                        }
+                    📍
+                    ${place.district || ""}
 
                     </p>
 
+                `;
 
-                    <p>
+      quotationDestinations.appendChild(card);
+    });
+  }
 
-                        ⭐
+  quotationStartDate.textContent = currentTrip.startDate || "Not selected";
 
-                        ${place.rating || "N/A"}
+  quotationEndDate.textContent = currentTrip.endDate || "Not selected";
 
-                    </p>
+  quotationTravelers.textContent = currentTrip.travelers || "Not selected";
 
-                </div>
+  quotationTravelStyle.textContent = currentTrip.travelStyle || "Not selected";
 
-            `;
+  quotationTransport.textContent = currentTrip.transport || "Not selected";
 
+  quotationAccommodation.textContent =
+    currentTrip.accommodation || "Not selected";
 
-            if (
-                quotationDestinations
-            ) {
-
-                quotationDestinations.appendChild(
-                    card
-                );
-
-            }
-
-        }
-
-    );
-
+  quotationSpecialRequests.textContent =
+    currentTrip.specialRequests || "No special requests";
 }
 
-
 /* ============================================================
-   8. LOAD TRAVEL DETAILS
+   CREATE QUOTATION REQUEST
+
 ============================================================ */
 
-function loadTravelDetails() {
-
-    const data =
-        getPlannerData();
-
-
-    /*
-       Start Date
-    */
-
-    if (
-        quotationStartDate
-    ) {
-
-        quotationStartDate.textContent =
-
-            data.startDate ||
-
-            "Not selected";
-
+async function submitQuotationRequest() {
+  try {
+    if (!currentTourist) {
+      return;
     }
 
+    if (!currentTrip) {
+      alert("Trip not loaded");
 
-    /*
-       End Date
-    */
-
-    if (
-        quotationEndDate
-    ) {
-
-        quotationEndDate.textContent =
-
-            data.endDate ||
-
-            "Not selected";
-
+      return;
     }
 
+    const requestData = {
+      touristId: currentTourist.uid,
 
-    /*
-       Travelers
-    */
+      touristEmail: currentTourist.email,
 
-    if (
-        quotationTravelers
-    ) {
+      tripId: currentTrip.id,
 
-        quotationTravelers.textContent =
+      destinations: currentTrip.destinations,
 
-            data.travelers ||
+      startDate: currentTrip.startDate,
 
-            "Not selected";
+      endDate: currentTrip.endDate,
 
-    }
+      travelers: currentTrip.travelers,
 
+      travelStyle: currentTrip.travelStyle,
 
-    /*
-       Travel Style
-    */
+      transport: currentTrip.transport,
 
-    if (
-        quotationTravelStyle
-    ) {
+      accommodation: currentTrip.accommodation,
 
-        quotationTravelStyle.textContent =
+      specialRequests: currentTrip.specialRequests,
 
-            data.travelStyle ||
+      selectedGuide: null,
 
-            "Not selected";
+      status: "pending",
 
-    }
+      createdAt: serverTimestamp(),
 
-
-    /*
-       Transport
-    */
-
-    if (
-        quotationTransport
-    ) {
-
-        quotationTransport.textContent =
-
-            data.transport ||
-
-            "Not selected";
-
-    }
-
-
-    /*
-       Accommodation
-    */
-
-    if (
-        quotationAccommodation
-    ) {
-
-        quotationAccommodation.textContent =
-
-            data.accommodation ||
-
-            "Not selected";
-
-    }
-
-
-    /*
-       Special Requests
-    */
-
-    if (
-        quotationSpecialRequests
-    ) {
-
-        quotationSpecialRequests.textContent =
-
-            data.specialRequests ||
-
-            "No special requests provided.";
-
-    }
-
-
-    /*
-       Summary Dates
-    */
-
-    if (
-        summaryQuotationDates
-    ) {
-
-        if (
-            data.startDate &&
-            data.endDate
-        ) {
-
-            summaryQuotationDates.textContent =
-
-                data.startDate +
-
-                " → " +
-
-                data.endDate;
-
-        }
-
-        else {
-
-            summaryQuotationDates.textContent =
-
-                "Not selected";
-
-        }
-
-    }
-
-
-    /*
-       Summary Travelers
-    */
-
-    if (
-        summaryQuotationTravelers
-    ) {
-
-        summaryQuotationTravelers.textContent =
-
-            data.travelers ||
-
-            "Not selected";
-
-    }
-
-}
-
-
-/* ============================================================
-   9. CREATE QUOTATION REQUEST
-============================================================ */
-
-function createQuotationRequest() {
-
-    /*
-       Get Current User
-    */
-
-    const user =
-
-        typeof getCurrentUser ===
-        "function"
-
-            ? getCurrentUser()
-
-            : null;
-
-
-    /*
-       User Not Logged In
-    */
-
-    if (!user) {
-
-        return null;
-
-    }
-
-
-    /*
-       Get Destinations
-    */
-
-    const destinations =
-        getQuotationTrip();
-
-
-    /*
-       Validate Destinations
-    */
-
-    if (
-        destinations.length === 0
-    ) {
-
-        alert(
-
-            "Please select at least one destination before sending a quotation request."
-
-        );
-
-
-        return null;
-
-    }
-
-
-    /*
-       Get Planner Data
-    */
-
-    const plannerData =
-        getPlannerData();
-
-
-    /*
-       Create Request
-    */
-
-    const quotationRequest = {
-
-
-        /*
-           Unique Request ID
-        */
-
-        requestId:
-
-            "REQ-" +
-
-            Date.now(),
-
-
-        /*
-           Tourist Information
-        */
-
-        tourist: {
-
-            id:
-
-                user.id ||
-
-                "",
-
-
-            fullName:
-
-                user.fullName ||
-
-                "",
-
-
-            email:
-
-                user.email ||
-
-                "",
-
-
-            country:
-
-                user.country ||
-
-                ""
-
-        },
-
-
-        /*
-           Destinations
-        */
-
-        destinations:
-
-            destinations,
-
-
-        /*
-           Travel Details
-        */
-
-        startDate:
-
-            plannerData.startDate ||
-
-            "",
-
-
-        endDate:
-
-            plannerData.endDate ||
-
-            "",
-
-
-        travelers:
-
-            plannerData.travelers ||
-
-            "",
-
-
-        travelStyle:
-
-            plannerData.travelStyle ||
-
-            "",
-
-
-        transport:
-
-            plannerData.transport ||
-
-            "",
-
-
-        accommodation:
-
-            plannerData.accommodation ||
-
-            "",
-
-
-        specialRequests:
-
-            plannerData.specialRequests ||
-
-            "",
-
-
-        /*
-           Request Status
-        */
-
-        status:
-
-            "pending",
-
-
-        /*
-           Selected Guide
-           
-           මුලින් Guide එකක්
-           Select කරලා නැත.
-        */
-
-        selectedGuide:
-
-            null,
-
-
-        /*
-           Guide Quotations
-        */
-
-        quotations:
-
-            [],
-
-
-        /*
-           Created Date
-        */
-
-        createdAt:
-
-            new Date().toISOString()
-
+      updatedAt: serverTimestamp(),
     };
 
+    const docRef = await addDoc(
+      collection(db, QUOTATION_COLLECTION),
 
-    return quotationRequest;
+      requestData,
+    );
 
+    console.log("Quotation Created:", docRef.id);
+
+    alert("Quotation request submitted successfully");
+
+    window.location.href = "find-guides.html";
+  } catch (error) {
+    console.error("Quotation error:", error);
+
+    alert("Unable to submit quotation request");
+  }
 }
 
-
 /* ============================================================
-   10. SUBMIT QUOTATION REQUEST
+   BUTTON EVENT
+
 ============================================================ */
 
-function submitQuotationRequest() {
-
-
-    /*
-       LOGIN CHECK
-    */
-
-    const user =
-
-        typeof getCurrentUser ===
-        "function"
-
-            ? getCurrentUser()
-
-            : null;
-
-
-    /*
-       User Not Logged In
-    */
-
-    if (!user) {
-
-        window.location.href =
-
-            "login.html?redirect=quotation-request.html";
-
-
-        return;
-
-    }
-
-
-    /*
-       TOURIST CHECK
-    */
-
-    if (
-        user.accountType !==
-        "tourist"
-    ) {
-
-        alert(
-
-            "Only Tourist accounts can send quotation requests."
-
-        );
-
-
-        return;
-
-    }
-
-
-    /*
-       CREATE REQUEST
-    */
-
-    const quotationRequest =
-
-        createQuotationRequest();
-
-
-    /*
-       Stop if Failed
-    */
-
-    if (
-        !quotationRequest
-    ) {
-
-        return;
-
-    }
-
-
-    /*
-       GET EXISTING REQUESTS
-    */
-
-    const existingRequests =
-
-        getQuotationRequests();
-
-
-    /*
-       SAVE NEW REQUEST
-    */
-
-    existingRequests.push(
-
-        quotationRequest
-
-    );
-
-
-    /*
-       Save to LocalStorage
-    */
-
-    saveQuotationRequests(
-
-        existingRequests
-
-    );
-
-
-    /*
-       Debug
-    */
-
-    console.log(
-
-        "Quotation Request Saved:",
-
-        quotationRequest
-
-    );
-
-
-    /*
-       SUCCESS MESSAGE
-    */
-
-    alert(
-
-        "Your quotation request has been submitted successfully. Now you can choose a registered guide."
-
-    );
-
-
-    /*
-       IMPORTANT:
-
-       මෙතැනින් පස්සේ
-       Tourist Dashboard එකට
-       redirect කරන්න එපා.
-
-       Find Guides Page එකට
-       පමණක් යන්න.
-    */
-
-    window.location.href =
-
-        "find-guides.html";
-
+if (submitQuotationButton) {
+  submitQuotationButton.addEventListener(
+    "click",
+
+    submitQuotationRequest,
+  );
 }
 
-
 /* ============================================================
-   11. SUBMIT BUTTON EVENT
+   ERROR MESSAGE
+
 ============================================================ */
 
-if (
-    submitQuotationButton
-) {
+function showError(message) {
+  console.error(message);
 
-    submitQuotationButton.addEventListener(
-
-        "click",
-
-        submitQuotationRequest
-
-    );
-
+  alert(message);
 }
-
-
-/* ============================================================
-   12. PAGE INITIALIZATION
-============================================================ */
-
-document.addEventListener(
-
-    "DOMContentLoaded",
-
-    () => {
-
-
-        /*
-           Current User
-        */
-
-        const user =
-
-            typeof getCurrentUser ===
-            "function"
-
-                ? getCurrentUser()
-
-                : null;
-
-
-        /*
-           Login නැත්නම්
-        */
-
-        if (!user) {
-
-            window.location.href =
-
-                "login.html?redirect=quotation-request.html";
-
-
-            return;
-
-        }
-
-
-        /*
-           Tourist නොවේ නම්
-        */
-
-        if (
-            user.accountType !==
-            "tourist"
-        ) {
-
-            if (
-                typeof redirectAfterLogin ===
-                "function"
-            ) {
-
-                redirectAfterLogin(
-                    user
-                );
-
-            }
-
-
-            return;
-
-        }
-
-
-        /*
-           Render Destinations
-        */
-
-        renderQuotationDestinations();
-
-
-        /*
-           Load Travel Details
-        */
-
-        loadTravelDetails();
-
-
-        /*
-           Debug
-        */
-
-        console.log(
-
-            "Quotation Request Page Loaded:",
-
-            user
-
-        );
-
-    }
-
-);
-

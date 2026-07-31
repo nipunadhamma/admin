@@ -607,3 +607,31 @@ Explore Sri Lanka
 
     
 }
+
+.login-icon img {
+    width: 50px;
+    /* ඩෙස්ක්ටොප් එක සඳහා ලාංඡනයේ පළල */
+    height: 50px;
+    /* ඩෙස්ක්ටොප් එක සඳහා ලාංඡනයේ උස */
+    object-fit: contain;
+}
+
+
+
+
+/* --- Mobile සඳහා විශේෂ CSS (තිරය 768px හෝ අඩු නම්) --- */
+@media screen and (max-width: 768px) {
+    .login-icon {
+        gap: 10px;
+        /* මොබයිල් එකේදී පරතරය ටිකක් අඩු කිරීම */
+        padding: 5px 0;
+    }
+
+    .login-icon img {
+        width: 38px;
+        /* මොබයිල් එකේදී ලාංඡනය කුඩා කරගැනීමට */
+        height: 38px;
+    }
+
+    
+}

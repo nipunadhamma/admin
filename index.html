@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     
+    <link rel="icon" href="images/logo.png">
     <!-- Google Translate Script -->
     <script type="text/javascript">
         function googleTranslateElementInit() {
@@ -19,13 +19,14 @@
         }
     </script>
     
-    <title>Explore Sri Lanka</title>
+    <title>LankaQuest</title>
 
     <!-- Leaflet Map CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
     <!-- අපේ CSS -->
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/hero.css">
     <link rel="stylesheet" href="css/map.css">
     <link rel="stylesheet" href="css/my-trip.css">
 
@@ -353,6 +354,194 @@
 
     
     <main>
+
+        <!-- =========================================================
+             HERO SLIDESHOW
+        ========================================================== -->
+        
+        <section id="heroSlideshow" class="hero-slideshow">
+        
+           
+            <!-- =====================================================
+             SLIDE 1
+        ====================================================== -->
+        
+            <div class="hero-slide active" style="background-image: url('images/hero/sigiriya.jpg');">
+        
+                <div class="hero-overlay"></div>
+        
+                <div class="hero-content">
+        
+                    <span class="hero-subtitle">
+                        🇱🇰 Discover the Wonder of Sri Lanka
+                    </span>
+        
+                    <h1>
+                        Explore the Beauty of Sri Lanka
+                    </h1>
+        
+                    <p>
+                        Discover ancient heritage, breathtaking nature,
+                        golden beaches and unforgettable adventures.
+                    </p>
+        
+                    <a href="#mapSection" class="hero-button">
+                        LankaQuest
+                        <span>→</span>
+                    </a>
+        
+                </div>
+        
+            </div>
+        
+        
+            <!-- =====================================================
+             SLIDE 2
+        ====================================================== -->
+        
+            <div class="hero-slide" style="background-image: url('images/hero/ella.jpg');">
+        
+                <div class="hero-overlay"></div>
+        
+                <div class="hero-content">
+        
+                    <span class="hero-subtitle">
+                        🌿 Nature & Adventure
+                    </span>
+        
+                    <h1>
+                        Discover the Magic of Ella
+                    </h1>
+        
+                    <p>
+                        Explore misty mountains, green valleys
+                        and unforgettable journeys.
+                    </p>
+        
+                </div>
+        
+            </div>
+        
+        
+            <!-- =====================================================
+             SLIDE 3
+        ====================================================== -->
+        
+            <div class="hero-slide" style="background-image: url('images/hero/mirissa.jpg');">
+        
+                <div class="hero-overlay"></div>
+        
+                <div class="hero-content">
+        
+                    <span class="hero-subtitle">
+                        🏖️ Tropical Paradise
+                    </span>
+        
+                    <h1>
+                        Escape to Sri Lanka's Beaches
+                    </h1>
+        
+                    <p>
+                        Relax by turquoise waters and experience
+                        the tropical beauty of the island.
+                    </p>
+        
+                </div>
+        
+            </div>
+        
+        
+            <!-- =====================================================
+             SLIDE 4
+        ====================================================== -->
+        
+            <div class="hero-slide" style="background-image: url('images/hero/galle-fort.jpg');">
+        
+                <div class="hero-overlay"></div>
+        
+                <div class="hero-content">
+        
+                    <span class="hero-subtitle">
+                        🏛️ History & Heritage
+                    </span>
+        
+                    <h1>
+                        Walk Through History
+                    </h1>
+        
+                    <p>
+                        Experience centuries of culture and heritage
+                        across the historic island.
+                    </p>
+        
+                </div>
+        
+            </div>
+        
+        
+            <!-- =====================================================
+             SLIDE 5
+        ====================================================== -->
+        
+            <div class="hero-slide" style="background-image: url('images/hero/nuwara-eliya.jpg');">
+        
+                <div class="hero-overlay"></div>
+        
+                <div class="hero-content">
+        
+                    <span class="hero-subtitle">
+                        🍃 Tea Country
+                    </span>
+        
+                    <h1>
+                        Experience the Green Heart of Sri Lanka
+                    </h1>
+        
+                    <p>
+                        Journey through rolling tea plantations
+                        and cool mountain landscapes.
+                    </p>
+        
+                </div>
+        
+            </div>
+        
+        
+            <!-- =====================================================
+             SLIDESHOW ARROWS
+        ====================================================== -->
+        
+            <button type="button" id="heroPrev" class="hero-arrow hero-prev" aria-label="Previous slide">
+                ‹
+            </button>
+        
+        
+            <button type="button" id="heroNext" class="hero-arrow hero-next" aria-label="Next slide">
+                ›
+            </button>
+        
+        
+            <!-- =====================================================
+             SLIDESHOW DOTS
+        ====================================================== -->
+        
+            <div id="heroDots" class="hero-dots">
+        
+                <button type="button" class="hero-dot active" data-slide="0" aria-label="Go to slide 1"></button>
+        
+                <button type="button" class="hero-dot" data-slide="1" aria-label="Go to slide 2"></button>
+        
+                <button type="button" class="hero-dot" data-slide="2" aria-label="Go to slide 3"></button>
+        
+                <button type="button" class="hero-dot" data-slide="3" aria-label="Go to slide 4"></button>
+        
+                <button type="button" class="hero-dot" data-slide="4" aria-label="Go to slide 5"></button>
+        
+            </div>
+            
+        
+        </section>
+
     
         <section class="map-section">
     
@@ -444,15 +633,90 @@
                 <button class="category-btn" data-category="beach">
                     🏖️ Beaches
                 </button>
+
+                <a href="attractions.html" class="category-btn attractions-page-btn"> 
+                    🗺️ Explore All Attractions 
+                </a>
+
+               
     
             </div>
     
     
             <!-- =========================================
-                 Map
+                 INTERACTIVE MAP CTA
             ========================================== -->
-    
-            <div id="map"></div>
+            
+            <div class="map-toggle-wrapper">
+            
+                
+                <div class="map-toggle-note">
+            
+                    <span class="map-toggle-note-icon">
+                        🗺️
+                    </span>
+            
+                    <div class="map-toggle-note-content">
+            
+                        <h3>
+                            LankaQuest Like Never Before
+                        </h3>
+            
+                        <p>
+                            Discover amazing destinations across the island
+                            with our interactive tourist map.
+                        </p>
+            
+                    </div>
+            
+                </div>
+            
+            
+                <button type="button" id="toggleMapButton" class="map-toggle-button">
+            
+                    <span class="map-button-icon">
+                        🗺️
+                    </span>
+            
+                    <span class="map-button-text">
+                        Explore Interactive Map
+                    </span>
+            
+                    <span class="map-button-arrow">
+                        →
+                    </span>
+            
+                </button>
+              
+            
+            </div>
+            
+            <!-- =========================================
+                 MAP
+            ========================================== -->
+            
+            <section id="mapSection" class="map-section hidden">
+            
+               
+                <div class="map-header">
+            
+                    <h2>
+                        LankaQuest on Map
+                    </h2>
+            
+                    <p>
+                        Explore tourist destinations on the interactive map
+                    </p>
+            
+                </div>
+            
+            
+                <div id="map"></div>
+               
+            
+            </section>
+
+
     
     
             <!-- =========================================
@@ -465,6 +729,241 @@
         </section>
     
     </main>
+    <!-- ============================================================
+         LANKAQUEST FOOTER
+    ============================================================ -->
+    
+    <footer class="site-footer">
+    
+        
+        <div class="footer-container">
+    
+    
+            <!-- ====================================================
+             BRAND
+        ===================================================== -->
+    
+            <div class="footer-column footer-brand">
+    
+                <a href="index.html" class="footer-logo">
+                    LankaQuest
+                </a>
+    
+    
+                <p>
+                    Discover the beauty, culture, heritage and
+                    unforgettable experiences of Sri Lanka.
+                </p>
+    
+    
+                <!-- Social Media -->
+    
+                <div class="footer-social">
+    
+                    <a href="#" aria-label="Facebook" title="Facebook">
+                        f
+                    </a>
+    
+    
+                    <a href="#" aria-label="Instagram" title="Instagram">
+                        ◎
+                    </a>
+    
+    
+                    <a href="#" aria-label="YouTube" title="YouTube">
+                        ▶
+                    </a>
+    
+    
+                    <a href="#" aria-label="TikTok" title="TikTok">
+                        ♪
+                    </a>
+    
+                </div>
+    
+            </div>
+    
+    
+    
+            <!-- ====================================================
+             QUICK LINKS
+        ===================================================== -->
+    
+            <div class="footer-column">
+    
+                <h3>
+                    Quick Links
+                </h3>
+    
+    
+                <ul>
+    
+                    <li>
+                        <a href="index.html">
+                            Home
+                        </a>
+                    </li>
+    
+    
+                    <li>
+                        <a href="attractions.html">
+                            Attractions
+                        </a>
+                    </li>
+    
+    
+                    <li>
+                        <a href="#mapSection">
+                            Explore Map
+                        </a>
+                    </li>
+    
+    
+                    <li>
+                        <a href="trip-planner.html">
+                            Trip Planner
+                        </a>
+                    </li>
+    
+                </ul>
+    
+            </div>
+    
+    
+    
+            <!-- ====================================================
+             EXPLORE
+        ===================================================== -->
+    
+            <div class="footer-column">
+    
+                <h3>
+                    Explore Sri Lanka
+                </h3>
+    
+    
+                <ul>
+    
+                    <li>
+                        <a href="attractions.html?category=heritage">
+                            🏛️ Heritage
+                        </a>
+                    </li>
+    
+    
+                    <li>
+                        <a href="attractions.html?category=culture">
+                            🛕 Culture
+                        </a>
+                    </li>
+    
+    
+                    <li>
+                        <a href="attractions.html?category=nature">
+                            🌿 Nature
+                        </a>
+                    </li>
+    
+    
+                    <li>
+                        <a href="attractions.html?category=wildlife">
+                            🐘 Wildlife
+                        </a>
+                    </li>
+    
+    
+                    <li>
+                        <a href="attractions.html?category=beach">
+                            🏖️ Beaches
+                        </a>
+                    </li>
+    
+                </ul>
+    
+            </div>
+    
+    
+    
+            <!-- ====================================================
+             CONTACT
+        ===================================================== -->
+    
+            <div class="footer-column">
+    
+                <h3>
+                    Contact Us
+                </h3>
+    
+    
+                <ul class="footer-contact">
+    
+                    <li>
+                        📍 Sri Lanka
+                    </li>
+    
+    
+                    <li>
+                        📧
+                        <a href="mailto:hello@lankaquest.com">
+                            hello@lankaquest.com
+                        </a>
+                    </li>
+    
+    
+                    <li>
+                        🌐
+                        <a href="index.html">
+                            www.lankaquest.com
+                        </a>
+                    </li>
+    
+                </ul>
+    
+            </div>
+    
+        </div>
+    
+    
+    
+        <!-- ========================================================
+         FOOTER BOTTOM
+    ========================================================= -->
+    
+        <div class="footer-bottom">
+    
+            <div class="footer-bottom-container">
+    
+                <p>
+                    © 2026 LankaQuest.
+                    All Rights Reserved.
+                </p>
+    
+    
+                <div class="footer-legal">
+    
+                    <a href="privacy-policy.html">
+                        Privacy Policy
+                    </a>
+    
+    
+                    <span>
+                        |
+                    </span>
+    
+    
+                    <a href="terms-conditions.html">
+                        Terms & Conditions
+                    </a>
+    
+                </div>
+    
+            </div>
+    
+        </div>
+        
+    
+    </footer>
+
     
 
 
@@ -477,12 +976,20 @@
     
     <!-- Tourist Places Database -->
     
+   
     <script src="js/places.js"></script>
+    
+
+    <!-- Hero Slideshow -->
+    <script src="js/hero-slideshow.js"></script>
     
     
     <!-- Map Logic -->
     
     <script src="js/map.js"></script>
+
+    <!-- Map Toggle -->
+    <script src="js/map-toggle.js"></script>
 
     <script src="js/mobile-menu.js"></script>
 

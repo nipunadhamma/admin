@@ -1,0 +1,468 @@
+/* ============================================================
+HERO SLIDESHOW
+============================================================ */
+
+.hero-slideshow {
+
+     position: relative;
+
+    width: 100%;
+
+    height: 650px;
+
+    overflow: hidden;
+
+    background: #174a3c;
+    
+}
+
+/* ============================================================
+HERO SLIDE
+============================================================ */
+
+.hero-slide {
+
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+
+    height: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background-position: center;
+
+    background-size: cover;
+
+    background-repeat: no-repeat;
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transition:
+        opacity 1s ease,
+        visibility 1s ease;
+    
+}
+
+/* ============================================================
+ACTIVE SLIDE
+============================================================ */
+
+.hero-slide.active {
+
+     opacity: 1;
+
+    visibility: visible;
+    
+}
+
+/* ============================================================
+DARK OVERLAY
+============================================================ */
+
+.hero-overlay {
+
+     position: absolute;
+
+    inset: 0;
+
+    background:
+        linear-gradient(90deg,
+            rgba(0, 0, 0, 0.72),
+            rgba(0, 0, 0, 0.35),
+            rgba(0, 0, 0, 0.15));
+    
+}
+
+/* ============================================================
+HERO CONTENT
+============================================================ */
+
+.hero-content {
+
+     position: relative;
+
+    z-index: 2;
+
+    width: 90%;
+
+    max-width: 900px;
+
+    margin-right: auto;
+
+    margin-left: 8%;
+
+    color: white;
+
+    animation:
+        heroContentFade 1s ease;
+   
+}
+
+@keyframes heroContentFade {
+
+    from {
+
+        opacity: 0;
+
+        transform:
+            translateY(25px);
+
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform:
+            translateY(0);
+
+    }
+
+    
+}
+
+/* ============================================================
+HERO SUBTITLE
+============================================================ */
+
+.hero-subtitle {
+
+     display: inline-block;
+
+    margin-bottom: 18px;
+
+    font-size: 18px;
+
+    font-weight: 600;
+
+    letter-spacing: 0.5px;
+   
+}
+
+/* ============================================================
+HERO TITLE
+============================================================ */
+
+.hero-content h1 {
+
+    max-width: 800px;
+
+    margin-bottom: 20px;
+
+    font-size: 54px;
+
+    line-height: 1.15;
+
+    font-weight: 700;
+    
+}
+
+/* ============================================================
+HERO DESCRIPTION
+============================================================ */
+
+.hero-content p {
+
+    max-width: 650px;
+
+    margin-bottom: 30px;
+
+    font-size: 18px;
+
+    line-height: 1.7;
+   
+}
+
+/* ============================================================
+HERO BUTTON
+============================================================ */
+
+.hero-button {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 14px 28px;
+
+    border-radius: 30px;
+
+    background: white;
+
+    color: #174a3c;
+
+    text-decoration: none;
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.25);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+    
+}
+
+.hero-button:hover {
+
+     transform:
+        translateY(-3px);
+
+    box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.35);
+   
+}
+
+/* ============================================================
+HERO ARROWS
+============================================================ */
+
+.hero-arrow {
+
+    position: absolute;
+
+    top: 50%;
+
+    z-index: 5;
+
+    width: 48px;
+
+    height: 48px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255, 255, 255, 0.2);
+
+    color: white;
+
+    font-size: 35px;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    transform:
+        translateY(-50%);
+
+    -webkit-backdrop-filter:
+        blur(5px);
+
+    backdrop-filter:
+        blur(5px);
+
+    transition:
+        background 0.25s ease,
+        transform 0.25s ease;
+    
+}
+
+.hero-arrow:hover {
+
+     background:
+        rgba(255, 255, 255, 0.4);
+
+    transform:
+        translateY(-50%) scale(1.08);
+    
+}
+
+.hero-prev {
+
+     left: 25px;
+   
+}
+
+.hero-next {
+
+   right: 25px;
+    
+}
+
+/* ============================================================
+HERO DOTS
+============================================================ */
+
+.hero-dots {
+
+     position: absolute;
+
+    bottom: 30px;
+
+    left: 50%;
+
+    z-index: 5;
+
+    display: flex;
+
+    gap: 9px;
+
+    transform:
+        translateX(-50%);
+    
+}
+
+.hero-dot {
+
+     width: 10px;
+
+    height: 10px;
+
+    padding: 0;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255, 255, 255, 0.5);
+
+    cursor: pointer;
+
+    transition:
+        width 0.25s ease,
+        background 0.25s ease;
+    
+}
+
+.hero-dot.active {
+
+     width: 28px;
+
+    border-radius: 10px;
+
+    background: white;
+  
+}
+
+/* ============================================================
+TABLET
+============================================================ */
+
+@media (max-width: 900px) {
+
+     .hero-slideshow {
+
+        height: 580px;
+
+    }
+
+
+    .hero-content {
+
+        margin-left: 7%;
+
+    }
+
+
+    .hero-content h1 {
+
+        font-size: 42px;
+
+    }
+
+    
+}
+
+/* ============================================================
+MOBILE
+============================================================ */
+
+@media (max-width: 600px) {
+
+     .hero-slideshow {
+
+        height: 600px;
+
+    }
+
+
+    .hero-content {
+
+        width: 85%;
+
+        margin:
+            0 auto;
+
+        text-align: center;
+
+    }
+
+
+    .hero-content h1 {
+
+        font-size: 34px;
+
+    }
+
+
+    .hero-content p {
+
+        font-size: 15px;
+
+    }
+
+
+    .hero-subtitle {
+
+        font-size: 15px;
+
+    }
+
+
+    .hero-button {
+
+        padding:
+            12px 22px;
+
+    }
+
+
+    .hero-arrow {
+
+        width: 40px;
+
+        height: 40px;
+
+        font-size: 28px;
+
+    }
+
+
+    .hero-prev {
+
+        left: 12px;
+
+    }
+
+
+    .hero-next {
+
+        right: 12px;
+
+    }
+
+   
+}

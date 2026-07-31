@@ -290,23 +290,124 @@ catch (error) {
 }
 
 /* ============================================================
-6. SAVE ALL QUOTATION REQUESTS
+   6. SAVE GUIDE QUOTATION REQUEST
+   FIRESTORE VERSION
+
+   Collection:
+
+   lankaQuestQuotationRequests
+
 ============================================================ */
 
-function saveGuideQuotationRequests(
-requests
-) {
+
+import {
+    collection,
+    addDoc,
+    serverTimestamp
+}
+from
+"https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 
-localStorage.setItem(
+import {
+    db
+}
+from
+"./firebase-config.js";
 
-    GUIDE_QUOTATION_REQUESTS_KEY,
 
-    JSON.stringify(
-        requests
-    )
 
-);
+
+
+async function saveGuideQuotationRequest(
+    requestData
+){
+
+
+    try{
+
+
+        const docRef =
+
+            await addDoc(
+
+                collection(
+                    db,
+                    "lankaQuestQuotationRequests"
+                ),
+
+                {
+
+
+                    ...requestData,
+
+
+                    createdAt:
+                    serverTimestamp(),
+
+
+                    updatedAt:
+                    serverTimestamp(),
+
+
+                    status:
+                    "pending"
+
+
+                }
+
+            );
+
+
+
+        console.log(
+
+            "Quotation Request Saved:",
+
+            docRef.id
+
+        );
+
+
+
+        return {
+
+            success:true,
+
+            id:docRef.id
+
+        };
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(
+
+            "Save quotation request error:",
+
+            error
+
+        );
+
+
+
+        return {
+
+
+            success:false,
+
+
+            error:error.message
+
+
+        };
+
+
+    }
 
 
 }

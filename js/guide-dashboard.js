@@ -1,51 +1,72 @@
 /* ============================================================
-   GUIDE DASHBOARD LOGIC
-   Explore Sri Lanka
+GUIDE DASHBOARD LOGIC
+LankaQuest
 
-   FLOW:
+FIREBASE FIRST ARCHITECTURE
 
-   Tourist
-      ↓
-   Trip Planner
-      ↓
-   Quotation Request
-      ↓
-   Find Registered Guides
-      ↓
-   Tourist Selects Guide
-      ↓
-   Request.selectedGuide
-      ↓
-   localStorage
-      ↓
-   Guide Login
-      ↓
-   Guide Dashboard
-      ↓
-   Current Guide's Requests Only
-      ↓
-   Guide Requests Page
-      ↓
-   Send Quotation
 
-   Frontend Demo Architecture
+auth.js
+   ↓
+exploreSriLankaCurrentUser
+   ↓
+Firebase UID
+   ↓
+Firestore
+
+lankaQuestGuides
+   ↓
+Current Guide Document
+
+lankaQuestQuotationRequests
+   ↓
+Tourist Requests
+
+lankaQuestQuotations
+   ↓
+Guide Quotations
+
+Guide Dashboard
+
+
+IMPORTANT RULE:
+
+localStorage is ONLY used for login session.
+
+Business data MUST come from Firestore.
+
 ============================================================ */
 
 /* ============================================================
-   1. STORAGE KEYS
+FIREBASE IMPORTS
 ============================================================ */
 
-const GUIDE_QUOTATION_REQUESTS_KEY = "exploreSriLankaQuotationRequests";
+import { db } from "./firebase-config.js";
+
+import {
+  doc,
+  getDoc,
+  collection,
+  getDocs,
+  query,
+  where,
+  orderBy,
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 /* ============================================================
-   2. DOM ELEMENTS
+1. SESSION KEY ONLY
 ============================================================ */
 
-const incomingRequestsContainer = document.getElementById(
-  "incomingRequestsContainer",
-);
+const GUIDE_CURRENT_USER_KEY = "exploreSriLankaCurrentUser";
 
-const noRequestsState = document.getElementById("noRequestsState");
+/* ============================================================
+2. DOM ELEMENTS
+============================================================ */
+
+const guideHeaderName = document.getElementById("guideHeaderName");
+
+const guideWelcomeName = document.getElementById("guideWelcomeName");
+
+const guideStatus = document.getElementById("guideStatus");
 
 const totalRequestCount = document.getElementById("totalRequestCount");
 
@@ -53,912 +74,2120 @@ const pendingRequestCount = document.getElementById("pendingRequestCount");
 
 const quotationCount = document.getElementById("quotationCount");
 
-const guideStatus = document.getElementById("guideStatus");
+const incomingRequestsContainer = document.getElementById(
+  "incomingRequestsContainer",
+);
 
-const guideHeaderName = document.getElementById("guideHeaderName");
-
-const guideWelcomeName = document.getElementById("guideWelcomeName");
-
-const logoutButton = document.getElementById("logoutButton");
+const noRequestsState = document.getElementById("noRequestsState");
 
 const refreshRequestsButton = document.getElementById("refreshRequestsButton");
 
+const logoutButton = document.getElementById("logoutButton");
+
 /* ============================================================
-   3. GET QUOTATION REQUESTS
+3. GET CURRENT LOGIN USER
+
+ONLY AUTH SESSION
+
+NOT BUSINESS DATA
+
 ============================================================ */
 
-function getGuideQuotationRequests() {
-  const savedRequests = localStorage.getItem(GUIDE_QUOTATION_REQUESTS_KEY);
-
+function getDashboardCurrentUser() {
   /*
-       No Saved Requests
+       Prefer auth.js
     */
 
-  if (!savedRequests) {
-    return [];
+  if (typeof getCurrentUser === "function") {
+    const user = getCurrentUser();
+
+    if (user) {
+      return user;
+    }
   }
 
   /*
-       Parse Requests
+       Fallback session
     */
 
+  let savedUser = localStorage.getItem(GUIDE_CURRENT_USER_KEY);
+
+  if (!savedUser) {
+    savedUser = sessionStorage.getItem(GUIDE_CURRENT_USER_KEY);
+  }
+
+  if (!savedUser) {
+    return null;
+  }
+
   try {
-    const requests = JSON.parse(savedRequests);
+    return JSON.parse(savedUser);
+  } catch (error) {
+    console.error("Current user parse error:", error);
 
-    /*
-           Make Sure Array
-        */
+    return null;
+  }
+}
 
-    if (!Array.isArray(requests)) {
-      return [];
+/* ============================================================
+4. GET CURRENT GUIDE UID
+
+============================================================ */
+
+function getCurrentGuideId(user) {
+  if (!user) {
+    return "";
+  }
+
+  return user.uid || user.guideId || user.id || "";
+}
+
+/* ============================================================
+5. LOAD GUIDE FROM FIRESTORE
+
+
+Collection:
+
+lankaQuestGuides
+
+Document:
+
+UID
+
+
+============================================================ */
+
+async function findCurrentGuide(currentUser) {
+  const guideId = getCurrentGuideId(currentUser);
+
+  if (!guideId) {
+    console.error("Guide UID missing");
+
+    return null;
+  }
+
+  try {
+    const guideRef = doc(
+      db,
+
+      "lankaQuestGuides",
+
+      guideId,
+    );
+
+    const guideSnap = await getDoc(guideRef);
+
+    if (!guideSnap.exists()) {
+      console.error("Guide document not found");
+
+      return null;
     }
 
-    return requests;
+    return {
+      id: guideId,
+
+      uid: guideId,
+
+      ...guideSnap.data(),
+    };
   } catch (error) {
     console.error(
-      "Guide quotation request data error:",
+      "Guide loading error:",
 
       error,
     );
 
-    return [];
+    return null;
   }
 }
 
 /* ============================================================
-   4. GET CURRENT GUIDE REQUESTS
+6. UPDATE GUIDE NAME
+
 ============================================================ */
 
-/*
-   IMPORTANT:
-
-   සියලුම quotation requests
-   Guide Dashboard එකේ පෙන්වන්නේ නැත.
-
-   Current logged-in Guide
-   select කර ඇති requests
-   පමණක් පෙන්වයි.
-
-   Matching:
-
-   request.selectedGuide.id
-          ===
-   currentGuide.id
-============================================================ */
-
-function getCurrentGuideRequests(currentGuide) {
-  /*
-       No Guide
-    */
-
-  if (!currentGuide) {
-    return [];
+function updateGuideName(guide) {
+  if (!guide) {
+    return;
   }
 
-  /*
-       Get All Requests
-    */
+  const name = guide.fullName || guide.email || "Guide";
 
-  const allRequests = getGuideQuotationRequests();
+  if (guideHeaderName) {
+    guideHeaderName.textContent = name;
+  }
 
-  /*
-       Current Guide ID
-    */
+  if (guideWelcomeName) {
+    guideWelcomeName.textContent = name;
+  }
+}
+/* ============================================================
+7. GET GUIDE ACCOUNT STATUS
 
-  const currentGuideId = currentGuide.id;
+Firestore fields:
 
-  /*
-       Filter Requests
-    */
+status
+isActive
+profileStatus
+packageStatus
 
-  const guideRequests = allRequests.filter((request) => {
-    /*
-                   Selected Guide
-                   Does Not Exist
-                */
+============================================================ */
 
-    if (!request.selectedGuide) {
-      return false;
+
+function getGuideAccountStatus(guide){
+
+
+    if(!guide){
+
+
+        return {
+
+            text:"Unknown",
+
+            className:"status-unknown"
+
+        };
+
+
     }
 
-    /*
-                   Get Selected Guide ID
-                */
 
-    const selectedGuideId = request.selectedGuide.id;
 
     /*
-                   Match Guide
-                */
-
-    return selectedGuideId === currentGuideId;
-  });
-
-  return guideRequests;
-}
-
-/* ============================================================
-   5. FORMAT DATE
-============================================================ */
-
-function formatRequestDate(dateString) {
-  /*
-       No Date
+       Rejected
     */
 
-  if (!dateString) {
-    return "Date not available";
-  }
 
-  /*
-       Format Date
-    */
+    if(
 
-  try {
-    return new Date(dateString).toLocaleString();
-  } catch (error) {
-    return dateString;
-  }
-}
+        guide.status === "rejected"
 
-/* ============================================================
-   6. GET REQUEST STATUS LABEL
-============================================================ */
+        ||
 
-function getRequestStatusLabel(status) {
-  /*
-       Default
-    */
+        guide.packageStatus === "rejected"
 
-  if (!status) {
-    return "Pending";
-  }
+    ){
 
-  /*
-       Status Labels
-    */
 
-  const statusLabels = {
-    pending: "Pending",
+        return {
 
-    guide_selected: "Guide Selected",
 
-    quotation_sent: "Quotation Sent",
+            text:"Rejected",
 
-    accepted: "Accepted",
 
-    rejected: "Rejected",
+            className:"status-rejected"
 
-    completed: "Completed",
-  };
 
-  return statusLabels[status] || status;
-}
+        };
 
-/* ============================================================
-   7. UPDATE DASHBOARD STATS
-============================================================ */
 
-function updateGuideDashboardStats(requests) {
-  /*
-       Safety Check
-    */
-
-  if (!Array.isArray(requests)) {
-    requests = [];
-  }
-
-  /*
-       Total Requests
-    */
-
-  if (totalRequestCount) {
-    totalRequestCount.textContent = requests.length;
-  }
-
-  /*
-       Pending Requests
-
-       Include:
-
-       pending
-       guide_selected
-    */
-
-  const pendingRequests = requests.filter(
-    (request) =>
-      request.status === "pending" || request.status === "guide_selected",
-  );
-
-  if (pendingRequestCount) {
-    pendingRequestCount.textContent = pendingRequests.length;
-  }
-
-  /*
-       Total Guide Quotations
-    */
-
-  let totalQuotations = 0;
-
-  requests.forEach((request) => {
-    if (Array.isArray(request.quotations)) {
-      /*
-                   Count only quotations
-                   belonging to current guide
-                */
-
-      totalQuotations += request.quotations.length;
     }
-  });
 
-  if (quotationCount) {
-    quotationCount.textContent = totalQuotations;
-  }
+
+
+
+    /*
+       Active Approved Guide
+    */
+
+
+    if(
+
+
+        guide.status === "approved"
+
+        &&
+
+        guide.isActive === true
+
+        &&
+
+        guide.profileStatus === "active"
+
+
+    ){
+
+
+        return {
+
+
+            text:"Active",
+
+
+            className:"status-active"
+
+
+        };
+
+
+    }
+
+
+
+
+    /*
+       Pending Approval
+    */
+
+
+    if(
+
+
+        guide.status === "pending"
+
+        ||
+
+        guide.packageStatus === "pending"
+
+
+    ){
+
+
+        return {
+
+
+            text:"Pending Review",
+
+
+            className:"status-pending"
+
+
+        };
+
+
+    }
+
+
+
+
+    /*
+       Disabled
+    */
+
+
+    if(
+
+
+        guide.isActive === false
+
+        ||
+
+        guide.profileStatus === "inactive"
+
+
+    ){
+
+
+        return {
+
+
+            text:"Inactive",
+
+
+            className:"status-inactive"
+
+
+        };
+
+
+    }
+
+
+
+
+    return {
+
+
+        text:
+        guide.status || "Unknown",
+
+
+        className:"status-unknown"
+
+
+    };
+
+
 }
 
+
+
+
+
+
+
 /* ============================================================
-   8. RENDER DESTINATIONS
+8. UPDATE GUIDE STATUS UI
+
 ============================================================ */
 
-function renderRequestDestinations(destinations) {
-  /*
-       Empty Destinations
-    */
 
-  if (!Array.isArray(destinations) || destinations.length === 0) {
-    return `
-
-            <div class="request-destination-item">
-
-                <span>
-
-                    No destinations selected
-
-                </span>
-
-            </div>
-
-        `;
-  }
-
-  /*
-       Destination Cards
-    */
-
-  return destinations
-
-    .map(
-      (place) => `
-
-            <div
-                class="request-destination-item"
-            >
-
-                <img
-                    src="${place.image || ""}"
-                    alt="${place.name || "Destination"}"
-                >
+function updateGuideStatus(guide){
 
 
-                <div>
 
-                    <strong>
+    if(!guideStatus){
 
-                        ${place.name || "Unknown Destination"}
+        return;
 
-                    </strong>
+    }
 
 
-                    <span>
 
-                        ${place.district || ""}
+    const statusInfo =
 
-                        ${place.province ? " · " + place.province : ""}
+    getGuideAccountStatus(
+        guide
+    );
 
-                    </span>
 
-                </div>
 
-            </div>
 
-        `,
-    )
+    guideStatus.textContent =
 
-    .join("");
+    statusInfo.text;
+
+
+
+
+
+    guideStatus.classList.remove(
+
+        "status-active",
+
+        "status-pending",
+
+        "status-rejected",
+
+        "status-inactive",
+
+        "status-unknown"
+
+    );
+
+
+
+
+    guideStatus.classList.add(
+
+        statusInfo.className
+
+    );
+
+
+
 }
 
+
+
+
+
+
+
 /* ============================================================
-   9. RENDER REQUEST CARD
+9. LOAD GUIDE REQUESTS FROM FIRESTORE
+
+
+Collection:
+
+lankaQuestQuotationRequests
+
+
+Expected fields:
+
+guideId
+selectedGuideId
+assignedGuideId
+guideEmail
+status
+
+
 ============================================================ */
 
-function renderRequestCard(request) {
-  /*
-       Tourist
+
+async function getCurrentGuideRequests(guide){
+
+
+
+    if(!guide){
+
+        return [];
+
+    }
+
+
+
+
+    const guideId =
+
+    guide.uid ||
+
+    guide.id ||
+
+    "";
+
+
+
+
+
+    if(!guideId){
+
+        return [];
+
+    }
+
+
+
+
+
+    try{
+
+
+        const requestsRef =
+
+        collection(
+
+            db,
+
+            "lankaQuestQuotationRequests"
+
+        );
+
+
+
+
+
+        const q =
+
+        query(
+
+            requestsRef,
+
+            where(
+
+                "guideId",
+
+                "==",
+
+                guideId
+
+            )
+
+        );
+
+
+
+
+
+        const snapshot =
+
+        await getDocs(q);
+
+
+
+
+
+        const requests = [];
+
+
+
+
+
+        snapshot.forEach(doc=>{
+
+
+            requests.push({
+
+
+                id:doc.id,
+
+
+                ...doc.data()
+
+
+            });
+
+
+
+        });
+
+
+
+
+
+        return requests;
+
+
+
+    }
+    catch(error){
+
+
+
+        console.error(
+
+            "Request loading error:",
+
+            error
+
+        );
+
+
+
+        return [];
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+
+/* ============================================================
+10. LOAD GUIDE QUOTATIONS FROM FIRESTORE
+
+
+Collection:
+
+lankaQuestQuotations
+
+
+============================================================ */
+
+
+async function getCurrentGuideQuotations(guide){
+
+
+
+    if(!guide){
+
+        return [];
+
+    }
+
+
+
+
+    const guideId =
+
+    guide.uid ||
+
+    guide.id ||
+
+    "";
+
+
+
+
+
+    if(!guideId){
+
+        return [];
+
+    }
+
+
+
+
+    try{
+
+
+
+        const quotationsRef =
+
+        collection(
+
+            db,
+
+            "lankaQuestQuotations"
+
+        );
+
+
+
+
+
+        const q =
+
+        query(
+
+            quotationsRef,
+
+            where(
+
+                "guideId",
+
+                "==",
+
+                guideId
+
+            )
+
+        );
+
+
+
+
+
+        const snapshot =
+
+        await getDocs(q);
+
+
+
+
+
+        const quotations = [];
+
+
+
+
+
+        snapshot.forEach(doc=>{
+
+
+            quotations.push({
+
+
+                id:doc.id,
+
+
+                ...doc.data()
+
+
+            });
+
+
+
+        });
+
+
+
+
+
+        return quotations;
+
+
+
+    }
+    catch(error){
+
+
+
+        console.error(
+
+            "Quotation loading error:",
+
+            error
+
+        );
+
+
+
+        return [];
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+/* ============================================================
+11. GET REQUEST STATUS
+
+============================================================ */
+
+
+function getRequestStatus(request){
+
+
+
+    return (
+
+        request.status ||
+
+        request.requestStatus ||
+
+        "pending"
+
+
+    ).toLowerCase();
+
+
+
+}
+
+
+
+
+
+
+
+
+/* ============================================================
+12. UPDATE DASHBOARD COUNTS
+
+
+NOW ASYNC BECAUSE DATA COMES FROM FIRESTORE
+
+============================================================ */
+
+
+async function updateDashboardCounts(guide){
+
+
+
+    const requests =
+
+    await getCurrentGuideRequests(
+        guide
+    );
+
+
+
+
+
+    const quotations =
+
+    await getCurrentGuideQuotations(
+        guide
+    );
+
+
+
+
+
+
+    if(totalRequestCount){
+
+
+        totalRequestCount.textContent =
+
+        requests.length;
+
+
+    }
+
+
+
+
+
+
+    const pending =
+
+    requests.filter(
+
+        request =>
+
+
+        getRequestStatus(request)
+        ===
+        "pending"
+
+
+        ||
+
+        getRequestStatus(request)
+        ===
+        "new"
+
+
+    );
+
+
+
+
+
+
+
+    if(pendingRequestCount){
+
+
+        pendingRequestCount.textContent =
+
+        pending.length;
+
+
+    }
+
+
+
+
+
+
+    if(quotationCount){
+
+
+        quotationCount.textContent =
+
+        quotations.length;
+
+
+    }
+
+
+
+}
+/* ============================================================
+13. ESCAPE HTML
+
+Prevent HTML injection
+
+============================================================ */
+
+
+function escapeHTML(value){
+
+
+
+    if(
+
+        value === null ||
+
+        value === undefined
+
+    ){
+
+        return "";
+
+    }
+
+
+
+
+
+    return String(value)
+
+        .replace(
+
+            /&/g,
+
+            "&amp;"
+
+        )
+
+        .replace(
+
+            /</g,
+
+            "&lt;"
+
+        )
+
+        .replace(
+
+            />/g,
+
+            "&gt;"
+
+        )
+
+        .replace(
+
+            /"/g,
+
+            "&quot;"
+
+        )
+
+        .replace(
+
+            /'/g,
+
+            "&#039;"
+
+        );
+
+
+
+}
+
+
+
+
+
+
+
+
+/* ============================================================
+14. FORMAT REQUEST DATE
+
+============================================================ */
+
+
+function formatRequestDate(dateValue){
+
+
+
+    if(!dateValue){
+
+
+        return "Date not available";
+
+
+    }
+
+
+
+
+
+    let date;
+
+
+
+    /*
+       Firestore Timestamp
     */
 
-  const tourist = request.tourist || {};
 
-  /*
-       Destinations
-    */
+    if(
 
-  const destinations = request.destinations || [];
+        dateValue.seconds
 
-  /*
-       Status
-    */
+    ){
 
-  const status = request.status || "pending";
 
-  /*
-       Status Label
-    */
+        date =
 
-  const statusLabel = getRequestStatusLabel(status);
+        new Date(
 
-  /*
-       Special Requests
-    */
+            dateValue.seconds * 1000
 
-  const specialRequests =
-    request.specialRequests || "No special requests provided.";
+        );
 
-  /*
-       Create Card
-    */
 
-  const card = document.createElement("article");
+    }
 
-  card.className = "incoming-request-card";
+    else{
 
-  /*
-       Request Card HTML
-    */
 
-  card.innerHTML = `
+        date =
 
-        <!-- ====================================================
-             REQUEST HEADER
-        ===================================================== -->
+        new Date(
+
+            dateValue
+
+        );
+
+
+    }
+
+
+
+
+
+    if(
+
+        Number.isNaN(
+
+            date.getTime()
+
+        )
+
+    ){
+
+
+        return "Invalid Date";
+
+
+    }
+
+
+
+
+
+    return date.toLocaleDateString(
+
+        "en-US",
+
+        {
+
+
+            year:"numeric",
+
+
+            month:"short",
+
+
+            day:"numeric"
+
+
+        }
+
+    );
+
+
+
+}
+
+
+
+
+
+
+
+
+
+/* ============================================================
+15. CREATE REQUEST CARD
+
+
+Firestore Document:
+
+lankaQuestQuotationRequests
+
+
+============================================================ */
+
+
+function createRequestCard(request){
+
+
+
+    const touristName =
+
+
+        request.touristName ||
+
+
+        request.fullName ||
+
+
+        request.customerName ||
+
+
+        "Tourist";
+
+
+
+
+
+    const destination =
+
+
+        request.destination ||
+
+
+        request.destinations ||
+
+
+        request.location ||
+
+
+        "Sri Lanka";
+
+
+
+
+
+    const status =
+
+
+        getRequestStatus(
+
+            request
+
+        );
+
+
+
+
+
+    const requestDate =
+
+
+        request.createdAt ||
+
+
+        request.requestedAt ||
+
+
+        "";
+
+
+
+
+
+    const requestId =
+
+
+        request.id ||
+
+
+        "N/A";
+
+
+
+
+
+
+    const card =
+
+
+    document.createElement(
+
+        "article"
+
+    );
+
+
+
+
+
+
+    card.className =
+
+
+    "incoming-request-card";
+
+
+
+
+
+
+
+    card.innerHTML = `
+
 
         <div class="request-card-header">
 
 
-            <div class="request-tourist-info">
+            <div>
+
+
+                <span class="request-card-label">
+
+                    TRIP REQUEST
+
+                </span>
+
+
 
                 <h3>
 
-                    🧳
+                    ${escapeHTML(
 
-                    ${tourist.fullName || "Unknown Tourist"}
+                        touristName
+
+                    )}
 
                 </h3>
 
 
-                <p>
-
-                    📧
-
-                    ${tourist.email || "Email not available"}
-
-                </p>
-
             </div>
 
 
-            <span
-                class="request-status request-status-${status}"
-            >
 
-                ${statusLabel}
+
+            <span class="request-status ${escapeHTML(status)}">
+
+
+                ${escapeHTML(status)}
+
 
             </span>
 
-        </div>
 
-
-
-        <!-- ====================================================
-             TRAVEL DETAILS
-        ===================================================== -->
-
-        <div class="request-details-grid">
-
-
-            <div class="request-detail-item">
-
-                <span>
-
-                    📅 Start Date
-
-                </span>
-
-
-                <strong>
-
-                    ${request.startDate || "Not selected"}
-
-                </strong>
-
-            </div>
-
-
-
-            <div class="request-detail-item">
-
-                <span>
-
-                    📅 End Date
-
-                </span>
-
-
-                <strong>
-
-                    ${request.endDate || "Not selected"}
-
-                </strong>
-
-            </div>
-
-
-
-            <div class="request-detail-item">
-
-                <span>
-
-                    👥 Travelers
-
-                </span>
-
-
-                <strong>
-
-                    ${request.travelers || "Not selected"}
-
-                </strong>
-
-            </div>
-
-
-
-            <div class="request-detail-item">
-
-                <span>
-
-                    🌿 Travel Style
-
-                </span>
-
-
-                <strong>
-
-                    ${request.travelStyle || "Not selected"}
-
-                </strong>
-
-            </div>
-
-
-
-            <div class="request-detail-item">
-
-                <span>
-
-                    🚗 Transport
-
-                </span>
-
-
-                <strong>
-
-                    ${request.transport || "Not selected"}
-
-                </strong>
-
-            </div>
-
-
-
-            <div class="request-detail-item">
-
-                <span>
-
-                    🏨 Accommodation
-
-                </span>
-
-
-                <strong>
-
-                    ${request.accommodation || "Not selected"}
-
-                </strong>
-
-            </div>
 
         </div>
 
 
 
-        <!-- ====================================================
-             DESTINATIONS
-        ===================================================== -->
-
-        <div class="request-destinations">
-
-            <h4>
-
-                📍 Requested Destinations
-
-            </h4>
 
 
-            <div class="request-destination-list">
-
-                ${renderRequestDestinations(destinations)}
-
-            </div>
-
-        </div>
-
-
-
-        <!-- ====================================================
-             SPECIAL REQUESTS
-        ===================================================== -->
-
-        <div class="request-special-requests">
-
-            <strong>
-
-                💬 Special Requests
-
-            </strong>
+        <div class="request-card-body">
 
 
             <p>
 
-                ${specialRequests}
+
+                <strong>
+
+                    Destination:
+
+                </strong>
+
+
+
+                ${escapeHTML(
+
+                    Array.isArray(destination)
+
+                    ?
+
+                    destination.join(", ")
+
+                    :
+
+                    destination
+
+                )}
+
+
 
             </p>
 
+
+
+
+
+
+
+            <p>
+
+
+                <strong>
+
+                    Request ID:
+
+                </strong>
+
+
+
+                ${escapeHTML(requestId)}
+
+
+
+            </p>
+
+
+
+
+
+
+
+            <p>
+
+
+                <strong>
+
+                    Received:
+
+                </strong>
+
+
+
+                ${formatRequestDate(
+
+                    requestDate
+
+                )}
+
+
+
+            </p>
+
+
+
         </div>
 
 
 
-        <!-- ====================================================
-             FOOTER
-        ===================================================== -->
-
-        <div class="request-card-footer">
 
 
-            <span class="request-date">
-
-                Request ID:
-
-                ${request.requestId || "N/A"}
-
-                ·
-
-                ${formatRequestDate(request.createdAt)}
-
-            </span>
 
 
-            <button
-                type="button"
-                class="send-quotation-button"
-                data-request-id="${request.requestId || ""}"
+
+        <div class="request-card-actions">
+
+
+
+            <a
+
+                href="guide-requests.html"
+
+                class="view-request-button"
+
+
             >
 
-                💰
 
-                Send Quotation
+                View Request →
 
-                →
 
-            </button>
+            </a>
+
+
 
         </div>
+
+
+
 
     `;
 
-  return card;
+
+
+
+
+
+    return card;
+
+
+
 }
 
+
+
+
+
+
+
+
+
 /* ============================================================
-   10. RENDER INCOMING REQUESTS
+16. RENDER INCOMING REQUESTS
+
+
+Firestore Data → Dashboard Cards
+
+
 ============================================================ */
 
-function renderIncomingRequests(currentGuide) {
-  /*
-       Get Only Current Guide Requests
-    */
 
-  const requests = getCurrentGuideRequests(currentGuide);
+async function renderIncomingRequests(guide){
 
-  /*
-       Update Stats
-    */
 
-  updateGuideDashboardStats(requests);
 
-  /*
-       Clear Existing
-    */
+    if(
 
-  if (incomingRequestsContainer) {
-    incomingRequestsContainer.innerHTML = "";
-  }
+        !incomingRequestsContainer
 
-  /*
-       Empty State
-    */
+    ){
 
-  if (requests.length === 0) {
-    if (noRequestsState) {
-      noRequestsState.style.display = "block";
+        return;
+
     }
 
-    return;
-  }
 
-  /*
-       Hide Empty State
+
+
+
+
+    const requests =
+
+
+    await getCurrentGuideRequests(
+
+        guide
+
+    );
+
+
+
+
+
+
+
+    /*
+       Clear old cards
+
     */
 
-  if (noRequestsState) {
-    noRequestsState.style.display = "none";
-  }
 
-  /*
-       Render Requests
+    incomingRequestsContainer.innerHTML = "";
+
+
+
+
+
+
+
+
+    /*
+       No Requests
+
     */
 
-  if (incomingRequestsContainer) {
-    requests.forEach((request) => {
-      const card = renderRequestCard(request);
 
-      incomingRequestsContainer.appendChild(card);
-    });
-  }
+    if(
 
-  /*
-       Attach Buttons
-    */
+        requests.length === 0
 
-  attachQuotationButtons();
-}
+    ){
 
-/* ============================================================
-   11. SEND QUOTATION BUTTONS
-============================================================ */
 
-function attachQuotationButtons() {
-  const buttons = document.querySelectorAll(".send-quotation-button");
 
-  buttons.forEach((button) => {
-    button.addEventListener(
-      "click",
+        incomingRequestsContainer.style.display =
 
-      () => {
-        /*
-                       Get Request ID
-                    */
+        "none";
 
-        const requestId = button.dataset.requestId;
 
-        /*
-                       Validate Request ID
-                    */
 
-        if (!requestId) {
-          alert("Request ID is missing.");
 
-          return;
+
+        if(noRequestsState){
+
+
+
+            noRequestsState.style.display =
+
+            "block";
+
+
+
         }
 
-        /*
-                       Open Guide Requests Page
 
-                       Pass Request ID
-                    */
+
+        return;
+
+
+
+    }
+
+
+
+
+
+
+
+    /*
+       Show container
+
+    */
+
+
+    incomingRequestsContainer.style.display =
+
+    "grid";
+
+
+
+
+
+
+    if(noRequestsState){
+
+
+        noRequestsState.style.display =
+
+        "none";
+
+
+    }
+
+
+
+
+
+
+
+    /*
+       Latest first
+
+    */
+
+
+    const sortedRequests =
+
+
+    [...requests].sort(
+
+        (a,b)=>{
+
+
+
+            const dateA =
+
+            new Date(
+
+                a.createdAt?.seconds
+
+                ?
+
+                a.createdAt.seconds * 1000
+
+                :
+
+                a.createdAt || 0
+
+            ).getTime();
+
+
+
+
+
+
+            const dateB =
+
+            new Date(
+
+                b.createdAt?.seconds
+
+                ?
+
+                b.createdAt.seconds * 1000
+
+                :
+
+                b.createdAt || 0
+
+            ).getTime();
+
+
+
+
+
+
+            return dateB - dateA;
+
+
+
+        }
+
+    );
+
+
+
+
+
+
+
+
+
+    /*
+       Dashboard show latest 5 only
+
+    */
+
+
+    const latestRequests =
+
+
+    sortedRequests.slice(
+
+        0,
+
+        5
+
+    );
+
+
+
+
+
+
+
+    latestRequests.forEach(
+
+        request=>{
+
+
+            const card =
+
+            createRequestCard(
+
+                request
+
+            );
+
+
+
+
+
+            incomingRequestsContainer.appendChild(
+
+                card
+
+            );
+
+
+
+        }
+
+    );
+
+
+
+}
+ /* ============================================================
+17. LOAD GUIDE DASHBOARD
+
+
+FLOW:
+
+auth.js
+
+↓
+
+exploreSriLankaCurrentUser
+
+↓
+
+Firebase UID
+
+↓
+
+lankaQuestGuides
+
+↓
+
+Dashboard
+
+
+============================================================ */
+
+
+async function loadGuideDashboard(){
+
+
+
+    /*
+       Get logged user
+    */
+
+
+    const currentUser =
+
+    getDashboardCurrentUser();
+
+
+
+
+
+
+    if(!currentUser){
+
+
 
         window.location.href =
-          "guide-requests.html?requestId=" + encodeURIComponent(requestId);
-      },
-    );
-  });
-}
 
-/* ============================================================
-   12. LOAD GUIDE PROFILE
-============================================================ */
+        "login.html";
 
-function loadGuideProfile() {
-  /*
-       Get Current User
 
-       auth.js
-       getCurrentUser()
-    */
 
-  const user = typeof getCurrentUser === "function" ? getCurrentUser() : null;
+        return;
 
-  /*
-       No User
-    */
 
-  if (!user) {
-    window.location.href = "login.html?redirect=guide-dashboard.html";
-
-    return null;
-  }
-
-  /*
-       Must Be Guide
-    */
-
-  if (user.accountType !== "guide") {
-    alert("Only Guide accounts can access the Guide Dashboard.");
-
-    if (typeof redirectAfterLogin === "function") {
-      redirectAfterLogin(user);
-    } else {
-      window.location.href = "index.html";
     }
 
-    return null;
-  }
 
-  /*
-       Guide Verification
+
+
+
+
+
+    /*
+       Only Guide Account
+
     */
 
-  if (user.verificationStatus !== "approved") {
-    window.location.href = "guide-verification.html";
 
-    return null;
-  }
+    if(
 
-  /*
-       Display Name
-    */
+        currentUser.accountType !== "guide"
 
-  const displayName = user.fullName || "Guide";
+    ){
 
-  if (guideHeaderName) {
-    guideHeaderName.textContent = displayName;
-  }
 
-  if (guideWelcomeName) {
-    guideWelcomeName.textContent = displayName;
-  }
 
-  /*
-       Account Status
-    */
+        if(
 
-  if (guideStatus) {
-    guideStatus.textContent = user.status || "Active";
-  }
+            typeof redirectAfterLogin === "function"
 
-  /*
-       Return Current Guide
-    */
+        ){
 
-  return user;
-}
 
-/* ============================================================
-   13. LOGOUT
-============================================================ */
+            redirectAfterLogin(
 
-if (logoutButton) {
-  logoutButton.addEventListener(
-    "click",
+                currentUser
 
-    () => {
-      /*
-               Confirm Logout
-            */
+            );
 
-      const confirmLogout = confirm("Are you sure you want to logout?");
 
-      if (!confirmLogout) {
+        }
+
+        else{
+
+
+            window.location.href =
+
+            "index.html";
+
+
+        }
+
+
+
         return;
-      }
 
-      /*
-               Use auth.js Logout
-            */
 
-      if (typeof logoutUser === "function") {
-        logoutUser();
-      } else {
-        window.location.href = "index.html";
-      }
-    },
-  );
+    }
+
+
+
+
+
+
+
+    /*
+       Load Guide From Firestore
+
+    */
+
+
+    const guide =
+
+
+    await findCurrentGuide(
+
+        currentUser
+
+    );
+
+
+
+
+
+
+
+
+    console.log(
+
+        "FOUND GUIDE DATA:",
+
+        guide
+
+    );
+
+
+
+
+
+
+
+    if(!guide){
+
+
+
+        console.error(
+
+            "Guide profile not found"
+
+        );
+
+
+
+
+
+        if(guideHeaderName){
+
+
+            guideHeaderName.textContent =
+
+            currentUser.fullName || "Guide";
+
+
+        }
+
+
+
+
+
+
+        if(guideWelcomeName){
+
+
+            guideWelcomeName.textContent =
+
+            currentUser.fullName || "Guide";
+
+
+        }
+
+
+
+
+
+
+        if(guideStatus){
+
+
+            guideStatus.textContent =
+
+            "Profile Not Found";
+
+
+        }
+
+
+
+
+
+        return;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    /*
+       Update UI
+
+    */
+
+
+    updateGuideName(
+
+        guide
+
+    );
+
+
+
+
+
+    updateGuideStatus(
+
+        guide
+
+    );
+
+
+
+
+
+    await updateDashboardCounts(
+
+        guide
+
+    );
+
+
+
+
+
+    await renderIncomingRequests(
+
+        guide
+
+    );
+
+
+
+
+
+
+
+
+    console.log(
+
+        "Current Guide:",
+
+        guide
+
+    );
+
+
+
+
+
+
+    console.log(
+
+        "Guide UID:",
+
+        guide.uid
+
+    );
+
+
+
 }
 
+
+
+
+
+
+
+
+
 /* ============================================================
-   14. REFRESH REQUESTS
+18. REFRESH REQUESTS BUTTON
+
+
 ============================================================ */
 
-if (refreshRequestsButton) {
-  refreshRequestsButton.addEventListener(
-    "click",
 
-    () => {
-      /*
-               Get Current Guide Again
-            */
+if(refreshRequestsButton){
 
-      const currentGuide =
-        typeof getCurrentUser === "function" ? getCurrentUser() : null;
 
-      /*
-               Render Again
-            */
 
-      if (currentGuide) {
-        renderIncomingRequests(currentGuide);
-      }
-    },
-  );
+    refreshRequestsButton.addEventListener(
+
+
+        "click",
+
+
+        ()=>{
+
+
+            loadGuideDashboard();
+
+
+        }
+
+
+    );
+
+
 }
 
+
+
+
+
+
+
+
+
 /* ============================================================
-   15. INITIALIZE DASHBOARD
+19. LOGOUT
+
+
 ============================================================ */
+
+
+if(logoutButton){
+
+
+
+    logoutButton.addEventListener(
+
+
+        "click",
+
+
+        ()=>{
+
+
+
+            /*
+               Use auth.js logout
+
+            */
+
+
+            if(
+
+                typeof logoutUser === "function"
+
+            ){
+
+
+
+                logoutUser();
+
+
+
+                return;
+
+
+            }
+
+
+
+
+
+
+
+            /*
+               Firebase auth fallback
+
+            */
+
+
+            localStorage.removeItem(
+
+                GUIDE_CURRENT_USER_KEY
+
+            );
+
+
+
+            sessionStorage.removeItem(
+
+                GUIDE_CURRENT_USER_KEY
+
+            );
+
+
+
+
+
+
+
+            window.location.href =
+
+            "index.html";
+
+
+
+        }
+
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+/* ============================================================
+20. INITIALIZE DASHBOARD  
+ getStorageArray() නැහැ
+ localStorage වල guide/request/quotation data නැහැ
+ GUIDE_RECORDS_KEY නැහැ
+ QUOTATION_REQUESTS_KEY නැහැ
+ QUOTATIONS_KEY නැහැ
+
+
+============================================================ */
+
 
 document.addEventListener(
-  "DOMContentLoaded",
 
-  () => {
-    /*
-           Verify Guide
-        */
 
-    const guide = loadGuideProfile();
+    "DOMContentLoaded",
 
-    /*
-           Stop if Not Valid
-        */
 
-    if (!guide) {
-      return;
+    ()=>{
+
+
+        loadGuideDashboard();
+
+
     }
 
-    /*
-           Load Current Guide Requests
-        */
 
-    renderIncomingRequests(guide);
-
-    /*
-           Debug
-        */
-
-    console.log(
-      "Guide Dashboard Loaded:",
-
-      guide.fullName,
-    );
-
-    console.log(
-      "Guide ID:",
-
-      guide.id,
-    );
-
-    console.log(
-      "Guide Requests:",
-
-      getCurrentGuideRequests(guide),
-    );
-  },
 );

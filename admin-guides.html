@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <!-- =========================================================
+         BASIC META
+    ========================================================== -->
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description" content="LankaQuest Admin Guide Management">
+
+    <meta name="author" content="LankaQuest">
+
+
+    <!-- =========================================================
+         PAGE TITLE
+    ========================================================== -->
+
+    <title>
+        Guide Management | LankaQuest Admin
+    </title>
+
+
+    <!-- =========================================================
+         FAVICON
+    ========================================================== -->
+
+    <link rel="icon" type="image/png" href="images/logo/favicon.png">
+
+
+    <!-- =========================================================
+         GLOBAL CSS
+    ========================================================== -->
+
+    <link rel="stylesheet" href="css/style.css">
+
+
+    <!-- =========================================================
+         ADMIN GUIDE CSS
+    ========================================================== -->
+
+    <link rel="stylesheet" href="css/admin-guides.css">
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================================================
+         ADMIN HEADER
+    ========================================================== -->
+
+    <header class="admin-header">
+
+        <div class="admin-header-container">
+
+
+            <!-- BRAND -->
+
+            <a href="admin-dashboard.html" class="admin-logo">
+
+                <span class="logo-icon">
+                    🌴
+                </span>
+
+                <span class="logo-text">
+                    LankaQuest
+                </span>
+
+                <span class="admin-label">
+                    Admin
+                </span>
+
+            </a>
+
+
+            <!-- NAVIGATION -->
+
+            <nav class="admin-navigation" aria-label="Admin Navigation">
+
+                <a href="admin-dashboard.html">
+                    Dashboard
+                </a>
+
+                <a href="admin-guides.html" class="active">
+                    Guides
+                </a>
+
+                <a href="admin-tourists.html">
+                    Tourists
+                </a>
+
+                <a href="admin-quotations.html">
+                    Quotations
+                </a>
+
+            </nav>
+
+
+            <!-- LOGOUT -->
+
+            <button type="button" id="adminLogoutButton" class="admin-logout-button">
+
+                Logout
+
+            </button>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- =========================================================
+         MAIN CONTENT
+    ========================================================== -->
+
+    <main class="admin-guides-page">
+
+
+        <!-- =====================================================
+             PAGE HEADER
+        ====================================================== -->
+
+        <section class="admin-page-header">
+
+            <div>
+
+                <span class="admin-page-badge">
+                    🧭 Guide Management
+                </span>
+
+                <h1>
+                    Guide Management
+                </h1>
+
+                <p>
+                    Review, approve and manage LankaQuest tour guides.
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =====================================================
+             STATISTICS
+        ====================================================== -->
+
+        <section class="guide-statistics">
+
+
+            <!-- TOTAL -->
+
+            <article class="guide-stat-card">
+
+                <div class="stat-icon">
+                    👥
+                </div>
+
+                <div>
+
+                    <span class="stat-label">
+                        Total Guides
+                    </span>
+
+                    <strong id="totalGuidesCount" class="stat-value">
+                        0
+                    </strong>
+
+                </div>
+
+            </article>
+
+
+
+            <!-- PENDING -->
+
+            <article class="guide-stat-card">
+
+                <div class="stat-icon">
+                    ⏳
+                </div>
+
+                <div>
+
+                    <span class="stat-label">
+                        Pending Review
+                    </span>
+
+                    <strong id="pendingGuidesCount" class="stat-value">
+                        0
+                    </strong>
+
+                </div>
+
+            </article>
+
+
+
+            <!-- APPROVED -->
+
+            <article class="guide-stat-card">
+
+                <div class="stat-icon">
+                    ✅
+                </div>
+
+                <div>
+
+                    <span class="stat-label">
+                        Approved Guides
+                    </span>
+
+                    <strong id="approvedGuidesCount" class="stat-value">
+                        0
+                    </strong>
+
+                </div>
+
+            </article>
+
+
+
+            <!-- ACTIVE -->
+
+            <article class="guide-stat-card">
+
+                <div class="stat-icon">
+                    🟢
+                </div>
+
+                <div>
+
+                    <span class="stat-label">
+                        Active Guides
+                    </span>
+
+                    <strong id="activeGuidesCount" class="stat-value">
+                        0
+                    </strong>
+
+                </div>
+
+            </article>
+
+        </section>
+
+
+
+        <!-- =====================================================
+             GUIDE MANAGEMENT CONTAINER
+        ====================================================== -->
+
+        <section class="guide-management-container">
+
+
+            <!-- =================================================
+                 TOOLBAR
+            ================================================== -->
+
+            <div class="guide-management-toolbar">
+
+
+                <!-- SEARCH -->
+
+                <div class="guide-search-box">
+
+                    <label for="guideSearch" class="sr-only">
+                        Search Guides
+                    </label>
+
+                    <input type="search" id="guideSearch" placeholder="Search by name, email, Guide ID or phone..."
+                        autocomplete="off">
+
+                </div>
+
+
+
+                <!-- STATUS FILTER -->
+
+                <div class="guide-filter-box">
+
+                    <label for="guideStatusFilter" class="sr-only">
+                        Filter by Status
+                    </label>
+
+                    <select id="guideStatusFilter">
+
+                        <option value="all">
+                            All Status
+                        </option>
+
+                        <option value="pending">
+                            Pending Review
+                        </option>
+
+                        <option value="approved">
+                            Approved
+                        </option>
+
+                        <option value="rejected">
+                            Rejected
+                        </option>
+
+                        <option value="suspended">
+                            Suspended
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- LANGUAGE FILTER -->
+
+                <div class="guide-filter-box">
+
+                    <label for="guideLanguageFilter" class="sr-only">
+                        Filter by Language
+                    </label>
+
+                    <select id="guideLanguageFilter">
+
+                        <option value="all">
+                            All Languages
+                        </option>
+
+                        <option value="Sinhala">
+                            Sinhala
+                        </option>
+
+                        <option value="English">
+                            English
+                        </option>
+
+                        <option value="Tamil">
+                            Tamil
+                        </option>
+
+                        <option value="Hindi">
+                            Hindi
+                        </option>
+
+                        <option value="German">
+                            German
+                        </option>
+
+                        <option value="French">
+                            French
+                        </option>
+
+                        <option value="Chinese">
+                            Chinese
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 GUIDE TABLE
+            ================================================== -->
+
+            <div class="guides-table-wrapper">
+
+                <table class="guides-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Guide
+                            </th>
+
+                            <th>
+                                Email
+                            </th>
+
+                            <th>
+                                Phone
+                            </th>
+
+                            <th>
+                                Languages
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Actions
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <!-- IMPORTANT:
+                         admin-guides.js renders guide rows here
+                    -->
+
+                    <tbody id="guidesTableBody">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 EMPTY STATE
+            ================================================== -->
+
+            <div id="guideEmptyState" class="guide-empty-state" style="display: none;">
+
+                <div class="empty-state-icon">
+                    🧭
+                </div>
+
+                <h2>
+                    No Guides Found
+                </h2>
+
+                <p>
+                    No guide applications match your current search
+                    or filter criteria.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- =========================================================
+         GUIDE DETAILS MODAL
+    ========================================================== -->
+
+    <div id="guideDetailsModal" class="guide-details-modal" aria-hidden="true">
+
+        <div class="guide-details-modal-dialog">
+
+
+            <!-- MODAL HEADER -->
+
+            <div class="guide-details-modal-header">
+
+                <h2>
+                    Guide Application Details
+                </h2>
+
+                <button type="button" id="closeGuideDetails" class="close-guide-details"
+                    aria-label="Close Guide Details">
+
+                    ×
+
+                </button>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 DETAILS CONTENT
+
+                 admin-guides.js dynamically inserts
+                 ALL guide information here.
+            ================================================== -->
+
+            <div id="guideDetailsContent" class="guide-details-content">
+
+                <!-- Dynamic Guide Details -->
+
+            </div>
+
+
+
+            <!-- MODAL FOOTER -->
+
+            <div class="guide-details-modal-footer">
+
+                <button type="button" id="closeGuideDetailsFooter" class="secondary-action-button">
+
+                    Close
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================================================
+         FOOTER
+    ========================================================== -->
+
+    <footer class="site-footer">
+
+        <div class="footer-container">
+
+            <div class="footer-brand">
+
+                <a href="admin-dashboard.html" class="footer-logo">
+
+                    🌴 LankaQuest Admin
+
+                </a>
+
+                <p>
+                    Manage LankaQuest Guide Applications.
+                </p>
+
+            </div>
+
+
+            <div class="footer-links">
+
+                <a href="admin-dashboard.html">
+                    Dashboard
+                </a>
+
+                <a href="admin-guides.html">
+                    Guide Management
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-bottom">
+
+            <p>
+                © 2026 LankaQuest. All rights reserved.
+            </p>
+
+        </div>
+
+    </footer>
+
+
+
+    <!-- =========================================================
+         JAVASCRIPT
+    ========================================================== -->
+
+    <script type="module" src="js/admin-guides.js"></script>
+
+    <!-- =========================================================
+         CLOSE MODAL FOOTER BUTTON
+    ========================================================== -->
+
+    <script>
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            () => {
+
+                const closeFooterButton =
+                    document.getElementById(
+                        "closeGuideDetailsFooter"
+                    );
+
+                const closeButton =
+                    document.getElementById(
+                        "closeGuideDetails"
+                    );
+
+                const modal =
+                    document.getElementById(
+                        "guideDetailsModal"
+                    );
+
+
+                if (
+                    closeFooterButton &&
+                    closeButton
+                ) {
+
+                    closeFooterButton.addEventListener(
+                        "click",
+                        () => {
+
+                            closeButton.click();
+
+                        }
+                    );
+
+                }
+
+
+                /*
+                   Optional Admin Logout
+                */
+
+                const logoutButton =
+                    document.getElementById(
+                        "adminLogoutButton"
+                    );
+
+
+                if (logoutButton) {
+
+                    logoutButton.addEventListener(
+                        "click",
+                        () => {
+
+                            const confirmed =
+                                confirm(
+                                    "Are you sure you want to logout?"
+                                );
+
+
+                            if (!confirmed) {
+
+                                return;
+
+                            }
+
+
+                            /*
+                               Change this later
+                               according to your auth system.
+                            */
+
+                            window.location.href =
+                                "login.html";
+
+                        }
+                    );
+
+                }
+
+            }
+        );
+
+    </script>
+
+
+</body>
+
+</html>

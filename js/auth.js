@@ -1,299 +1,983 @@
-
 /* ============================================================
+
    AUTHENTICATION CORE
-   Explore Sri Lanka
+   LankaQuest
 
-   RESPONSIBILITIES:
+   FIREBASE FIRST ARCHITECTURE
 
-   🔐 Login State
-   👤 Current User
-   🧳 Tourist Account
-   🧑‍💼 Guide Account
-   🛡️ Guide Verification
-   🚪 Logout
-   🔄 Normal Login Redirect
+   FLOW:
 
-   ARCHITECTURE:
+   Firebase Authentication
+            |
+            ↓
+        Firebase UID
+            |
+            ↓
+        Firestore Profile
 
-   Tourist Account
-       ↓
-   Tourist Dashboard
-       ↓
-   Trip Planner
-       ↓
-   Quotation
-       ↓
-   Find Guide
+        lankaQuestGuides
+        lankaQuestTourists
 
-   Guide Account
-       ↓
-   Guide Dashboard
-       ↓
-   Incoming Requests
-       ↓
-   Guide Requests
-       ↓
-   Send Quotation
+            |
+            ↓
 
-   FRONTEND DEMO AUTHENTICATION
+        Session Cache Only
 
-   Future:
-   Backend API
-   Database
-   Secure Authentication
-   JWT / Session
+        exploreSriLankaCurrentUser
+
+            |
+            ↓
+
+        Dashboard
+
+
+   IMPORTANT:
+
+   localStorage is NOT database.
+
+   It is only temporary login session storage.
+
 ============================================================ */
 
-
 /* ============================================================
-   1. STORAGE KEYS
+   FIREBASE IMPORTS
 ============================================================ */
 
-const AUTH_USER_KEY =
-    "exploreSriLankaCurrentUser";
+import { auth, db } from "./firebase-config.js";
 
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-const DEMO_ACCOUNTS_KEY =
-    "exploreSriLankaDemoAccounts";
-
+import {
+  doc,
+  getDoc,
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 /* ============================================================
-   2. DEMO ACCOUNTS
+   SESSION KEY ONLY
+
+   NOT DATABASE
+
 ============================================================ */
 
-const demoAccounts = [
+const AUTH_USER_KEY = "exploreSriLankaCurrentUser";
 
-    /* ========================================================
-       DEMO TOURIST
-    ======================================================== */
-
-    {
-
-        id:
-            "tourist-demo-001",
-
-        accountType:
-            "tourist",
-
-        fullName:
-            "Demo Tourist",
-
-        email:
-            "tourist@example.com",
-
-        password:
-            "tourist123",
-
-        country:
-            "United Kingdom"
-
-    },
-
-
-    /* ========================================================
-       DEMO GUIDE
-    ======================================================== */
-
-    {
-
-        id:
-            "guide-demo-001",
-
-        accountType:
-            "guide",
-
-        fullName:
-            "Demo Sri Lanka Guide",
-
-        email:
-            "guide@example.com",
-
-        password:
-            "guide123",
-
-        phone:
-            "+94 77 123 4567",
-
-        district:
-            "Kandy",
-
-        languages:
-            "English, Sinhala",
-
-        experience:
-            "5-10",
-
-        verificationStatus:
-            "approved",
-
-        status:
-            "active"
-
-    }
-
-];
-
+const googleProvider = new GoogleAuthProvider();
 
 /* ============================================================
-   3. GET CURRENT USER
+   GET CURRENT USER
+
+   Reads current login session
+
 ============================================================ */
 
 function getCurrentUser() {
+  let savedUser = localStorage.getItem(AUTH_USER_KEY);
 
-    /*
-       First check localStorage.
+  if (!savedUser) {
+    savedUser = sessionStorage.getItem(AUTH_USER_KEY);
+  }
 
-       Remember Me = checked
-    */
+  if (!savedUser) {
+    return null;
+  }
 
-    let savedUser =
-        localStorage.getItem(
-            AUTH_USER_KEY
-        );
+  try {
+    return JSON.parse(savedUser);
+  } catch (error) {
+    console.error(
+      "User session error:",
+
+      error,
+    );
+
+    clearUserSession();
+
+    return null;
+  }
+}
+
+/* ============================================================
+   SAVE CURRENT USER
+
+   Session cache only
+
+============================================================ */
+
+function saveCurrentUser(
+  user,
+
+  remember = true,
+) {
+  clearUserSession();
+
+  const storage = remember ? localStorage : sessionStorage;
+
+  storage.setItem(
+    AUTH_USER_KEY,
+
+    JSON.stringify(user),
+  );
+}
+
+/* ============================================================
+   CLEAR USER SESSION
+
+============================================================ */
+
+function clearUserSession() {
+  localStorage.removeItem(AUTH_USER_KEY);
+
+  sessionStorage.removeItem(AUTH_USER_KEY);
+}
+
+/* ============================================================
+   CREATE GUIDE SESSION OBJECT
 
 
-    /*
-       If not found,
-       check sessionStorage.
+   Firestore:
 
-       Remember Me = unchecked
-    */
+   lankaQuestGuides/{UID}
 
-    if (!savedUser) {
+============================================================ */
 
-        savedUser =
-            sessionStorage.getItem(
-                AUTH_USER_KEY
+function createGuideSession(
+  guide,
+
+  uid,
+) {
+  return {
+    uid: uid,
+
+    id: uid,
+
+    guideId: uid,
+
+    accountType: "guide",
+
+    fullName: guide.fullName || "",
+
+    email: guide.email || "",
+
+    phone: guide.phone || "",
+
+    province: guide.province || "",
+
+    district: guide.district || "",
+
+    languages: Array.isArray(guide.languages) ? guide.languages : [],
+
+    specializations: Array.isArray(guide.specializations)
+      ? guide.specializations
+      : [],
+
+    experience: guide.experience || "",
+
+    areasCovered: guide.areasCovered || "",
+
+    profileImage: guide.profileImage || "",
+
+    verificationStatus: guide.verificationStatus || "pending",
+
+    status: guide.status || "pending",
+
+    profileStatus: guide.profileStatus || "inactive",
+
+    isActive: guide.isActive === true,
+
+    rating: guide.rating || 0,
+
+    reviewCount: guide.reviewCount || 0,
+  };
+}
+
+/* ============================================================
+   CREATE TOURIST SESSION OBJECT
+
+
+   Firestore:
+
+   lankaQuestTourists/{UID}
+
+============================================================ */
+
+function createTouristSession(
+  tourist,
+
+  uid,
+) {
+  return {
+    uid: uid,
+
+    id: uid,
+
+    accountType: "tourist",
+
+    fullName: tourist.fullName || "",
+
+    email: tourist.email || "",
+
+    phone: tourist.phone || "",
+
+    country: tourist.country || "",
+  };
+}
+
+/* ============================================================
+   GOOGLE LOGIN
+
+   Firebase Authentication
+          |
+          ↓
+   Google Account
+          |
+          ↓
+   Firebase UID
+          |
+          ↓
+   Firestore Profile
+
+   lankaQuestTourists
+   lankaQuestGuides
+
+============================================================ */
+
+
+async function googleLogin(){
+
+
+    try{
+
+
+        const provider =
+            new GoogleAuthProvider();
+
+
+
+        const result =
+            await signInWithPopup(
+
+                auth,
+
+                provider
+
             );
 
-    }
 
 
-    /*
-       No logged-in user
-    */
-
-    if (!savedUser) {
-
-        return null;
-
-    }
+        const firebaseUser =
+            result.user;
 
 
-    /*
-       Convert JSON
-    */
 
-    try {
+        const uid =
+            firebaseUser.uid;
 
-        return JSON.parse(
-            savedUser
+
+
+        console.log(
+            "Google UID:",
+            uid
         );
 
+
+
+        /*
+            CHECK GUIDE PROFILE
+
+            lankaQuestGuides/{UID}
+
+        */
+
+
+        const guideRef =
+            doc(
+
+                db,
+
+                "lankaQuestGuides",
+
+                uid
+
+            );
+
+
+
+        const guideSnap =
+            await getDoc(
+
+                guideRef
+
+            );
+
+
+
+        if(
+            guideSnap.exists()
+        ){
+
+
+            const guideData =
+                guideSnap.data();
+
+
+
+            const guideUser =
+                createGuideSession(
+
+                    guideData,
+
+                    uid
+
+                );
+
+
+
+            saveCurrentUser(
+
+                guideUser,
+
+                true
+
+            );
+
+
+
+            return {
+
+                success:true,
+
+                user:guideUser
+
+            };
+
+
+        }
+
+
+
+
+
+        /*
+            CHECK TOURIST PROFILE
+
+            lankaQuestTourists/{UID}
+
+        */
+
+
+        const touristRef =
+            doc(
+
+                db,
+
+                "lankaQuestTourists",
+
+                uid
+
+            );
+
+
+
+        const touristSnap =
+            await getDoc(
+
+                touristRef
+
+            );
+
+
+
+        if(
+            touristSnap.exists()
+        ){
+
+
+            const touristData =
+                touristSnap.data();
+
+
+
+            const touristUser =
+                createTouristSession(
+
+                    touristData,
+
+                    uid
+
+                );
+
+
+
+            saveCurrentUser(
+
+                touristUser,
+
+                true
+
+            );
+
+
+
+            return {
+
+
+                success:true,
+
+
+                user:touristUser
+
+
+            };
+
+
+        }
+
+
+
+
+
+        /*
+            Firebase account exists
+
+            But Firestore profile missing
+
+        */
+
+
+        await signOut(auth);
+
+
+
+        return {
+
+
+            success:false,
+
+
+            message:
+
+            "Google account registered but profile not found. Please complete registration."
+
+
+        };
+
+
+
     }
 
-    catch (error) {
+
+
+    catch(error){
+
 
         console.error(
 
-            "Authentication data error:",
+            "Google Login Error:",
 
             error
 
         );
 
 
-        /*
-           Clear corrupted data
-        */
 
-        localStorage.removeItem(
-            AUTH_USER_KEY
-        );
+        return {
 
 
-        sessionStorage.removeItem(
-            AUTH_USER_KEY
-        );
+            success:false,
 
 
-        return null;
+            message:
+
+            error.message || 
+            "Google login failed."
+
+
+        };
+
 
     }
+
+
+}
+/* ============================================================
+   FIREBASE LOGIN
+
+   FLOW:
+
+   Email + Password
+
+        ↓
+
+   Firebase Authentication
+
+        ↓
+
+   Firebase UID
+
+        ↓
+
+   Firestore Profile
+
+        ↓
+
+   Create Session
+
+============================================================ */
+
+
+async function firebaseLogin(
+
+    email,
+
+    password,
+
+    remember = true ){
+
+
+    try{
+
+
+        /*
+            Firebase Authentication Login
+        */
+
+
+        const userCredential =
+
+            await signInWithEmailAndPassword(
+
+                auth,
+
+                email,
+
+                password
+
+            );
+
+
+
+        const firebaseUser =
+
+            userCredential.user;
+
+
+
+        const uid =
+
+            firebaseUser.uid;
+
+
+
+
+        console.log(
+
+            "Firebase UID:",
+
+            uid
+
+        );
+
+
+
+
+
+        /* ====================================================
+           CHECK GUIDE PROFILE
+
+
+           Firestore:
+
+           lankaQuestGuides
+
+           Document:
+
+           UID
+
+        ==================================================== */
+
+
+        const guideRef =
+
+            doc(
+
+                db,
+
+                "lankaQuestGuides",
+
+                uid
+
+            );
+
+
+
+
+        const guideSnap =
+
+            await getDoc(
+
+                guideRef
+
+            );
+
+
+
+
+
+        if(
+
+            guideSnap.exists()
+
+        ){
+
+
+
+            const guideData =
+
+                guideSnap.data();
+
+
+
+
+            const guideUser =
+
+                createGuideSession(
+
+                    guideData,
+
+                    uid
+
+                );
+
+
+
+
+
+            saveCurrentUser(
+
+                guideUser,
+
+                remember
+
+            );
+
+
+
+
+
+            return {
+
+
+                success:true,
+
+
+                user:guideUser
+
+
+            };
+
+
+
+        }
+
+
+
+
+
+        /* ====================================================
+           CHECK TOURIST PROFILE
+
+
+           Firestore:
+
+           lankaQuestTourists
+
+           Document:
+
+           UID
+
+        ==================================================== */
+
+
+
+        const touristRef =
+
+            doc(
+
+                db,
+
+                "lankaQuestTourists",
+
+                uid
+
+            );
+
+
+
+
+
+        const touristSnap =
+
+            await getDoc(
+
+                touristRef
+
+            );
+
+
+
+
+
+
+        if(
+
+            touristSnap.exists()
+
+        ){
+
+
+
+            const touristData =
+
+                touristSnap.data();
+
+
+
+
+
+            const touristUser =
+
+                createTouristSession(
+
+                    touristData,
+
+                    uid
+
+                );
+
+
+
+
+
+            saveCurrentUser(
+
+                touristUser,
+
+                remember
+
+            );
+
+
+
+
+
+            return {
+
+
+                success:true,
+
+
+                user:touristUser
+
+
+            };
+
+
+
+        }
+
+
+
+
+
+
+
+        /*
+            Firebase account exists
+
+            But Firestore profile missing
+
+        */
+
+
+
+        await signOut(
+
+            auth
+
+        );
+
+
+
+
+
+        return {
+
+
+            success:false,
+
+
+            message:
+
+            "Account profile not found. Please contact support."
+
+
+
+        };
+
+
+
+    }
+
+
+
+    catch(error){
+
+
+
+        console.error(
+
+            "Firebase Login Error:",
+
+            error
+
+        );
+
+
+
+
+        let message =
+
+            "Login failed. Please try again.";
+
+
+
+
+
+
+
+        if(
+
+            error.code ===
+
+            "auth/user-not-found"
+
+        ){
+
+
+            message =
+
+            "No account found with this email.";
+
+
+        }
+
+
+
+
+
+        else if(
+
+            error.code ===
+
+            "auth/wrong-password"
+
+        ){
+
+
+            message =
+
+            "Incorrect password.";
+
+
+        }
+
+
+
+
+
+
+        else if(
+
+            error.code ===
+
+            "auth/invalid-credential"
+
+        ){
+
+
+            message =
+
+            "Invalid email or password.";
+
+
+        }
+
+
+
+
+
+
+        else if(
+
+            error.code ===
+
+            "auth/invalid-email"
+
+        ){
+
+
+            message =
+
+            "Invalid email address.";
+
+
+        }
+
+
+
+
+
+
+        return {
+
+
+            success:false,
+
+
+            message:message
+
+
+
+        };
+
+
+
+    }
+
 
 }
 
 
-/* ============================================================
-   4. SAVE CURRENT USER
-============================================================ */
-
-function saveCurrentUser(
-
-    user,
-
-    remember = true
-
-) {
-
-    /*
-       Remove old sessions
-    */
-
-    localStorage.removeItem(
-        AUTH_USER_KEY
-    );
 
 
-    sessionStorage.removeItem(
-        AUTH_USER_KEY
-    );
 
 
-    /*
-       Remember Me
-    */
-
-    if (remember) {
-
-        localStorage.setItem(
-
-            AUTH_USER_KEY,
-
-            JSON.stringify(
-                user
-            )
-
-        );
-
-    }
-
-    else {
-
-        /*
-           Temporary Session
-        */
-
-        sessionStorage.setItem(
-
-            AUTH_USER_KEY,
-
-            JSON.stringify(
-                user
-            )
-
-        );
-
-    }
-
-}
 
 
 /* ============================================================
-   5. LOGIN USER
+   LOGIN USER WRAPPER
+
+   Compatible with login.js
+
 ============================================================ */
 
-function loginUser(
+
+async function loginUser(
 
     email,
 
@@ -301,480 +985,544 @@ function loginUser(
 
     remember = true
 
-) {
-
-    /*
-       Search Demo Account
-    */
-
-    const user =
-
-        demoAccounts.find(
-
-            account =>
-
-                account.email
-                    .toLowerCase() ===
-                email
-                    .trim()
-                    .toLowerCase()
-
-                &&
-
-                account.password ===
-                password
-
-        );
+){
 
 
-    /*
-       Invalid Login
-    */
+    return await firebaseLogin(
 
-    if (!user) {
+        email,
 
-        return {
-
-            success:
-                false,
-
-            message:
-                "Invalid email or password."
-
-        };
-
-    }
-
-
-    /*
-       Safe User Object
-
-       Password save නොකරයි.
-    */
-
-    const safeUser = {
-
-        id:
-            user.id,
-
-        accountType:
-            user.accountType,
-
-        fullName:
-            user.fullName,
-
-        email:
-            user.email,
-
-        country:
-            user.country || "",
-
-        phone:
-            user.phone || "",
-
-        district:
-            user.district || "",
-
-        languages:
-            user.languages || "",
-
-        experience:
-            user.experience || "",
-
-        verificationStatus:
-            user.verificationStatus || "",
-
-        status:
-            user.status || ""
-
-    };
-
-
-    /*
-       Save Session
-    */
-
-    saveCurrentUser(
-
-        safeUser,
+        password,
 
         remember
 
     );
 
 
-    /*
-       Return Login Success
-    */
-
-    return {
-
-        success:
-            true,
-
-        user:
-            safeUser
-
-    };
-
 }
 
 
+
+
+
+
+
+
 /* ============================================================
-   6. LOGOUT
+   LOGOUT USER
+
+
+   Firebase Auth Logout
+
+   + Clear Session
+
 ============================================================ */
 
-function logoutUser() {
 
-    /*
-       Clear Login Session
-    */
-
-    localStorage.removeItem(
-        AUTH_USER_KEY
-    );
+async function logoutUser(){
 
 
-    sessionStorage.removeItem(
-        AUTH_USER_KEY
-    );
+
+    try{
 
 
-    /*
-       Return Home
-    */
 
-    window.location.href =
-        "index.html";
+        await signOut(
+
+            auth
+
+        );
+
+
+
+
+
+        clearUserSession();
+
+
+
+
+
+        window.location.href =
+
+            "index.html";
+
+
+
+
+    }
+
+
+    catch(error){
+
+
+
+        console.error(
+
+            "Logout Error:",
+
+            error
+
+        );
+
+
+
+    }
+
 
 }
-
-
 /* ============================================================
-   7. CHECK LOGIN
+   REQUIRE ACCOUNT TYPE
+
+
+   Used in:
+
+   tourist-dashboard.js
+
+   guide-dashboard.js
+
+
 ============================================================ */
 
-function isLoggedIn() {
 
-    return (
-        getCurrentUser() !== null
-    );
+function requireAccountType(
 
-}
+    requiredType
 
+){
 
-/* ============================================================
-   8. GET ACCOUNT TYPE
-============================================================ */
-
-function getAccountType() {
 
     const user =
+
         getCurrentUser();
 
 
-    if (!user) {
+
+
+
+    if(!user){
+
+
+        window.location.href =
+
+            "login.html";
+
 
         return null;
 
+
     }
 
 
-    return user.accountType;
+
+
+
+
+    if(
+
+        user.accountType !== requiredType
+
+    ){
+
+
+
+        alert(
+
+            "Access denied."
+
+        );
+
+
+
+        redirectAfterLogin(
+
+            user
+
+        );
+
+
+
+        return null;
+
+
+
+    }
+
+
+
+
+
+
+    return user;
+
 
 }
 
 
+
+
+
+
+
+
+
 /* ============================================================
-   9. GET USER DISPLAY NAME
+   GUIDE DASHBOARD ACCESS CHECK
+
+
+   Only approved active guides
+
+
 ============================================================ */
 
-function getUserDisplayName() {
 
-    const user =
-        getCurrentUser();
+function canAccessGuideDashboard(
+
+    user
+
+){
 
 
-    if (!user) {
+    if(!user){
 
-        return "";
+
+        return false;
+
 
     }
+
+
+
+
+
+    if(
+
+        user.accountType !== "guide"
+
+    ){
+
+
+        return false;
+
+
+    }
+
+
+
 
 
     return (
 
-        user.fullName ||
 
-        user.email ||
+        user.verificationStatus === "approved"
 
-        ""
+
+        &&
+
+
+        user.status === "approved"
+
+
+        &&
+
+
+        user.profileStatus === "active"
+
+
+        &&
+
+
+        user.isActive === true
+
 
     );
+
+
 
 }
 
 
-/* ============================================================
-   10. NORMAL LOGIN REDIRECT
-============================================================ */
 
-/*
-   මෙම function එක භාවිතා කරන්නේ
-   Normal Login එකෙන් පසුව පමණි.
+
+
+
+
+
+
+/* ============================================================
+   REDIRECT AFTER LOGIN
+
 
    Tourist
-       ↓
-   Tourist Dashboard
+        ↓
+   tourist-dashboard.html
+
 
    Approved Guide
-       ↓
-   Guide Dashboard
+        ↓
+   guide-dashboard.html
 
-   Unapproved Guide
-       ↓
-   Guide Verification
-*/
+
+   Pending Guide
+        ↓
+   guide-verification.html
+
+
+============================================================ */
+
 
 function redirectAfterLogin(
 
     user
 
-) {
+){
 
-    /*
-       No User
-    */
 
-    if (!user) {
+
+    if(!user){
+
 
         window.location.href =
+
             "login.html";
 
+
         return;
+
 
     }
 
 
-    /* ========================================================
-       TOURIST
-    ======================================================== */
 
-    if (
-        user.accountType ===
-        "tourist"
-    ) {
+
+
+
+
+    /*
+        TOURIST
+    */
+
+
+    if(
+
+        user.accountType === "tourist"
+
+    ){
+
+
 
         window.location.href =
+
             "tourist-dashboard.html";
 
-        return;
-
-    }
-
-
-    /* ========================================================
-       GUIDE
-    ======================================================== */
-
-    if (
-        user.accountType ===
-        "guide"
-    ) {
-
-        /*
-           Approved Guide
-        */
-
-        if (
-            user.verificationStatus ===
-            "approved"
-        ) {
-
-            window.location.href =
-                "guide-dashboard.html";
-
-            return;
-
-        }
-
-
-        /*
-           Pending / Rejected
-        */
-
-        window.location.href =
-            "guide-verification.html";
 
         return;
 
+
     }
+
+
+
+
+
+
+
 
 
     /*
-       Unknown Account
+        GUIDE
     */
 
-    window.location.href =
-        "index.html";
 
-}
+    if(
 
+        user.accountType === "guide"
 
-/* ============================================================
-   11. REQUIRE LOGIN
-============================================================ */
+    ){
 
-function requireLogin(
 
-    redirectPage =
-        "login.html"
 
-) {
+        if(
 
-    const user =
-        getCurrentUser();
-
-
-    if (!user) {
-
-        window.location.href =
-            redirectPage;
-
-        return null;
-
-    }
-
-
-    return user;
-
-}
-
-
-/* ============================================================
-   12. REQUIRE ACCOUNT TYPE
-============================================================ */
-
-function requireAccountType(
-
-    accountType
-
-) {
-
-    const user =
-        requireLogin();
-
-
-    if (!user) {
-
-        return null;
-
-    }
-
-
-    if (
-        user.accountType !==
-        accountType
-    ) {
-
-        redirectAfterLogin(
-            user
-        );
-
-        return null;
-
-    }
-
-
-    return user;
-
-}
-
-
-/* ============================================================
-   13. REQUIRE VERIFIED GUIDE
-============================================================ */
-
-function requireVerifiedGuide() {
-
-    const user =
-        requireLogin();
-
-
-    if (!user) {
-
-        return null;
-
-    }
-
-
-    /*
-       Must Be Guide
-    */
-
-    if (
-        user.accountType !==
-        "guide"
-    ) {
-
-        redirectAfterLogin(
-            user
-        );
-
-        return null;
-
-    }
-
-
-    /*
-       Must Be Approved
-    */
-
-    if (
-        user.verificationStatus !==
-        "approved"
-    ) {
-
-        window.location.href =
-            "guide-verification.html";
-
-        return null;
-
-    }
-
-
-    return user;
-
-}
-
-
-/* ============================================================
-   14. AUTH DEBUG
-============================================================ */
-
-document.addEventListener(
-
-    "DOMContentLoaded",
-
-    () => {
-
-        const user =
-            getCurrentUser();
-
-
-        if (user) {
-
-            console.log(
-
-                "Current User:",
+            canAccessGuideDashboard(
 
                 user
 
-            );
+            )
+
+        ){
+
+
+
+            window.location.href =
+
+                "guide-dashboard.html";
+
+
+            return;
+
 
         }
 
+
+
+
+
+
+        /*
+            Pending
+
+            Rejected
+
+            Inactive
+
+        */
+
+
+
+        window.location.href =
+
+            "guide-verification.html";
+
+
+        return;
+
+
+
     }
 
-);
 
+
+
+
+
+
+
+    /*
+        UNKNOWN ACCOUNT
+
+    */
+
+
+    window.location.href =
+
+        "index.html";
+
+
+}
+
+
+
+
+
+
+
+
+
+/* ============================================================
+   CHECK LOGIN STATUS
+
+
+============================================================ */
+
+
+function isLoggedIn(){
+
+
+    return (
+
+        getCurrentUser() !== null
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+/* ============================================================
+   RESTORE USER SESSION
+
+
+============================================================ */
+
+
+function restoreUserSession(){
+
+
+
+    const user =
+
+        getCurrentUser();
+
+
+
+
+
+
+    if(user){
+
+
+
+        console.log(
+
+            "Active User:",
+
+            user
+
+        );
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+
+
+/* ============================================================
+   INITIALIZE AUTH
+
+
+============================================================ */
+
+
+restoreUserSession();
+
+
+
+
+
+
+
+
+/* ============================================================
+   EXPORTS
+
+
+============================================================ */
+
+
+export {
+  getCurrentUser,
+  loginUser,
+  logoutUser,
+  requireAccountType,
+  redirectAfterLogin,
+  isLoggedIn,
+  googleLogin,
+};
