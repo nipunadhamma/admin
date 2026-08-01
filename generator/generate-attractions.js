@@ -132,7 +132,7 @@ const SITEMAP_OUTPUT =
 
 const SITE_URL = (
     process.env.LANKAQUEST_SITE_URL ||
-    "https://lankaquest.lk"
+    "https://lankaquest.com"
 )
     .replace(/\/+$/, "");
 
@@ -1121,7 +1121,7 @@ function createDistrictSections(
                                 <div class="attraction-actions">
 
                                     <a
-                                        href="../${escapeHTML(
+                                        href="${escapeHTML(
                                             link
                                         )}"
                                         class="attraction-action trip-button"
@@ -1315,17 +1315,11 @@ function createIndividualPage(
 
     <meta
         name="description"
-        content="${escapeHTML(
-            place.shortDescription ||
-            place.description
-        )}"
+        content="${escapeHTML(place.shortDescription || place.description)}"
     >
 
     <title>
-        ${escapeHTML(
-            place.title ||
-            place.name
-        )}
+        ${escapeHTML(place.title || place.name)}
         | LankaQuest
     </title>
 
@@ -1339,6 +1333,10 @@ function createIndividualPage(
         rel="stylesheet"
         href="../../../../css/attractions.css"
     >
+     <link
+        rel="stylesheet"
+        href="../../../../css/place-attractions.css"
+    >
 
 </head>
 
@@ -1348,26 +1346,38 @@ function createIndividualPage(
 
 <header class="site-header">
 
-    <div class="section-container">
+    <div class="site-brand">
 
-        <a
-            href="../../../../index.html"
-            class="brand-link"
-        >
-            <img
-                src="../../../../images/logo.png"
-                alt="LankaQuest"
-                class="brand-logo"
-            >
+        <a href="../../../../index.html" class="brand-link">
+          <div class="brand-icon">
+            <img src="../../../../images/logo.png" alt="LankaQuest Logo">
+          </div>
 
-            <span>
-                LankaQuest
-            </span>
+            <div class="brand-text">
+        
+                <h1>
+                    LankaQuest
+                </h1>
+        
+                <p>
+                    Discover the Wonder of Sri Lanka
+                 </p>
+        
+            </div>
 
         </a>
+    
+    </div>
 
+    <div class="header-actions">
 
-        <nav class="main-navigation">
+        <button type="button" id="mobileMenuButton" class="mobile-menu-button" aria-label="Open Menu" aria-expanded="false">
+            ☰
+        </button>
+
+        <nav id="mobileMenu" class="mobile-menu" aria-label="Main Navigation">
+
+        
 
             <a href="../../../../index.html">
                 Home
@@ -1382,7 +1392,9 @@ function createIndividualPage(
             </a>
 
             <a href="../../../../trip-planner.html">
-                Trip Planner
+                 <span>
+                    ❤️ My Trip
+                </span>
             </a>
 
         </nav>
@@ -1398,34 +1410,26 @@ function createIndividualPage(
 <section class="province-detail-hero">
 
     <a
-        href="../../${escapeHTML(
-            provinceSlug
-        )}.html"
+        href="../../${escapeHTML(provinceSlug)}.html"
         class="back-button"
     >
-        ← ${escapeHTML(
-            place.province
-        )}
+        ← ${escapeHTML(place.province)}
     </a>
 
 
     <h1>
-        ${escapeHTML(
-            place.name
-        )}
+        ${escapeHTML(place.name)}
     </h1>
 
 
     ${
-        place.sinhalaName
-            ? `
+      place.sinhalaName
+        ? `
                 <p>
-                    ${escapeHTML(
-                        place.sinhalaName
-                    )}
+                    ${escapeHTML(place.sinhalaName)}
                 </p>
               `
-            : ""
+        : ""
     }
 
 </section>
@@ -1450,52 +1454,44 @@ function createIndividualPage(
 
 
                 ${
-                    place.featured
-                        ? `
+                  place.featured
+                    ? `
                             <span class="featured">
                                 ⭐ Featured
                             </span>
                           `
-                        : ""
+                    : ""
                 }
 
 
                 ${
-                    place.promoted
-                        ? `
+                  place.promoted
+                    ? `
                             <span class="featured">
                                 Sponsored
                             </span>
                           `
-                        : ""
+                    : ""
                 }
 
 
                 <span class="attraction-category">
 
-                    ${escapeHTML(
-                        place.categoryName
-                    )}
+                    ${escapeHTML(place.categoryName)}
 
                 </span>
 
 
                 <h2>
 
-                    ${escapeHTML(
-                        place.title ||
-                        place.name
-                    )}
+                    ${escapeHTML(place.title || place.name)}
 
                 </h2>
 
 
                 <p>
 
-                    ${escapeHTML(
-                        place.description ||
-                        place.shortDescription
-                    )}
+                    ${escapeHTML(place.description || place.shortDescription)}
 
                 </p>
 
@@ -1504,61 +1500,53 @@ function createIndividualPage(
 
                     <span>
                         📍
-                        ${escapeHTML(
-                            place.location
-                        )}
+                        ${escapeHTML(place.location)}
                     </span>
 
 
                     <span>
                         🗺️
-                        ${escapeHTML(
-                            place.district
-                        )}
+                        ${escapeHTML(place.district)}
                     </span>
 
 
                     ${
-                        place.rating !== ""
-                            ? `
+                      place.rating !== ""
+                        ? `
                                 <span>
                                     ⭐
-                                    ${escapeHTML(
-                                        place.rating
-                                    )}
+                                    ${escapeHTML(place.rating)}
                                 </span>
                               `
-                            : ""
+                        : ""
                     }
 
 
                     ${
-                        place.bestTime
-                            ? `
+                      place.bestTime
+                        ? `
                                 <span>
                                     🌤️
                                     Best:
-                                    ${escapeHTML(
-                                        place.bestTime
-                                    )}
+                                    ${escapeHTML(place.bestTime)}
                                 </span>
                               `
-                            : ""
+                        : ""
                     }
 
                 </div>
 
 
                 ${
-                    gallery
-                        ? `
+                  gallery
+                    ? `
                             <div class="attraction-grid">
 
                                 ${gallery}
 
                             </div>
                           `
-                        : ""
+                    : ""
                 }
 
 
@@ -1573,9 +1561,7 @@ function createIndividualPage(
 
 
                     <a
-                        href="../../${escapeHTML(
-                            provinceSlug
-                        )}.html"
+                        href="../../${escapeHTML(provinceSlug)}.html"
                         class="attraction-action map-button"
                     >
                         ← Back to Province
@@ -1603,6 +1589,8 @@ function createIndividualPage(
     </p>
 
 </footer>
+
+<script src="../../../../js/mobile-menu.js"></script>
 
 
 </body>

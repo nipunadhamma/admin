@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -15,8 +14,6 @@
 
     <link rel="stylesheet" href="css/style.css">
 
-    <link rel="stylesheet" href="css/hero.css">
-
     <link rel="stylesheet" href="css/attractions.css">
 
 </head>
@@ -30,70 +27,79 @@
 ============================================================ -->
 
     <header class="site-header">
-
-        <div class="section-container">
-
+    
+        <div class="site-brand">
+    
+    
             <a href="index.html" class="brand-link">
-
-                <img src="images/logo.png" alt="LankaQuest" class="brand-icon">
-
-                <span>
-                    LankaQuest
-                </span>
-
+    
+                <div class="brand-icon">
+    
+                    <img src="images/logo.png" alt="LankaQuest" class="brand-icon">
+    
+                </div>
+    
+                <div class="brand-text">
+    
+                    <h1>
+                        LankaQuest
+                    </h1>
+    
+                    <p>
+                        Discover the Wonder of Sri Lanka
+                    </p>
+    
+                </div>
+    
             </a>
-
-
-            <nav class="main-navigation">
-
+    
+        </div>
+        <div class="header-actions">
+    
+            <button type="button" id="mobileMenuButton" class="mobile-menu-button" aria-label="Open Menu"
+                aria-expanded="false">
+                ☰
+            </button>
+    
+            <nav id="mobileMenu" class="mobile-menu" aria-label="Main Navigation">
+    
                 <a href="index.html">
                     Home
                 </a>
-
+    
                 <a href="attractions.html" class="active">
                     Attractions
                 </a>
-
+    
                 <a href="find-guides.html">
                     Find Guides
                 </a>
-
-                <a href="trip-planner.html">
-                    Trip Planner
-                </a>
-
-            </nav>
-
-
-            <div class="header-actions">
-
+    
                 <a href="login.html" class="tourist-login-button">
                     <span>Login</span>
                 </a>
-
-
-                <a href="trip-planner.html" class="my-trip-button" id="myTripButton">
-
-                    <span>
-                        ❤️ My Trip
-                    </span>
-
-                    <span class="trip-counter" id="tripCounter" hidden>
-                        0
-                    </span>
-
+    
+                <a href="trip-planner.html">
+    
+                    <button type="button" id="myTripButton" class="my-trip-button">
+    
+                        ❤️
+                        <span>
+                            My Trip
+                        </span>
+    
+                        <span id="tripCounter" class="trip-counter">
+                            0
+                        </span>
+    
+                    </button>
                 </a>
-
-
-                <button type="button" class="mobile-menu-button" id="mobileMenuButton" aria-label="Open navigation"
-                    aria-expanded="false">
-                    ☰
-                </button>
-
-            </div>
-
+    
+            </nav>
+    
+    
         </div>
-
+    
     </header>
 
 
@@ -144,7 +150,7 @@
 
 
             <!-- SEARCH DROPDOWN -->
-
+            
             <div id="attractionSearchResults" class="attraction-search-results" hidden></div>
 
         </div>
@@ -1164,13 +1170,15 @@
 
     </footer>
 
-
+    <script src="js/places.js"></script>
+    
     <!-- ============================================================
      JAVASCRIPT
 ============================================================ -->
 
     <script type="module" src="js/attractions.js"></script>
-
+    
+    <script src="js/mobile-menu.js"></script>
 
 </body>
 

@@ -846,11 +846,111 @@ body {
 
     grid-template-columns:
         repeat(auto-fit,
-            minmax(280px,
-                1fr));
+            minmax(280px, 1fr));
 
     gap:
         25px;
+
+    align-items:
+        stretch;
+
+}
+
+
+/* ============================================================
+   ATTRACTION CARD
+============================================================ */
+
+.attraction-card {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    min-height:
+        460px;
+
+}
+
+
+/* ============================================================
+   CARD IMAGE
+============================================================ */
+
+.attraction-image {
+
+    width:
+        100%;
+
+    height:
+        220px;
+
+    overflow:
+        hidden;
+
+    flex-shrink:
+        0;
+
+}
+
+
+.attraction-image img {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    object-fit:
+        cover;
+
+    display:
+        block;
+
+}
+
+
+/* ============================================================
+   CARD CONTENT
+============================================================ */
+
+.attraction-content {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    flex:
+        1;
+
+}
+
+
+/* ============================================================
+   CARD DESCRIPTION
+============================================================ */
+
+.attraction-content p {
+
+    line-height:
+        1.6;
+
+}
+
+
+/* ============================================================
+   CARD ACTIONS
+============================================================ */
+
+.attraction-actions {
+
+    margin-top:
+        auto;
 
 }
 
@@ -1068,6 +1168,1128 @@ body {
 
     border-top:
         1px solid #e4ebe9;
+
+}
+
+/* ============================================================
+   PROVINCE PAGE
+   MAIN LAYOUT
+============================================================ */
+
+.province-content {
+
+    width:
+        100%;
+
+    padding:
+        0 0 70px;
+
+    background:
+        #f8fafc;
+
+}
+
+
+/* ============================================================
+   PROVINCE HERO
+============================================================ */
+
+.province-detail-hero {
+
+    position:
+        relative;
+
+    width:
+        100%;
+
+    min-height:
+        390px;
+
+    padding:
+        75px 24px 70px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    text-align:
+        center;
+
+    overflow:
+        hidden;
+
+    background:
+        linear-gradient(135deg,
+            #0f172a 0%,
+            #164e63 50%,
+            #0f766e 100%);
+
+}
+
+
+/* ============================================================
+   HERO DECORATIVE OVERLAY
+============================================================ */
+
+.province-detail-hero::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    width:
+        420px;
+
+    height:
+        420px;
+
+    top:
+        -220px;
+
+    right:
+        -120px;
+
+    border-radius:
+        50%;
+
+    background:
+        rgba(255, 255, 255, 0.06);
+
+    pointer-events:
+        none;
+
+}
+
+
+.province-detail-hero::after {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    width:
+        260px;
+
+    height:
+        260px;
+
+    bottom:
+        -160px;
+
+    left:
+        -80px;
+
+    border-radius:
+        50%;
+
+    background:
+        rgba(255, 255, 255, 0.05);
+
+    pointer-events:
+        none;
+
+}
+
+
+/* ============================================================
+   HERO BACK BUTTON
+============================================================ */
+
+.province-detail-hero .back-button {
+
+    position:
+        relative;
+
+    z-index:
+        2;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    margin-bottom:
+        25px;
+
+    padding:
+        10px 20px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.35);
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(255, 255, 255, 0.10);
+
+    color:
+        #ffffff;
+
+    text-decoration:
+        none;
+
+    font-size:
+        14px;
+
+    font-weight:
+        600;
+
+    line-height:
+        1;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+
+}
+
+
+.province-detail-hero .back-button:hover {
+
+    background:
+        rgba(255, 255, 255, 0.18);
+
+    border-color:
+        rgba(255, 255, 255, 0.60);
+
+    transform:
+        translateY(-2px);
+
+}
+
+
+/* ============================================================
+   PROVINCE TITLE
+============================================================ */
+
+.province-detail-hero h1 {
+
+    position:
+        relative;
+
+    z-index:
+        2;
+
+    width:
+        100%;
+
+    max-width:
+        900px;
+
+    margin:
+        0;
+
+    color:
+        #ffffff;
+
+    font-size:
+        clamp(34px,
+            5vw,
+            58px);
+
+    font-weight:
+        800;
+
+    line-height:
+        1.1;
+
+    letter-spacing:
+        -0.02em;
+
+    text-shadow:
+        0 4px 18px rgba(0, 0, 0, 0.25);
+
+}
+
+
+/* ============================================================
+   HERO DESCRIPTION
+============================================================ */
+
+.province-detail-hero>p {
+
+    position:
+        relative;
+
+    z-index:
+        2;
+
+    width:
+        100%;
+
+    max-width:
+        760px;
+
+    margin:
+        18px auto 0;
+
+    color:
+        rgba(255, 255, 255, 0.88);
+
+    font-size:
+        17px;
+
+    line-height:
+        1.7;
+
+}
+
+
+/* ============================================================
+   PROVINCE STATISTICS
+============================================================ */
+
+.province-statistics {
+
+    position:
+        relative;
+
+    z-index:
+        2;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        12px;
+
+    margin-top:
+        28px;
+
+}
+
+
+.province-statistics span {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        6px;
+
+    padding:
+        10px 16px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.22);
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(255, 255, 255, 0.10);
+
+    color:
+        #ffffff;
+
+    font-size:
+        14px;
+
+    font-weight:
+        600;
+
+    backdrop-filter:
+        blur(8px);
+
+}
+
+
+/* ============================================================
+   DISTRICT SECTION
+============================================================ */
+
+.district-section {
+
+    width:
+        100%;
+
+    padding:
+        55px 0 0;
+
+}
+
+
+.district-section .section-container {
+
+    width:
+        min(1200px,
+            calc(100% - 40px));
+
+    margin:
+        0 auto;
+
+}
+
+
+/* ============================================================
+   DISTRICT HEADER
+============================================================ */
+
+.district-header {
+
+    margin-bottom:
+        28px;
+
+}
+
+
+.district-header h2 {
+
+    margin:
+        0;
+
+    color:
+        #0f172a;
+
+    font-size:
+        clamp(25px,
+            3vw,
+            34px);
+
+    font-weight:
+        750;
+
+    line-height:
+        1.2;
+
+}
+
+
+.district-header p {
+
+    margin:
+        8px 0 0;
+
+    color:
+        #64748b;
+
+    font-size:
+        15px;
+
+    line-height:
+        1.6;
+
+}
+
+
+/* ============================================================
+   ATTRACTION GRID
+============================================================ */
+
+.attraction-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3,
+            minmax(0, 1fr));
+
+    gap:
+        24px;
+
+    width:
+        100%;
+
+}
+
+
+/* ============================================================
+   ATTRACTION CARD
+============================================================ */
+
+.attraction-card {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    min-width:
+        0;
+
+    overflow:
+        hidden;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid #e2e8f0;
+
+    border-radius:
+        18px;
+
+    box-shadow:
+        0 8px 25px rgba(15, 23, 42, 0.07);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+
+}
+
+
+.attraction-card:hover {
+
+    transform:
+        translateY(-5px);
+
+    border-color:
+        #cbd5e1;
+
+    box-shadow:
+        0 16px 35px rgba(15, 23, 42, 0.12);
+
+}
+
+
+/* ============================================================
+   ATTRACTION IMAGE
+============================================================ */
+
+.attraction-card .attraction-image {
+
+    position:
+        relative;
+
+    width:
+        100%;
+
+    height:
+        220px;
+
+    overflow:
+        hidden;
+
+    background:
+        #e2e8f0;
+
+}
+
+
+.attraction-card .attraction-image img {
+
+    display:
+        block;
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    object-fit:
+        cover;
+
+    transition:
+        transform 0.35s ease;
+
+}
+
+
+.attraction-card:hover .attraction-image img {
+
+    transform:
+        scale(1.05);
+
+}
+
+
+/* ============================================================
+   ATTRACTION CONTENT
+============================================================ */
+
+.attraction-content {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    flex:
+        1;
+
+    padding:
+        22px;
+
+}
+
+
+/* ============================================================
+   FEATURED BADGE
+============================================================ */
+
+.attraction-content .featured {
+
+    display:
+        inline-flex;
+
+    align-self:
+        flex-start;
+
+    margin-bottom:
+        10px;
+
+    padding:
+        5px 10px;
+
+    border-radius:
+        999px;
+
+    background:
+        #fff7ed;
+
+    color:
+        #c2410c;
+
+    font-size:
+        12px;
+
+    font-weight:
+        700;
+
+}
+
+
+/* ============================================================
+   CATEGORY
+============================================================ */
+
+.attraction-category {
+
+    display:
+        block;
+
+    margin-bottom:
+        7px;
+
+    color:
+        #0f766e;
+
+    font-size:
+        12px;
+
+    font-weight:
+        700;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        0.06em;
+
+}
+
+
+/* ============================================================
+   CARD TITLE
+============================================================ */
+
+.attraction-card h3 {
+
+    margin:
+        0;
+
+    color:
+        #0f172a;
+
+    font-size:
+        21px;
+
+    font-weight:
+        750;
+
+    line-height:
+        1.3;
+
+}
+
+
+/* ============================================================
+   CARD DESCRIPTION
+============================================================ */
+
+.attraction-card .attraction-content>p {
+
+    margin:
+        11px 0 18px;
+
+    color:
+        #64748b;
+
+    font-size:
+        14px;
+
+    line-height:
+        1.65;
+
+}
+
+
+/* ============================================================
+   CARD ACTIONS
+============================================================ */
+
+.attraction-actions {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    margin-top:
+        auto;
+
+}
+
+
+.attraction-action {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    min-height:
+        42px;
+
+    padding:
+        9px 15px;
+
+    border-radius:
+        10px;
+
+    text-decoration:
+        none;
+
+    font-size:
+        13px;
+
+    font-weight:
+        700;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+
+}
+
+
+.attraction-action:hover {
+
+    transform:
+        translateY(-1px);
+
+}
+
+
+/* ============================================================
+   VIEW DETAILS BUTTON
+============================================================ */
+
+.attraction-action.trip-button {
+
+    width:
+        100%;
+
+    background:
+        #0f766e;
+
+    color:
+        #ffffff;
+
+}
+
+
+.attraction-action.trip-button:hover {
+
+    background:
+        #115e59;
+
+}
+
+
+/* ============================================================
+   RATING
+============================================================ */
+
+.attraction-rating {
+
+    margin-top:
+        13px;
+
+    color:
+        #475569;
+
+    font-size:
+        13px;
+
+    font-weight:
+        600;
+
+}
+
+
+/* ============================================================
+   TABLET
+============================================================ */
+
+@media (max-width: 1000px) {
+
+    .attraction-grid {
+
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+
+    }
+
+}
+
+
+/* ============================================================
+   TABLET / SMALL
+============================================================ */
+
+@media (max-width: 768px) {
+
+    .province-detail-hero {
+
+        min-height:
+            340px;
+
+        padding:
+            60px 20px;
+
+    }
+
+
+    .province-detail-hero>p {
+
+        font-size:
+            16px;
+
+        line-height:
+            1.6;
+
+    }
+
+
+    .district-section {
+
+        padding-top:
+            42px;
+
+    }
+
+
+    .district-section .section-container {
+
+        width:
+            min(100% - 32px,
+                700px);
+
+    }
+
+
+    .district-header {
+
+        margin-bottom:
+            22px;
+
+    }
+
+
+    .attraction-grid {
+
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+
+        gap:
+            18px;
+
+    }
+
+
+    .attraction-card .attraction-image {
+
+        height:
+            190px;
+
+    }
+
+
+    .attraction-content {
+
+        padding:
+            18px;
+
+    }
+
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 560px) {
+
+    .province-detail-hero {
+
+        min-height:
+            300px;
+
+        padding:
+            48px 16px;
+
+    }
+
+
+    .province-detail-hero .back-button {
+
+        margin-bottom:
+            18px;
+
+        padding:
+            9px 15px;
+
+        font-size:
+            13px;
+
+    }
+
+
+    .province-detail-hero h1 {
+
+        font-size:
+            30px;
+
+        line-height:
+            1.15;
+
+    }
+
+
+    .province-detail-hero>p {
+
+        margin-top:
+            13px;
+
+        font-size:
+            15px;
+
+    }
+
+
+    .province-statistics {
+
+        gap:
+            8px;
+
+        margin-top:
+            22px;
+
+    }
+
+
+    .province-statistics span {
+
+        padding:
+            8px 12px;
+
+        font-size:
+            12px;
+
+    }
+
+
+    .district-section {
+
+        padding:
+            34px 0 0;
+
+    }
+
+
+    .district-section .section-container {
+
+        width:
+            calc(100% - 24px);
+
+    }
+
+
+    .district-header {
+
+        margin-bottom:
+            18px;
+
+    }
+
+
+    .district-header h2 {
+
+        font-size:
+            24px;
+
+    }
+
+
+    .district-header p {
+
+        font-size:
+            14px;
+
+    }
+
+
+    .attraction-grid {
+
+        grid-template-columns:
+            1fr;
+
+        gap:
+            18px;
+
+    }
+
+
+    .attraction-card .attraction-image {
+
+        height:
+            210px;
+
+    }
+
+
+    .attraction-content {
+
+        padding:
+            18px;
+
+    }
+
+
+    .attraction-card h3 {
+
+        font-size:
+            20px;
+
+    }
+
+
+    .attraction-card .attraction-content>p {
+
+        font-size:
+            14px;
+
+    }
+
+}
+
+
+/* ============================================================
+   VERY SMALL MOBILE
+============================================================ */
+
+@media (max-width: 360px) {
+
+    .province-detail-hero {
+
+        padding:
+            42px 14px;
+
+    }
+
+
+    .province-detail-hero h1 {
+
+        font-size:
+            27px;
+
+    }
+
+
+    .province-statistics {
+
+        flex-direction:
+            column;
+
+        width:
+            100%;
+
+    }
+
+
+    .province-statistics span {
+
+        width:
+            100%;
+
+    }
+
+
+    .district-section .section-container {
+
+        width:
+            calc(100% - 20px);
+
+    }
+
+
+    .attraction-card .attraction-image {
+
+        height:
+            190px;
+
+    }
 
 }
 

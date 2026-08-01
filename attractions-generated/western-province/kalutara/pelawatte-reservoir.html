@@ -31,6 +31,10 @@
         rel="stylesheet"
         href="../../../../css/attractions.css"
     >
+     <link
+        rel="stylesheet"
+        href="../../../../css/place-attractions.css"
+    >
 
 </head>
 
@@ -40,26 +44,38 @@
 
 <header class="site-header">
 
-    <div class="section-container">
+    <div class="site-brand">
 
-        <a
-            href="../../../../index.html"
-            class="brand-link"
-        >
-            <img
-                src="../../../../images/logo.png"
-                alt="LankaQuest"
-                class="brand-logo"
-            >
+        <a href="../../../../index.html" class="brand-link">
+          <div class="brand-icon">
+            <img src="../../../../images/logo.png" alt="LankaQuest Logo">
+          </div>
 
-            <span>
-                LankaQuest
-            </span>
+            <div class="brand-text">
+        
+                <h1>
+                    LankaQuest
+                </h1>
+        
+                <p>
+                    Discover the Wonder of Sri Lanka
+                 </p>
+        
+            </div>
 
         </a>
+    
+    </div>
 
+    <div class="header-actions">
 
-        <nav class="main-navigation">
+        <button type="button" id="mobileMenuButton" class="mobile-menu-button" aria-label="Open Menu" aria-expanded="false">
+            ☰
+        </button>
+
+        <nav id="mobileMenu" class="mobile-menu" aria-label="Main Navigation">
+
+        
 
             <a href="../../../../index.html">
                 Home
@@ -74,7 +90,9 @@
             </a>
 
             <a href="../../../../trip-planner.html">
-                Trip Planner
+                 <span>
+                    ❤️ My Trip
+                </span>
             </a>
 
         </nav>
@@ -274,6 +292,8 @@
     </p>
 
 </footer>
+
+<script src="../../../../js/mobile-menu.js"></script>
 
 
 </body>
