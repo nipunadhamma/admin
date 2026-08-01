@@ -3,7 +3,7 @@
    LANKAQUEST
    GUIDE REQUESTS & QUOTATION SYSTEM
 
-   FIRESTORE-ONLY ARCHITECTURE
+   FIRESTORE-FIRST ARCHITECTURE
 
    FLOW:
 
@@ -13,13 +13,17 @@
         ↓
    guide-requests.html?requestId=FIRESTORE_DOC_ID
         ↓
-   Load Request from Firestore
+   Firebase Auth State
         ↓
    Verify Current Guide
         ↓
+   Load Request from Firestore
+        ↓
+   Verify Request belongs to Guide
+        ↓
    Create Quotation
         ↓
-   Save Quotation to Firestore
+   Save Quotation
         ↓
    Update Request
         ↓
@@ -38,11 +42,13 @@
    IMPORTANT:
 
    ❌ No localStorage
+   ❌ No sessionStorage
    ❌ No demo request storage
    ❌ No old Explore Sri Lanka storage
 
    ✅ Firebase Authentication
    ✅ Firestore
+   ✅ Firebase UID
 ============================================================ */
 
 
@@ -50,9 +56,21 @@
    1. FIREBASE IMPORTS
 ============================================================ */
 
-import { db, auth } from "./firebase-config.js";
+import {
+    db,
+    auth
+} from "./firebase-config.js";
 
-import { logoutUser } from "./auth.js";
+
+import {
+    logoutUser
+} from "./auth.js";
+
+
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
 
 import {
     collection,
@@ -65,9 +83,25 @@ import {
 
 
 
+/* ============================================================
+   2. FIRESTORE COLLECTIONS
+============================================================ */
+
+const GUIDE_COLLECTION =
+    "lankaQuestGuides";
+
+
+const REQUEST_COLLECTION =
+    "lankaQuestQuotationRequests";
+
+
+const QUOTATION_COLLECTION =
+    "lankaQuestQuotations";
+
+
 
 /* ============================================================
-   2. DOM ELEMENTS
+   3. DOM ELEMENTS
 ============================================================ */
 
 const guideRequestContent =
@@ -232,18 +266,26 @@ const guideHeaderName =
     );
 
 
-/* ============================================================
-   3. CURRENT REQUEST
-============================================================ */
-
-let currentRequest = null;
-
 
 /* ============================================================
-   4. CURRENT GUIDE
+   4. GLOBAL STATE
 ============================================================ */
 
-let currentGuide = null;
+let currentRequest =
+    null;
+
+
+let currentGuide =
+    null;
+
+
+let authReady =
+    false;
+
+
+let pageInitialized =
+    false;
+
 
 
 /* ============================================================
@@ -261,10 +303,22 @@ function getRequestIdFromURL() {
     return urlParams.get(
         "requestId"
     );
+
 }
 
+
+
+/* ============================================================
+   6. GET CURRENT FIREBASE USER
+============================================================ */
+
 function getAuthenticatedUser() {
-  return auth.currentUser || null;
+
+    return (
+        auth.currentUser ||
+        null
+    );
+
 }
 
 
@@ -277,12 +331,19 @@ function showRequestError(
     message
 ) {
 
+    console.error(
+        "Guide Request Error:",
+        message
+    );
+
+
     if (
         guideRequestContent
     ) {
 
         guideRequestContent.style.display =
             "none";
+
     }
 
 
@@ -292,6 +353,7 @@ function showRequestError(
 
         requestErrorState.style.display =
             "block";
+
     }
 
 
@@ -307,9 +369,11 @@ function showRequestError(
 
         errorParagraph.textContent =
             message;
+
     }
 
 }
+
 
 
 /* ============================================================
@@ -324,6 +388,7 @@ function showRequestContent() {
 
         requestErrorState.style.display =
             "none";
+
     }
 
 
@@ -333,13 +398,15 @@ function showRequestContent() {
 
         guideRequestContent.style.display =
             "block";
+
     }
 
 }
 
 
+
 /* ============================================================
-   9. FORMAT STATUS
+   9. FORMAT REQUEST STATUS
 ============================================================ */
 
 function formatRequestStatus(
@@ -378,6 +445,7 @@ function formatRequestStatus(
 }
 
 
+
 /* ============================================================
    10. RENDER REQUEST STATUS
 ============================================================ */
@@ -391,6 +459,7 @@ function renderRequestStatus(
     ) {
 
         return;
+
     }
 
 
@@ -416,8 +485,35 @@ function renderRequestStatus(
 }
 
 
+
 /* ============================================================
-   11. RENDER DESTINATIONS
+   11. HTML ESCAPE
+============================================================ */
+
+function escapeHTML(
+    value
+) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.textContent =
+        value == null
+            ? ""
+            : String(value);
+
+
+    return div.innerHTML;
+
+}
+
+
+
+/* ============================================================
+   12. RENDER DESTINATIONS
 ============================================================ */
 
 function renderRequestDestinations(
@@ -429,6 +525,7 @@ function renderRequestDestinations(
     ) {
 
         return;
+
     }
 
 
@@ -456,6 +553,7 @@ function renderRequestDestinations(
         `;
 
         return;
+
     }
 
 
@@ -480,11 +578,16 @@ function renderRequestDestinations(
                     ? `
 
                         <img
-                            src="${escapeHTML(place.image)}"
+                            src="${escapeHTML(
+                                place.image
+                            )}"
                             alt="${escapeHTML(
                                 place.name ||
                                 "Destination"
                             )}"
+                            onerror="
+                                this.style.display='none';
+                            "
                         >
 
                     `
@@ -500,19 +603,26 @@ function renderRequestDestinations(
             destination.innerHTML = `
 
                 <div class="request-destination-number">
+
                     ${index + 1}
+
                 </div>
 
+
                 ${imageHTML}
+
 
                 <div>
 
                     <strong>
+
                         ${escapeHTML(
                             place.name ||
                             "Unknown Destination"
                         )}
+
                     </strong>
+
 
                     <span>
 
@@ -547,30 +657,6 @@ function renderRequestDestinations(
 }
 
 
-/* ============================================================
-   12. HTML ESCAPE
-============================================================ */
-
-function escapeHTML(
-    value
-) {
-
-    const div =
-        document.createElement(
-            "div"
-        );
-
-
-    div.textContent =
-        value == null
-            ? ""
-            : String(value);
-
-
-    return div.innerHTML;
-
-}
-
 
 /* ============================================================
    13. RENDER REQUEST DETAILS
@@ -579,15 +665,6 @@ function escapeHTML(
 function renderRequestDetails(
     request
 ) {
-
-    /*
-       Current Firestore request can use
-       either direct tourist fields or
-       nested tourist object.
-
-       Support both so existing documents
-       continue to work.
-    */
 
     const tourist =
         request.tourist ||
@@ -612,6 +689,7 @@ function renderRequestDetails(
 
         touristName.textContent =
             fullName;
+
     }
 
 
@@ -621,6 +699,7 @@ function renderRequestDetails(
 
         touristEmail.textContent =
             email;
+
     }
 
 
@@ -631,6 +710,7 @@ function renderRequestDetails(
         requestStartDate.textContent =
             request.startDate ||
             "Not selected";
+
     }
 
 
@@ -641,6 +721,7 @@ function renderRequestDetails(
         requestEndDate.textContent =
             request.endDate ||
             "Not selected";
+
     }
 
 
@@ -651,6 +732,7 @@ function renderRequestDetails(
         requestTravelers.textContent =
             request.travelers ||
             "Not selected";
+
     }
 
 
@@ -661,6 +743,7 @@ function renderRequestDetails(
         requestTravelStyle.textContent =
             request.travelStyle ||
             "Not selected";
+
     }
 
 
@@ -671,6 +754,7 @@ function renderRequestDetails(
         requestTransport.textContent =
             request.transport ||
             "Not selected";
+
     }
 
 
@@ -681,6 +765,7 @@ function renderRequestDetails(
         requestAccommodation.textContent =
             request.accommodation ||
             "Not selected";
+
     }
 
 
@@ -691,6 +776,7 @@ function renderRequestDetails(
         requestSpecialRequests.textContent =
             request.specialRequests ||
             "No special requests provided.";
+
     }
 
 
@@ -702,6 +788,7 @@ function renderRequestDetails(
             request.requestId ||
             request.id ||
             "N/A";
+
     }
 
 
@@ -718,8 +805,9 @@ function renderRequestDetails(
 }
 
 
+
 /* ============================================================
-   14. GET CURRENT GUIDE FROM FIRESTORE
+   14. GET GUIDE PROFILE
 ============================================================ */
 
 async function getGuideProfile(
@@ -727,10 +815,16 @@ async function getGuideProfile(
 ) {
 
     if (
-        !firebaseUser
+        !firebaseUser?.uid
     ) {
 
+        console.error(
+            "getGuideProfile(): Firebase UID missing."
+        );
+
+
         return null;
+
     }
 
 
@@ -739,7 +833,7 @@ async function getGuideProfile(
         const guideRef =
             doc(
                 db,
-                "lankaQuestGuides",
+                GUIDE_COLLECTION,
                 firebaseUser.uid
             );
 
@@ -754,7 +848,14 @@ async function getGuideProfile(
             !guideSnapshot.exists()
         ) {
 
+            console.error(
+                "Guide profile not found:",
+                firebaseUser.uid
+            );
+
+
             return null;
+
         }
 
 
@@ -785,15 +886,23 @@ async function getGuideProfile(
 }
 
 
+
 /* ============================================================
    15. VERIFY CURRENT GUIDE
 ============================================================ */
 
-async function verifyGuide() {
+async function verifyGuide(
+    firebaseUser = null
+) {
 
     const user =
+        firebaseUser ||
         getAuthenticatedUser();
 
+
+    /* ========================================================
+       FIREBASE AUTH CHECK
+    ======================================================== */
 
     if (
         !user
@@ -805,61 +914,29 @@ async function verifyGuide() {
 
 
         return false;
+
     }
 
 
-    /*
-       Account type check
-    */
-
-    if (
-        user.accountType &&
-        user.accountType !==
-        "guide"
-    ) {
-
-        showRequestError(
-            "This account is not registered as a guide."
-        );
+    console.log(
+        "Firebase Guide UID:",
+        user.uid
+    );
 
 
-        return false;
-    }
+    console.log(
+        "Firebase Guide Email:",
+        user.email
+    );
 
 
-    const firebaseUser =
-        user.firebaseUser ||
-        user.authUser ||
-        user;
-
-
-    /*
-       Firebase UID
-    */
-
-    const uid =
-        firebaseUser.uid ||
-        user.uid;
-
-
-    if (
-        !uid
-    ) {
-
-        showRequestError(
-            "Firebase authentication information is missing."
-        );
-
-
-        return false;
-    }
-
+    /* ========================================================
+       LOAD GUIDE PROFILE
+    ======================================================== */
 
     const guide =
         await getGuideProfile(
-            {
-                uid
-            }
+            user
         );
 
 
@@ -868,13 +945,18 @@ async function verifyGuide() {
     ) {
 
         showRequestError(
-            "Guide profile was not found."
+            "Guide profile was not found for this Firebase account."
         );
 
 
         return false;
+
     }
 
+
+    /* ========================================================
+       ACCOUNT TYPE
+    ======================================================== */
 
     if (
         guide.accountType &&
@@ -883,18 +965,18 @@ async function verifyGuide() {
     ) {
 
         showRequestError(
-            "This account is not registered as a guide."
+            "This Firebase account is not registered as a guide."
         );
 
 
         return false;
+
     }
 
 
-    /*
-       Only approved guides can
-       send quotations.
-    */
+    /* ========================================================
+       VERIFICATION STATUS
+    ======================================================== */
 
     if (
         guide.verificationStatus !==
@@ -907,8 +989,72 @@ async function verifyGuide() {
 
 
         return false;
+
     }
 
+
+    /* ========================================================
+       STATUS
+    ======================================================== */
+
+    if (
+        guide.status &&
+        guide.status !==
+        "approved"
+    ) {
+
+        showRequestError(
+            "Your guide account is not currently approved."
+        );
+
+
+        return false;
+
+    }
+
+
+    /* ========================================================
+       ACTIVE PROFILE
+    ======================================================== */
+
+    if (
+        guide.profileStatus &&
+        guide.profileStatus !==
+        "active"
+    ) {
+
+        showRequestError(
+            "Your guide profile is not currently active."
+        );
+
+
+        return false;
+
+    }
+
+
+    /* ========================================================
+       ACTIVE FLAG
+    ======================================================== */
+
+    if (
+        guide.isActive !== undefined &&
+        guide.isActive !== true
+    ) {
+
+        showRequestError(
+            "Your guide account is currently inactive."
+        );
+
+
+        return false;
+
+    }
+
+
+    /* ========================================================
+       SAVE CURRENT GUIDE
+    ======================================================== */
 
     currentGuide =
         guide;
@@ -921,12 +1067,20 @@ async function verifyGuide() {
         guideHeaderName.textContent =
             guide.fullName ||
             "Guide";
+
     }
+
+
+    console.log(
+        "Verified Guide:",
+        currentGuide
+    );
 
 
     return true;
 
 }
+
 
 
 /* ============================================================
@@ -947,20 +1101,36 @@ async function loadRequestById(
 
 
         return null;
+
+    }
+
+
+    if (
+        !currentGuide
+    ) {
+
+        showRequestError(
+            "Guide authentication has not been verified."
+        );
+
+
+        return null;
+
     }
 
 
     try {
 
-        /*
-           requestId from the URL is the
-           Firestore document ID.
-        */
+        console.log(
+            "Loading Firestore request:",
+            requestId
+        );
+
 
         const requestRef =
             doc(
                 db,
-                "lankaQuestQuotationRequests",
+                REQUEST_COLLECTION,
                 requestId
             );
 
@@ -971,6 +1141,10 @@ async function loadRequestById(
             );
 
 
+        /* ====================================================
+           REQUEST DOES NOT EXIST
+        ==================================================== */
+
         if (
             !requestSnapshot.exists()
         ) {
@@ -980,7 +1154,14 @@ async function loadRequestById(
             );
 
 
+            console.error(
+                "Firestore request not found:",
+                requestId
+            );
+
+
             return null;
+
         }
 
 
@@ -988,9 +1169,9 @@ async function loadRequestById(
             requestSnapshot.data();
 
 
-        /*
-           Keep Firestore document ID.
-        */
+        /* ====================================================
+           CREATE REQUEST OBJECT
+        ==================================================== */
 
         const request = {
 
@@ -998,7 +1179,6 @@ async function loadRequestById(
                 requestSnapshot.id,
 
             requestId:
-                requestData.requestId ||
                 requestSnapshot.id,
 
             ...requestData
@@ -1007,54 +1187,137 @@ async function loadRequestById(
 
 
         /*
-           SECURITY CHECK
-
-           The request should belong to
-           this guide.
+           If Firestore contains a custom requestId,
+           preserve it.
         */
 
         if (
-            request.guideId &&
-            currentGuide &&
-            request.guideId !==
-            currentGuide.uid
+            requestData.requestId
         ) {
 
-            showRequestError(
-                "This quotation request is not assigned to your guide account."
-            );
+            request.requestId =
+                requestData.requestId;
 
-
-            return null;
         }
 
 
-        /*
-           If no guideId exists, allow old
-           guide-selected documents where
-           selectedGuide.uid matches.
-        */
+        /* ====================================================
+           SECURITY CHECK 1
+           guideId
+        ==================================================== */
+
+        if (
+            request.guideId
+        ) {
+
+            if (
+                request.guideId !==
+                currentGuide.uid
+            ) {
+
+                showRequestError(
+                    "This quotation request is not assigned to your guide account."
+                );
+
+
+                console.error(
+                    "Guide ID mismatch.",
+                    {
+
+                        requestGuideId:
+                            request.guideId,
+
+                        currentGuideId:
+                            currentGuide.uid
+
+                    }
+                );
+
+
+                return null;
+
+            }
+
+        }
+
+
+        /* ====================================================
+           SECURITY CHECK 2
+           selectedGuide.uid
+        ==================================================== */
+
+        if (
+            request.selectedGuide?.uid
+        ) {
+
+            if (
+                request.selectedGuide.uid !==
+                currentGuide.uid
+            ) {
+
+                showRequestError(
+                    "This quotation request is assigned to another guide."
+                );
+
+
+                console.error(
+                    "Selected guide UID mismatch.",
+                    {
+
+                        selectedGuideUid:
+                            request.selectedGuide.uid,
+
+                        currentGuideId:
+                            currentGuide.uid
+
+                    }
+                );
+
+
+                return null;
+
+            }
+
+        }
+
+
+        /* ====================================================
+           SECURITY CHECK 3
+           GUIDE ID MISSING
+        ==================================================== */
 
         if (
             !request.guideId &&
-            request.selectedGuide?.uid &&
-            currentGuide &&
-            request.selectedGuide.uid !==
-            currentGuide.uid
+            !request.selectedGuide?.uid
         ) {
 
             showRequestError(
-                "This quotation request is assigned to another guide."
+                "This quotation request has not been assigned to a guide yet."
             );
 
 
             return null;
+
         }
 
+
+        /* ====================================================
+           SAVE CURRENT REQUEST
+        ==================================================== */
 
         currentRequest =
             request;
 
+
+        console.log(
+            "Current quotation request:",
+            currentRequest
+        );
+
+
+        /* ====================================================
+           RENDER
+        ==================================================== */
 
         renderRequestDetails(
             request
@@ -1089,6 +1352,7 @@ async function loadRequestById(
 }
 
 
+
 /* ============================================================
    17. SHOW QUOTATION MESSAGE
 ============================================================ */
@@ -1103,6 +1367,7 @@ function showQuotationMessage(
     ) {
 
         return;
+
     }
 
 
@@ -1129,6 +1394,7 @@ function showQuotationMessage(
 }
 
 
+
 /* ============================================================
    18. CLEAR QUOTATION MESSAGE
 ============================================================ */
@@ -1146,9 +1412,16 @@ function clearQuotationMessage() {
         quotationFormMessage.style.display =
             "none";
 
+
+        quotationFormMessage.classList.remove(
+            "message-error",
+            "message-success"
+        );
+
     }
 
 }
+
 
 
 /* ============================================================
@@ -1160,9 +1433,9 @@ function validateQuotationForm() {
     clearQuotationMessage();
 
 
-    /*
-       Amount
-    */
+    /* ========================================================
+       AMOUNT
+    ======================================================== */
 
     const amount =
         quotationAmount
@@ -1186,12 +1459,13 @@ function validateQuotationForm() {
 
 
         return false;
+
     }
 
 
-    /*
-       Currency
-    */
+    /* ========================================================
+       CURRENCY
+    ======================================================== */
 
     if (
         !quotationCurrency ||
@@ -1207,12 +1481,13 @@ function validateQuotationForm() {
 
 
         return false;
+
     }
 
 
-    /*
-       Valid Until
-    */
+    /* ========================================================
+       VALID UNTIL
+    ======================================================== */
 
     if (
         !quotationValidUntil ||
@@ -1228,12 +1503,13 @@ function validateQuotationForm() {
 
 
         return false;
+
     }
 
 
-    /*
-       Date validation
-    */
+    /* ========================================================
+       DATE VALIDATION
+    ======================================================== */
 
     const today =
         new Date();
@@ -1267,12 +1543,13 @@ function validateQuotationForm() {
 
 
         return false;
+
     }
 
 
-    /*
-       Disclaimer
-    */
+    /* ========================================================
+       DISCLAIMER
+    ======================================================== */
 
     if (
         !disclaimerAccepted ||
@@ -1288,12 +1565,14 @@ function validateQuotationForm() {
 
 
         return false;
+
     }
 
 
     return true;
 
 }
+
 
 
 /* ============================================================
@@ -1329,9 +1608,9 @@ function createQuotation(
             currentRequest.requestId,
 
 
-        /*
-           Tourist
-        */
+        /* ====================================================
+           TOURIST
+        ==================================================== */
 
         touristId:
 
@@ -1354,9 +1633,9 @@ function createQuotation(
             "",
 
 
-        /*
-           Guide
-        */
+        /* ====================================================
+           GUIDE
+        ==================================================== */
 
         guideId:
 
@@ -1382,9 +1661,9 @@ function createQuotation(
             "",
 
 
-        /*
-           Trip
-        */
+        /* ====================================================
+           TRIP
+        ==================================================== */
 
         destinations:
 
@@ -1434,9 +1713,9 @@ function createQuotation(
             "",
 
 
-        /*
-           Pricing
-        */
+        /* ====================================================
+           PRICING
+        ==================================================== */
 
         amount:
 
@@ -1450,9 +1729,9 @@ function createQuotation(
             quotationCurrency.value,
 
 
-        /*
-           Services
-        */
+        /* ====================================================
+           SERVICES
+        ==================================================== */
 
         included:
 
@@ -1468,18 +1747,18 @@ function createQuotation(
                 : "",
 
 
-        /*
-           Validity
-        */
+        /* ====================================================
+           VALIDITY
+        ==================================================== */
 
         validUntil:
 
             quotationValidUntil.value,
 
 
-        /*
-           Guide message
-        */
+        /* ====================================================
+           GUIDE NOTES
+        ==================================================== */
 
         notes:
 
@@ -1488,45 +1767,41 @@ function createQuotation(
                 : "",
 
 
-        /*
-           Status
-        */
+        /* ====================================================
+           STATUS
+        ==================================================== */
 
         status:
-
             "sent",
 
 
-        /*
-           Disclaimer
-        */
+        /* ====================================================
+           DISCLAIMER
+        ==================================================== */
 
         disclaimerAccepted:
-
             true,
 
 
         disclaimerAcceptedAt:
-
             serverTimestamp(),
 
 
-        /*
-           Created
-        */
+        /* ====================================================
+           TIMESTAMPS
+        ==================================================== */
 
         createdAt:
-
             serverTimestamp(),
 
 
         updatedAt:
-
             serverTimestamp()
 
     };
 
 }
+
 
 
 /* ============================================================
@@ -1539,15 +1814,11 @@ async function saveQuotationToFirestore(
 
     try {
 
-        /*
-           Create quotation document
-        */
-
         const quotationRef =
             await addDoc(
                 collection(
                     db,
-                    "lankaQuestQuotations"
+                    QUOTATION_COLLECTION
                 ),
                 quotation
             );
@@ -1595,6 +1866,7 @@ async function saveQuotationToFirestore(
 }
 
 
+
 /* ============================================================
    22. UPDATE ORIGINAL REQUEST
 ============================================================ */
@@ -1625,7 +1897,7 @@ async function updateQuotationRequest(
         const requestRef =
             doc(
                 db,
-                "lankaQuestQuotationRequests",
+                REQUEST_COLLECTION,
                 currentRequest.id
             );
 
@@ -1657,10 +1929,9 @@ async function updateQuotationRequest(
         );
 
 
-        /*
-           Update local current request
-           only in memory.
-        */
+        /* ====================================================
+           UPDATE MEMORY ONLY
+        ==================================================== */
 
         currentRequest.status =
             "quotation_sent";
@@ -1707,6 +1978,7 @@ async function updateQuotationRequest(
 }
 
 
+
 /* ============================================================
    23. SEND QUOTATION
 ============================================================ */
@@ -1725,6 +1997,21 @@ async function sendQuotation(
 
 
         return;
+
+    }
+
+
+    if (
+        !guide
+    ) {
+
+        showQuotationMessage(
+            "Guide authentication could not be verified."
+        );
+
+
+        return;
+
     }
 
 
@@ -1733,12 +2020,13 @@ async function sendQuotation(
     ) {
 
         return;
+
     }
 
 
-    /*
-       Prevent duplicate quotation
-    */
+    /* ========================================================
+       PREVENT DUPLICATE QUOTATION
+    ======================================================== */
 
     if (
         currentRequest.status ===
@@ -1751,6 +2039,7 @@ async function sendQuotation(
 
 
         return;
+
     }
 
 
@@ -1776,9 +2065,9 @@ async function sendQuotation(
 
     try {
 
-        /*
-           Create quotation
-        */
+        /* ====================================================
+           CREATE QUOTATION
+        ==================================================== */
 
         const quotation =
             createQuotation(
@@ -1786,9 +2075,9 @@ async function sendQuotation(
             );
 
 
-        /*
-           Save quotation
-        */
+        /* ====================================================
+           SAVE QUOTATION
+        ==================================================== */
 
         const quotationResult =
             await saveQuotationToFirestore(
@@ -1808,9 +2097,9 @@ async function sendQuotation(
         }
 
 
-        /*
-           Update request
-        */
+        /* ====================================================
+           UPDATE ORIGINAL REQUEST
+        ==================================================== */
 
         const updateResult =
             await updateQuotationRequest(
@@ -1822,13 +2111,6 @@ async function sendQuotation(
             !updateResult.success
         ) {
 
-            /*
-               Quotation already exists.
-
-               We don't silently pretend
-               the request update succeeded.
-            */
-
             throw new Error(
                 updateResult.error ||
                 "Quotation was saved but the trip request could not be updated."
@@ -1837,9 +2119,9 @@ async function sendQuotation(
         }
 
 
-        /*
-           Success
-        */
+        /* ====================================================
+           SUCCESS
+        ==================================================== */
 
         showQuotationMessage(
             "Quotation sent successfully. The tourist can now review your quotation.",
@@ -1866,9 +2148,9 @@ async function sendQuotation(
         }
 
 
-        /*
-           Return to dashboard
-        */
+        /* ====================================================
+           RETURN TO DASHBOARD
+        ==================================================== */
 
         setTimeout(
             () => {
@@ -1915,6 +2197,7 @@ async function sendQuotation(
 }
 
 
+
 /* ============================================================
    24. QUOTATION FORM SUBMIT
 ============================================================ */
@@ -1932,8 +2215,35 @@ if (
             event.preventDefault();
 
 
+            /*
+               Firebase Auth state should already
+               be ready by this point.
+
+               But verify again before sending.
+            */
+
+            const firebaseUser =
+                getAuthenticatedUser();
+
+
+            if (
+                !firebaseUser
+            ) {
+
+                showQuotationMessage(
+                    "Your guide login session has expired. Please login again."
+                );
+
+
+                return;
+
+            }
+
+
             const verified =
-                await verifyGuide();
+                await verifyGuide(
+                    firebaseUser
+                );
 
 
             if (
@@ -1941,6 +2251,7 @@ if (
             ) {
 
                 return;
+
             }
 
 
@@ -1952,6 +2263,7 @@ if (
     );
 
 }
+
 
 
 /* ============================================================
@@ -1975,6 +2287,7 @@ if (
 }
 
 
+
 /* ============================================================
    26. CANCEL QUOTATION
 ============================================================ */
@@ -1996,6 +2309,7 @@ if (
 }
 
 
+
 /* ============================================================
    27. LOGOUT
 ============================================================ */
@@ -2008,33 +2322,20 @@ if (
         "click",
         async () => {
 
-            if (
-                typeof window.logoutUser ===
-                "function"
-            ) {
+            try {
 
-                try {
-
-                    await window.logoutUser();
-
-                }
-                catch (
-                    error
-                ) {
-
-                    console.error(
-                        "Logout error:",
-                        error
-                    );
-
-
-                    window.location.href =
-                        "index.html";
-
-                }
+                await logoutUser();
 
             }
-            else {
+            catch (
+                error
+            ) {
+
+                console.error(
+                    "Logout error:",
+                    error
+                );
+
 
                 window.location.href =
                     "index.html";
@@ -2047,25 +2348,98 @@ if (
 }
 
 
+
 /* ============================================================
    28. INITIALIZE GUIDE REQUEST PAGE
+
+   IMPORTANT FIX:
+
+   DO NOT use:
+
+       document.addEventListener(
+           "DOMContentLoaded",
+           ...
+       );
+
+   to authenticate the guide.
+
+   Firebase Authentication may still be restoring
+   the Google login session at DOMContentLoaded.
+
+   We therefore WAIT for:
+
+       onAuthStateChanged()
+
+   before verifying the guide and loading the request.
 ============================================================ */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    async () => {
+onAuthStateChanged(
+    auth,
+    async (
+        firebaseUser
+    ) => {
 
         console.log(
-            "Guide Requests Page Loading..."
+            "Guide Requests Auth State:",
+            firebaseUser
         );
 
 
-        /*
-           Verify Guide
-        */
+        /* ====================================================
+           AUTH STATE READY
+        ==================================================== */
+
+        authReady =
+            true;
+
+
+        /* ====================================================
+           NO FIREBASE USER
+        ==================================================== */
+
+        if (
+            !firebaseUser
+        ) {
+
+            showRequestError(
+                "Please login as a guide."
+            );
+
+
+            console.error(
+                "Guide Requests: Firebase user is not authenticated."
+            );
+
+
+            return;
+
+        }
+
+
+        /* ====================================================
+           FIREBASE USER FOUND
+        ==================================================== */
+
+        console.log(
+            "Authenticated Firebase UID:",
+            firebaseUser.uid
+        );
+
+
+        console.log(
+            "Authenticated Firebase Email:",
+            firebaseUser.email
+        );
+
+
+        /* ====================================================
+           VERIFY GUIDE
+        ==================================================== */
 
         const verified =
-            await verifyGuide();
+            await verifyGuide(
+                firebaseUser
+            );
 
 
         if (
@@ -2073,12 +2447,13 @@ document.addEventListener(
         ) {
 
             return;
+
         }
 
 
-        /*
-           Get Firestore Request ID
-        */
+        /* ====================================================
+           GET REQUEST ID
+        ==================================================== */
 
         const requestId =
             getRequestIdFromURL();
@@ -2093,28 +2468,64 @@ document.addEventListener(
             );
 
 
+            console.error(
+                "Guide Requests: requestId missing from URL."
+            );
+
+
             return;
+
         }
 
 
-        /*
-           Load request
-        */
-
-        await loadRequestById(
+        console.log(
+            "Requested Firestore Request ID:",
             requestId
         );
 
 
+        /* ====================================================
+           LOAD EXACT REQUEST
+        ==================================================== */
+
+        const request =
+            await loadRequestById(
+                requestId
+            );
+
+
+        if (
+            !request
+        ) {
+
+            return;
+
+        }
+
+
+        /* ====================================================
+           PAGE INITIALIZED
+        ==================================================== */
+
+        pageInitialized =
+            true;
+
+
         console.log(
-            "Guide Requests Page Loaded",
+            "Guide Requests Page Loaded Successfully:",
             {
 
                 requestId:
-                    requestId,
+                    request.id,
 
                 guideId:
-                    currentGuide?.uid
+                    currentGuide?.uid,
+
+                guideName:
+                    currentGuide?.fullName,
+
+                guideEmail:
+                    currentGuide?.email
 
             }
         );

@@ -1,424 +1,820 @@
+
 /* ============================================================
-GUIDE DASHBOARD LOGIC
-LankaQuest
+   LANKAQUEST
+   GUIDE DASHBOARD
 
-FIREBASE FIRST ARCHITECTURE
+   FIREBASE-FIRST ARCHITECTURE
 
+   Firebase Authentication
+            ↓
+       Firebase UID
+            ↓
+   lankaQuestGuides/{UID}
+            ↓
+      Guide Profile
+            ↓
+      Guide Dashboard
+            ↓
+   lankaQuestQuotationRequests
+            ↓
+      Incoming Requests
 
-auth.js
-   ↓
-exploreSriLankaCurrentUser
-   ↓
-Firebase UID
-   ↓
-Firestore
+   IMPORTANT:
 
-lankaQuestGuides
-   ↓
-Current Guide Document
+   Firebase Authentication = Identity
 
-lankaQuestQuotationRequests
-   ↓
-Tourist Requests
+   Firestore = LankaQuest Profile + Business Data
 
-lankaQuestQuotations
-   ↓
-Guide Quotations
-
-Guide Dashboard
-
-
-IMPORTANT RULE:
-
-localStorage is ONLY used for login session.
-
-Business data MUST come from Firestore.
+   localStorage/sessionStorage are NOT used to determine
+   the current guide account.
 
 ============================================================ */
 
+
 /* ============================================================
-FIREBASE IMPORTS
+   1. FIREBASE IMPORTS
 ============================================================ */
-
-import { db } from "./firebase-config.js";
-
-import { getCurrentUser, logoutUser, redirectAfterLogin } from "./auth.js";
 
 import {
-  doc,
-  getDoc,
-  collection,
-  getDocs,
-  query,
-  where,
-  orderBy,
+    auth,
+    db
+} from "./firebase-config.js";
+
+
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+
+import {
+    doc,
+    getDoc,
+    collection,
+    getDocs,
+    query,
+    where
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-/* ============================================================
-1. SESSION KEY ONLY
-============================================================ */
 
-const GUIDE_CURRENT_USER_KEY = "exploreSriLankaCurrentUser";
+import {
+    logoutUser
+} from "./auth.js";
 
-/* ============================================================
-2. DOM ELEMENTS
-============================================================ */
-
-const guideHeaderName = document.getElementById("guideHeaderName");
-
-const guideWelcomeName = document.getElementById("guideWelcomeName");
-
-const guideStatus = document.getElementById("guideStatus");
-
-const totalRequestCount = document.getElementById("totalRequestCount");
-
-const pendingRequestCount = document.getElementById("pendingRequestCount");
-
-const quotationCount = document.getElementById("quotationCount");
-
-const incomingRequestsContainer = document.getElementById(
-  "incomingRequestsContainer",
-);
-
-const noRequestsState = document.getElementById("noRequestsState");
-
-const refreshRequestsButton = document.getElementById("refreshRequestsButton");
-
-const logoutButton = document.getElementById("logoutButton");
 
 /* ============================================================
-3. GET CURRENT LOGIN USER
-
-ONLY AUTH SESSION
-
-NOT BUSINESS DATA
-
+   2. DOM ELEMENTS
 ============================================================ */
 
-function getDashboardCurrentUser() {
-  return getCurrentUser();
-}
-
-/* ============================================================
-4. GET CURRENT GUIDE UID
-
-============================================================ */
-
-function getCurrentGuideId(user) {
-  if (!user) {
-    return "";
-  }
-
-  return user.uid || user.guideId || user.id || "";
-}
-
-/* ============================================================
-5. LOAD GUIDE FROM FIRESTORE
-
-
-Collection:
-
-lankaQuestGuides
-
-Document:
-
-UID
-
-
-============================================================ */
-
-async function findCurrentGuide(currentUser) {
-  const guideId = getCurrentGuideId(currentUser);
-
-  if (!guideId) {
-    console.error("Guide UID missing");
-
-    return null;
-  }
-
-  try {
-    const guideRef = doc(
-      db,
-
-      "lankaQuestGuides",
-
-      guideId,
+const guideHeaderName =
+    document.getElementById(
+        "guideHeaderName"
     );
 
-    const guideSnap = await getDoc(guideRef);
 
-    if (!guideSnap.exists()) {
-      console.error("Guide document not found");
-
-      return null;
-    }
-
-    return {
-      id: guideId,
-
-      uid: guideId,
-
-      ...guideSnap.data(),
-    };
-  } catch (error) {
-    console.error(
-      "Guide loading error:",
-
-      error,
+const guideWelcomeName =
+    document.getElementById(
+        "guideWelcomeName"
     );
 
-    return null;
-  }
-}
+
+const guideStatus =
+    document.getElementById(
+        "guideStatus"
+    );
+
+
+const totalRequestCount =
+    document.getElementById(
+        "totalRequestCount"
+    );
+
+
+const pendingRequestCount =
+    document.getElementById(
+        "pendingRequestCount"
+    );
+
+
+const quotationCount =
+    document.getElementById(
+        "quotationCount"
+    );
+
+
+const incomingRequestsContainer =
+    document.getElementById(
+        "incomingRequestsContainer"
+    );
+
+
+const noRequestsState =
+    document.getElementById(
+        "noRequestsState"
+    );
+
+
+const refreshRequestsButton =
+    document.getElementById(
+        "refreshRequestsButton"
+    );
+
+
+const logoutButton =
+    document.getElementById(
+        "logoutButton"
+    );
+
 
 /* ============================================================
-6. UPDATE GUIDE NAME
+   3. CURRENT FIREBASE USER
 
+   This variable contains ONLY the Firebase Auth user.
+
+   Example:
+
+   currentFirebaseUser.uid
+   =
+   rWYP3EOw6kU8bt5P89roc8eNRoC2
 ============================================================ */
 
-function updateGuideName(guide) {
-  if (!guide) {
-    return;
-  }
+let currentFirebaseUser =
+    null;
 
-  const name = guide.fullName || guide.email || "Guide";
 
-  if (guideHeaderName) {
-    guideHeaderName.textContent = name;
-  }
-
-  if (guideWelcomeName) {
-    guideWelcomeName.textContent = name;
-  }
-}
 /* ============================================================
-7. GET GUIDE ACCOUNT STATUS
-
-Firestore fields:
-
-status
-isActive
-profileStatus
-packageStatus
-
+   4. CURRENT GUIDE FIRESTORE PROFILE
 ============================================================ */
 
-
-function getGuideAccountStatus(guide){
-
-
-    if(!guide){
+let currentGuide =
+    null;
 
 
-        return {
+/* ============================================================
+   5. ESCAPE HTML
+============================================================ */
 
-            text:"Unknown",
+function escapeHTML(
+    value
+) {
 
-            className:"status-unknown"
+    if (
+        value === null ||
+        value === undefined
+    ) {
 
-        };
-
-
-    }
-
-
-
-    /*
-       Rejected
-    */
-
-
-    if(
-
-        guide.status === "rejected"
-
-        ||
-
-        guide.packageStatus === "rejected"
-
-    ){
-
-
-        return {
-
-
-            text:"Rejected",
-
-
-            className:"status-rejected"
-
-
-        };
-
+        return "";
 
     }
 
 
-
-
-    /*
-       Active Approved Guide
-    */
-
-
-    if(
-
-
-        guide.status === "approved"
-
-        &&
-
-        guide.isActive === true
-
-        &&
-
-        guide.profileStatus === "active"
-
-
-    ){
-
-
-        return {
-
-
-            text:"Active",
-
-
-            className:"status-active"
-
-
-        };
-
-
-    }
-
-
-
-
-    /*
-       Pending Approval
-    */
-
-
-    if(
-
-
-        guide.status === "pending"
-
-        ||
-
-        guide.packageStatus === "pending"
-
-
-    ){
-
-
-        return {
-
-
-            text:"Pending Review",
-
-
-            className:"status-pending"
-
-
-        };
-
-
-    }
-
-
-
-
-    /*
-       Disabled
-    */
-
-
-    if(
-
-
-        guide.isActive === false
-
-        ||
-
-        guide.profileStatus === "inactive"
-
-
-    ){
-
-
-        return {
-
-
-            text:"Inactive",
-
-
-            className:"status-inactive"
-
-
-        };
-
-
-    }
-
-
-
-
-    return {
-
-
-        text:
-        guide.status || "Unknown",
-
-
-        className:"status-unknown"
-
-
-    };
-
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 
 }
 
 
-
-
-
-
-
 /* ============================================================
-8. UPDATE GUIDE STATUS UI
+   6. GET GUIDE PROFILE
+
+   Firebase Auth UID
+          ↓
+   lankaQuestGuides/{UID}
+
+   This is the IMPORTANT FIX.
+
+   We do NOT use:
+
+   currentUser.accountType
+
+   from Firebase Auth.
 
 ============================================================ */
 
+async function loadCurrentGuideProfile(
+    firebaseUser
+) {
 
-function updateGuideStatus(guide){
+    if (
+        !firebaseUser ||
+        !firebaseUser.uid
+    ) {
+
+        console.error(
+            "Guide profile load failed: Firebase UID missing."
+        );
+
+        return null;
+
+    }
 
 
+    const guideId =
+        firebaseUser.uid;
 
-    if(!guideStatus){
+
+    console.log(
+        "Loading guide profile..."
+    );
+
+
+    console.log(
+        "Firebase UID:",
+        guideId
+    );
+
+
+    try {
+
+        const guideRef =
+            doc(
+                db,
+                "lankaQuestGuides",
+                guideId
+            );
+
+
+        const guideSnapshot =
+            await getDoc(
+                guideRef
+            );
+
+
+        console.log(
+            "Guide document exists:",
+            guideSnapshot.exists()
+        );
+
+
+        if (
+            !guideSnapshot.exists()
+        ) {
+
+            console.error(
+                "Guide Firestore profile not found."
+            );
+
+
+            console.error(
+                "Expected document:",
+                `lankaQuestGuides/${guideId}`
+            );
+
+
+            return null;
+
+        }
+
+
+        const guideData =
+            guideSnapshot.data();
+
+
+        const guide = {
+
+            id:
+                guideSnapshot.id,
+
+            uid:
+                guideSnapshot.id,
+
+            ...guideData
+
+        };
+
+
+        console.log(
+            "============================================"
+        );
+
+
+        console.log(
+            "CURRENT GUIDE PROFILE"
+        );
+
+
+        console.log(
+            guide
+        );
+
+
+        console.log(
+            "Guide UID:",
+            guide.uid
+        );
+
+
+        console.log(
+            "Guide Name:",
+            guide.fullName
+        );
+
+
+        console.log(
+            "Guide Email:",
+            guide.email
+        );
+
+
+        console.log(
+            "Account Type:",
+            guide.accountType
+        );
+
+
+        console.log(
+            "Verification Status:",
+            guide.verificationStatus
+        );
+
+
+        console.log(
+            "Status:",
+            guide.status
+        );
+
+
+        console.log(
+            "Profile Status:",
+            guide.profileStatus
+        );
+
+
+        console.log(
+            "Is Active:",
+            guide.isActive
+        );
+
+
+        console.log(
+            "============================================"
+        );
+
+
+        return guide;
+
+
+    } catch (error) {
+
+        console.error(
+            "Guide Firestore loading error:",
+            error
+        );
+
+
+        return null;
+
+    }
+
+}
+
+
+/* ============================================================
+   7. VERIFY GUIDE ACCOUNT TYPE
+
+   Firestore profile is checked.
+
+============================================================ */
+
+function isGuideProfile(
+    guide
+) {
+
+    if (!guide) {
+
+        return false;
+
+    }
+
+
+    /*
+       If accountType exists, it MUST be guide.
+
+       If older Firestore documents do not contain
+       accountType, we still allow the profile because
+       the document itself is inside lankaQuestGuides.
+    */
+
+    if (
+        guide.accountType &&
+        guide.accountType !== "guide"
+    ) {
+
+        console.error(
+            "Firestore accountType is not guide:",
+            guide.accountType
+        );
+
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+/* ============================================================
+   8. CHECK GUIDE DASHBOARD ACCESS
+
+   Approved + Active guide only.
+
+============================================================ */
+
+function canAccessGuideDashboard(
+    guide
+) {
+
+    if (!guide) {
+
+        return false;
+
+    }
+
+
+    /*
+       Verification status
+    */
+
+    const verificationStatus =
+        String(
+            guide.verificationStatus || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    /*
+       Account status
+    */
+
+    const status =
+        String(
+            guide.status || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    /*
+       Profile status
+    */
+
+    const profileStatus =
+        String(
+            guide.profileStatus || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    /*
+       Active flag
+    */
+
+    const isActive =
+        guide.isActive === true;
+
+
+    console.log(
+        "Guide Dashboard Access Check:",
+        {
+            verificationStatus,
+            status,
+            profileStatus,
+            isActive
+        }
+    );
+
+
+    /*
+       Verification must be approved.
+    */
+
+    if (
+        verificationStatus !==
+        "approved"
+    ) {
+
+        return false;
+
+    }
+
+
+    /*
+       If status exists, it must be approved.
+    */
+
+    if (
+        status &&
+        status !== "approved"
+    ) {
+
+        return false;
+
+    }
+
+
+    /*
+       If profileStatus exists, it must be active.
+    */
+
+    if (
+        profileStatus &&
+        profileStatus !== "active"
+    ) {
+
+        return false;
+
+    }
+
+
+    /*
+       If isActive is explicitly present,
+       it must be true.
+
+       This allows older guide documents that
+       do not yet contain isActive.
+    */
+
+    if (
+        typeof guide.isActive !==
+        "undefined" &&
+        isActive !== true
+    ) {
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+/* ============================================================
+   9. UPDATE GUIDE NAME
+============================================================ */
+
+function updateGuideName(
+    guide
+) {
+
+    if (!guide) {
 
         return;
 
     }
 
 
+    const name =
+        guide.fullName ||
+        guide.name ||
+        guide.email ||
+        "Guide";
+
+
+    if (
+        guideHeaderName
+    ) {
+
+        guideHeaderName.textContent =
+            name;
+
+    }
+
+
+    if (
+        guideWelcomeName
+    ) {
+
+        guideWelcomeName.textContent =
+            name;
+
+    }
+
+}
+
+
+/* ============================================================
+   10. GET GUIDE ACCOUNT STATUS
+============================================================ */
+
+function getGuideAccountStatus(
+    guide
+) {
+
+    if (!guide) {
+
+        return {
+
+            text:
+                "Unknown",
+
+            className:
+                "status-unknown"
+
+        };
+
+    }
+
+
+    const verificationStatus =
+        String(
+            guide.verificationStatus || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    const status =
+        String(
+            guide.status || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    const profileStatus =
+        String(
+            guide.profileStatus || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    /*
+       Rejected
+    */
+
+    if (
+        verificationStatus ===
+        "rejected"
+        ||
+        status ===
+        "rejected"
+    ) {
+
+        return {
+
+            text:
+                "Rejected",
+
+            className:
+                "status-rejected"
+
+        };
+
+    }
+
+
+    /*
+       Active
+    */
+
+    if (
+        verificationStatus ===
+        "approved"
+        &&
+        (
+            !status ||
+            status === "approved"
+        )
+        &&
+        (
+            !profileStatus ||
+            profileStatus === "active"
+        )
+        &&
+        (
+            typeof guide.isActive ===
+            "undefined"
+            ||
+            guide.isActive === true
+        )
+    ) {
+
+        return {
+
+            text:
+                "Active",
+
+            className:
+                "status-active"
+
+        };
+
+    }
+
+
+    /*
+       Pending
+    */
+
+    if (
+        verificationStatus ===
+        "pending"
+        ||
+        status ===
+        "pending"
+    ) {
+
+        return {
+
+            text:
+                "Pending Review",
+
+            className:
+                "status-pending"
+
+        };
+
+    }
+
+
+    /*
+       Inactive
+    */
+
+    if (
+        guide.isActive === false
+        ||
+        profileStatus ===
+        "inactive"
+    ) {
+
+        return {
+
+            text:
+                "Inactive",
+
+            className:
+                "status-inactive"
+
+        };
+
+    }
+
+
+    return {
+
+        text:
+            guide.status ||
+            guide.verificationStatus ||
+            "Unknown",
+
+        className:
+            "status-unknown"
+
+    };
+
+}
+
+
+/* ============================================================
+   11. UPDATE GUIDE STATUS UI
+============================================================ */
+
+function updateGuideStatus(
+    guide
+) {
+
+    if (!guideStatus) {
+
+        return;
+
+    }
+
 
     const statusInfo =
-
-    getGuideAccountStatus(
-        guide
-    );
-
-
+        getGuideAccountStatus(
+            guide
+        );
 
 
     guideStatus.textContent =
-
-    statusInfo.text;
-
-
-
+        statusInfo.text;
 
 
     guideStatus.classList.remove(
@@ -436,1729 +832,1466 @@ function updateGuideStatus(guide){
     );
 
 
-
-
     guideStatus.classList.add(
-
         statusInfo.className
-
     );
-
-
 
 }
 
 
-
-
-
-
-
 /* ============================================================
-9. LOAD GUIDE REQUESTS FROM FIRESTORE
+   12. LOAD GUIDE REQUESTS
 
+   Collection:
 
-Collection:
+   lankaQuestQuotationRequests
 
-lankaQuestQuotationRequests
+   Query:
 
-
-Expected fields:
-
-guideId
-selectedGuideId
-assignedGuideId
-guideEmail
-status
-
+   guideId == Firebase UID
 
 ============================================================ */
 
+async function getCurrentGuideRequests(
+    guide
+) {
 
-async function getCurrentGuideRequests(guide){
-
-
-
-    if(!guide){
+    if (!guide) {
 
         return [];
 
     }
-
-
 
 
     const guideId =
-
-    guide.uid ||
-
-    guide.id ||
-
-    "";
+        guide.uid ||
+        guide.id ||
+        "";
 
 
+    if (!guideId) {
 
+        console.error(
+            "Guide UID missing while loading requests."
+        );
 
-
-    if(!guideId){
 
         return [];
 
     }
 
 
+    console.log(
+        "Loading requests for guide:",
+        guideId
+    );
 
 
-
-    try{
-
+    try {
 
         const requestsRef =
-
-        collection(
-
-            db,
-
-            "lankaQuestQuotationRequests"
-
-        );
+            collection(
+                db,
+                "lankaQuestQuotationRequests"
+            );
 
 
-
-
-
-        const q =
-
-        query(
-
-            requestsRef,
-
-            where(
-
-                "guideId",
-
-                "==",
-
-                guideId
-
-            )
-
-        );
-
-
-
+        const requestsQuery =
+            query(
+                requestsRef,
+                where(
+                    "guideId",
+                    "==",
+                    guideId
+                )
+            );
 
 
         const snapshot =
-
-        await getDocs(q);
-
-
-
+            await getDocs(
+                requestsQuery
+            );
 
 
-        const requests = [];
+        const requests =
+            [];
 
 
+        snapshot.forEach(
+            (
+                requestSnapshot
+            ) => {
+
+                requests.push({
+
+                    id:
+                        requestSnapshot.id,
+
+                    ...requestSnapshot.data()
+
+                });
+
+            }
+        );
 
 
-
-        snapshot.forEach(doc=>{
-
-
-            requests.push({
-
-
-                id:doc.id,
+        console.log(
+            "Guide requests found:",
+            requests.length
+        );
 
 
-                ...doc.data()
-
-
-            });
-
-
-
-        });
-
-
-
+        console.log(
+            "Guide requests:",
+            requests
+        );
 
 
         return requests;
 
 
-
-    }
-    catch(error){
-
-
+    } catch (error) {
 
         console.error(
-
             "Request loading error:",
-
             error
-
         );
-
 
 
         return [];
 
-
-
     }
-
-
 
 }
 
 
-
-
-
-
-
-
 /* ============================================================
-10. LOAD GUIDE QUOTATIONS FROM FIRESTORE
+   13. LOAD GUIDE QUOTATIONS
 
+   Collection:
 
-Collection:
-
-lankaQuestQuotations
-
+   lankaQuestQuotations
 
 ============================================================ */
 
+async function getCurrentGuideQuotations(
+    guide
+) {
 
-async function getCurrentGuideQuotations(guide){
-
-
-
-    if(!guide){
+    if (!guide) {
 
         return [];
 
     }
-
-
 
 
     const guideId =
-
-    guide.uid ||
-
-    guide.id ||
-
-    "";
+        guide.uid ||
+        guide.id ||
+        "";
 
 
-
-
-
-    if(!guideId){
+    if (!guideId) {
 
         return [];
 
     }
 
 
-
-
-    try{
-
-
+    try {
 
         const quotationsRef =
-
-        collection(
-
-            db,
-
-            "lankaQuestQuotations"
-
-        );
+            collection(
+                db,
+                "lankaQuestQuotations"
+            );
 
 
-
-
-
-        const q =
-
-        query(
-
-            quotationsRef,
-
-            where(
-
-                "guideId",
-
-                "==",
-
-                guideId
-
-            )
-
-        );
-
-
-
+        const quotationsQuery =
+            query(
+                quotationsRef,
+                where(
+                    "guideId",
+                    "==",
+                    guideId
+                )
+            );
 
 
         const snapshot =
-
-        await getDocs(q);
-
-
-
+            await getDocs(
+                quotationsQuery
+            );
 
 
-        const quotations = [];
+        const quotations =
+            [];
 
 
+        snapshot.forEach(
+            (
+                quotationSnapshot
+            ) => {
+
+                quotations.push({
+
+                    id:
+                        quotationSnapshot.id,
+
+                    ...quotationSnapshot.data()
+
+                });
+
+            }
+        );
 
 
-
-        snapshot.forEach(doc=>{
-
-
-            quotations.push({
-
-
-                id:doc.id,
-
-
-                ...doc.data()
-
-
-            });
-
-
-
-        });
-
-
-
+        console.log(
+            "Guide quotations found:",
+            quotations.length
+        );
 
 
         return quotations;
 
 
-
-    }
-    catch(error){
-
-
+    } catch (error) {
 
         console.error(
-
             "Quotation loading error:",
-
             error
-
         );
-
 
 
         return [];
 
-
-
     }
 
-
-
 }
 
 
-
-
-
-
-
 /* ============================================================
-11. GET REQUEST STATUS
-
+   14. GET REQUEST STATUS
 ============================================================ */
 
+function getRequestStatus(
+    request
+) {
 
-function getRequestStatus(request){
-
-
-
-    return (
-
+    return String(
         request.status ||
-
         request.requestStatus ||
-
         "pending"
-
-
-    ).toLowerCase();
-
-
+    )
+    .trim()
+    .toLowerCase();
 
 }
 
 
-
-
-
-
-
-
 /* ============================================================
-12. UPDATE DASHBOARD COUNTS
-
-
-NOW ASYNC BECAUSE DATA COMES FROM FIRESTORE
-
+   15. UPDATE DASHBOARD COUNTS
 ============================================================ */
 
-
-async function updateDashboardCounts(guide){
-
-
+async function updateDashboardCounts(
+    guide
+) {
 
     const requests =
-
-    await getCurrentGuideRequests(
-        guide
-    );
-
-
-
-
-
-    const quotations =
-
-    await getCurrentGuideQuotations(
-        guide
-    );
-
-
-
-
-
-
-    if(totalRequestCount){
-
-
-        totalRequestCount.textContent =
-
-        requests.length;
-
-
-    }
-
-
-
-
-
-
-    const pending =
-
-    requests.filter(
-
-        request =>
-
-
-        getRequestStatus(request)
-        ===
-        "pending"
-
-
-        ||
-
-        getRequestStatus(request)
-        ===
-        "new"
-
-
-    );
-
-
-
-
-
-
-
-    if(pendingRequestCount){
-
-
-        pendingRequestCount.textContent =
-
-        pending.length;
-
-
-    }
-
-
-
-
-
-
-    if(quotationCount){
-
-
-        quotationCount.textContent =
-
-        quotations.length;
-
-
-    }
-
-
-
-}
-/* ============================================================
-13. ESCAPE HTML
-
-Prevent HTML injection
-
-============================================================ */
-
-
-function escapeHTML(value){
-
-
-
-    if(
-
-        value === null ||
-
-        value === undefined
-
-    ){
-
-        return "";
-
-    }
-
-
-
-
-
-    return String(value)
-
-        .replace(
-
-            /&/g,
-
-            "&amp;"
-
-        )
-
-        .replace(
-
-            /</g,
-
-            "&lt;"
-
-        )
-
-        .replace(
-
-            />/g,
-
-            "&gt;"
-
-        )
-
-        .replace(
-
-            /"/g,
-
-            "&quot;"
-
-        )
-
-        .replace(
-
-            /'/g,
-
-            "&#039;"
-
+        await getCurrentGuideRequests(
+            guide
         );
 
 
-
-}
-
-
-
-
+    const quotations =
+        await getCurrentGuideQuotations(
+            guide
+        );
 
 
+    /*
+       Total requests
+    */
 
+    if (
+        totalRequestCount
+    ) {
 
-/* ============================================================
-14. FORMAT REQUEST DATE
-
-============================================================ */
-
-
-function formatRequestDate(dateValue){
-
-
-
-    if(!dateValue){
-
-
-        return "Date not available";
-
+        totalRequestCount.textContent =
+            requests.length;
 
     }
 
 
+    /*
+       Pending requests
 
+       guide_selected is an incoming request
+       and should also remain visible to guide.
+
+    */
+
+    const pendingRequests =
+        requests.filter(
+            (
+                request
+            ) => {
+
+                const status =
+                    getRequestStatus(
+                        request
+                    );
+
+
+                return (
+
+                    status ===
+                    "pending"
+
+                    ||
+
+                    status ===
+                    "new"
+
+                    ||
+
+                    status ===
+                    "guide_selected"
+
+                );
+
+            }
+        );
+
+
+    if (
+        pendingRequestCount
+    ) {
+
+        pendingRequestCount.textContent =
+            pendingRequests.length;
+
+    }
+
+
+    /*
+       Quotations
+    */
+
+    if (
+        quotationCount
+    ) {
+
+        quotationCount.textContent =
+            quotations.length;
+
+    }
+
+}
+
+
+/* ============================================================
+   16. FORMAT REQUEST DATE
+============================================================ */
+
+function formatRequestDate(
+    dateValue
+) {
+
+    if (!dateValue) {
+
+        return "Date not available";
+
+    }
 
 
     let date;
-
 
 
     /*
        Firestore Timestamp
     */
 
-
-    if(
-
-        dateValue.seconds
-
-    ){
-
+    if (
+        dateValue &&
+        typeof dateValue.toDate ===
+        "function"
+    ) {
 
         date =
-
-        new Date(
-
-            dateValue.seconds * 1000
-
-        );
-
-
-    }
-
-    else{
-
-
-        date =
-
-        new Date(
-
-            dateValue
-
-        );
-
+            dateValue.toDate();
 
     }
 
 
+    /*
+       Firestore Timestamp object
+    */
+
+    else if (
+        dateValue &&
+        typeof dateValue.seconds ===
+        "number"
+    ) {
+
+        date =
+            new Date(
+                dateValue.seconds *
+                1000
+            );
+
+    }
 
 
+    /*
+       JavaScript Date
+    */
 
-    if(
+    else if (
+        dateValue instanceof Date
+    ) {
 
+        date =
+            dateValue;
+
+    }
+
+
+    /*
+       String / number
+    */
+
+    else {
+
+        date =
+            new Date(
+                dateValue
+            );
+
+    }
+
+
+    if (
         Number.isNaN(
-
             date.getTime()
-
         )
-
-    ){
-
+    ) {
 
         return "Invalid Date";
 
-
     }
 
 
-
-
-
     return date.toLocaleDateString(
-
         "en-US",
-
         {
 
+            year:
+                "numeric",
 
-            year:"numeric",
+            month:
+                "short",
 
-
-            month:"short",
-
-
-            day:"numeric"
-
+            day:
+                "numeric"
 
         }
-
     );
-
-
 
 }
 
 
-
-
-
-
-
-
-
 /* ============================================================
-15. CREATE REQUEST CARD
-
-
-Firestore Document:
-
-lankaQuestQuotationRequests
-
-
+   17. CREATE REQUEST CARD
 ============================================================ */
 
-
-function createRequestCard(request){
-
-
+function createRequestCard(
+    request
+) {
 
     const touristName =
-
-
         request.touristName ||
-
-
         request.fullName ||
-
-
         request.customerName ||
-
-
+        request.touristEmail ||
         "Tourist";
 
 
-
-
-
-    const destination =
-
-
+    let destination =
         request.destination ||
-
-
         request.destinations ||
-
-
         request.location ||
-
-
         "Sri Lanka";
 
 
+    /*
+       Convert destination objects
+       into readable names.
+    */
 
+    if (
+        Array.isArray(
+            destination
+        )
+    ) {
+
+        destination =
+            destination
+                .map(
+                    (
+                        item
+                    ) => {
+
+                        if (
+                            typeof item ===
+                            "string"
+                        ) {
+
+                            return item;
+
+                        }
+
+
+                        return (
+                            item?.name ||
+                            item?.title ||
+                            item?.id ||
+                            ""
+                        );
+
+                    }
+                )
+                .filter(Boolean)
+                .join(", ");
+
+    }
 
 
     const status =
-
-
         getRequestStatus(
-
             request
-
         );
 
 
-
-
-
     const requestDate =
-
-
         request.createdAt ||
-
-
         request.requestedAt ||
-
-
         "";
 
 
-
-
-
     const requestId =
-
-
         request.id ||
-
-
         "N/A";
 
 
+    const travelers =
+        request.travelers ||
+        "Not specified";
 
 
+    const startDate =
+        request.startDate ||
+        "Not selected";
+
+
+    const endDate =
+        request.endDate ||
+        "Not selected";
 
 
     const card =
-
-
-    document.createElement(
-
-        "article"
-
-    );
-
-
-
-
+        document.createElement(
+            "article"
+        );
 
 
     card.className =
-
-
-    "incoming-request-card";
-
-
-
-
-
+        "incoming-request-card";
 
 
     card.innerHTML = `
 
-
         <div class="request-card-header">
-
 
             <div>
 
-
                 <span class="request-card-label">
-
                     TRIP REQUEST
-
                 </span>
 
-
-
                 <h3>
-
-                    ${escapeHTML(
-
-                        touristName
-
-                    )}
-
+                    ${escapeHTML(touristName)}
                 </h3>
-
 
             </div>
 
 
-
-
-            <span class="request-status ${escapeHTML(status)}">
-
-
+            <span
+                class="request-status ${escapeHTML(status)}"
+            >
                 ${escapeHTML(status)}
-
-
             </span>
 
-
-
         </div>
-
-
-
 
 
         <div class="request-card-body">
 
-
             <p>
 
-
                 <strong>
-
                     Destination:
-
                 </strong>
 
-
-
-                ${escapeHTML(
-
-                    Array.isArray(destination)
-
-                    ?
-
-                    destination.join(", ")
-
-                    :
-
-                    destination
-
-                )}
-
-
+                ${escapeHTML(destination)}
 
             </p>
 
 
+            <p>
 
+                <strong>
+                    Travelers:
+                </strong>
 
+                ${escapeHTML(travelers)}
 
+            </p>
 
 
             <p>
 
-
                 <strong>
-
-                    Request ID:
-
+                    Travel Dates:
                 </strong>
 
+                ${escapeHTML(startDate)}
 
+                →
+
+                ${escapeHTML(endDate)}
+
+            </p>
+
+
+            <p>
+
+                <strong>
+                    Request ID:
+                </strong>
 
                 ${escapeHTML(requestId)}
 
-
-
             </p>
-
-
-
-
-
 
 
             <p>
 
-
                 <strong>
-
                     Received:
-
                 </strong>
 
-
-
-                ${formatRequestDate(
-
-                    requestDate
-
-                )}
-
-
+                ${escapeHTML(formatRequestDate(requestDate))}
 
             </p>
 
-
-
         </div>
-
-
-
-
-
-
 
 
         <div class="request-card-actions">
 
-
-
             <a
-
-                href="guide-requests.html"
-
+               href="guide-requests.html?requestId=${encodeURIComponent(requestId)}"
                 class="view-request-button"
-
-
             >
-
-
                 View Request →
-
-
             </a>
 
-
-
         </div>
-
-
-
 
     `;
 
 
-
-
-
-
     return card;
-
-
 
 }
 
 
-
-
-
-
-
-
-
 /* ============================================================
-16. RENDER INCOMING REQUESTS
-
-
-Firestore Data → Dashboard Cards
-
-
+   18. RENDER INCOMING REQUESTS
 ============================================================ */
 
+async function renderIncomingRequests(
+    guide
+) {
 
-async function renderIncomingRequests(guide){
-
-
-
-    if(
-
+    if (
         !incomingRequestsContainer
-
-    ){
+    ) {
 
         return;
 
     }
 
 
-
-
-
-
     const requests =
-
-
-    await getCurrentGuideRequests(
-
-        guide
-
-    );
-
-
-
-
-
+        await getCurrentGuideRequests(
+            guide
+        );
 
 
     /*
        Clear old cards
-
     */
 
-
-    incomingRequestsContainer.innerHTML = "";
-
-
-
-
-
-
+    incomingRequestsContainer.innerHTML =
+        "";
 
 
     /*
-       No Requests
-
+       No requests
     */
 
-
-    if(
-
-        requests.length === 0
-
-    ){
-
-
+    if (
+        requests.length ===
+        0
+    ) {
 
         incomingRequestsContainer.style.display =
-
-        "none";
-
+            "none";
 
 
-
-
-        if(noRequestsState){
-
-
+        if (
+            noRequestsState
+        ) {
 
             noRequestsState.style.display =
-
-            "block";
-
-
+                "block";
 
         }
 
 
-
         return;
 
-
-
     }
-
-
-
-
-
 
 
     /*
        Show container
-
     */
 
-
     incomingRequestsContainer.style.display =
-
-    "grid";
-
+        "grid";
 
 
-
-
-
-    if(noRequestsState){
-
+    if (
+        noRequestsState
+    ) {
 
         noRequestsState.style.display =
-
-        "none";
-
+            "none";
 
     }
 
 
-
-
-
-
-
     /*
-       Latest first
-
+       Sort newest first
     */
-
 
     const sortedRequests =
+        [...requests].sort(
+            (
+                a,
+                b
+            ) => {
+
+                const dateA =
+                    getTimestampMilliseconds(
+                        a.createdAt
+                    );
 
 
-    [...requests].sort(
-
-        (a,b)=>{
-
-
-
-            const dateA =
-
-            new Date(
-
-                a.createdAt?.seconds
-
-                ?
-
-                a.createdAt.seconds * 1000
-
-                :
-
-                a.createdAt || 0
-
-            ).getTime();
+                const dateB =
+                    getTimestampMilliseconds(
+                        b.createdAt
+                    );
 
 
+                return (
+                    dateB -
+                    dateA
+                );
 
-
-
-
-            const dateB =
-
-            new Date(
-
-                b.createdAt?.seconds
-
-                ?
-
-                b.createdAt.seconds * 1000
-
-                :
-
-                b.createdAt || 0
-
-            ).getTime();
-
-
-
-
-
-
-            return dateB - dateA;
-
-
-
-        }
-
-    );
-
-
-
-
-
-
-
+            }
+        );
 
 
     /*
-       Dashboard show latest 5 only
-
+       Dashboard shows latest 5
     */
 
-
     const latestRequests =
-
-
-    sortedRequests.slice(
-
-        0,
-
-        5
-
-    );
-
-
-
-
-
+        sortedRequests.slice(
+            0,
+            5
+        );
 
 
     latestRequests.forEach(
-
-        request=>{
-
+        (
+            request
+        ) => {
 
             const card =
-
-            createRequestCard(
-
-                request
-
-            );
-
-
-
+                createRequestCard(
+                    request
+                );
 
 
             incomingRequestsContainer.appendChild(
-
                 card
-
             );
 
-
-
         }
-
     );
-
-
 
 }
- /* ============================================================
-17. LOAD GUIDE DASHBOARD
 
 
-FLOW:
-
-auth.js
-
-↓
-
-exploreSriLankaCurrentUser
-
-↓
-
-Firebase UID
-
-↓
-
-lankaQuestGuides
-
-↓
-
-Dashboard
-
-
+/* ============================================================
+   19. TIMESTAMP TO MILLISECONDS
 ============================================================ */
 
+function getTimestampMilliseconds(
+    value
+) {
 
-async function loadGuideDashboard(){
+    if (!value) {
 
-
-
-    /*
-       Get logged user
-    */
-
-
-    const currentUser =
-
-    getDashboardCurrentUser();
-
-
-
-
-
-
-    if(!currentUser){
-
-
-
-        window.location.href =
-
-        "login.html";
-
-
-
-        return;
-
+        return 0;
 
     }
 
 
-
-
-
-
-
     /*
-       Only Guide Account
-
+       Firestore Timestamp
     */
 
+    if (
+        typeof value.toDate ===
+        "function"
+    ) {
 
-    if(
-
-        currentUser.accountType !== "guide"
-
-    ){
-
-
-
-        if(
-
-            typeof redirectAfterLogin === "function"
-
-        )
-        {
-
-
-            redirectAfterLogin(
-
-                currentUser
-
-            );
-
-
-        }
-
-        else{
-
-
-            window.location.href =
-
-            "index.html";
-
-
-        }
-
-
-
-        return;
-
+        return value
+            .toDate()
+            .getTime();
 
     }
 
 
+    /*
+       Firestore Timestamp object
+    */
 
+    if (
+        typeof value.seconds ===
+        "number"
+    ) {
 
+        return (
+            value.seconds *
+            1000
+        );
 
+    }
 
 
     /*
-       Load Guide From Firestore
-
+       Date
     */
 
+    if (
+        value instanceof Date
+    ) {
 
-    const guide =
+        return value.getTime();
+
+    }
 
 
-    await findCurrentGuide(
+    /*
+       String / number
+    */
 
-        currentUser
+    const date =
+        new Date(
+            value
+        );
 
+
+    const time =
+        date.getTime();
+
+
+    return Number.isNaN(
+        time
+    )
+        ? 0
+        : time;
+
+}
+
+
+/* ============================================================
+   20. SHOW DASHBOARD ERROR
+============================================================ */
+
+function showDashboardError(
+    message
+) {
+
+    console.error(
+        message
     );
 
 
+    if (
+        guideHeaderName
+    ) {
+
+        guideHeaderName.textContent =
+            "Guide Dashboard";
+
+    }
 
 
+    if (
+        guideWelcomeName
+    ) {
+
+        guideWelcomeName.textContent =
+            "Unable to load dashboard";
+
+    }
 
 
+    if (
+        guideStatus
+    ) {
+
+        guideStatus.textContent =
+            message;
 
 
-    console.log(
+        guideStatus.classList.remove(
 
-        "FOUND GUIDE DATA:",
+            "status-active",
 
-        guide
+            "status-pending",
 
-    );
+            "status-rejected",
 
-
-
-
-
-
-
-    if(!guide){
-
-
-
-        console.error(
-
-            "Guide profile not found"
+            "status-inactive"
 
         );
 
 
+        guideStatus.classList.add(
+            "status-unknown"
+        );
+
+    }
+
+}
 
 
+/* ============================================================
+   21. LOAD GUIDE DASHBOARD
 
-        if(guideHeaderName){
+   IMPORTANT FIX
 
+   OLD:
 
-            guideHeaderName.textContent =
+   getCurrentUser()
+        ↓
+   currentUser.accountType
+        ↓
+   redirect
 
-            currentUser.fullName || "Guide";
+   NEW:
 
+   Firebase Auth
+        ↓
+   firebaseUser.uid
+        ↓
+   lankaQuestGuides/{uid}
+        ↓
+   Guide Profile
+        ↓
+   Dashboard
 
-        }
+============================================================ */
 
+async function loadGuideDashboard(
+    firebaseUser
+) {
 
-
-
-
-
-        if(guideWelcomeName){
-
-
-            guideWelcomeName.textContent =
-
-            currentUser.fullName || "Guide";
-
-
-        }
-
-
-
-
-
-
-        if(guideStatus){
-
-
-            guideStatus.textContent =
-
-            "Profile Not Found";
+    console.log(
+        "============================================"
+    );
 
 
-        }
+    console.log(
+        "LANKAQUEST GUIDE DASHBOARD INITIALIZING"
+    );
 
 
+    console.log(
+        "Firebase User:",
+        firebaseUser
+    );
 
+
+    /* ========================================================
+       1. AUTHENTICATION CHECK
+    ======================================================== */
+
+    if (
+        !firebaseUser
+    ) {
+
+        console.error(
+            "No Firebase authenticated user."
+        );
+
+
+        window.location.href =
+            "login.html";
 
 
         return;
 
+    }
+
+
+    currentFirebaseUser =
+        firebaseUser;
+
+
+    console.log(
+        "Firebase UID:",
+        firebaseUser.uid
+    );
+
+
+    console.log(
+        "Firebase Email:",
+        firebaseUser.email
+    );
+
+
+    console.log(
+        "Firebase Provider:",
+        firebaseUser.providerData
+    );
+
+
+    /* ========================================================
+       2. LOAD GUIDE FIRESTORE PROFILE
+    ======================================================== */
+
+    const guide =
+        await loadCurrentGuideProfile(
+            firebaseUser
+        );
+
+
+    currentGuide =
+        guide;
+
+
+    if (
+        !guide
+    ) {
+
+        showDashboardError(
+            "Guide profile not found."
+        );
+
+
+        /*
+           DO NOT redirect immediately.
+
+           This allows the real error to remain visible
+           and makes debugging possible.
+        */
+
+        return;
 
     }
 
 
+    /* ========================================================
+       3. VERIFY GUIDE ACCOUNT TYPE
+    ======================================================== */
 
+    if (
+        !isGuideProfile(
+            guide
+        )
+    ) {
 
+        console.error(
+            "This Firestore profile is not a guide."
+        );
 
 
+        showDashboardError(
+            "This account is not registered as a guide."
+        );
 
 
+        return;
 
-    /*
-       Update UI
+    }
 
-    */
 
+    /* ========================================================
+       4. CHECK GUIDE APPROVAL
+    ======================================================== */
 
-    updateGuideName(
+    const accessAllowed =
+        canAccessGuideDashboard(
+            guide
+        );
 
-        guide
 
-    );
+    if (
+        !accessAllowed
+    ) {
 
+        console.warn(
+            "Guide dashboard access denied."
+        );
 
 
+        console.warn(
+            "Guide profile:",
+            guide
+        );
 
 
-    updateGuideStatus(
+        /*
+           Only redirect when the Firestore profile
+           itself clearly says the guide is not allowed.
+        */
 
-        guide
+        const verificationStatus =
+            String(
+                guide.verificationStatus || ""
+            )
+            .trim()
+            .toLowerCase();
 
-    );
 
+        const status =
+            String(
+                guide.status || ""
+            )
+            .trim()
+            .toLowerCase();
 
 
+        const profileStatus =
+            String(
+                guide.profileStatus || ""
+            )
+            .trim()
+            .toLowerCase();
 
 
-    await updateDashboardCounts(
+        const explicitlyInactive =
+            guide.isActive === false;
 
-        guide
 
-    );
+        if (
+            verificationStatus ===
+            "rejected"
+            ||
+            status ===
+            "rejected"
+            ||
+            profileStatus ===
+            "inactive"
+            ||
+            explicitlyInactive
+        ) {
 
+            window.location.href =
+                "guide-verification.html";
 
 
-
-
-    await renderIncomingRequests(
-
-        guide
-
-    );
-
-
-
-
-
-
-
-
-    console.log(
-
-        "Current Guide:",
-
-        guide
-
-    );
-
-
-
-
-
-
-    console.log(
-
-        "Guide UID:",
-
-        guide.uid
-
-    );
-
-
-
-}
-
-
-
-
-
-
-
-
-
-/* ============================================================
-18. REFRESH REQUESTS BUTTON
-
-
-============================================================ */
-
-
-if(refreshRequestsButton){
-
-
-
-    refreshRequestsButton.addEventListener(
-
-
-        "click",
-
-
-        ()=>{
-
-
-            loadGuideDashboard();
-
+            return;
 
         }
 
 
+        /*
+           Pending approval
+        */
+
+        showDashboardError(
+            "Guide account is not approved for dashboard access."
+        );
+
+
+        return;
+
+    }
+
+
+    /* ========================================================
+       5. UPDATE GUIDE UI
+    ======================================================== */
+
+    updateGuideName(
+        guide
     );
 
+
+    updateGuideStatus(
+        guide
+    );
+
+
+    /* ========================================================
+       6. LOAD DASHBOARD COUNTS
+    ======================================================== */
+
+    await updateDashboardCounts(
+        guide
+    );
+
+
+    /* ========================================================
+       7. LOAD INCOMING REQUESTS
+    ======================================================== */
+
+    await renderIncomingRequests(
+        guide
+    );
+
+
+    /* ========================================================
+       8. FINAL DEBUG
+    ======================================================== */
+
+    console.log(
+        "============================================"
+    );
+
+
+    console.log(
+        "GUIDE DASHBOARD READY"
+    );
+
+
+    console.log(
+        "Firebase UID:",
+        firebaseUser.uid
+    );
+
+
+    console.log(
+        "Firestore Guide UID:",
+        guide.uid
+    );
+
+
+    console.log(
+        "Guide Name:",
+        guide.fullName
+    );
+
+
+    console.log(
+        "Guide Email:",
+        guide.email
+    );
+
+
+    console.log(
+        "============================================"
+    );
 
 }
 
 
-
-
-
-
-
-
-
 /* ============================================================
-19. LOGOUT
-
-
+   22. REFRESH REQUESTS
 ============================================================ */
 
+if (
+    refreshRequestsButton
+) {
 
-if(logoutButton){
-
-
-
-    logoutButton.addEventListener(
-
-
+    refreshRequestsButton.addEventListener(
         "click",
+        async () => {
 
+            if (
+                !currentFirebaseUser
+            ) {
 
-        ()=>{
-
-
-
-            /*
-               Use auth.js logout
-
-            */
-
-
-            if(
-
-                typeof logoutUser === "function"
-
-            ){
-
-
-
-                logoutUser();
-
+                console.warn(
+                    "Cannot refresh: Firebase user unavailable."
+                );
 
 
                 return;
 
-
             }
 
 
-
-
-
-
-
             /*
-               Firebase auth fallback
+               Reload guide profile first.
 
+               This ensures that if Admin changes
+               guide status, dashboard gets the
+               latest Firestore data.
             */
 
-
-            localStorage.removeItem(
-
-                GUIDE_CURRENT_USER_KEY
-
+            await loadGuideDashboard(
+                currentFirebaseUser
             );
-
-
-
-            sessionStorage.removeItem(
-
-                GUIDE_CURRENT_USER_KEY
-
-            );
-
-
-
-
-
-
-
-            window.location.href =
-
-            "index.html";
-
-
 
         }
-
-
     );
-
 
 }
 
 
+/* ============================================================
+   23. LOGOUT
+============================================================ */
+
+if (
+    logoutButton
+) {
+
+    logoutButton.addEventListener(
+        "click",
+        async () => {
+
+            try {
+
+                console.log(
+                    "Guide logout started..."
+                );
 
 
+                await logoutUser();
 
 
+            } catch (error) {
 
+                console.error(
+                    "Guide logout error:",
+                    error
+                );
+
+
+                /*
+                   Fallback
+                */
+
+                window.location.href =
+                    "index.html";
+
+            }
+
+        }
+    );
+
+}
 
 
 /* ============================================================
-20. INITIALIZE DASHBOARD  
- getStorageArray() නැහැ
- localStorage වල guide/request/quotation data නැහැ
- GUIDE_RECORDS_KEY නැහැ
- QUOTATION_REQUESTS_KEY නැහැ
- QUOTATIONS_KEY නැහැ
+   24. FIREBASE AUTH STATE LISTENER
 
+   THIS REPLACES:
+
+   DOMContentLoaded
+        ↓
+   getCurrentUser()
+        ↓
+   currentUser.accountType
+
+   New:
+
+   Firebase Auth
+        ↓
+   Firebase User
+        ↓
+   Firestore Guide Profile
 
 ============================================================ */
 
+onAuthStateChanged(
+    auth,
 
-document.addEventListener(
+    async (
+        firebaseUser
+    ) => {
+
+        console.log(
+            "============================================"
+        );
 
 
-    "DOMContentLoaded",
+        console.log(
+            "Firebase Auth State Changed"
+        );
 
 
-    ()=>{
+        console.log(
+            "User:",
+            firebaseUser
+        );
 
 
-        loadGuideDashboard();
+        console.log(
+            "============================================"
+        );
 
+
+        if (
+            !firebaseUser
+        ) {
+
+            console.warn(
+                "No authenticated Firebase user."
+            );
+
+
+            window.location.href =
+                "login.html";
+
+
+            return;
+
+        }
+
+
+        await loadGuideDashboard(
+            firebaseUser
+        );
 
     }
-
-
 );
+
+
+/* ============================================================
+   END GUIDE-DASHBOARD.JS
+============================================================ */
+

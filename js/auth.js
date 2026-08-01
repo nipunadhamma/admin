@@ -16,9 +16,6 @@
        Firestore Profile
             |
             ↓
-       Session Cache
-            |
-            ↓
           Dashboard
 
 
@@ -40,16 +37,19 @@
       ↓
    guide-verification.html
 
+
    IMPORTANT:
 
-   localStorage/sessionStorage are ONLY session cache.
-   They are NOT the database.
+   Firebase Authentication is the ONLY
+   authentication/session source.
 
+   localStorage/sessionStorage are NOT used
+   for authentication state.
 ============================================================ */
 
 
 /* ============================================================
-   FIREBASE IMPORTS
+   1. FIREBASE IMPORTS
 ============================================================ */
 
 import {
@@ -73,7 +73,7 @@ import {
 
 
 /* ============================================================
-   ADMIN CONFIGURATION
+   2. ADMIN CONFIGURATION
 ============================================================ */
 
 const ADMIN_EMAIL =
@@ -81,104 +81,29 @@ const ADMIN_EMAIL =
 
 
 /* ============================================================
-   SESSION KEY
-
-   This is ONLY a login-session cache.
-============================================================ */
-
-const AUTH_USER_KEY =
-    "exploreSriLankaCurrentUser";
-
-
-/* ============================================================
-   GOOGLE PROVIDER
+   3. GOOGLE PROVIDER
 ============================================================ */
 
 const googleProvider =
     new GoogleAuthProvider();
 
 
-
 /* ============================================================
-   GET CURRENT FIREBASE USER
+   4. GET CURRENT FIREBASE USER
 
-   FIREBASE AUTH IS THE AUTHORITATIVE IDENTITY SOURCE.
-
-   localStorage / sessionStorage are NOT used to
-   determine who is currently authenticated.
+   FIREBASE AUTHENTICATION IS THE ONLY
+   AUTHORITATIVE IDENTITY SOURCE.
 ============================================================ */
 
 function getCurrentUser() {
-
-    /*
-       Firebase Authentication is the source
-       of the current authenticated identity.
-    */
 
     return auth.currentUser || null;
 
 }
 
 
-
-
 /* ============================================================
-   SAVE CURRENT USER
-
-   Session cache only.
-============================================================ */
-
-function saveCurrentUser(
-    user,
-    remember = true
-) {
-
-    clearUserSession();
-
-
-    const storage =
-        remember
-            ? localStorage
-            : sessionStorage;
-
-
-    storage.setItem(
-        AUTH_USER_KEY,
-        JSON.stringify(user)
-    );
-
-}
-
-
-/* ============================================================
-   CLEAR USER SESSION
-============================================================ */
-
-function clearUserSession() {
-
-    localStorage.removeItem(
-        AUTH_USER_KEY
-    );
-
-
-    sessionStorage.removeItem(
-        AUTH_USER_KEY
-    );
-
-}
-
-
-/* ============================================================
-   CHECK ADMIN FIREBASE USER
-
-   IMPORTANT:
-
-   Firebase Authentication is the source of identity.
-
-   Admin email:
-   kalawanesangamaji@gmail.com
-
-   Email must also be verified.
+   5. CHECK ADMIN FIREBASE USER
 ============================================================ */
 
 function isAdminFirebaseUser(
@@ -201,21 +126,23 @@ function isAdminFirebaseUser(
 
 
     return (
+
         email ===
         ADMIN_EMAIL.toLowerCase()
+
         &&
+
         firebaseUser.emailVerified === true
+
     );
 
 }
 
 
 /* ============================================================
-   CREATE ADMIN SESSION
+   6. CREATE ADMIN SESSION OBJECT
 
-   Admin does NOT need a Firestore profile document.
-
-   Admin identity comes from Firebase Authentication.
+   Admin does NOT need a Firestore profile.
 ============================================================ */
 
 function createAdminSession(
@@ -252,7 +179,7 @@ function createAdminSession(
 
 
 /* ============================================================
-   CREATE GUIDE SESSION OBJECT
+   7. CREATE GUIDE SESSION OBJECT
 
    Firestore:
    lankaQuestGuides/{UID}
@@ -284,7 +211,7 @@ function createGuideSession(
             guide.email || "",
 
         phone:
-            guide.phone || "",
+            guide.phone || guide.phoneNumber || "",
 
         province:
             guide.province || "",
@@ -297,23 +224,39 @@ function createGuideSession(
                 guide.languages
             )
                 ? guide.languages
-                : [],
+                : guide.languages
+                    ? [guide.languages]
+                    : guide.language
+                        ? [guide.language]
+                        : [],
 
         specializations:
             Array.isArray(
                 guide.specializations
             )
                 ? guide.specializations
-                : [],
+                : guide.specializations
+                    ? [guide.specializations]
+                    : guide.specialization
+                        ? [guide.specialization]
+                        : [],
 
         experience:
-            guide.experience || "",
+            guide.experience ||
+            guide.experienceYears ||
+            "",
 
         areasCovered:
-            guide.areasCovered || "",
+            guide.areasCovered ||
+            guide.areas ||
+            guide.coverageAreas ||
+            "",
 
         profileImage:
-            guide.profileImage || "",
+            guide.profileImage ||
+            guide.photoURL ||
+            guide.photo ||
+            "",
 
         verificationStatus:
             guide.verificationStatus ||
@@ -331,10 +274,18 @@ function createGuideSession(
             guide.isActive === true,
 
         rating:
-            guide.rating || 0,
+            Number(
+                guide.rating ||
+                guide.averageRating ||
+                0
+            ),
 
         reviewCount:
-            guide.reviewCount || 0
+            Number(
+                guide.reviewCount ||
+                guide.reviewsCount ||
+                0
+            )
 
     };
 
@@ -342,7 +293,7 @@ function createGuideSession(
 
 
 /* ============================================================
-   CREATE TOURIST SESSION OBJECT
+   8. CREATE TOURIST SESSION OBJECT
 
    Firestore:
    lankaQuestTourists/{UID}
@@ -382,56 +333,21 @@ function createTouristSession(
 
 
 /* ============================================================
-   GOOGLE LOGIN
+   9. GOOGLE LOGIN
 
-   IMPORTANT FIX:
-
-   Admin Google account is handled BEFORE checking
-   lankaQuestGuides or lankaQuestTourists.
-
-   Therefore the Admin does NOT need a Firestore profile.
-============================================================ */
-
-
-/* ============================================================
-   GOOGLE LOGIN
+   Google
+      ↓
    Firebase Authentication
-   +
-   LankaQuest Profile Detection
-
-   FLOW:
-
-   Google Login
-        ↓
-   Firebase Authentication
-        ↓
-   User Authenticated
-        ↓
+      ↓
+   Firebase UID
+      ↓
    Admin?
-      ↙     ↘
-    YES     NO
-     ↓       ↓
-  Admin   Check Guide
-            ↓
-         Check Tourist
-            ↓
-      Profile Exists?
-         ↙       ↘
-       YES       NO
-        ↓         ↓
-   Dashboard   Registration
-                  ↓
-        register.html?google=1
-
-
-   IMPORTANT:
-
-   If the Google user has no LankaQuest profile,
-   DO NOT sign the user out.
-
-   The authenticated Firebase user must remain
-   active so register.js can complete the
-   LankaQuest profile registration.
+      ↓
+   Guide?
+      ↓
+   Tourist?
+      ↓
+   Registration
 ============================================================ */
 
 async function googleLogin() {
@@ -448,10 +364,6 @@ async function googleLogin() {
                 googleProvider
             );
 
-
-        /* ====================================================
-           FIREBASE USER
-        ==================================================== */
 
         const firebaseUser =
             result.user;
@@ -500,14 +412,9 @@ async function googleLogin() {
                 );
 
 
-            saveCurrentUser(
-                adminUser,
-                true
-            );
-
-
             console.log(
-                "Admin Google login successful."
+                "Admin Google login successful.",
+                adminUser
             );
 
 
@@ -563,9 +470,9 @@ async function googleLogin() {
                 );
 
 
-            saveCurrentUser(
-                guideUser,
-                true
+            console.log(
+                "Guide Google login successful.",
+                guideUser
             );
 
 
@@ -621,9 +528,9 @@ async function googleLogin() {
                 );
 
 
-            saveCurrentUser(
-                touristUser,
-                true
+            console.log(
+                "Tourist Google login successful.",
+                touristUser
             );
 
 
@@ -642,6 +549,13 @@ async function googleLogin() {
 
         /* ====================================================
            NO LANKAQUEST PROFILE
+
+           IMPORTANT:
+
+           DO NOT signOut(auth).
+
+           Firebase Google authentication must remain
+           active so registration can continue.
         ==================================================== */
 
         console.log(
@@ -652,25 +566,6 @@ async function googleLogin() {
         console.log(
             "No LankaQuest profile found."
         );
-
-
-        /*
-           IMPORTANT:
-
-           DO NOT call:
-
-           signOut(auth)
-
-           DO NOT call:
-
-           clearUserSession()
-
-           The Firebase Google authentication session
-           must remain active.
-
-           register.js will use the authenticated
-           Firebase user to complete registration.
-        */
 
 
         return {
@@ -694,10 +589,6 @@ async function googleLogin() {
 
 
     } catch (error) {
-
-        /* ====================================================
-           GOOGLE LOGIN ERROR
-        ==================================================== */
 
         console.error(
             "Google Login Error:",
@@ -813,22 +704,17 @@ async function googleLogin() {
 }
 
 
-
-
 /* ============================================================
-   FIREBASE EMAIL + PASSWORD LOGIN
+   10. FIREBASE EMAIL + PASSWORD LOGIN
 
-   IMPORTANT FIX:
+   Email + Password remains enabled.
 
-   Admin account is checked immediately after Firebase Auth.
-
-   Admin does NOT need a Firestore profile.
+   No localStorage/sessionStorage is used.
 ============================================================ */
 
 async function firebaseLogin(
     email,
-    password,
-    remember = true
+    password
 ) {
 
     try {
@@ -889,12 +775,6 @@ async function firebaseLogin(
                 );
 
 
-            saveCurrentUser(
-                adminUser,
-                remember
-            );
-
-
             console.log(
                 "Admin email/password login successful."
             );
@@ -913,27 +793,22 @@ async function firebaseLogin(
         }
 
 
-        /*
-           If the email belongs to the Admin address but
-           Firebase says the email is not verified, do not
-           create an Admin session.
-
-           This matches the Firestore Rules requirement.
-        */
+        /* ====================================================
+           ADMIN EMAIL VERIFICATION
+        ==================================================== */
 
         if (
             normalizedEmail ===
             ADMIN_EMAIL.toLowerCase()
+
             &&
+
             firebaseUser.emailVerified !== true
         ) {
 
             await signOut(
                 auth
             );
-
-
-            clearUserSession();
 
 
             return {
@@ -982,9 +857,9 @@ async function firebaseLogin(
                 );
 
 
-            saveCurrentUser(
-                guideUser,
-                remember
+            console.log(
+                "Guide email/password login successful.",
+                guideUser
             );
 
 
@@ -1034,9 +909,9 @@ async function firebaseLogin(
                 );
 
 
-            saveCurrentUser(
-                touristUser,
-                remember
+            console.log(
+                "Tourist email/password login successful.",
+                touristUser
             );
 
 
@@ -1054,15 +929,12 @@ async function firebaseLogin(
 
 
         /* ====================================================
-           FIREBASE ACCOUNT EXISTS BUT PROFILE DOES NOT
+           FIREBASE ACCOUNT WITHOUT PROFILE
         ==================================================== */
 
         await signOut(
             auth
         );
-
-
-        clearUserSession();
 
 
         return {
@@ -1098,7 +970,6 @@ async function firebaseLogin(
 
         }
 
-
         else if (
             error.code ===
             "auth/wrong-password"
@@ -1108,7 +979,6 @@ async function firebaseLogin(
                 "Incorrect password.";
 
         }
-
 
         else if (
             error.code ===
@@ -1120,7 +990,6 @@ async function firebaseLogin(
 
         }
 
-
         else if (
             error.code ===
             "auth/invalid-email"
@@ -1130,7 +999,6 @@ async function firebaseLogin(
                 "Invalid email address.";
 
         }
-
 
         else if (
             error.code ===
@@ -1142,7 +1010,6 @@ async function firebaseLogin(
 
         }
 
-
         else if (
             error.code ===
             "auth/too-many-requests"
@@ -1152,7 +1019,6 @@ async function firebaseLogin(
                 "Too many login attempts. Please try again later.";
 
         }
-
 
         else if (
             error.code ===
@@ -1181,32 +1047,28 @@ async function firebaseLogin(
 
 
 /* ============================================================
-   LOGIN USER WRAPPER
+   11. LOGIN USER WRAPPER
 
    Compatible with login.js
 ============================================================ */
 
 async function loginUser(
     email,
-    password,
-    remember = true
+    password
 ) {
 
     return await firebaseLogin(
         email,
-        password,
-        remember
+        password
     );
 
 }
 
 
 /* ============================================================
-   LOGOUT USER
+   12. LOGOUT USER
 
-   Firebase Auth logout
-   +
-   Clear application session
+   Firebase Auth is the only session authority.
 ============================================================ */
 
 async function logoutUser() {
@@ -1218,7 +1080,9 @@ async function logoutUser() {
         );
 
 
-        clearUserSession();
+        console.log(
+            "Firebase logout successful."
+        );
 
 
         window.location.href =
@@ -1238,7 +1102,7 @@ async function logoutUser() {
 
 
 /* ============================================================
-   REQUIRE ACCOUNT TYPE
+   13. REQUIRE ACCOUNT TYPE
 
    Used by:
 
@@ -1250,11 +1114,11 @@ function requireAccountType(
     requiredType
 ) {
 
-    const user =
+    const firebaseUser =
         getCurrentUser();
 
 
-    if (!user) {
+    if (!firebaseUser) {
 
         window.location.href =
             "login.html";
@@ -1265,49 +1129,34 @@ function requireAccountType(
     }
 
 
-    if (
-        user.accountType !==
-        requiredType
-    ) {
+    /*
+       This function only has the Firebase user
+       at this point.
 
-        alert(
-            "Access denied."
-        );
+       Pages that need the Firestore profile should
+       load it using firebaseUser.uid.
+    */
 
-
-        redirectAfterLogin(
-            user
-        );
-
-
-        return null;
-
-    }
-
-
-    return user;
+    return firebaseUser;
 
 }
 
 
 /* ============================================================
-   REQUIRE ADMIN
+   14. REQUIRE ADMIN
 
-   Use this on future Admin pages if required.
+   Firebase Authentication is the identity source.
 
-   IMPORTANT:
-
-   This is only a client-side navigation check.
-   Firestore Security Rules remain the real protection.
+   Firestore Rules remain the real protection.
 ============================================================ */
 
 function requireAdmin() {
 
-    const user =
+    const firebaseUser =
         getCurrentUser();
 
 
-    if (!user) {
+    if (!firebaseUser) {
 
         window.location.href =
             "login.html";
@@ -1319,11 +1168,9 @@ function requireAdmin() {
 
 
     if (
-        user.accountType !==
-        "admin"
-        ||
-        user.email.toLowerCase() !==
-        ADMIN_EMAIL.toLowerCase()
+        !isAdminFirebaseUser(
+            firebaseUser
+        )
     ) {
 
         alert(
@@ -1331,9 +1178,8 @@ function requireAdmin() {
         );
 
 
-        redirectAfterLogin(
-            user
-        );
+        window.location.href =
+            "index.html";
 
 
         return null;
@@ -1341,15 +1187,21 @@ function requireAdmin() {
     }
 
 
-    return user;
+    return firebaseUser;
 
 }
 
 
 /* ============================================================
-   GUIDE DASHBOARD ACCESS CHECK
+   15. GUIDE DASHBOARD ACCESS CHECK
 
-   Only approved active guides.
+   NOTE:
+
+   This function receives the Firestore guide
+   profile/session object.
+
+   The exact Firestore status structure will be
+   verified separately.
 ============================================================ */
 
 function canAccessGuideDashboard(
@@ -1398,23 +1250,12 @@ function canAccessGuideDashboard(
 
 
 /* ============================================================
-   REDIRECT AFTER LOGIN
+   16. REDIRECT AFTER LOGIN
 
-   Admin
-       ↓
-   admin-guides.html
+   NOTE:
 
-   Tourist
-       ↓
-   tourist-dashboard.html
-
-   Approved Guide
-       ↓
-   guide-dashboard.html
-
-   Pending / Rejected / Inactive Guide
-       ↓
-   guide-verification.html
+   login.js should call this only after it has
+   received the appropriate user/profile object.
 ============================================================ */
 
 function redirectAfterLogin(
@@ -1439,7 +1280,9 @@ function redirectAfterLogin(
     if (
         user.accountType ===
         "admin"
+
         &&
+
         String(
             user.email || ""
         )
@@ -1498,12 +1341,6 @@ function redirectAfterLogin(
         }
 
 
-        /*
-           Pending
-           Rejected
-           Inactive
-        */
-
         window.location.href =
             "guide-verification.html";
 
@@ -1524,9 +1361,9 @@ function redirectAfterLogin(
 
 
 /* ============================================================
-   CHECK LOGIN STATUS
+   17. CHECK LOGIN STATUS
 
-   Application session cache.
+   Firebase Authentication only.
 ============================================================ */
 
 function isLoggedIn() {
@@ -1540,10 +1377,10 @@ function isLoggedIn() {
 
 
 /* ============================================================
-   RESTORE USER SESSION
+   18. RESTORE USER SESSION
 
-   This does not authenticate a user by itself.
-   Firebase Authentication remains the real identity system.
+   Firebase automatically restores the authenticated
+   session. No localStorage/sessionStorage cache is needed.
 ============================================================ */
 
 function restoreUserSession() {
@@ -1555,8 +1392,9 @@ function restoreUserSession() {
     if (user) {
 
         console.log(
-            "Active User:",
-            user
+            "Firebase authenticated user:",
+            user.uid,
+            user.email
         );
 
     }
@@ -1565,14 +1403,14 @@ function restoreUserSession() {
 
 
 /* ============================================================
-   INITIALIZE AUTH
+   19. INITIALIZE AUTH
 ============================================================ */
 
 restoreUserSession();
 
 
 /* ============================================================
-   EXPORTS
+   20. EXPORTS
 ============================================================ */
 
 export {
@@ -1591,7 +1429,8 @@ export {
 
     isLoggedIn,
 
-    googleLogin
+    googleLogin,
+
+    canAccessGuideDashboard
 
 };
-
