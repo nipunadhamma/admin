@@ -50,11 +50,9 @@
    1. FIREBASE IMPORTS
 ============================================================ */
 
-import {
-    db
-} from "./firebase-config.js";
+import { db, auth } from "./firebase-config.js";
 
-import { getCurrentUser, logoutUser } from "./auth.js";
+import { logoutUser } from "./auth.js";
 
 import {
     collection,
@@ -265,30 +263,8 @@ function getRequestIdFromURL() {
     );
 }
 
-/* ============================================================
-   GET AUTHENTICATED FIREBASE USER
-============================================================ */
-
 function getAuthenticatedUser() {
-
-    try {
-
-        const user =
-            getCurrentUser();
-
-        return user || null;
-
-    }
-    catch (error) {
-
-        console.error(
-            "Unable to get authenticated user:",
-            error
-        );
-
-        return null;
-
-    }
+  return auth.currentUser || null;
 }
 
 

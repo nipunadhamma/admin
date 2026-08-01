@@ -1,3 +1,4 @@
+
 /* ============================================================
    LANKAQUEST
    FIND GUIDES PAGE
@@ -27,46 +28,71 @@
    status = "guide_selected"
       ↓
    Guide Dashboard
-      ↓
-   Incoming Request
 ============================================================ */
+
 
 /* ============================================================
    1. FIREBASE IMPORTS
 ============================================================ */
 
-import { db } from "./firebase-config.js";
+import {
+    db,
+    auth
+} from "./firebase-config.js";
 
 import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  where,
-  updateDoc,
-  serverTimestamp,
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+import {
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    query,
+    where,
+    updateDoc,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
 
 /* ============================================================
    2. DOM ELEMENTS
+
+   These IDs MUST match find-guides.html
 ============================================================ */
 
-const guidesContainer = document.getElementById("guidesContainer");
+const guidesList =
+    document.getElementById("guidesList");
 
-const guideSearchInput = document.getElementById("guideSearchInput");
+const guidesLoading =
+    document.getElementById("guidesLoading");
 
-const districtFilter = document.getElementById("districtFilter");
+const guidesEmptyState =
+    document.getElementById("guidesEmptyState");
 
-const languageFilter = document.getElementById("languageFilter");
+const guideSearch =
+    document.getElementById("guideSearch");
 
-const sortFilter = document.getElementById("sortFilter");
+const guideDistrict =
+    document.getElementById("guideDistrict");
 
-const clearFiltersButton = document.getElementById("clearFiltersButton");
+const guideLanguage =
+    document.getElementById("guideLanguage");
 
-const guideCount = document.getElementById("guideCount");
+const guideSort =
+    document.getElementById("guideSort");
 
-const logoutButton = document.getElementById("logoutButton");
+const guideResultCount =
+    document.getElementById("guideResultCount");
+
+const clearGuideFilters =
+    document.getElementById("clearGuideFilters");
+
+const emptyClearFilters =
+    document.getElementById("emptyClearFilters");
+
 
 /* ============================================================
    3. STATE
@@ -82,278 +108,500 @@ let currentRequestId = null;
 
 let currentUser = null;
 
+
 /* ============================================================
    4. GET REQUEST ID
 ============================================================ */
 
 function getRequestIdFromURL() {
-  const params = new URLSearchParams(window.location.search);
 
-  return params.get("requestId");
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    return params.get("requestId");
 }
+
 
 /* ============================================================
    5. GET CURRENT FIREBASE USER
 ============================================================ */
 
-async function getCurrentFirebaseUser() {
-  /*
-       auth.js may expose getCurrentUser()
-       through window.
-    */
+function getAuthenticatedUser() {
 
-  if (typeof window.getCurrentUser === "function") {
-    const user = window.getCurrentUser();
+    return auth.currentUser || null;
 
-    if (user) {
-      return user.firebaseUser || user.authUser || user;
-    }
-  }
-
-  /*
-       Fallback:
-
-       Import Firebase Auth directly.
-
-       This makes the page independent from
-       localStorage/session-only authentication.
-    */
-
-  try {
-    const { getAuth, onAuthStateChanged } =
-      await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js");
-
-    const { auth } = await import("./firebase-config.js");
-
-    if (auth?.currentUser) {
-      return auth.currentUser;
-    }
-
-    return await new Promise((resolve) => {
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        unsubscribe();
-
-        resolve(user);
-      });
-    });
-  } catch (error) {
-    console.error("Unable to get Firebase user:", error);
-
-    return null;
-  }
 }
 
+
 /* ============================================================
-   6. ESCAPE HTML
+   6. WAIT FOR FIREBASE AUTH
+============================================================ */
+
+function waitForAuthenticatedUser() {
+
+    return new Promise(
+        (resolve) => {
+
+            const existingUser =
+                getAuthenticatedUser();
+
+            if (existingUser) {
+
+                resolve(existingUser);
+
+                return;
+            }
+
+
+            const unsubscribe =
+                onAuthStateChanged(
+                    auth,
+                    (user) => {
+
+                        unsubscribe();
+
+                        resolve(user);
+
+                    }
+                );
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   7. ESCAPE HTML
 ============================================================ */
 
 function escapeHTML(value) {
-  const div = document.createElement("div");
 
-  div.textContent = value == null ? "" : String(value);
+    const div =
+        document.createElement("div");
 
-  return div.innerHTML;
+    div.textContent =
+        value == null
+            ? ""
+            : String(value);
+
+    return div.innerHTML;
+
 }
 
+
 /* ============================================================
-   7. LOAD CURRENT REQUEST
+   8. SHOW LOADING
+============================================================ */
+
+function showLoading() {
+
+    if (guidesLoading) {
+
+        guidesLoading.style.display =
+            "block";
+
+        guidesLoading.textContent =
+            "Loading registered guides...";
+
+    }
+
+}
+
+
+/* ============================================================
+   9. HIDE LOADING
+============================================================ */
+
+function hideLoading() {
+
+    if (guidesLoading) {
+
+        guidesLoading.style.display =
+            "none";
+
+    }
+
+}
+
+
+/* ============================================================
+   10. SHOW EMPTY STATE
+============================================================ */
+
+function showEmptyState() {
+
+    if (guidesEmptyState) {
+
+        guidesEmptyState.style.display =
+            "block";
+
+    }
+
+}
+
+
+/* ============================================================
+   11. HIDE EMPTY STATE
+============================================================ */
+
+function hideEmptyState() {
+
+    if (guidesEmptyState) {
+
+        guidesEmptyState.style.display =
+            "none";
+
+    }
+
+}
+
+
+/* ============================================================
+   12. GET CURRENT REQUEST
 ============================================================ */
 
 async function loadCurrentRequest() {
-  currentRequestId = getRequestIdFromURL();
 
-  if (!currentRequestId) {
-    console.error("No requestId found in URL.");
+    currentRequestId =
+        getRequestIdFromURL();
 
-    showPageMessage(
-      "No quotation request was found. Please return to your trip.",
-    );
 
-    return null;
-  }
+    if (!currentRequestId) {
 
-  try {
-    const requestRef = doc(db, "lankaQuestQuotationRequests", currentRequestId);
+        console.error(
+            "No requestId found in URL."
+        );
 
-    const snapshot = await getDoc(requestRef);
+        showPageMessage(
+            "No quotation request was found."
+        );
 
-    if (!snapshot.exists()) {
-      console.error("Quotation request not found:", currentRequestId);
+        return null;
 
-      showPageMessage("The quotation request could not be found.");
-
-      return null;
     }
 
-    currentRequest = {
-      id: snapshot.id,
 
-      ...snapshot.data(),
-    };
+    try {
 
-    console.log("Quotation request loaded:", currentRequest);
+        const requestRef =
+            doc(
+                db,
+                "lankaQuestQuotationRequests",
+                currentRequestId
+            );
 
-    return currentRequest;
-  } catch (error) {
-    console.error("Load quotation request error:", error);
 
-    showPageMessage("Unable to load your quotation request.");
+        const requestSnapshot =
+            await getDoc(requestRef);
 
-    return null;
-  }
+
+        if (!requestSnapshot.exists()) {
+
+            console.error(
+                "Quotation request not found:",
+                currentRequestId
+            );
+
+            showPageMessage(
+                "The quotation request could not be found."
+            );
+
+            return null;
+
+        }
+
+
+        currentRequest = {
+
+            id:
+                requestSnapshot.id,
+
+            ...requestSnapshot.data()
+
+        };
+
+
+        console.log(
+            "Quotation request loaded:",
+            currentRequest
+        );
+
+
+        return currentRequest;
+
+    } catch (error) {
+
+        console.error(
+            "Load quotation request error:",
+            error
+        );
+
+
+        showPageMessage(
+            "Unable to load your quotation request."
+        );
+
+
+        return null;
+
+    }
+
 }
 
+
 /* ============================================================
-   8. VERIFY TOURIST OWNERSHIP
+   13. VERIFY TOURIST OWNERSHIP
 ============================================================ */
 
 async function verifyTouristOwnership() {
-  if (!currentRequest) {
-    return false;
-  }
 
-  const firebaseUser = await getCurrentFirebaseUser();
+    if (!currentRequest) {
 
-  if (!firebaseUser) {
-    showPageMessage("Please login as a Tourist before selecting a guide.");
+        return false;
 
-    return false;
-  }
+    }
 
-  currentUser = firebaseUser;
 
-  /*
-       The request must belong to
-       the authenticated tourist.
+    const firebaseUser =
+        getAuthenticatedUser();
+
+
+    if (!firebaseUser) {
+
+        showPageMessage(
+            "Please login as a Tourist before selecting a guide."
+        );
+
+        return false;
+
+    }
+
+
+    currentUser =
+        firebaseUser;
+
+
+    /*
+       Request must belong to
+       authenticated Firebase user.
     */
 
-  if (
-    currentRequest.touristId &&
-    currentRequest.touristId !== firebaseUser.uid
-  ) {
-    console.error("Tourist ownership mismatch.");
+    if (
+        currentRequest.touristId &&
+        currentRequest.touristId !==
+            firebaseUser.uid
+    ) {
 
-    showPageMessage("You are not authorized to modify this quotation request.");
+        console.error(
+            "Tourist ownership mismatch."
+        );
 
-    return false;
-  }
 
-  return true;
+        showPageMessage(
+            "You are not authorized to modify this quotation request."
+        );
+
+
+        return false;
+
+    }
+
+
+    return true;
+
 }
 
+
 /* ============================================================
-   9. LOAD APPROVED GUIDES
+   14. LOAD APPROVED GUIDES
 ============================================================ */
 
 async function loadGuides() {
-  if (!guidesContainer) {
-    return;
-  }
 
-  try {
-    guidesContainer.innerHTML = `
+    if (!guidesList) {
 
-            <div class="guide-loading">
+        console.error(
+            "guidesList element not found."
+        );
 
-                <div>
-                    🔄
-                </div>
+        return;
 
-                <p>
-                    Loading registered guides...
-                </p>
+    }
 
-            </div>
 
-        `;
+    showLoading();
 
-    /*
-           Only approved guides should appear
-           to tourists.
+    hideEmptyState();
+
+
+    try {
+
+        /*
+           ONLY APPROVED GUIDES
+
+           No status fallback.
+           No accountStatus fallback.
         */
 
-    const guidesQuery = query(
-      collection(db, "lankaQuestGuides"),
-      where("verificationStatus", "==", "approved"),
-    );
+        const guidesQuery =
+            query(
+                collection(
+                    db,
+                    "lankaQuestGuides"
+                ),
+                where(
+                    "verificationStatus",
+                    "==",
+                    "approved"
+                )
+            );
 
-    const snapshot = await getDocs(guidesQuery);
 
-    guides = [];
+        const guidesSnapshot =
+            await getDocs(
+                guidesQuery
+            );
 
-    snapshot.forEach((guideSnapshot) => {
-      const data = guideSnapshot.data();
 
-      guides.push({
-        id: guideSnapshot.id,
+        console.log(
+            "Approved guide documents found:",
+            guidesSnapshot.size
+        );
 
-        uid: guideSnapshot.id,
 
-        ...data,
-      });
-    });
+        guides = [];
 
-    /*
-           Only actual guide accounts.
-        */
 
-    guides = guides.filter(
-      (guide) => !guide.accountType || guide.accountType === "guide",
-    );
+        guidesSnapshot.forEach(
+            (guideSnapshot) => {
 
-    filteredGuides = [...guides];
+                const data =
+                    guideSnapshot.data();
 
-    populateDistrictFilter();
 
-    populateLanguageFilter();
+                console.log(
+                    "Approved guide:",
+                    guideSnapshot.id,
+                    data
+                );
 
-    renderGuides();
 
-    console.log("Approved guides loaded:", guides.length);
-  } catch (error) {
-    console.error("Load guides error:", error);
+                /*
+                   Only actual guide accounts.
+                */
 
-    guidesContainer.innerHTML = `
+                if (
+                    data.accountType !==
+                    "guide"
+                ) {
 
-            <div class="guide-error">
+                    return;
 
-                <div>
-                    ⚠️
-                </div>
+                }
 
-                <h3>
-                    Unable to load guides
-                </h3>
 
-                <p>
-                    Please refresh the page and try again.
-                </p>
+                guides.push({
 
-            </div>
+                    id:
+                        guideSnapshot.id,
 
-        `;
-  }
+                    uid:
+                        data.uid ||
+                        guideSnapshot.id,
+
+                    ...data
+
+                });
+
+            }
+        );
+
+
+        filteredGuides =
+            [...guides];
+
+
+        populateDistrictFilter();
+
+        populateLanguageFilter();
+
+        applySort();
+
+        renderGuides();
+
+
+        console.log(
+            "Approved guides loaded:",
+            guides.length
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Load guides error:",
+            error
+        );
+
+
+        guidesList.innerHTML = "";
+
+        showEmptyState();
+
+
+        if (guidesEmptyState) {
+
+            guidesEmptyState.querySelector("h3")?.replaceChildren(
+                document.createTextNode(
+                    "Unable to Load Guides"
+                )
+            );
+
+        }
+
+
+    } finally {
+
+        hideLoading();
+
+    }
+
 }
 
+
 /* ============================================================
-   10. POPULATE DISTRICT FILTER
+   15. POPULATE DISTRICT FILTER
 ============================================================ */
 
 function populateDistrictFilter() {
-  if (!districtFilter) {
-    return;
-  }
 
-  const districts = [
-    ...new Set(guides.map((guide) => guide.district).filter(Boolean)),
-  ].sort();
+    if (!guideDistrict) {
 
-  /*
-       Keep first "All Districts"
-       option.
-    */
+        return;
 
-  districtFilter.innerHTML = `
+    }
+
+
+    const districts = [
+
+        ...new Set(
+
+            guides
+                .map(
+                    (guide) =>
+                        guide.district
+                )
+                .filter(Boolean)
+
+        )
+
+    ].sort();
+
+
+    guideDistrict.innerHTML = `
 
         <option value="">
             All Districts
@@ -361,49 +609,118 @@ function populateDistrictFilter() {
 
     `;
 
-  districts.forEach((district) => {
-    const option = document.createElement("option");
 
-    option.value = district;
+    districts.forEach(
+        (district) => {
 
-    option.textContent = district;
+            const option =
+                document.createElement(
+                    "option"
+                );
 
-    districtFilter.appendChild(option);
-  });
+
+            option.value =
+                district;
+
+
+            option.textContent =
+                district;
+
+
+            guideDistrict.appendChild(
+                option
+            );
+
+        }
+    );
+
 }
 
+
 /* ============================================================
-   11. POPULATE LANGUAGE FILTER
+   16. POPULATE LANGUAGE FILTER
 ============================================================ */
 
 function populateLanguageFilter() {
-  if (!languageFilter) {
-    return;
-  }
 
-  const languages = [];
+    if (!guideLanguage) {
 
-  guides.forEach((guide) => {
-    const guideLanguages = guide.languages || guide.language || [];
+        return;
 
-    if (Array.isArray(guideLanguages)) {
-      guideLanguages.forEach((language) => {
-        if (language) {
-          languages.push(language);
-        }
-      });
-    } else if (typeof guideLanguages === "string") {
-      guideLanguages.split(",").forEach((language) => {
-        if (language.trim()) {
-          languages.push(language.trim());
-        }
-      });
     }
-  });
 
-  const uniqueLanguages = [...new Set(languages)].sort();
 
-  languageFilter.innerHTML = `
+    const languages = [];
+
+
+    guides.forEach(
+        (guide) => {
+
+            const guideLanguages =
+                guide.languages ||
+                guide.language ||
+                [];
+
+
+            if (
+                Array.isArray(
+                    guideLanguages
+                )
+            ) {
+
+                guideLanguages.forEach(
+                    (language) => {
+
+                        if (language) {
+
+                            languages.push(
+                                String(
+                                    language
+                                ).trim()
+                            );
+
+                        }
+
+                    }
+                );
+
+            } else {
+
+                String(
+                    guideLanguages
+                )
+                    .split(",")
+                    .forEach(
+                        (language) => {
+
+                            if (
+                                language.trim()
+                            ) {
+
+                                languages.push(
+                                    language.trim()
+                                );
+
+                            }
+
+                        }
+                    );
+
+            }
+
+        }
+    );
+
+
+    const uniqueLanguages =
+        [
+            ...new Set(
+                languages
+            )
+        ].sort();
+
+
+    guideLanguage.innerHTML = `
 
         <option value="">
             All Languages
@@ -411,220 +728,504 @@ function populateLanguageFilter() {
 
     `;
 
-  uniqueLanguages.forEach((language) => {
-    const option = document.createElement("option");
 
-    option.value = language;
+    uniqueLanguages.forEach(
+        (language) => {
 
-    option.textContent = language;
+            const option =
+                document.createElement(
+                    "option"
+                );
 
-    languageFilter.appendChild(option);
-  });
+
+            option.value =
+                language;
+
+
+            option.textContent =
+                language;
+
+
+            guideLanguage.appendChild(
+                option
+            );
+
+        }
+    );
+
 }
 
+
 /* ============================================================
-   12. GUIDE SEARCH + FILTER
+   17. APPLY FILTERS
 ============================================================ */
 
 function applyFilters() {
-  const search = guideSearchInput
-    ? guideSearchInput.value.trim().toLowerCase()
-    : "";
 
-  const district = districtFilter ? districtFilter.value : "";
+    const search =
+        guideSearch
+            ? guideSearch.value
+                .trim()
+                .toLowerCase()
+            : "";
 
-  const language = languageFilter ? languageFilter.value : "";
 
-  filteredGuides = guides.filter((guide) => {
-    /*
-                   Search
+    const district =
+        guideDistrict
+            ? guideDistrict.value
+            : "";
+
+
+    const language =
+        guideLanguage
+            ? guideLanguage.value
+            : "";
+
+
+    filteredGuides =
+        guides.filter(
+            (guide) => {
+
+                /*
+                   SEARCH
                 */
 
-    if (search) {
-      const searchableText = [
-        guide.fullName,
+                if (search) {
 
-        guide.name,
+                    const searchableText = [
 
-        guide.district,
+                        guide.fullName,
 
-        guide.province,
+                        guide.name,
 
-        guide.email,
+                        guide.district,
 
-        guide.specializations,
+                        guide.province,
 
-        guide.specialization,
+                        guide.email,
 
-        guide.areas,
+                        guide.specializations,
 
-        guide.languages,
+                        guide.specialization,
 
-        guide.language,
-      ]
-        .flat()
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+                        guide.areas,
 
-      if (!searchableText.includes(search)) {
-        return false;
-      }
-    }
+                        guide.coverageAreas,
 
-    /*
-                   District
+                        guide.languages,
+
+                        guide.language
+
+                    ]
+                        .flat()
+                        .filter(Boolean)
+                        .join(" ")
+                        .toLowerCase();
+
+
+                    if (
+                        !searchableText.includes(
+                            search
+                        )
+                    ) {
+
+                        return false;
+
+                    }
+
+                }
+
+
+                /*
+                   DISTRICT
                 */
 
-    if (district && guide.district !== district) {
-      return false;
-    }
+                if (
+                    district &&
+                    guide.district !==
+                        district
+                ) {
 
-    /*
-                   Language
+                    return false;
+
+                }
+
+
+                /*
+                   LANGUAGE
                 */
 
-    if (language) {
-      const guideLanguages = guide.languages || guide.language || [];
+                if (language) {
 
-      const languageMatch = Array.isArray(guideLanguages)
-        ? guideLanguages
-            .map((item) => String(item).toLowerCase())
-            .includes(language.toLowerCase())
-        : String(guideLanguages).toLowerCase().includes(language.toLowerCase());
+                    const guideLanguages =
+                        guide.languages ||
+                        guide.language ||
+                        [];
 
-      if (!languageMatch) {
-        return false;
-      }
-    }
 
-    return true;
-  });
+                    const languageMatch =
+                        Array.isArray(
+                            guideLanguages
+                        )
+                            ? guideLanguages.some(
+                                (item) =>
+                                    String(item)
+                                        .toLowerCase()
+                                        .trim() ===
+                                    language
+                                        .toLowerCase()
+                                        .trim()
+                              )
+                            : String(
+                                guideLanguages
+                              )
+                                .toLowerCase()
+                                .split(",")
+                                .map(
+                                    (item) =>
+                                        item.trim()
+                                )
+                                .includes(
+                                    language
+                                        .toLowerCase()
+                                        .trim()
+                                );
 
-  applySort();
 
-  renderGuides();
+                    if (!languageMatch) {
+
+                        return false;
+
+                    }
+
+                }
+
+
+                return true;
+
+            }
+        );
+
+
+    applySort();
+
+    renderGuides();
+
 }
 
+
 /* ============================================================
-   13. SORT GUIDES
+   18. APPLY SORT
 ============================================================ */
 
 function applySort() {
-  const sort = sortFilter ? sortFilter.value : "rating";
 
-  if (sort === "rating") {
-    filteredGuides.sort(
-      (a, b) =>
-        Number(b.rating || b.averageRating || 0) -
-        Number(a.rating || a.averageRating || 0),
-    );
+    const sort =
+        guideSort
+            ? guideSort.value
+            : "rank";
 
-    return;
-  }
 
-  if (sort === "experience") {
-    filteredGuides.sort(
-      (a, b) => Number(b.experienceYears || 0) - Number(a.experienceYears || 0),
-    );
+    if (
+        sort === "rating" ||
+        sort === "rank"
+    ) {
 
-    return;
-  }
+        filteredGuides.sort(
+            (a, b) => {
 
-  if (sort === "name") {
-    filteredGuides.sort((a, b) =>
-      String(a.fullName || a.name || "").localeCompare(
-        String(b.fullName || b.name || ""),
-      ),
-    );
-  }
+                const ratingA =
+                    Number(
+                        a.rating ||
+                        a.averageRating ||
+                        0
+                    );
+
+
+                const ratingB =
+                    Number(
+                        b.rating ||
+                        b.averageRating ||
+                        0
+                    );
+
+
+                return ratingB -
+                    ratingA;
+
+            }
+        );
+
+
+        return;
+
+    }
+
+
+    if (
+        sort === "experience"
+    ) {
+
+        filteredGuides.sort(
+            (a, b) => {
+
+                const experienceA =
+                    Number(
+                        a.experienceYears ||
+                        0
+                    );
+
+
+                const experienceB =
+                    Number(
+                        b.experienceYears ||
+                        0
+                    );
+
+
+                return experienceB -
+                    experienceA;
+
+            }
+        );
+
+
+        return;
+
+    }
+
+
+    if (
+        sort === "reviews"
+    ) {
+
+        filteredGuides.sort(
+            (a, b) => {
+
+                const reviewsA =
+                    Number(
+                        a.reviewCount ||
+                        a.reviewsCount ||
+                        0
+                    );
+
+
+                const reviewsB =
+                    Number(
+                        b.reviewCount ||
+                        b.reviewsCount ||
+                        0
+                    );
+
+
+                return reviewsB -
+                    reviewsA;
+
+            }
+        );
+
+
+        return;
+
+    }
+
+
+    if (
+        sort === "completed"
+    ) {
+
+        filteredGuides.sort(
+            (a, b) => {
+
+                const completedA =
+                    Number(
+                        a.completedTrips ||
+                        a.completedTourCount ||
+                        0
+                    );
+
+
+                const completedB =
+                    Number(
+                        b.completedTrips ||
+                        b.completedTourCount ||
+                        0
+                    );
+
+
+                return completedB -
+                    completedA;
+
+            }
+        );
+
+
+        return;
+
+    }
+
 }
 
+
 /* ============================================================
-   14. RENDER GUIDES
+   19. RENDER GUIDES
 ============================================================ */
 
 function renderGuides() {
-  if (!guidesContainer) {
-    return;
-  }
 
-  if (guideCount) {
-    guideCount.textContent = `${filteredGuides.length} Guide${
-      filteredGuides.length === 1 ? "" : "s"
-    }`;
-  }
+    if (!guidesList) {
 
-  if (filteredGuides.length === 0) {
-    guidesContainer.innerHTML = `
+        return;
 
-            <div class="no-guides">
+    }
 
-                <div>
-                    🔎
-                </div>
 
-                <h3>
-                    No Guides Found
-                </h3>
+    guidesList.innerHTML = "";
 
-                <p>
-                    Try changing your search or filters.
-                </p>
 
-            </div>
+    if (guideResultCount) {
 
-        `;
+        guideResultCount.textContent =
+            `${filteredGuides.length} Guide${
+                filteredGuides.length === 1
+                    ? ""
+                    : "s"
+            }`;
 
-    return;
-  }
+    }
 
-  guidesContainer.innerHTML = "";
 
-  filteredGuides.forEach((guide, index) => {
-    const card = createGuideCard(guide, index);
+    if (
+        filteredGuides.length === 0
+    ) {
 
-    guidesContainer.appendChild(card);
-  });
+        showEmptyState();
+
+        return;
+
+    }
+
+
+    hideEmptyState();
+
+
+    filteredGuides.forEach(
+        (guide, index) => {
+
+            const card =
+                createGuideCard(
+                    guide,
+                    index
+                );
+
+
+            guidesList.appendChild(
+                card
+            );
+
+        }
+    );
+
 }
 
+
 /* ============================================================
-   15. CREATE GUIDE CARD
+   20. CREATE GUIDE CARD
 ============================================================ */
 
-function createGuideCard(guide, index) {
-  const card = document.createElement("article");
+function createGuideCard(
+    guide,
+    index
+) {
 
-  card.className = "guide-card";
+    const card =
+        document.createElement(
+            "article"
+        );
 
-  const name = guide.fullName || guide.name || "Registered Guide";
 
-  const district = guide.district || "Sri Lanka";
+    card.className =
+        "guide-card";
 
-  const rating = guide.rating || guide.averageRating || "New";
 
-  const experience =
-    guide.experienceYears || guide.experience || "Not specified";
+    const name =
+        guide.fullName ||
+        guide.name ||
+        "Registered Guide";
 
-  const languages = guide.languages || guide.language || [];
 
-  let languageText = "N/A";
+    const district =
+        guide.district ||
+        "Sri Lanka";
 
-  if (Array.isArray(languages)) {
-    languageText = languages.length ? languages.join(", ") : "N/A";
-  } else if (languages) {
-    languageText = String(languages);
-  }
 
-  const specializations =
-    guide.specializations || guide.specialization || "General Tourism";
+    const rating =
+        guide.rating ||
+        guide.averageRating ||
+        "New";
 
-  const areas = guide.areas || guide.coverageAreas || "N/A";
 
-  const avatar = guide.photoURL || guide.profileImage || guide.photo || "";
+    const experience =
+        guide.experienceYears ||
+        guide.experience ||
+        "Not specified";
 
-  const avatarHTML = avatar
-    ? `
+
+    const languages =
+        guide.languages ||
+        guide.language ||
+        [];
+
+
+    let languageText =
+        "N/A";
+
+
+    if (
+        Array.isArray(
+            languages
+        )
+    ) {
+
+        languageText =
+            languages.length
+                ? languages.join(", ")
+                : "N/A";
+
+    } else if (
+        languages
+    ) {
+
+        languageText =
+            String(
+                languages
+            );
+
+    }
+
+
+    const specializations =
+        guide.specializations ||
+        guide.specialization ||
+        "General Tourism";
+
+
+    const areas =
+        guide.areas ||
+        guide.coverageAreas ||
+        "N/A";
+
+
+    const avatar =
+        guide.photoURL ||
+        guide.profileImage ||
+        guide.photo ||
+        "";
+
+
+    const avatarHTML =
+        avatar
+            ? `
 
                 <img
                     src="${escapeHTML(avatar)}"
@@ -633,7 +1234,7 @@ function createGuideCard(guide, index) {
                 >
 
             `
-    : `
+            : `
 
                 <div class="guide-avatar-placeholder">
                     👤
@@ -641,10 +1242,13 @@ function createGuideCard(guide, index) {
 
             `;
 
-  card.innerHTML = `
+
+    card.innerHTML = `
 
         <div class="guide-rank">
+
             🏆 Rank #${index + 1}
+
         </div>
 
 
@@ -659,7 +1263,8 @@ function createGuideCard(guide, index) {
                 </h3>
 
                 <p>
-                    📍 ${escapeHTML(district)}
+                    📍
+                    ${escapeHTML(district)}
                 </p>
 
             </div>
@@ -677,46 +1282,89 @@ function createGuideCard(guide, index) {
         <div class="guide-details">
 
             <p>
+
                 🧑‍💼
+
                 <strong>
                     Experience:
                 </strong>
 
-                ${escapeHTML(experience)}
+                ${escapeHTML(
+                    experience
+                )}
+
             </p>
 
 
             <p>
+
                 🗣
+
                 <strong>
                     Languages:
                 </strong>
 
-                ${escapeHTML(languageText)}
+                ${escapeHTML(
+                    languageText
+                )}
+
             </p>
 
 
             <p>
+
                 🌿
+
                 <strong>
                     Specializations:
                 </strong>
 
                 ${escapeHTML(
-                  Array.isArray(specializations)
-                    ? specializations.join(", ")
-                    : specializations,
+                    Array.isArray(
+                        specializations
+                    )
+                        ? specializations.join(
+                            ", "
+                          )
+                        : specializations
                 )}
+
             </p>
 
 
             <p>
+
                 🗺
+
                 <strong>
                     Areas:
                 </strong>
 
-                ${escapeHTML(Array.isArray(areas) ? areas.join(", ") : areas)}
+                ${escapeHTML(
+                    Array.isArray(
+                        areas
+                    )
+                        ? areas.join(
+                            ", "
+                          )
+                        : areas
+                )}
+
+            </p>
+
+
+            <p>
+
+                ⭐
+
+                <strong>
+                    Rating:
+                </strong>
+
+                ${escapeHTML(
+                    rating
+                )}
+
             </p>
 
         </div>
@@ -727,7 +1375,6 @@ function createGuideCard(guide, index) {
             <button
                 type="button"
                 class="view-guide-button"
-                data-guide-id="${escapeHTML(guide.id)}"
             >
                 View Profile
             </button>
@@ -736,7 +1383,6 @@ function createGuideCard(guide, index) {
             <button
                 type="button"
                 class="select-guide-button"
-                data-guide-id="${escapeHTML(guide.id)}"
             >
                 Select Guide →
             </button>
@@ -745,433 +1391,728 @@ function createGuideCard(guide, index) {
 
     `;
 
-  const viewButton = card.querySelector(".view-guide-button");
 
-  if (viewButton) {
-    viewButton.addEventListener("click", () => {
-      viewGuideProfile(guide);
-    });
-  }
+    const viewButton =
+        card.querySelector(
+            ".view-guide-button"
+        );
 
-  const selectButton = card.querySelector(".select-guide-button");
 
-  if (selectButton) {
-    selectButton.addEventListener("click", async () => {
-      await selectGuide(guide, selectButton);
-    });
-  }
+    if (viewButton) {
 
-  return card;
+        viewButton.addEventListener(
+            "click",
+            () => {
+
+                viewGuideProfile(
+                    guide
+                );
+
+            }
+        );
+
+    }
+
+
+    const selectButton =
+        card.querySelector(
+            ".select-guide-button"
+        );
+
+
+    if (selectButton) {
+
+        selectButton.addEventListener(
+            "click",
+            async () => {
+
+                await selectGuide(
+                    guide,
+                    selectButton
+                );
+
+            }
+        );
+
+    }
+
+
+    return card;
+
 }
 
-/* ============================================================
-   16. VIEW GUIDE PROFILE
-============================================================ */
-
-function viewGuideProfile(guide) {
-  /*
-       Preserve the existing simple profile
-       behaviour without creating a separate
-       data source.
-    */
-
-  const name = guide.fullName || guide.name || "Guide";
-
-  const email = guide.email || "Not available";
-
-  const phone = guide.phone || guide.phoneNumber || "Not available";
-
-  const district = guide.district || "Not specified";
-
-  const languages = guide.languages || guide.language || "N/A";
-
-  const specializations =
-    guide.specializations || guide.specialization || "General Tourism";
-
-  alert(
-    `${name}\n\n` +
-      `📍 ${district}\n` +
-      `📧 ${email}\n` +
-      `📞 ${phone}\n\n` +
-      `🗣 Languages: ${
-        Array.isArray(languages) ? languages.join(", ") : languages
-      }\n\n` +
-      `🌿 Specializations: ${
-        Array.isArray(specializations)
-          ? specializations.join(", ")
-          : specializations
-      }`,
-  );
-}
 
 /* ============================================================
-   17. SELECT GUIDE
+   21. VIEW GUIDE PROFILE
 ============================================================ */
 
-async function selectGuide(guide, button) {
-  /*
-       Prevent double clicks.
-    */
+function viewGuideProfile(
+    guide
+) {
 
-  if (button?.disabled) {
-    return;
-  }
+    const name =
+        guide.fullName ||
+        guide.name ||
+        "Guide";
 
-  /*
-       Confirm tourist authentication.
-    */
 
-  const authorized = await verifyTouristOwnership();
+    const email =
+        guide.email ||
+        "Not available";
 
-  if (!authorized) {
-    return;
-  }
 
-  if (!currentRequest || !currentRequest.id) {
-    alert("Quotation request was not found.");
+    const phone =
+        guide.phone ||
+        guide.phoneNumber ||
+        "Not available";
 
-    return;
-  }
 
-  /*
-       Validate guide UID.
-    */
+    const district =
+        guide.district ||
+        "Not specified";
 
-  const guideId = guide.uid || guide.id;
 
-  if (!guideId) {
-    console.error("Guide UID is missing:", guide);
+    const languages =
+        guide.languages ||
+        guide.language ||
+        "N/A";
 
-    alert("This guide could not be selected because the guide ID is missing.");
 
-    return;
-  }
+    const specializations =
+        guide.specializations ||
+        guide.specialization ||
+        "General Tourism";
 
-  /*
-       Confirm selection.
-    */
-
-  const confirmed = window.confirm(
-    `Select ${guide.fullName || guide.name || "this guide"} as your tour guide?`,
-  );
-
-  if (!confirmed) {
-    return;
-  }
-
-  if (button) {
-    button.disabled = true;
-
-    button.dataset.originalText = button.textContent;
-
-    button.textContent = "Selecting...";
-  }
-
-  try {
-    /*
-           =====================================================
-           CREATE A CLEAN GUIDE SNAPSHOT
-           =====================================================
-        */
-
-    const selectedGuide = {
-      uid: guideId,
-
-      id: guideId,
-
-      fullName: guide.fullName || guide.name || "",
-
-      email: guide.email || "",
-
-      phone: guide.phone || guide.phoneNumber || "",
-
-      district: guide.district || "",
-
-      province: guide.province || "",
-
-      languages: guide.languages || guide.language || [],
-
-      specializations: guide.specializations || guide.specialization || "",
-
-      areas: guide.areas || guide.coverageAreas || "",
-
-      verificationStatus: guide.verificationStatus || "approved",
-    };
-
-    /*
-           =====================================================
-           UPDATE FIRESTORE REQUEST
-           =====================================================
-
-           THIS IS THE IMPORTANT FIX.
-
-           guideId is now stored directly.
-
-           Guide Dashboard can query:
-
-           where(
-               "guideId",
-               "==",
-               currentGuide.uid
-           )
-        */
-
-    const requestRef = doc(
-      db,
-      "lankaQuestQuotationRequests",
-      currentRequest.id,
-    );
-
-    await updateDoc(requestRef, {
-      /*
-                   Guide identity
-                */
-
-      guideId: guideId,
-
-      guideName: selectedGuide.fullName,
-
-      guideEmail: selectedGuide.email,
-
-      /*
-                   Full selected guide snapshot
-                */
-
-      selectedGuide: selectedGuide,
-
-      /*
-                   Request status
-                */
-
-      status: "guide_selected",
-
-      quotationRequested: true,
-
-      /*
-                   Timestamp
-                */
-
-      guideSelectedAt: serverTimestamp(),
-
-      updatedAt: serverTimestamp(),
-    });
-
-    /*
-           Update in-memory request.
-        */
-
-    currentRequest.guideId = guideId;
-
-    currentRequest.guideName = selectedGuide.fullName;
-
-    currentRequest.guideEmail = selectedGuide.email;
-
-    currentRequest.selectedGuide = selectedGuide;
-
-    currentRequest.status = "guide_selected";
-
-    currentRequest.quotationRequested = true;
-
-    /*
-           Success
-        */
-
-    console.log("Guide selected successfully.", {
-      requestId: currentRequest.id,
-
-      guideId: guideId,
-
-      guideName: selectedGuide.fullName,
-
-      guideEmail: selectedGuide.email,
-    });
 
     alert(
-      `${selectedGuide.fullName || "Guide"} has been selected successfully.`,
+
+        `${name}\n\n` +
+
+        `📍 ${district}\n` +
+
+        `📧 ${email}\n` +
+
+        `📞 ${phone}\n\n` +
+
+        `🗣 Languages: ${
+            Array.isArray(
+                languages
+            )
+                ? languages.join(
+                    ", "
+                  )
+                : languages
+        }\n\n` +
+
+        `🌿 Specializations: ${
+            Array.isArray(
+                specializations
+            )
+                ? specializations.join(
+                    ", "
+                  )
+                : specializations
+        }`
+
     );
 
-    /*
-           Go to request confirmation /
-           next stage.
-
-           Keep requestId in URL so the
-           next page can load the same
-           Firestore document.
-        */
-
-    window.location.href = `quotation-request.html?requestId=${encodeURIComponent(
-      currentRequest.id,
-    )}&guideId=${encodeURIComponent(guideId)}`;
-  } catch (error) {
-    console.error("Select guide Firestore error:", error);
-
-    alert(error.message || "Unable to select this guide. Please try again.");
-
-    if (button) {
-      button.disabled = false;
-
-      button.textContent = button.dataset.originalText || "Select Guide →";
-    }
-  }
 }
 
+
 /* ============================================================
-   18. SHOW PAGE MESSAGE
+   22. SELECT GUIDE
 ============================================================ */
 
-function showPageMessage(message) {
-  if (!guidesContainer) {
-    alert(message);
+async function selectGuide(
+    guide,
+    button
+) {
 
-    return;
-  }
+    if (
+        button &&
+        button.disabled
+    ) {
 
-  guidesContainer.innerHTML = `
+        return;
 
-        <div class="guide-error">
+    }
 
-            <div>
-                ⚠️
-            </div>
 
-            <h3>
-                ${escapeHTML(message)}
-            </h3>
+    const firebaseUser =
+        getAuthenticatedUser();
 
-        </div>
 
-    `;
+    if (!firebaseUser) {
+
+        alert(
+            "Please login as a Tourist before selecting a guide."
+        );
+
+        return;
+
+    }
+
+
+    currentUser =
+        firebaseUser;
+
+
+    if (
+        !currentRequest ||
+        !currentRequest.id
+    ) {
+
+        alert(
+            "Quotation request was not found."
+        );
+
+        return;
+
+    }
+
+
+    /*
+       Verify request ownership
+    */
+
+    if (
+        currentRequest.touristId &&
+        currentRequest.touristId !==
+            firebaseUser.uid
+    ) {
+
+        alert(
+            "You are not authorized to modify this request."
+        );
+
+        return;
+
+    }
+
+
+    /*
+       Guide UID
+    */
+
+    const guideId =
+        guide.uid ||
+        guide.id;
+
+
+    if (!guideId) {
+
+        console.error(
+            "Guide UID is missing:",
+            guide
+        );
+
+
+        alert(
+            "This guide could not be selected because the guide ID is missing."
+        );
+
+
+        return;
+
+    }
+
+
+    const guideName =
+        guide.fullName ||
+        guide.name ||
+        "";
+
+
+    const guideEmail =
+        guide.email ||
+        "";
+
+
+    const confirmed =
+        window.confirm(
+            `Select ${guideName || "this guide"} as your tour guide?`
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    if (button) {
+
+        button.disabled =
+            true;
+
+        button.dataset.originalText =
+            button.textContent;
+
+        button.textContent =
+            "Selecting...";
+
+    }
+
+
+    try {
+
+        /*
+           Selected guide snapshot
+        */
+
+        const selectedGuide = {
+
+            uid:
+                guideId,
+
+            id:
+                guideId,
+
+            fullName:
+                guideName,
+
+            email:
+                guideEmail,
+
+            phone:
+                guide.phone ||
+                guide.phoneNumber ||
+                "",
+
+            district:
+                guide.district ||
+                "",
+
+            province:
+                guide.province ||
+                "",
+
+            languages:
+                guide.languages ||
+                guide.language ||
+                [],
+
+            specializations:
+                guide.specializations ||
+                guide.specialization ||
+                "",
+
+            areas:
+                guide.areas ||
+                guide.coverageAreas ||
+                "",
+
+            verificationStatus:
+                guide.verificationStatus
+
+        };
+
+
+        /*
+           Update Firestore request
+        */
+
+        const requestRef =
+            doc(
+                db,
+                "lankaQuestQuotationRequests",
+                currentRequest.id
+            );
+
+
+        await updateDoc(
+            requestRef,
+            {
+
+                guideId:
+                    guideId,
+
+                guideName:
+                    guideName,
+
+                guideEmail:
+                    guideEmail,
+
+                selectedGuide:
+                    selectedGuide,
+
+                status:
+                    "guide_selected",
+
+                quotationRequested:
+                    true,
+
+                guideSelectedAt:
+                    serverTimestamp(),
+
+                updatedAt:
+                    serverTimestamp()
+
+            }
+        );
+
+
+        /*
+           Update local state
+        */
+
+        currentRequest.guideId =
+            guideId;
+
+        currentRequest.guideName =
+            guideName;
+
+        currentRequest.guideEmail =
+            guideEmail;
+
+        currentRequest.selectedGuide =
+            selectedGuide;
+
+        currentRequest.status =
+            "guide_selected";
+
+        currentRequest.quotationRequested =
+            true;
+
+
+        console.log(
+            "Guide selected successfully.",
+            {
+
+                requestId:
+                    currentRequest.id,
+
+                guideId:
+                    guideId,
+
+                guideName:
+                    guideName,
+
+                guideEmail:
+                    guideEmail
+
+            }
+        );
+
+
+        alert(
+            `${guideName || "Guide"} has been selected successfully.`
+        );
+
+
+        /*
+           Continue to quotation request page
+        */
+
+        window.location.href =
+            `quotation-request.html?requestId=${
+                encodeURIComponent(
+                    currentRequest.id
+                )
+            }&guideId=${
+                encodeURIComponent(
+                    guideId
+                )
+            }`;
+
+
+    } catch (error) {
+
+        console.error(
+            "Select guide Firestore error:",
+            error
+        );
+
+
+        alert(
+            error.message ||
+            "Unable to select this guide. Please try again."
+        );
+
+
+        if (button) {
+
+            button.disabled =
+                false;
+
+            button.textContent =
+                button.dataset.originalText ||
+                "Select Guide →";
+
+        }
+
+    }
+
 }
 
+
 /* ============================================================
-   19. CLEAR FILTERS
+   23. SHOW PAGE MESSAGE
+============================================================ */
+
+function showPageMessage(
+    message
+) {
+
+    if (guidesList) {
+
+        guidesList.innerHTML = `
+
+            <div class="guide-error">
+
+                <div>
+                    ⚠️
+                </div>
+
+                <h3>
+                    ${escapeHTML(message)}
+                </h3>
+
+            </div>
+
+        `;
+
+    } else {
+
+        alert(message);
+
+    }
+
+}
+
+
+/* ============================================================
+   24. CLEAR FILTERS
 ============================================================ */
 
 function clearFilters() {
-  if (guideSearchInput) {
-    guideSearchInput.value = "";
-  }
 
-  if (districtFilter) {
-    districtFilter.value = "";
-  }
+    if (guideSearch) {
 
-  if (languageFilter) {
-    languageFilter.value = "";
-  }
+        guideSearch.value =
+            "";
 
-  if (sortFilter) {
-    sortFilter.value = "rating";
-  }
-
-  filteredGuides = [...guides];
-
-  applySort();
-
-  renderGuides();
-}
-
-/* ============================================================
-   20. FILTER EVENT LISTENERS
-============================================================ */
-
-if (guideSearchInput) {
-  guideSearchInput.addEventListener("input", () => {
-    applyFilters();
-  });
-}
-
-if (districtFilter) {
-  districtFilter.addEventListener("change", () => {
-    applyFilters();
-  });
-}
-
-if (languageFilter) {
-  languageFilter.addEventListener("change", () => {
-    applyFilters();
-  });
-}
-
-if (sortFilter) {
-  sortFilter.addEventListener("change", () => {
-    applyFilters();
-  });
-}
-
-if (clearFiltersButton) {
-  clearFiltersButton.addEventListener("click", () => {
-    clearFilters();
-  });
-}
-
-/* ============================================================
-   21. LOGOUT
-============================================================ */
-
-if (logoutButton) {
-  logoutButton.addEventListener("click", async () => {
-    try {
-      if (typeof window.logoutUser === "function") {
-        await window.logoutUser();
-      } else {
-        const { getAuth, signOut } =
-          await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js");
-
-        const { auth } = await import("./firebase-config.js");
-
-        await signOut(auth);
-      }
-    } catch (error) {
-      console.error("Logout error:", error);
     }
 
-    window.location.href = "index.html";
-  });
+
+    if (guideDistrict) {
+
+        guideDistrict.value =
+            "";
+
+    }
+
+
+    if (guideLanguage) {
+
+        guideLanguage.value =
+            "";
+
+    }
+
+
+    if (guideSort) {
+
+        guideSort.value =
+            "rank";
+
+    }
+
+
+    filteredGuides =
+        [...guides];
+
+
+    applySort();
+
+    renderGuides();
+
 }
 
+
 /* ============================================================
-   22. INITIALIZE
+   25. EVENT LISTENERS
 ============================================================ */
 
-document.addEventListener("DOMContentLoaded", async () => {
-  console.log("LankaQuest Find Guides loading...");
+if (guideSearch) {
 
-  /*
-           1. Load request
+    guideSearch.addEventListener(
+        "input",
+        () => {
+
+            applyFilters();
+
+        }
+    );
+
+}
+
+
+if (guideDistrict) {
+
+    guideDistrict.addEventListener(
+        "change",
+        () => {
+
+            applyFilters();
+
+        }
+    );
+
+}
+
+
+if (guideLanguage) {
+
+    guideLanguage.addEventListener(
+        "change",
+        () => {
+
+            applyFilters();
+
+        }
+    );
+
+}
+
+
+if (guideSort) {
+
+    guideSort.addEventListener(
+        "change",
+        () => {
+
+            applyFilters();
+
+        }
+    );
+
+}
+
+
+if (clearGuideFilters) {
+
+    clearGuideFilters.addEventListener(
+        "click",
+        () => {
+
+            clearFilters();
+
+        }
+    );
+
+}
+
+
+if (emptyClearFilters) {
+
+    emptyClearFilters.addEventListener(
+        "click",
+        () => {
+
+            clearFilters();
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   26. INITIALIZE
+============================================================ */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    async () => {
+
+        console.log(
+            "LankaQuest Find Guides loading..."
+        );
+
+
+        /*
+           Wait for Firebase Auth
         */
 
-  const request = await loadCurrentRequest();
+        const firebaseUser =
+            await waitForAuthenticatedUser();
 
-  if (!request) {
-    return;
-  }
 
-  /*
-           2. Verify tourist ownership
+        if (!firebaseUser) {
+
+            showPageMessage(
+                "Please login as a Tourist before finding guides."
+            );
+
+            return;
+
+        }
+
+
+        currentUser =
+            firebaseUser;
+
+
+        /*
+           Load quotation request
         */
 
-  const authorized = await verifyTouristOwnership();
+        const request =
+            await loadCurrentRequest();
 
-  if (!authorized) {
-    return;
-  }
 
-  /*
-           3. Load approved guides
+        if (!request) {
+
+            return;
+
+        }
+
+
+        /*
+           Verify ownership
         */
 
-  await loadGuides();
+        const authorized =
+            await verifyTouristOwnership();
 
-  console.log("Find Guides page initialized.", {
-    requestId: currentRequestId,
 
-    touristId: currentUser?.uid,
+        if (!authorized) {
 
-    guides: guides.length,
-  });
-});
+            return;
+
+        }
+
+
+        /*
+           Load approved guides
+        */
+
+        await loadGuides();
+
+
+        console.log(
+            "Find Guides page initialized.",
+            {
+
+                requestId:
+                    currentRequestId,
+
+                touristId:
+                    currentUser?.uid,
+
+                guides:
+                    guides.length
+
+            }
+        );
+
+    }
+);
+
 
 /* ============================================================
    END FIND-GUIDES.JS
 ============================================================ */
+

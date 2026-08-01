@@ -98,59 +98,28 @@ const googleProvider =
     new GoogleAuthProvider();
 
 
-/* ============================================================
-   GET CURRENT USER
 
-   Reads application session cache.
+/* ============================================================
+   GET CURRENT FIREBASE USER
+
+   FIREBASE AUTH IS THE AUTHORITATIVE IDENTITY SOURCE.
+
+   localStorage / sessionStorage are NOT used to
+   determine who is currently authenticated.
 ============================================================ */
 
 function getCurrentUser() {
 
-    let savedUser =
-        localStorage.getItem(
-            AUTH_USER_KEY
-        );
+    /*
+       Firebase Authentication is the source
+       of the current authenticated identity.
+    */
 
-
-    if (!savedUser) {
-
-        savedUser =
-            sessionStorage.getItem(
-                AUTH_USER_KEY
-            );
-
-    }
-
-
-    if (!savedUser) {
-
-        return null;
-
-    }
-
-
-    try {
-
-        return JSON.parse(
-            savedUser
-        );
-
-    } catch (error) {
-
-        console.error(
-            "User session error:",
-            error
-        );
-
-
-        clearUserSession();
-
-
-        return null;
-
-    }
+    return auth.currentUser || null;
 
 }
+
+
 
 
 /* ============================================================
