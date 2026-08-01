@@ -1,10 +1,10 @@
-
 /* ============================================================
+   LANKAQUEST
    SRI LANKA TOURISM DATABASE
 
-   Main Destination Database
+   MAIN DESTINATION DATABASE
 
-   මෙම Data එක භාවිතා කරන්නේ:
+   USED BY:
 
    🗺️ Interactive Map
    🔍 Search
@@ -13,15 +13,28 @@
    🌟 Featured Places
    📸 Gallery
    🧳 Trip Planner
-   📄 Destination Pages
+   📄 Attraction Generator
+
+   IMPORTANT:
+
+   Individual HTML page paths are NOT stored here.
+
+   generate-attractions.js automatically creates:
+
+   attractions-generated/
+       province/
+           district/
+               place-id.html
 
 ============================================================ */
 
 
 window.touristPlaces = [
+
+
   /* ========================================================
        01. SIGIRIYA
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "sigiriya",
@@ -50,7 +63,8 @@ window.touristPlaces = [
 
     coordinates: [7.957, 80.7603],
 
-    image: "images/destinations/sigiriya/sigiriya-main.jpg",
+    image:
+      "images/destinations/sigiriya/sigiriya-main.jpg",
 
     gallery: [
       "images/destinations/sigiriya/sigiriya-01.jpg",
@@ -64,13 +78,12 @@ window.touristPlaces = [
     rating: 4.9,
 
     bestTime: "January to April",
-
-    page: "destinations/sigiriya.html",
   },
+
 
   /* ========================================================
        02. KANDY
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "kandy",
@@ -99,7 +112,8 @@ window.touristPlaces = [
 
     coordinates: [7.2906, 80.6337],
 
-    image: "images/destinations/kandy/kandy-main.jpg",
+    image:
+      "images/destinations/kandy/kandy-main.jpg",
 
     gallery: [
       "images/destinations/kandy/kandy-01.jpg",
@@ -113,13 +127,12 @@ window.touristPlaces = [
     rating: 4.8,
 
     bestTime: "December to April",
-
-    page: "destinations/kandy.html",
   },
+
 
   /* ========================================================
        03. ELLA
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "ella",
@@ -148,7 +161,8 @@ window.touristPlaces = [
 
     coordinates: [6.8667, 81.0466],
 
-    image: "images/destinations/ella/ella-main.jpg",
+    image:
+      "images/destinations/ella/ella-main.jpg",
 
     gallery: [
       "images/destinations/ella/ella-01.jpg",
@@ -162,13 +176,12 @@ window.touristPlaces = [
     rating: 4.9,
 
     bestTime: "January to March",
-
-    page: "destinations/ella.html",
   },
+
 
   /* ========================================================
        04. GALLE FORT
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "galle-fort",
@@ -197,7 +210,8 @@ window.touristPlaces = [
 
     coordinates: [6.0269, 80.217],
 
-    image: "images/destinations/galle-fort/galle-fort-main.jpg",
+    image:
+      "images/destinations/galle-fort/galle-fort-main.jpg",
 
     gallery: [
       "images/destinations/galle-fort/galle-fort-01.jpg",
@@ -211,13 +225,12 @@ window.touristPlaces = [
     rating: 4.8,
 
     bestTime: "December to April",
-
-    page: "destinations/galle-fort.html",
   },
+
 
   /* ========================================================
        05. YALA NATIONAL PARK
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "yala",
@@ -246,7 +259,8 @@ window.touristPlaces = [
 
     coordinates: [6.3728, 81.5185],
 
-    image: "images/destinations/yala/yala-main.jpg",
+    image:
+      "images/destinations/yala/yala-main.jpg",
 
     gallery: [
       "images/destinations/yala/yala-01.jpg",
@@ -260,13 +274,12 @@ window.touristPlaces = [
     rating: 4.7,
 
     bestTime: "February to June",
-
-    page: "destinations/yala.html",
   },
+
 
   /* ========================================================
        06. ANURADHAPURA
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "anuradhapura",
@@ -295,7 +308,8 @@ window.touristPlaces = [
 
     coordinates: [8.3114, 80.4037],
 
-    image: "images/destinations/anuradhapura/anuradhapura-main.jpg",
+    image:
+      "images/destinations/anuradhapura/anuradhapura-main.jpg",
 
     gallery: [
       "images/destinations/anuradhapura/anuradhapura-01.jpg",
@@ -309,13 +323,12 @@ window.touristPlaces = [
     rating: 4.8,
 
     bestTime: "May to September",
-
-    page: "destinations/anuradhapura.html",
   },
+
 
   /* ========================================================
        07. POLONNARUWA
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "polonnaruwa",
@@ -344,7 +357,8 @@ window.touristPlaces = [
 
     coordinates: [7.9403, 81.0188],
 
-    image: "images/destinations/polonnaruwa/polonnaruwa-main.jpg",
+    image:
+      "images/destinations/polonnaruwa/polonnaruwa-main.jpg",
 
     gallery: [
       "images/destinations/polonnaruwa/polonnaruwa-01.jpg",
@@ -358,13 +372,12 @@ window.touristPlaces = [
     rating: 4.8,
 
     bestTime: "May to September",
-
-    page: "destinations/polonnaruwa.html",
   },
+
 
   /* ========================================================
        08. NUWARA ELIYA
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "nuwara-eliya",
@@ -393,7 +406,8 @@ window.touristPlaces = [
 
     coordinates: [6.9497, 80.7891],
 
-    image: "images/destinations/nuwara-eliya/nuwara-eliya-main.jpg",
+    image:
+      "images/destinations/nuwara-eliya/nuwara-eliya-main.jpg",
 
     gallery: [
       "images/destinations/nuwara-eliya/nuwara-eliya-01.jpg",
@@ -407,13 +421,12 @@ window.touristPlaces = [
     rating: 4.7,
 
     bestTime: "January to April",
-
-    page: "destinations/nuwara-eliya.html",
   },
+
 
   /* ========================================================
        09. MIRISSA
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "mirissa",
@@ -442,7 +455,8 @@ window.touristPlaces = [
 
     coordinates: [5.9483, 80.4716],
 
-    image: "images/destinations/mirissa/mirissa-main.jpg",
+    image:
+      "images/destinations/mirissa/mirissa-main.jpg",
 
     gallery: [
       "images/destinations/mirissa/mirissa-01.jpg",
@@ -456,13 +470,12 @@ window.touristPlaces = [
     rating: 4.8,
 
     bestTime: "December to April",
-
-    page: "destinations/mirissa.html",
   },
+
 
   /* ========================================================
        10. UNAWATUNA
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "unawatuna",
@@ -491,7 +504,8 @@ window.touristPlaces = [
 
     coordinates: [6.0097, 80.2488],
 
-    image: "images/destinations/unawatuna/unawatuna-main.jpg",
+    image:
+      "images/destinations/unawatuna/unawatuna-main.jpg",
 
     gallery: [
       "images/destinations/unawatuna/unawatuna-01.jpg",
@@ -505,13 +519,12 @@ window.touristPlaces = [
     rating: 4.7,
 
     bestTime: "December to April",
-
-    page: "destinations/unawatuna.html",
   },
+
 
   /* ========================================================
        11. BENTOTA
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "bentota",
@@ -540,7 +553,8 @@ window.touristPlaces = [
 
     coordinates: [6.4211, 80.0017],
 
-    image: "images/destinations/bentota/bentota-main.jpg",
+    image:
+      "images/destinations/bentota/bentota-main.jpg",
 
     gallery: [
       "images/destinations/bentota/bentota-01.jpg",
@@ -554,13 +568,12 @@ window.touristPlaces = [
     rating: 4.6,
 
     bestTime: "November to April",
-
-    page: "destinations/bentota.html",
   },
+
 
   /* ========================================================
        12. ARUGAM BAY
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "arugam-bay",
@@ -589,7 +602,8 @@ window.touristPlaces = [
 
     coordinates: [6.8403, 81.8367],
 
-    image: "images/destinations/arugam-bay/arugam-bay-main.jpg",
+    image:
+      "images/destinations/arugam-bay/arugam-bay-main.jpg",
 
     gallery: [
       "images/destinations/arugam-bay/arugam-bay-01.jpg",
@@ -603,13 +617,11 @@ window.touristPlaces = [
     rating: 4.8,
 
     bestTime: "May to September",
-
-    page: "destinations/arugam-bay.html",
   },
-
+ 
   /* ========================================================
        13. TRINCOMALEE
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "trincomalee",
@@ -652,13 +664,12 @@ window.touristPlaces = [
     rating: 4.8,
 
     bestTime: "May to September",
-
-    page: "destinations/trincomalee.html",
   },
+
 
   /* ========================================================
        14. HORTON PLAINS
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "horton-plains",
@@ -701,13 +712,12 @@ window.touristPlaces = [
     rating: 4.8,
 
     bestTime: "January to March",
-
-    page: "destinations/horton-plains.html",
   },
+
 
   /* ========================================================
        15. ADAM'S PEAK
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "adams-peak",
@@ -750,13 +760,12 @@ window.touristPlaces = [
     rating: 4.8,
 
     bestTime: "December to May",
-
-    page: "destinations/adams-peak.html",
   },
+
 
   /* ========================================================
        16. DAMBULLA
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "dambulla",
@@ -799,13 +808,12 @@ window.touristPlaces = [
     rating: 4.8,
 
     bestTime: "January to April",
-
-    page: "destinations/dambulla.html",
   },
+
 
   /* ========================================================
        17. MINNERIYA NATIONAL PARK
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "minneriya",
@@ -848,13 +856,12 @@ window.touristPlaces = [
     rating: 4.7,
 
     bestTime: "June to September",
-
-    page: "destinations/minneriya.html",
   },
+
 
   /* ========================================================
        18. UDAWALAWE NATIONAL PARK
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "udawalawe",
@@ -897,13 +904,12 @@ window.touristPlaces = [
     rating: 4.7,
 
     bestTime: "May to September",
-
-    page: "destinations/udawalawe.html",
   },
+
 
   /* ========================================================
        19. BUNDALA NATIONAL PARK
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "bundala",
@@ -946,13 +952,12 @@ window.touristPlaces = [
     rating: 4.5,
 
     bestTime: "November to March",
-
-    page: "destinations/bundala.html",
   },
+
 
   /* ========================================================
        20. SINHARAJA FOREST
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "sinharaja",
@@ -995,13 +1000,12 @@ window.touristPlaces = [
     rating: 4.8,
 
     bestTime: "January to April",
-
-    page: "destinations/sinharaja.html",
   },
 
+
   /* ========================================================
-       21. KNuckles Mountain Range
-    ======================================================== */
+       21. KNUCKLES MOUNTAIN RANGE
+  ======================================================== */
 
   {
     id: "knuckles",
@@ -1044,13 +1048,12 @@ window.touristPlaces = [
     rating: 4.8,
 
     bestTime: "January to April",
-
-    page: "destinations/knuckles.html",
   },
+
 
   /* ========================================================
        22. RAVANA FALLS
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "ravana-falls",
@@ -1093,13 +1096,12 @@ window.touristPlaces = [
     rating: 4.6,
 
     bestTime: "October to April",
-
-    page: "destinations/ravana-falls.html",
   },
+
 
   /* ========================================================
        23. NINE ARCH BRIDGE
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "nine-arch-bridge",
@@ -1142,13 +1144,12 @@ window.touristPlaces = [
     rating: 4.8,
 
     bestTime: "January to March",
-
-    page: "destinations/nine-arch-bridge.html",
   },
+
 
   /* ========================================================
        24. HIKKADUWA
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "hikkaduwa",
@@ -1191,13 +1192,11 @@ window.touristPlaces = [
     rating: 4.6,
 
     bestTime: "November to April",
-
-    page: "destinations/hikkaduwa.html",
   },
-
+ 
   /* ========================================================
        25. PASIKUDAH
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "pasikudah",
@@ -1209,10 +1208,10 @@ window.touristPlaces = [
     title: "Pasikudah Beach",
 
     shortDescription:
-      "A stunning east coast beach famous for shallow turquoise waters and white sand.",
+      "A beautiful east coast beach famous for its calm, shallow and crystal-clear waters.",
 
     description:
-      "Pasikudah is one of Sri Lanka's most beautiful beaches and is ideal for relaxing seaside holidays.",
+      "Pasikudah is one of Sri Lanka's most beautiful beaches, known for its long shallow bay and clear turquoise waters.",
 
     category: "beach",
 
@@ -1224,7 +1223,7 @@ window.touristPlaces = [
 
     location: "Pasikudah, Sri Lanka",
 
-    coordinates: [7.9239, 81.56],
+    coordinates: [7.9219, 81.5594],
 
     image: "images/destinations/pasikudah/pasikudah-main.jpg",
 
@@ -1237,16 +1236,15 @@ window.touristPlaces = [
 
     featured: true,
 
-    rating: 4.7,
+    rating: 4.8,
 
     bestTime: "May to September",
-
-    page: "destinations/pasikudah.html",
   },
+
 
   /* ========================================================
        26. JAFFNA
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "jaffna",
@@ -1255,17 +1253,17 @@ window.touristPlaces = [
 
     sinhalaName: "යාපනය",
 
-    title: "Jaffna – Northern Sri Lanka",
+    title: "Jaffna – Northern Cultural Capital",
 
     shortDescription:
-      "A culturally rich northern destination known for temples, history and unique Tamil heritage.",
+      "A culturally rich northern destination famous for temples, history and unique Tamil heritage.",
 
     description:
-      "Jaffna offers visitors a unique cultural experience with historic sites, temples, local food and northern landscapes.",
+      "Jaffna offers a unique cultural experience with historic forts, Hindu temples, traditional cuisine and beautiful northern landscapes.",
 
     category: "culture",
 
-    categoryName: "Culture & Religion",
+    categoryName: "Culture & Heritage",
 
     province: "Northern Province",
 
@@ -1284,18 +1282,17 @@ window.touristPlaces = [
       "images/destinations/jaffna/jaffna-04.jpg",
     ],
 
-    featured: true,
+    featured: false,
 
     rating: 4.6,
 
     bestTime: "January to September",
-
-    page: "destinations/jaffna.html",
   },
+
 
   /* ========================================================
        27. NEGOMBO
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "negombo",
@@ -1304,13 +1301,13 @@ window.touristPlaces = [
 
     sinhalaName: "මීගමුව",
 
-    title: "Negombo Beach City",
+    title: "Negombo Beach",
 
     shortDescription:
-      "A coastal city near Colombo International Airport known for beaches, seafood and fishing culture.",
+      "A lively coastal destination near Colombo and Bandaranaike International Airport.",
 
     description:
-      "Negombo is a convenient first or last stop for international travelers visiting Sri Lanka.",
+      "Negombo is famous for its long sandy beaches, fishing culture, seafood and convenient location near the international airport.",
 
     category: "beach",
 
@@ -1338,13 +1335,12 @@ window.touristPlaces = [
     rating: 4.5,
 
     bestTime: "December to April",
-
-    page: "destinations/negombo.html",
   },
+
 
   /* ========================================================
        28. KALPITIYA
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "kalpitiya",
@@ -1356,14 +1352,14 @@ window.touristPlaces = [
     title: "Kalpitiya – Coastal Adventure",
 
     shortDescription:
-      "A beautiful coastal destination known for dolphins, lagoons and water sports.",
+      "A coastal destination famous for kite surfing, dolphins and marine adventures.",
 
     description:
-      "Kalpitiya offers unique marine experiences including dolphin watching and kitesurfing.",
+      "Kalpitiya is an exciting coastal destination offering kite surfing, dolphin watching, snorkeling and other marine experiences.",
 
-    category: "beach",
+    category: "adventure",
 
-    categoryName: "Beaches & Coast",
+    categoryName: "Adventure & Experiences",
 
     province: "North Western Province",
 
@@ -1371,7 +1367,7 @@ window.touristPlaces = [
 
     location: "Kalpitiya, Sri Lanka",
 
-    coordinates: [8.2376, 79.7581],
+    coordinates: [8.237, 79.7598],
 
     image: "images/destinations/kalpitiya/kalpitiya-main.jpg",
 
@@ -1386,29 +1382,28 @@ window.touristPlaces = [
 
     rating: 4.6,
 
-    bestTime: "May to September",
-
-    page: "destinations/kalpitiya.html",
+    bestTime: "May to October",
   },
 
+
   /* ========================================================
-       29. PIDURANGALA
-    ======================================================== */
+       29. PIDURANGALA ROCK
+  ======================================================== */
 
   {
     id: "pidurangala",
 
     name: "Pidurangala Rock",
 
-    sinhalaName: "පිදුරංගල",
+    sinhalaName: "පිදුරංගල ගල",
 
     title: "Pidurangala Rock",
 
     shortDescription:
-      "A spectacular viewpoint offering panoramic views of Sigiriya and the surrounding landscape.",
+      "A spectacular rock viewpoint offering panoramic views of Sigiriya and the surrounding landscape.",
 
     description:
-      "Pidurangala Rock is a popular hiking destination and offers one of the best views of Sigiriya Rock.",
+      "Pidurangala Rock is a popular hiking destination located near Sigiriya, offering one of the best sunrise and sunset views in the area.",
 
     category: "nature",
 
@@ -1418,9 +1413,9 @@ window.touristPlaces = [
 
     district: "Matale",
 
-    location: "Sigiriya, Matale, Sri Lanka",
+    location: "Sigiriya, Sri Lanka",
 
-    coordinates: [7.9697, 80.7527],
+    coordinates: [7.9708, 80.7597],
 
     image: "images/destinations/pidurangala/pidurangala-main.jpg",
 
@@ -1436,13 +1431,12 @@ window.touristPlaces = [
     rating: 4.8,
 
     bestTime: "January to April",
-
-    page: "destinations/pidurangala.html",
   },
+
 
   /* ========================================================
        30. COLOMBO
-    ======================================================== */
+  ======================================================== */
 
   {
     id: "colombo",
@@ -1451,17 +1445,17 @@ window.touristPlaces = [
 
     sinhalaName: "කොළඹ",
 
-    title: "Colombo – The Commercial Capital",
+    title: "Colombo – Sri Lanka's Commercial Capital",
 
     shortDescription:
-      "Sri Lanka's vibrant commercial capital offering modern attractions, history, shopping and food.",
+      "A vibrant city combining modern attractions, colonial heritage, shopping and coastal experiences.",
 
     description:
-      "Colombo is a lively city where visitors can experience modern Sri Lanka alongside colonial heritage, markets, restaurants and seaside attractions.",
+      "Colombo is Sri Lanka's largest city, offering cultural landmarks, museums, shopping districts, restaurants and a lively waterfront.",
 
-    category: "culture",
+    category: "city",
 
-    categoryName: "Culture & City",
+    categoryName: "Cities & Urban",
 
     province: "Western Province",
 
@@ -1484,498 +1478,884 @@ window.touristPlaces = [
 
     rating: 4.5,
 
-    bestTime: "January to April",
-
-    page: "destinations/colombo.html",
+    bestTime: "January to March",
   },
+
+
+  /* ========================================================
+       31. THAMBA DOLA
+  ======================================================== */
 
   {
     id: "thamba-dola",
+
     name: "Thamba Dola",
+
     sinhalaName: "තඹ දොළ",
-    title: "Thamba Dola – Natural Water Pool & Waterfall",
+
+    title: "Thamba Dola",
+
     shortDescription:
-      "An attractive natural waterfall and pool located in the Kalutara district surrounded by rainforest.",
+      "A peaceful natural attraction surrounded by the scenic landscapes of Kalutara.",
+
     description:
-      "Thamba Dola is a serene natural cascade and bathing spot originating from the Kalu Gala reserve, offering crystal-clear fresh water within a lush green ecosystem.",
+      "Thamba Dola is a lesser-known natural attraction in the Kalutara area, offering a peaceful environment away from busy tourist locations.",
+
     category: "nature",
-    categoryName: "Nature & Adventure",
+
+    categoryName: "Nature & Mountains",
+
     province: "Western Province",
+
     district: "Kalutara",
-    location: "Polgampola, Sri Lanka",
-    coordinates: [6.4833, 80.2167],
-    image: "images/destinations/kalutara/thamba-dola-main.jpg",
+
+    location: "Kalutara, Sri Lanka",
+
+    coordinates: [6.5854, 80.1185],
+
+    image: "images/destinations/thamba-dola/thamba-dola-main.jpg",
+
     gallery: [
-      "images/destinations/kalutara/thamba-01.jpg",
-      "images/destinations/kalutara/thamba-02.jpg",
-      "images/destinations/kalutara/thamba-03.jpg",
-      "images/destinations/kalutara/thamba-04.jpg",
+      "images/destinations/thamba-dola/thamba-dola-01.jpg",
+      "images/destinations/thamba-dola/thamba-dola-02.jpg",
+      "images/destinations/thamba-dola/thamba-dola-03.jpg",
+      "images/destinations/thamba-dola/thamba-dola-04.jpg",
     ],
-    featured: true,
-    rating: 4.6,
-    bestTime: "December to April",
-    page: "destinations/thamba-dola.html",
+
+    featured: false,
+
+    rating: 4.3,
+
+    bestTime: "November to April",
   },
+
+
+  /* ========================================================
+       32. KALU GANGA
+  ======================================================== */
+
   {
     id: "kalu-ganga",
+
     name: "Kalu Ganga",
+
     sinhalaName: "කළු ගඟ",
-    title: "Kalu Ganga – The Scenic River",
+
+    title: "Kalu Ganga",
+
     shortDescription:
-      "One of Sri Lanka's major rivers offering scenic boat rides and picturesque riverbanks.",
+      "A scenic river flowing through the lush landscapes of Sri Lanka's western region.",
+
     description:
-      "Kalu Ganga flows through the Kalutara district, providing visitors with relaxing boat excursions, vibrant local river life, and scenic views.",
+      "Kalu Ganga is an important river in Sri Lanka, flowing through scenic landscapes and communities before reaching the sea at Kalutara.",
+
     category: "nature",
-    categoryName: "Nature & Adventure",
+
+    categoryName: "Nature & Mountains",
+
     province: "Western Province",
+
     district: "Kalutara",
+
     location: "Kalutara, Sri Lanka",
-    coordinates: [6.5854, 79.9607],
-    image: "images/destinations/kalutara/kalu-ganga-main.jpg",
+
+    coordinates: [6.583, 79.96],
+
+    image: "images/destinations/kalu-ganga/kalu-ganga-main.jpg",
+
     gallery: [
-      "images/destinations/kalutara/kalu-01.jpg",
-      "images/destinations/kalutara/kalu-02.jpg",
-      "images/destinations/kalutara/kalu-03.jpg",
-      "images/destinations/kalutara/kalu-04.jpg",
+      "images/destinations/kalu-ganga/kalu-ganga-01.jpg",
+      "images/destinations/kalu-ganga/kalu-ganga-02.jpg",
+      "images/destinations/kalu-ganga/kalu-ganga-03.jpg",
+      "images/destinations/kalu-ganga/kalu-ganga-04.jpg",
     ],
+
     featured: false,
-    rating: 4.3,
-    bestTime: "All year round",
-    page: "destinations/kalu-ganga.html",
+
+    rating: 4.4,
+
+    bestTime: "November to April",
   },
+
+
+  /* ========================================================
+       33. PANADURA BEACH
+  ======================================================== */
+
   {
     id: "panadura-beach",
+
     name: "Panadura Beach",
+
     sinhalaName: "පානදුර වෙරළ",
-    title: "Panadura Beach – Coastal Sunset Views",
+
+    title: "Panadura Beach",
+
     shortDescription:
-      "A breezy coastal stretch popular for peaceful evening walks and stunning sunsets.",
+      "A relaxing coastal destination close to Colombo with a beautiful sandy shoreline.",
+
     description:
-      "Panadura Beach offers a relaxing seaside atmosphere, cool ocean breezes, and a wonderful setting for evening relaxation along the western coast.",
+      "Panadura Beach is a popular local coastal destination offering sunsets, sea views and a relaxed atmosphere.",
+
     category: "beach",
-    categoryName: "Beach & Leisure",
+
+    categoryName: "Beaches & Coast",
+
     province: "Western Province",
+
     district: "Kalutara",
+
     location: "Panadura, Sri Lanka",
-    coordinates: [6.7133, 79.9042],
-    image: "images/destinations/kalutara/panadura-beach-main.jpg",
+
+    coordinates: [6.7132, 79.9042],
+
+    image: "images/destinations/panadura-beach/panadura-beach-main.jpg",
+
     gallery: [
-      "images/destinations/kalutara/panadura-01.jpg",
-      "images/destinations/kalutara/panadura-02.jpg",
-      "images/destinations/kalutara/panadura-03.jpg",
-      "images/destinations/kalutara/panadura-04.jpg",
+      "images/destinations/panadura-beach/panadura-beach-01.jpg",
+      "images/destinations/panadura-beach/panadura-beach-02.jpg",
+      "images/destinations/panadura-beach/panadura-beach-03.jpg",
+      "images/destinations/panadura-beach/panadura-beach-04.jpg",
     ],
+
     featured: false,
-    rating: 4.2,
-    bestTime: "January to March",
-    page: "destinations/panadura-beach.html",
+
+    rating: 4.3,
+
+    bestTime: "November to April",
   },
+
+
+  /* ========================================================
+       34. KALUTARA BODHIYA
+  ======================================================== */
+
   {
     id: "kalutara-bodhiya",
+
     name: "Kalutara Bodhiya",
-    sinhalaName: "කළුතර බෝධීන් වහන්සේ",
-    title: "Kalutara Bodhiya – Sacred Buddhist Site",
+
+    sinhalaName: "කළුතර බෝධිය",
+
+    title: "Kalutara Bodhiya",
+
     shortDescription:
-      "A globally renowned sacred Buddhist temple situated next to the banks of Kalu Ganga.",
+      "One of Sri Lanka's most important Buddhist religious sites located beside the Kalu River.",
+
     description:
-      "Kalutara Bodhiya is an iconic spiritual landmark featuring a magnificent stupa and sacred fig tree, attracting thousands of pilgrims and travelers daily.",
+      "Kalutara Bodhiya is a famous Buddhist shrine and sacred Bodhi tree located in the heart of Kalutara.",
+
     category: "culture",
-    categoryName: "Culture & Heritage",
+
+    categoryName: "Culture & Religion",
+
     province: "Western Province",
+
     district: "Kalutara",
+
     location: "Kalutara, Sri Lanka",
-    coordinates: [6.5856, 79.9614],
-    image: "images/destinations/kalutara/kalutara-bodhiya-main.jpg",
+
+    coordinates: [6.5856, 79.9605],
+
+    image: "images/destinations/kalutara-bodhiya/kalutara-bodhiya-main.jpg",
+
     gallery: [
-      "images/destinations/kalutara/bodhiya-01.jpg",
-      "images/destinations/kalutara/bodhiya-02.jpg",
-      "images/destinations/kalutara/bodhiya-03.jpg",
-      "images/destinations/kalutara/bodhiya-04.jpg",
+      "images/destinations/kalutara-bodhiya/kalutara-bodhiya-01.jpg",
+      "images/destinations/kalutara-bodhiya/kalutara-bodhiya-02.jpg",
+      "images/destinations/kalutara-bodhiya/kalutara-bodhiya-03.jpg",
+      "images/destinations/kalutara-bodhiya/kalutara-bodhiya-04.jpg",
     ],
+
     featured: true,
-    rating: 4.8,
-    bestTime: "All year round",
-    page: "destinations/kalutara-bodhiya.html",
+
+    rating: 4.7,
+
+    bestTime: "January to December",
   },
+
+
+  /* ========================================================
+       35. PELAWATTE RESERVOIR
+  ======================================================== */
+
   {
     id: "pelawatte-reservoir",
+
     name: "Pelawatte Reservoir",
-    sinhalaName: "පැලවත්ත වැව",
-    title: "Pelawatte Reservoir – Tranquil Waters",
+
+    sinhalaName: "පැලවත්ත ජලාශය",
+
+    title: "Pelawatte Reservoir",
+
     shortDescription:
-      "A serene reservoir surrounded by lush green hills and peaceful countryside.",
+      "A peaceful reservoir surrounded by greenery and scenic countryside in Kalutara.",
+
     description:
-      "Pelawatte Reservoir provides a calm and scenic environment away from busy towns, ideal for nature lovers seeking quiet landscapes.",
+      "Pelawatte Reservoir offers a calm natural environment with scenic water views and surrounding countryside.",
+
     category: "nature",
-    categoryName: "Nature & Adventure",
+
+    categoryName: "Nature & Mountains",
+
     province: "Western Province",
+
     district: "Kalutara",
+
     location: "Pelawatte, Sri Lanka",
-    coordinates: [6.435, 80.3],
-    image: "images/destinations/kalutara/pelawatte-main.jpg",
+
+    coordinates: [6.493, 80.120],
+
+    image: "images/destinations/pelawatte-reservoir/pelawatte-reservoir-main.jpg",
+
     gallery: [
-      "images/destinations/kalutara/pelawatte-01.jpg",
-      "images/destinations/kalutara/pelawatte-02.jpg",
-      "images/destinations/kalutara/pelawatte-03.jpg",
-      "images/destinations/kalutara/pelawatte-04.jpg",
+      "images/destinations/pelawatte-reservoir/pelawatte-reservoir-01.jpg",
+      "images/destinations/pelawatte-reservoir/pelawatte-reservoir-02.jpg",
+      "images/destinations/pelawatte-reservoir/pelawatte-reservoir-03.jpg",
+      "images/destinations/pelawatte-reservoir/pelawatte-reservoir-04.jpg",
     ],
+
     featured: false,
-    rating: 4.4,
-    bestTime: "Throughout the year",
-    page: "destinations/pelawatte-reservoir.html",
-  },
-  {
-    id: "pinnakanda-center",
-    name: "Pinnakanda Tourism Center",
-    sinhalaName: "පින්නකන්ද සංචාරක මධ්‍යස්ථානය",
-    title: "Pinnakanda – Rural Eco Experience",
-    shortDescription:
-      "A community tourism center showcasing local village life and natural surroundings in Mathugama.",
-    description:
-      "Pinnakanda gives visitors an authentic taste of rural Sri Lankan lifestyle, traditional crafts, and rich local biodiversity.",
-    category: "culture",
-    categoryName: "Culture & Eco Tourism",
-    province: "Western Province",
-    district: "Kalutara",
-    location: "Mathugama, Sri Lanka",
-    coordinates: [6.52, 80.13],
-    image: "images/destinations/kalutara/pinnakanda-main.jpg",
-    gallery: [
-      "images/destinations/kalutara/pinnakanda-01.jpg",
-      "images/destinations/kalutara/pinnakanda-02.jpg",
-      "images/destinations/kalutara/pinnakanda-03.jpg",
-      "images/destinations/kalutara/pinnakanda-04.jpg",
-    ],
-    featured: false,
-    rating: 4.3,
-    bestTime: "January to May",
-    page: "destinations/pinnakanda.html",
-  },
-  {
-    id: "agalawatta-streams",
-    name: "Agalawatta Streams & Cascades",
-    sinhalaName: "අගලවත්ත දොළ සහ ඇලි",
-    title: "Agalawatta Streams – Rainforest Rivulets",
-    shortDescription:
-      "A network of crystal-clear streams and minor cascades flowing through Agalawatta greenery.",
-    description:
-      "Agalawatta streams offer refreshing, cool water currents originating from interior rainforest patches, ideal for tranquil nature explorations.",
-    category: "nature",
-    categoryName: "Nature & Adventure",
-    province: "Western Province",
-    district: "Kalutara",
-    location: "Agalawatta, Sri Lanka",
-    coordinates: [6.5333, 80.1667],
-    image: "images/destinations/kalutara/agalawatta-main.jpg",
-    gallery: [
-      "images/destinations/kalutara/agalawatta-01.jpg",
-      "images/destinations/kalutara/agalawatta-02.jpg",
-      "images/destinations/kalutara/agalawatta-03.jpg",
-      "images/destinations/kalutara/agalawatta-04.jpg",
-    ],
-    featured: false,
-    rating: 4.5,
+
+    rating: 4.2,
+
     bestTime: "November to April",
-    page: "destinations/agalawatta-streams.html",
   },
+
+
+  /* ========================================================
+       36. PINNAKANDA TOURISM CENTER
+  ======================================================== */
+
+  {
+    id: "pinnakanda-tourism-center",
+
+    name: "Pinnakanda Tourism Center",
+
+    sinhalaName: "පින්නකන්ද සංචාරක මධ්‍යස්ථානය",
+
+    title: "Pinnakanda Tourism Center",
+
+    shortDescription:
+      "A local tourism destination offering visitors a chance to explore the natural beauty of Kalutara.",
+
+    description:
+      "Pinnakanda Tourism Center is a developing local attraction providing opportunities to experience the natural environment and rural landscapes of the region.",
+
+    category: "nature",
+
+    categoryName: "Nature & Mountains",
+
+    province: "Western Province",
+
+    district: "Kalutara",
+
+    location: "Kalutara, Sri Lanka",
+
+    coordinates: [6.5000, 80.1000],
+
+    image: "images/destinations/pinnakanda-tourism-center/pinnakanda-tourism-center-main.jpg",
+
+    gallery: [
+      "images/destinations/pinnakanda-tourism-center/pinnakanda-tourism-center-01.jpg",
+      "images/destinations/pinnakanda-tourism-center/pinnakanda-tourism-center-02.jpg",
+      "images/destinations/pinnakanda-tourism-center/pinnakanda-tourism-center-03.jpg",
+      "images/destinations/pinnakanda-tourism-center/pinnakanda-tourism-center-04.jpg",
+    ],
+
+    featured: false,
+
+    rating: 4.2,
+
+    bestTime: "November to April",
+  },
+ 
+  /* ========================================================
+       37. AGALAWATTA STREAMS AND CASCADES
+  ======================================================== */
+
+  {
+    id: "agalawatta-streams-and-cascades",
+
+    name: "Agalawatta Streams and Cascades",
+
+    sinhalaName: "අගලවත්ත දොළ සහ දිය ඇලි",
+
+    title: "Agalawatta Streams and Cascades",
+
+    shortDescription:
+      "A peaceful natural attraction featuring streams, cascades and lush greenery in Kalutara.",
+
+    description:
+      "Agalawatta is surrounded by streams, small cascades and beautiful green landscapes, making it a relaxing destination for nature lovers.",
+
+    category: "nature",
+
+    categoryName: "Nature & Mountains",
+
+    province: "Western Province",
+
+    district: "Kalutara",
+
+    location: "Agalawatta, Kalutara, Sri Lanka",
+
+    coordinates: [6.5320, 80.2200],
+
+    image:
+      "images/destinations/agalawatta-streams-and-cascades/agalawatta-streams-and-cascades-main.jpg",
+
+    gallery: [
+      "images/destinations/agalawatta-streams-and-cascades/agalawatta-streams-and-cascades-01.jpg",
+      "images/destinations/agalawatta-streams-and-cascades/agalawatta-streams-and-cascades-02.jpg",
+      "images/destinations/agalawatta-streams-and-cascades/agalawatta-streams-and-cascades-03.jpg",
+      "images/destinations/agalawatta-streams-and-cascades/agalawatta-streams-and-cascades-04.jpg",
+    ],
+
+    featured: false,
+
+    rating: 4.2,
+
+    bestTime: "November to April",
+  },
+
+
+  /* ========================================================
+       38. BADURALIYA WATERFALLS
+  ======================================================== */
+
   {
     id: "baduraliya-waterfalls",
+
     name: "Baduraliya Waterfalls",
-    sinhalaName: "බදුරელიගම ස්වභාවික දිය ඇලි",
-    title: "Baduraliya Waterfalls – Sinharajah Border Streams",
+
+    sinhalaName: "බදුරලිය දිය ඇලි",
+
+    title: "Baduraliya Waterfalls",
+
     shortDescription:
-      "Pristine waterfalls and natural rock pools located near the borders of the Sinharaja rainforest.",
+      "A scenic waterfall destination surrounded by the lush forests and hills of Kalutara.",
+
     description:
-      "Baduraliya features cold, crystal-clear natural water streams flowing out of dense rainforest reserves, perfect for adventurous explorers.",
+      "Baduraliya and its surrounding countryside offer beautiful streams, waterfalls and forest landscapes that are ideal for nature exploration.",
+
     category: "nature",
-    categoryName: "Nature & Adventure",
+
+    categoryName: "Nature & Mountains",
+
     province: "Western Province",
+
     district: "Kalutara",
-    location: "Baduraliya, Sri Lanka",
-    coordinates: [6.5, 80.2667],
-    image: "images/destinations/kalutara/baduraliya-main.jpg",
+
+    location: "Baduraliya, Kalutara, Sri Lanka",
+
+    coordinates: [6.5040, 80.2380],
+
+    image:
+      "images/destinations/baduraliya-waterfalls/baduraliya-waterfalls-main.jpg",
+
     gallery: [
-      "images/destinations/kalutara/baduraliya-01.jpg",
-      "images/destinations/kalutara/baduraliya-02.jpg",
-      "images/destinations/kalutara/baduraliya-03.jpg",
-      "images/destinations/kalutara/baduraliya-04.jpg",
+      "images/destinations/baduraliya-waterfalls/baduraliya-waterfalls-01.jpg",
+      "images/destinations/baduraliya-waterfalls/baduraliya-waterfalls-02.jpg",
+      "images/destinations/baduraliya-waterfalls/baduraliya-waterfalls-03.jpg",
+      "images/destinations/baduraliya-waterfalls/baduraliya-waterfalls-04.jpg",
     ],
-    featured: true,
-    rating: 4.7,
-    bestTime: "December to March",
-    page: "destinations/baduraliya-waterfalls.html",
+
+    featured: false,
+
+    rating: 4.3,
+
+    bestTime: "November to April",
   },
+
+
+  /* ========================================================
+       39. WADDUWA BEACH
+  ======================================================== */
+
   {
     id: "wadduwa-beach",
+
     name: "Wadduwa Beach",
-    sinhalaName: "වාද්දුව වෙරළ තීරය",
-    title: "Wadduwa Beach – Resort Coastline",
+
+    sinhalaName: "වාද්දුව වෙරළ",
+
+    title: "Wadduwa Beach",
+
     shortDescription:
-      "A charming tropical beach lined with prestigious resort hotels and golden sands.",
+      "A peaceful golden beach on Sri Lanka's western coast, popular for relaxation and sunsets.",
+
     description:
-      "Wadduwa Beach is famous among international and local holidaymakers for luxury beachfront properties, palm-fringed views, and peaceful vibes.",
+      "Wadduwa Beach is a scenic coastal destination south of Colombo with sandy shores, palm trees and beautiful ocean views.",
+
     category: "beach",
-    categoryName: "Beach & Leisure",
+
+    categoryName: "Beaches & Coast",
+
     province: "Western Province",
+
     district: "Kalutara",
-    location: "Wadduwa, Sri Lanka",
-    coordinates: [6.7, 79.9167],
-    image: "images/destinations/kalutara/wadduwa-main.jpg",
+
+    location: "Wadduwa, Kalutara, Sri Lanka",
+
+    coordinates: [6.6240, 79.9290],
+
+    image:
+      "images/destinations/wadduwa-beach/wadduwa-beach-main.jpg",
+
     gallery: [
-      "images/destinations/kalutara/wadduwa-01.jpg",
-      "images/destinations/kalutara/wadduwa-02.jpg",
-      "images/destinations/kalutara/wadduwa-03.jpg",
-      "images/destinations/kalutara/wadduwa-04.jpg",
+      "images/destinations/wadduwa-beach/wadduwa-beach-01.jpg",
+      "images/destinations/wadduwa-beach/wadduwa-beach-02.jpg",
+      "images/destinations/wadduwa-beach/wadduwa-beach-03.jpg",
+      "images/destinations/wadduwa-beach/wadduwa-beach-04.jpg",
     ],
-    featured: true,
-    rating: 4.6,
-    bestTime: "January to April",
-    page: "destinations/wadduwa-beach.html",
+
+    featured: false,
+
+    rating: 4.4,
+
+    bestTime: "November to April",
   },
+
+
+  /* ========================================================
+       40. KUDAGANKANDA
+  ======================================================== */
+
   {
     id: "kudagankanda",
+
     name: "Kudagankanda",
-    sinhalaName: "කුඩාගංකන්ද",
-    title: "Kudagankanda – Hiking & Panoramic Views",
+
+    sinhalaName: "කුඩාගන්කන්ද",
+
+    title: "Kudagankanda",
+
     shortDescription:
-      "A prominent hillock popular among trekking enthusiasts and nature viewpoint seekers.",
+      "A scenic rural destination surrounded by greenery and peaceful landscapes in Kalutara.",
+
     description:
-      "Kudagankanda offers an exciting short hiking trail through regional vegetation, rewarding climbers with panoramic views of the surrounding countryside.",
-    category: "adventure",
-    categoryName: "Hiking & Adventure",
+      "Kudagankanda offers visitors a quieter experience of Sri Lanka's countryside, with green landscapes and natural surroundings.",
+
+    category: "nature",
+
+    categoryName: "Nature & Mountains",
+
     province: "Western Province",
+
     district: "Kalutara",
-    location: "Kalutara District, Sri Lanka",
-    coordinates: [6.55, 80.1167],
-    image: "images/destinations/kalutara/kudagankanda-main.jpg",
+
+    location: "Kalutara, Sri Lanka",
+
+    coordinates: [6.5700, 80.1800],
+
+    image:
+      "images/destinations/kudagankanda/kudagankanda-main.jpg",
+
     gallery: [
-      "images/destinations/kalutara/kudagankanda-01.jpg",
-      "images/destinations/kalutara/kudagankanda-02.jpg",
-      "images/destinations/kalutara/kudagankanda-03.jpg",
-      "images/destinations/kalutara/kudagankanda-04.jpg",
+      "images/destinations/kudagankanda/kudagankanda-01.jpg",
+      "images/destinations/kudagankanda/kudagankanda-02.jpg",
+      "images/destinations/kudagankanda/kudagankanda-03.jpg",
+      "images/destinations/kudagankanda/kudagankanda-04.jpg",
     ],
+
     featured: false,
-    rating: 4.4,
-    bestTime: "January to March",
-    page: "destinations/kudagankanda.html",
+
+    rating: 4.1,
+
+    bestTime: "November to April",
   },
+
+
+  /* ========================================================
+       41. SRI MAHA BODHIYA
+  ======================================================== */
+
   {
-    id: "sri-mahha-bodhiya",
+    id: "sri-maha-bodhiya",
+
     name: "Sri Maha Bodhiya",
-    sinhalaName: "ජය ශ්‍රී මහා බෝධීන් වහන්සේ",
-    title: "Sri Maha Bodhiya – The Sacred Fig Tree",
+
+    sinhalaName: "ශ්‍රී මහා බෝධිය",
+
+    title: "Sri Maha Bodhiya",
+
     shortDescription:
-      "The oldest historically authenticated tree in the world, brought from sacred Bodhgaya.",
+      "One of the world's most sacred Buddhist trees and an important pilgrimage destination in Anuradhapura.",
+
     description:
-      "Sri Maha Bodhiya is the most sacred site in Anuradhapura, planted from a cutting of the southern branch of the original Sri Maha Bodhi tree in India under which Gautama Buddha attained enlightenment.",
-    category: "culture",
-    categoryName: "Culture & Heritage",
+      "Sri Maha Bodhiya is one of Sri Lanka's most revered Buddhist sites. The sacred Bodhi tree is believed to have grown from a sapling brought from the original Bodhi tree in India.",
+
+    category: "religious",
+
+    categoryName: "Culture & Religion",
+
     province: "North Central Province",
+
     district: "Anuradhapura",
+
     location: "Anuradhapura, Sri Lanka",
-    coordinates: [8.3445, 80.3956],
-    image: "images/destinations/atamasthana/sri-maha-bodhiya-main.jpg",
+
+    coordinates: [8.3431, 80.3964],
+
+    image:
+      "images/destinations/sri-maha-bodhiya/sri-maha-bodhiya-main.jpg",
+
     gallery: [
-      "images/destinations/atamasthana/bodhi-01.jpg",
-      "images/destinations/atamasthana/bodhi-02.jpg",
-      "images/destinations/atamasthana/bodhi-03.jpg",
-      "images/destinations/atamasthana/bodhi-04.jpg",
+      "images/destinations/sri-maha-bodhiya/sri-maha-bodhiya-01.jpg",
+      "images/destinations/sri-maha-bodhiya/sri-maha-bodhiya-02.jpg",
+      "images/destinations/sri-maha-bodhiya/sri-maha-bodhiya-03.jpg",
+      "images/destinations/sri-maha-bodhiya/sri-maha-bodhiya-04.jpg",
     ],
+
     featured: true,
+
     rating: 4.9,
-    bestTime: "All year round",
-    page: "destinations/sri-maha-bodhiya.html",
+
+    bestTime: "January to December",
   },
+
+
+  /* ========================================================
+       42. RUWANWELI MAHA SEYA
+  ======================================================== */
+
   {
     id: "ruwanweli-maha-seya",
+
     name: "Ruwanweli Maha Seya",
+
     sinhalaName: "රුවන්වැලි මහා සෑය",
-    title: "Ruwanweli Maha Seya – The Great Stupa",
+
+    title: "Ruwanweli Maha Seya",
+
     shortDescription:
-      "An architectural marvel and one of the world's tallest ancient stupas built by King Dutugemunu.",
+      "A magnificent ancient stupa and one of the most sacred Buddhist monuments in Sri Lanka.",
+
     description:
-      "Ruwanweli Maha Seya is revered for its magnificent architecture and deep religious significance, holding a vast collection of the Buddha's relics.",
-    category: "culture",
-    categoryName: "Culture & Heritage",
+      "Ruwanweli Maha Seya is a historic Buddhist stupa in Anuradhapura and one of the most important religious landmarks of Sri Lanka.",
+
+    category: "religious",
+
+    categoryName: "Culture & Religion",
+
     province: "North Central Province",
+
     district: "Anuradhapura",
+
     location: "Anuradhapura, Sri Lanka",
-    coordinates: [8.3514, 80.3967],
-    image: "images/destinations/atamasthana/ruwanweli-seya-main.jpg",
+
+    coordinates: [8.3498, 80.3967],
+
+    image:
+      "images/destinations/ruwanweli-maha-seya/ruwanweli-maha-seya-main.jpg",
+
     gallery: [
-      "images/destinations/atamasthana/ruwanweli-01.jpg",
-      "images/destinations/atamasthana/ruwanweli-02.jpg",
-      "images/destinations/atamasthana/ruwanweli-03.jpg",
-      "images/destinations/atamasthana/ruwanweli-04.jpg",
+      "images/destinations/ruwanweli-maha-seya/ruwanweli-maha-seya-01.jpg",
+      "images/destinations/ruwanweli-maha-seya/ruwanweli-maha-seya-02.jpg",
+      "images/destinations/ruwanweli-maha-seya/ruwanweli-maha-seya-03.jpg",
+      "images/destinations/ruwanweli-maha-seya/ruwanweli-maha-seya-04.jpg",
     ],
+
     featured: true,
+
     rating: 4.9,
-    bestTime: "All year round",
-    page: "destinations/ruwanweli-maha-seya.html",
+
+    bestTime: "January to December",
   },
+
+
+  /* ========================================================
+       43. THUPARAMAYA
+  ======================================================== */
+
   {
     id: "thuparamaya",
+
     name: "Thuparamaya",
+
     sinhalaName: "ථූපාරාමය",
-    title: "Thuparamaya – The First Stupa in Sri Lanka",
+
+    title: "Thuparamaya Stupa",
+
     shortDescription:
-      "The historical first dagoba built in Sri Lanka following the introduction of Buddhism.",
+      "The first stupa believed to have been built in Sri Lanka after the introduction of Buddhism.",
+
     description:
-      "Thuparamaya was constructed by King Devanampiya Tissa to enshrine the right collarbone of the Buddha, featuring a unique vatadage architectural design.",
-    category: "culture",
-    categoryName: "Culture & Heritage",
+      "Thuparamaya is one of the oldest Buddhist monuments in Sri Lanka and an important part of the ancient sacred city of Anuradhapura.",
+
+    category: "religious",
+
+    categoryName: "Culture & Religion",
+
     province: "North Central Province",
+
     district: "Anuradhapura",
+
     location: "Anuradhapura, Sri Lanka",
-    coordinates: [8.3586, 80.3956],
-    image: "images/destinations/atamasthana/thuparamaya-main.jpg",
+
+    coordinates: [8.3513, 80.3966],
+
+    image:
+      "images/destinations/thuparamaya/thuparamaya-main.jpg",
+
     gallery: [
-      "images/destinations/atamasthana/thupara-01.jpg",
-      "images/destinations/atamasthana/thupara-02.jpg",
-      "images/destinations/atamasthana/thupara-03.jpg",
-      "images/destinations/atamasthana/thupara-04.jpg",
+      "images/destinations/thuparamaya/thuparamaya-01.jpg",
+      "images/destinations/thuparamaya/thuparamaya-02.jpg",
+      "images/destinations/thuparamaya/thuparamaya-03.jpg",
+      "images/destinations/thuparamaya/thuparamaya-04.jpg",
     ],
+
     featured: false,
-    rating: 4.7,
-    bestTime: "All year round",
-    page: "destinations/thuparamaya.html",
-  },
-  {
-    id: "loowahapaya",
-    name: "Lovamahapaya",
-    sinhalaName: "ලෝවාමਹਾපාය (ලෝහ ප්‍රාසාදය)",
-    title: "Lovamahapaya – The Brazen Palace",
-    shortDescription:
-      "Historically known as the magnificent nine-story brazen palace for Buddhist monks.",
-    description:
-      "Lovamahapaya, originally constructed by King Dutugemunu with a brazen roof, today stands as an iconic field of stone pillars echoing ancient splendor.",
-    category: "culture",
-    categoryName: "Culture & Heritage",
-    province: "North Central Province",
-    district: "Anuradhapura",
-    location: "Anuradhapura, Sri Lanka",
-    coordinates: [8.3468, 80.3953],
-    image: "images/destinations/atamasthana/lovamahapaya-main.jpg",
-    gallery: [
-      "images/destinations/atamasthana/loha-01.jpg",
-      "images/destinations/atamasthana/loha-02.jpg",
-      "images/destinations/atamasthana/loha-03.jpg",
-      "images/destinations/atamasthana/loha-04.jpg",
-    ],
-    featured: false,
-    rating: 4.6,
-    bestTime: "All year round",
-    page: "destinations/lovamahapaya.html",
-  },
-  {
-    id: "abhayagiriya",
-    name: "Abhayagiri Dagoba",
-    sinhalaName: "අභයගිරි විහාරය",
-    title: "Abhayagiri Dagoba – Ancient Monastic Complex",
-    shortDescription:
-      "One of the world's most extensive monastic ruins and a major ancient center of Buddhism.",
-    description:
-      "Abhayagiri Monastery was a vibrant international learning center holding thousands of monks, featuring a massive stupa and exquisite stone carvings like the Moonstone.",
-    category: "culture",
-    categoryName: "Culture & Heritage",
-    province: "North Central Province",
-    district: "Anuradhapura",
-    location: "Anuradhapura, Sri Lanka",
-    coordinates: [8.3653, 80.395],
-    image: "images/destinations/atamasthana/abhayagiriya-main.jpg",
-    gallery: [
-      "images/destinations/atamasthana/abhaya-01.jpg",
-      "images/destinations/atamasthana/abhaya-02.jpg",
-      "images/destinations/atamasthana/abhaya-03.jpg",
-      "images/destinations/atamasthana/abhaya-04.jpg",
-    ],
-    featured: true,
+
     rating: 4.8,
-    bestTime: "All year round",
-    page: "destinations/abhayagiriya.html",
+
+    bestTime: "January to December",
   },
+
+
+  /* ========================================================
+       44. LOVAMAHAPAYA
+  ======================================================== */
+
+  {
+    id: "lovamahapaya",
+
+    name: "Lovamahapaya",
+
+    sinhalaName: "ලෝවාමහාපාය",
+
+    title: "Lovamahapaya",
+
+    shortDescription:
+      "The historic Brazen Palace of Anuradhapura, once known for its enormous multi-storey structure.",
+
+    description:
+      "Lovamahapaya was an ancient monastic building in Anuradhapura associated with the Mahavihara monastery and famous for its large number of bronze-tiled roofs.",
+
+    category: "heritage",
+
+    categoryName: "Heritage & History",
+
+    province: "North Central Province",
+
+    district: "Anuradhapura",
+
+    location: "Anuradhapura, Sri Lanka",
+
+    coordinates: [8.3449, 80.3970],
+
+    image:
+      "images/destinations/lovamahapaya/lovamahapaya-main.jpg",
+
+    gallery: [
+      "images/destinations/lovamahapaya/lovamahapaya-01.jpg",
+      "images/destinations/lovamahapaya/lovamahapaya-02.jpg",
+      "images/destinations/lovamahapaya/lovamahapaya-03.jpg",
+      "images/destinations/lovamahapaya/lovamahapaya-04.jpg",
+    ],
+
+    featured: false,
+
+    rating: 4.6,
+
+    bestTime: "January to December",
+  },
+
+
+  /* ========================================================
+       45. ABHAYAGIRI DAGOBA
+  ======================================================== */
+
+  {
+    id: "abhayagiri-dagoba",
+
+    name: "Abhayagiri Dagoba",
+
+    sinhalaName: "අභයගිරි දාගැබ",
+
+    title: "Abhayagiri Dagoba",
+
+    shortDescription:
+      "A monumental ancient stupa and one of the most important archaeological sites in Anuradhapura.",
+
+    description:
+      "Abhayagiri Dagoba was the center of a major ancient Buddhist monastery complex and remains one of the most impressive monuments of Anuradhapura.",
+
+    category: "heritage",
+
+    categoryName: "Heritage & History",
+
+    province: "North Central Province",
+
+    district: "Anuradhapura",
+
+    location: "Anuradhapura, Sri Lanka",
+
+    coordinates: [8.3565, 80.3966],
+
+    image:
+      "images/destinations/abhayagiri-dagoba/abhayagiri-dagoba-main.jpg",
+
+    gallery: [
+      "images/destinations/abhayagiri-dagoba/abhayagiri-dagoba-01.jpg",
+      "images/destinations/abhayagiri-dagoba/abhayagiri-dagoba-02.jpg",
+      "images/destinations/abhayagiri-dagoba/abhayagiri-dagoba-03.jpg",
+      "images/destinations/abhayagiri-dagoba/abhayagiri-dagoba-04.jpg",
+    ],
+
+    featured: true,
+
+    rating: 4.8,
+
+    bestTime: "January to December",
+  },
+
+
+  /* ========================================================
+       46. JETAVANARAMAYA
+  ======================================================== */
+
   {
     id: "jetavanaramaya",
+
     name: "Jetavanaramaya",
-    sinhalaName: "ජෙතවනාරාමය",
-    title: "Jetavanaramaya – Monumental Ancient Brick Stupa",
+
+    sinhalaName: "ජේතවනාරාමය",
+
+    title: "Jetavanaramaya",
+
     shortDescription:
-      "Once one of the tallest structures in the ancient world, built by King Mahasena.",
+      "A massive ancient Buddhist stupa and one of the greatest engineering achievements of ancient Sri Lanka.",
+
     description:
-      "Jetavanaramaya is an architectural masterpiece of the ancient world, known for containing an immense volume of bricks and standing as a testament to ancient engineering.",
-    category: "culture",
-    categoryName: "Culture & Heritage",
+      "Jetavanaramaya is one of the largest ancient brick structures in the world and forms an important part of the sacred city of Anuradhapura.",
+
+    category: "heritage",
+
+    categoryName: "Heritage & History",
+
     province: "North Central Province",
+
     district: "Anuradhapura",
+
     location: "Anuradhapura, Sri Lanka",
-    coordinates: [8.3542, 80.4022],
-    image: "images/destinations/atamasthana/jetavanaramaya-main.jpg",
+
+    coordinates: [8.3500, 80.4037],
+
+    image:
+      "images/destinations/jetavanaramaya/jetavanaramaya-main.jpg",
+
     gallery: [
-      "images/destinations/atamasthana/jetavana-01.jpg",
-      "images/destinations/atamasthana/jetavana-02.jpg",
-      "images/destinations/atamasthana/jetavana-03.jpg",
-      "images/destinations/atamasthana/jetavana-04.jpg",
+      "images/destinations/jetavanaramaya/jetavanaramaya-01.jpg",
+      "images/destinations/jetavanaramaya/jetavanaramaya-02.jpg",
+      "images/destinations/jetavanaramaya/jetavanaramaya-03.jpg",
+      "images/destinations/jetavanaramaya/jetavanaramaya-04.jpg",
     ],
+
     featured: true,
+
     rating: 4.8,
-    bestTime: "All year round",
-    page: "destinations/jetavanaramaya.html",
+
+    bestTime: "January to December",
   },
+
+
+  /* ========================================================
+       47. MIRISAVETI STUPA
+  ======================================================== */
+
   {
-    id: "mirisawetiya",
+    id: "mirisaveti-stupa",
+
     name: "Mirisaveti Stupa",
-    sinhalaName: "මිරිසවැටි ස්ථූපය",
-    title: "Mirisaveti Stupa – Historical Votive Dagoba",
+
+    sinhalaName: "මිරිසවැටිය සෑය",
+
+    title: "Mirisaveti Stupa",
+
     shortDescription:
-      "A prominent stupa built by King Dutugemunu after his victory over Elara.",
+      "An ancient Buddhist stupa located in the sacred city of Anuradhapura.",
+
     description:
-      "Mirisaveti Stupa holds deep historical significance associated with the King's sacred staff containing the Buddha's relic, set within a peaceful monastic setting.",
-    category: "culture",
-    categoryName: "Culture & Heritage",
+      "Mirisaveti Stupa is one of the historic stupas of Anuradhapura and is associated with the reign of King Dutugemunu.",
+
+    category: "heritage",
+
+    categoryName: "Heritage & History",
+
     province: "North Central Province",
+
     district: "Anuradhapura",
+
     location: "Anuradhapura, Sri Lanka",
-    coordinates: [8.3364, 80.3922],
-    image: "images/destinations/atamasthana/mirisawetiya-main.jpg",
+
+    coordinates: [8.3408, 80.3896],
+
+    image:
+      "images/destinations/mirisaveti-stupa/mirisaveti-stupa-main.jpg",
+
     gallery: [
-      "images/destinations/atamasthana/mirisa-01.jpg",
-      "images/destinations/atamasthana/mirisa-02.jpg",
-      "images/destinations/atamasthana/mirisa-03.jpg",
-      "images/destinations/atamasthana/mirisa-04.jpg",
+      "images/destinations/mirisaveti-stupa/mirisaveti-stupa-01.jpg",
+      "images/destinations/mirisaveti-stupa/mirisaveti-stupa-02.jpg",
+      "images/destinations/mirisaveti-stupa/mirisaveti-stupa-03.jpg",
+      "images/destinations/mirisaveti-stupa/mirisaveti-stupa-04.jpg",
     ],
+
     featured: false,
+
     rating: 4.7,
-    bestTime: "All year round",
-    page: "destinations/mirisawetiya.html",
+
+    bestTime: "January to December",
   },
+
+
+  /* ========================================================
+       48. LANKARAMA
+  ======================================================== */
+
   {
-    id: "lankaramaya",
+    id: "lankarama",
+
     name: "Lankarama",
+
     sinhalaName: "ලංකාරාමය",
-    title: "Lankarama – Ancient Monastic Stupa",
+
+    title: "Lankarama Stupa",
+
     shortDescription:
-      "An ancient stupa built by King Valagamba in the Kalavenna area of Anuradhapura.",
+      "A peaceful ancient stupa surrounded by historic stone pillars in Anuradhapura.",
+
     description:
-      "Lankarama is a serene and charming dagoba encircled by monolithic stone pillars, offering a peaceful atmosphere for reflection and devotion.",
-    category: "culture",
-    categoryName: "Culture & Heritage",
+      "Lankarama is an ancient Buddhist stupa in Anuradhapura surrounded by elegant stone pillars and remnants of an important historical monastery complex.",
+
+    category: "heritage",
+
+    categoryName: "Heritage & History",
+
     province: "North Central Province",
+
     district: "Anuradhapura",
+
     location: "Anuradhapura, Sri Lanka",
-    coordinates: [8.3689, 80.3875],
-    image: "images/destinations/atamasthana/lankaramaya-main.jpg",
+
+    coordinates: [8.3650, 80.3975],
+
+    image:
+      "images/destinations/lankarama/lankarama-main.jpg",
+
     gallery: [
-      "images/destinations/atamasthana/lankara-01.jpg",
-      "images/destinations/atamasthana/lankara-02.jpg",
-      "images/destinations/atamasthana/lankara-03.jpg",
-      "images/destinations/atamasthana/lankara-04.jpg",
+      "images/destinations/lankarama/lankarama-01.jpg",
+      "images/destinations/lankarama/lankarama-02.jpg",
+      "images/destinations/lankarama/lankarama-03.jpg",
+      "images/destinations/lankarama/lankarama-04.jpg",
     ],
+
     featured: false,
+
     rating: 4.6,
-    bestTime: "All year round",
-    page: "destinations/lankaramaya.html",
+
+    bestTime: "January to December",
   },
-];
 
 
+]
 

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -8,23 +9,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <meta name="description"
-        content="Explore Sri Lanka's most beautiful tourist attractions by province. Discover beaches, heritage sites, wildlife, nature and unforgettable experiences.">
+        content="Explore Sri Lanka's best tourist attractions, destinations and experiences with LankaQuest.">
 
-    <title>
-        Attractions | LankaQuest
-    </title>
-
-
-    <!-- ============================================================
-         MAIN PROJECT CSS
-    ============================================================= -->
+    <title>Explore Attractions | LankaQuest</title>
 
     <link rel="stylesheet" href="css/style.css">
 
-
-    <!-- ============================================================
-         ATTRACTIONS PAGE CSS
-    ============================================================= -->
+    <link rel="stylesheet" href="css/hero.css">
 
     <link rel="stylesheet" href="css/attractions.css">
 
@@ -35,553 +26,1151 @@
 
 
     <!-- ============================================================
-     SITE HEADER
-============================================================= -->
+     HEADER
+============================================================ -->
 
     <header class="site-header">
 
-
-        <!-- BRAND -->
-
-        <div class="site-brand">
+        <div class="section-container">
 
             <a href="index.html" class="brand-link">
 
-                <div class="brand-icon">
-
-                    <img src="images/logo.png" alt="LankaQuest Logo">
-
-                </div>
-
-
-                <div class="brand-text">
-
-                    <h1>
-                        LankaQuest
-                    </h1>
-
-                    <p>
-                        Discover Sri Lanka. Create Your Journey.
-                    </p>
-
-                </div>
-
-            </a>
-
-        </div>
-
-
-
-        <!-- NAVIGATION -->
-
-        <nav class="main-navigation" id="mainNavigation">
-
-            <a href="index.html">
-                Home
-            </a>
-
-            <a href="index.html#map">
-                Explore Map
-            </a>
-
-            <a href="attractions.html" class="active">
-                Attractions
-            </a>
-
-            <a href="trip-planner.html">
-                My Trip
-            </a>
-
-        </nav>
-
-
-
-        <!-- HEADER ACTIONS -->
-
-        <div class="header-actions">
-
-
-            <a href="login.html?redirect=guide-dashboard.html" class="guide-login-button">
-
-                🧑‍💼
+                <img src="images/logo.png" alt="LankaQuest" class="brand-icon">
 
                 <span>
-                    Guide Login
+                    LankaQuest
                 </span>
 
             </a>
 
 
-            <a href="login.html?redirect=tourist-dashboard.html" class="tourist-login-button">
+            <nav class="main-navigation">
 
-                👤
+                <a href="index.html">
+                    Home
+                </a>
 
-                <span>
-                    Tourist Login
-                </span>
+                <a href="attractions.html" class="active">
+                    Attractions
+                </a>
 
-            </a>
+                <a href="find-guides.html">
+                    Find Guides
+                </a>
 
+                <a href="trip-planner.html">
+                    Trip Planner
+                </a>
 
-            <button type="button" id="myTripButton" class="my-trip-button">
-
-                ❤️
-
-                <span>
-                    My Trip
-                </span>
-
-                <span id="tripCounter" class="trip-counter">
-                    0
-                </span>
-
-            </button>
+            </nav>
 
 
-            <!-- MOBILE MENU -->
+            <div class="header-actions">
 
-            <button type="button" id="mobileMenuButton" class="mobile-menu-button" aria-label="Open Menu"
-                aria-expanded="false">
+                <a href="login.html" class="tourist-login-button">
+                    <span>Login</span>
+                </a>
 
-                ☰
 
-            </button>
+                <a href="trip-planner.html" class="my-trip-button" id="myTripButton">
+
+                    <span>
+                        ❤️ My Trip
+                    </span>
+
+                    <span class="trip-counter" id="tripCounter" hidden>
+                        0
+                    </span>
+
+                </a>
+
+
+                <button type="button" class="mobile-menu-button" id="mobileMenuButton" aria-label="Open navigation"
+                    aria-expanded="false">
+                    ☰
+                </button>
+
+            </div>
 
         </div>
 
     </header>
 
 
-
     <!-- ============================================================
-     MAIN CONTENT
-============================================================= -->
+     HERO
+============================================================ -->
 
-    <main class="attractions-page">
+    <section class="attractions-hero">
 
-
-        <!-- ========================================================
-         HERO
-    ========================================================= -->
-
-        <section class="attractions-hero">
+        <div class="hero-overlay"></div>
 
 
-            <div class="hero-overlay"></div>
+        <div class="attractions-hero-content">
+
+            <span class="hero-eyebrow">
+                🇱🇰 Explore Sri Lanka
+            </span>
 
 
-            <div class="attractions-hero-content">
+            <h1>
+                Discover Sri Lanka
+            </h1>
 
 
-                <span class="hero-eyebrow">
-                    🇱🇰 Explore Sri Lanka
+            <p>
+                Explore breathtaking destinations,
+                ancient heritage sites, beautiful beaches,
+                mountains, wildlife and unforgettable
+                experiences across Sri Lanka.
+            </p>
+
+
+            <!-- ====================================================
+             SEARCH
+        ===================================================== -->
+
+            <div class="attraction-search-box">
+
+                <span>
+                    🔍
                 </span>
 
 
+                <input type="search" id="attractionSearch" placeholder="Search places, districts, provinces..."
+                    autocomplete="off" aria-label="Search attractions">
+
+            </div>
+
+
+            <!-- SEARCH DROPDOWN -->
+
+            <div id="attractionSearchResults" class="attraction-search-results" hidden></div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ============================================================
+     SPONSORED
+============================================================ -->
+
+    <section class="attraction-sponsored-section" id="sponsoredSection">
+
+        <div class="section-container">
+
+            <div class="section-heading">
+
+                <span class="section-eyebrow">
+                    Sponsored
+                </span>
+
                 <h2>
-                    Discover the Wonders of Sri Lanka
+                    Featured Experiences
                 </h2>
+
+            </div>
+
+
+            <div class="sponsored-grid" id="sponsoredGrid">
+
+                <!--
+                Generated automatically by generator
+            -->
+
+                
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ============================================================
+     EXPLORE TOOLS
+============================================================ -->
+
+    <section class="attraction-tools">
+
+        <div class="section-container">
+
+            <div class="section-heading">
+
+                <span class="section-eyebrow">
+                    Explore
+                </span>
+
+                <h2>
+                    Find Your Next Destination
+                </h2>
+
+                <p>
+                    Browse attractions by province
+                    or search for a specific destination.
+                </p>
+
+            </div>
+
+
+            <!-- ====================================================
+             PROVINCE FILTER
+        ===================================================== -->
+
+            <div class="province-filter" id="provinceFilter">
+
+                <button type="button" class="province-filter-button active" data-province="all">
+                    All Provinces
+                </button>
+
+
+                
+
+        <button
+            type="button"
+            class="province-filter-button"
+            data-province="central-province"
+        >
+
+            Central Province
+
+        </button>
+
+    
+
+        <button
+            type="button"
+            class="province-filter-button"
+            data-province="uva-province"
+        >
+
+            Uva Province
+
+        </button>
+
+    
+
+        <button
+            type="button"
+            class="province-filter-button"
+            data-province="southern-province"
+        >
+
+            Southern Province
+
+        </button>
+
+    
+
+        <button
+            type="button"
+            class="province-filter-button"
+            data-province="north-central-province"
+        >
+
+            North Central Province
+
+        </button>
+
+    
+
+        <button
+            type="button"
+            class="province-filter-button"
+            data-province="western-province"
+        >
+
+            Western Province
+
+        </button>
+
+    
+
+        <button
+            type="button"
+            class="province-filter-button"
+            data-province="eastern-province"
+        >
+
+            Eastern Province
+
+        </button>
+
+    
+
+        <button
+            type="button"
+            class="province-filter-button"
+            data-province="sabaragamuwa-province"
+        >
+
+            Sabaragamuwa Province
+
+        </button>
+
+    
+
+        <button
+            type="button"
+            class="province-filter-button"
+            data-province="northern-province"
+        >
+
+            Northern Province
+
+        </button>
+
+    
+
+        <button
+            type="button"
+            class="province-filter-button"
+            data-province="north-western-province"
+        >
+
+            North Western Province
+
+        </button>
+
+    
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ============================================================
+     ATTRACTIONS
+============================================================ -->
+
+    <main class="provinces-section">
+
+        <div class="section-container">
+
+            <div class="province-grid" id="provinceGrid">
+
+                
+
+        <article
+            class="province-card"
+            data-province="central-province"
+            data-search="central province sigiriya සීගිරිය matale heritage &amp; history kandy මහනුවර kandy culture &amp; religion nuwara eliya නුවරඑළිය nuwara eliya nature &amp; mountains horton plains හෝර්ටන් තැන්න nuwara eliya nature &amp; mountains dambulla cave temple දඹුල්ල රජමහා විහාරය matale culture &amp; religion knuckles mountain range නකල්ස් කඳු පන්තිය matale nature &amp; mountains pidurangala rock පිදුරංගල ගල matale nature &amp; mountains"
+        >
+
+            <div class="province-card-image">
+
+                
+                            <img
+                                src="images/destinations/sigiriya/sigiriya-main.jpg"
+                                alt="Central Province"
+                                loading="lazy"
+                            >
+                          
+
+
+                <span class="province-card-badge">
+
+                    7
+                    Attractions
+
+                </span>
+
+            </div>
+
+
+            <div class="province-card-content">
+
+                <span class="province-label">
+                    Province
+                </span>
+
+
+                <h3>
+                    Central Province
+                </h3>
 
 
                 <p>
-                    Explore beautiful beaches, ancient heritage,
-                    wildlife, mountains and unforgettable experiences
-                    across all nine provinces.
+                    Explore tourist attractions
+                    across
+                    Central Province.
                 </p>
 
 
-                <!-- SEARCH -->
-
-                <div class="attraction-search-box">
+                <div class="province-card-meta">
 
                     <span>
-                        🔎
+                        📍
+                        7
+                        Places
                     </span>
 
-                    <input type="search" id="attractionSearch" placeholder="Search provinces or attractions..."
-                        autocomplete="off">
+
+                    
+                                <span>
+                                    ⭐
+                                    7
+                                    Featured
+                                </span>
+                              
 
                 </div>
 
-            </div>
 
-        </section>
+                <a
+                    href="attractions-generated/central-province.html"
+                    class="province-view-button"
+                >
 
-
-
-        <!-- ========================================================
-         FILTER / QUICK NAVIGATION
-    ========================================================= -->
-
-        <section class="attraction-tools">
-
-
-            <div class="section-container">
-
-
-                <div class="section-heading">
-
-                    <span class="section-eyebrow">
-                        Explore by Region
+                    <span>
+                        Explore Province
                     </span>
 
-                    <h2>
-                        Choose a Province
-                    </h2>
+                    <span>
+                        →
+                    </span>
 
-                    <p>
-                        Select a province and discover its
-                        most memorable attractions.
-                    </p>
-
-                </div>
-
-
-                <!-- Province Buttons -->
-
-                <div class="province-filter" id="provinceFilter">
-
-                    <button type="button" class="province-filter-button active" data-province="all">
-                        All Provinces
-                    </button>
-
-                    <button type="button" class="province-filter-button" data-province="western">
-                            Western
-                        <a href="attractions/western-province.html">
-                        
-                    </a>
-                    </button>
-
-                    <button type="button" class="province-filter-button" data-province="central">
-                        Central 
-                        
-                        <a href="attractions/southern-province.html">
-                            
-                        </a>
-                    </button>
-
-                    <button type="button" class="province-filter-button" data-province="southern">
-                        
-                        Southern 
-                        <a href="attractions/central-province.html">
-                            
-                        </a>
-                        
-                    </button>
-
-                    <button type="button" class="province-filter-button" data-province="northern">
-                        Northern
-                        <a href="attractions/northern-province.html"></a>
-                    </button>
-
-                    <button type="button" class="province-filter-button" data-province="eastern">
-                        Eastern
-                        <a href="attractions/eastern-province.html"></a>
-                    </button>
-
-                    <button type="button" class="province-filter-button" data-province="north-central">
-                        North Central
-                    </button>
-
-                    <button type="button" class="province-filter-button" data-province="north-western">
-                        North Western
-                    </button>
-
-                    <button type="button" class="province-filter-button" data-province="uva">
-                        Uva
-                    </button>
-
-                    <button type="button" class="province-filter-button" data-province="sabaragamuwa">
-                        Sabaragamuwa
-                    </button>
-
-                </div>
+                </a>
 
             </div>
 
-        </section>
+        </article>
 
+    
 
+        <article
+            class="province-card"
+            data-province="uva-province"
+            data-search="uva province ella ඇල්ල badulla nature &amp; mountains ravana falls රාවණා ඇල්ල badulla nature &amp; mountains nine arch bridge නව ආරුක්කු පාලම badulla nature &amp; mountains"
+        >
 
-        <!-- ========================================================
-         PROVINCES
-    ========================================================= -->
+            <div class="province-card-image">
 
-        <section class="provinces-section">
+                
+                            <img
+                                src="images/destinations/ella/ella-main.jpg"
+                                alt="Uva Province"
+                                loading="lazy"
+                            >
+                          
 
 
-            <div class="section-container">
+                <span class="province-card-badge">
 
+                    3
+                    Attractions
 
-                <div id="provinceGrid" class="province-grid">
-
-
-                    <!-- ==================================================
-                     EASTERN PROVINCE
-                =================================================== -->
-
-                    <article class="province-card" data-province="eastern"
-                        data-search="eastern province trincomalee batticaloa ampara nilaveli arugam bay pasikudah">
-
-
-                        <div class="province-card-image">
-
-                            <img src="images/attractions/eastern.jpg" alt="Eastern Province Sri Lanka" loading="lazy">
-
-
-                            <span class="province-card-badge">
-                                ⭐ Featured
-                            </span>
-
-                        </div>
-
-
-                        <div class="province-card-content">
-
-
-                            <span class="province-label">
-                                Eastern Province
-                            </span>
-
-
-                            <h3>
-                                The Enchanting East
-                            </h3>
-
-
-                            <p>
-                                Discover pristine beaches,
-                                historic temples, marine adventures,
-                                wildlife and world-class surfing.
-                            </p>
-
-
-                            <div class="province-card-meta">
-
-                                <span>
-                                    📍 3 Districts
-                                </span>
-
-                                <span>
-                                    🏖️ Beaches
-                                </span>
-
-                            </div>
-
-
-                            <a href="eastern-province.html" class="province-view-button">
-
-                                Explore Eastern Province
-
-                                <span>
-                                    →
-                                </span>
-
-                            </a>
-
-                        </div>
-
-                    </article>
-
-
-
-                    <!-- ==================================================
-                     WESTERN PROVINCE
-                =================================================== -->
-
-                    <article class="province-card" data-province="western"
-                        data-search="western province colombo gampaha kalutara">
-
-                        <div class="province-card-image">
-
-                            <div class="province-placeholder">
-                                🌆
-                            </div>
-
-                        </div>
-
-                        <div class="province-card-content">
-
-                            <span class="province-label">
-                                Western Province
-                            </span>
-
-                            <h3>
-                                Urban Life & Coastal Charm
-                            </h3>
-
-                            <p>
-                                Explore Colombo, coastal towns,
-                                cultural landmarks and vibrant city life.
-                            </p>
-
-                            <div class="province-card-meta">
-
-                                <span>
-                                    📍 3 Districts
-                                </span>
-
-                                <span>
-                                    🌆 City
-                                </span>
-
-                            </div>
-
-                            <a href="#" class="province-view-button disabled-link">
-                                Coming Soon →
-                            </a>
-
-                        </div>
-
-                    </article>
-
-
-
-                    <!-- ==================================================
-                     CENTRAL PROVINCE
-                =================================================== -->
-
-                    <article class="province-card" data-province="central"
-                        data-search="central province kandy matale nuwara eliya">
-
-                        <div class="province-card-image">
-
-                            <div class="province-placeholder">
-                                ⛰️
-                            </div>
-
-                        </div>
-
-                        <div class="province-card-content">
-
-                            <span class="province-label">
-                                Central Province
-                            </span>
-
-                            <h3>
-                                Mountains & Heritage
-                            </h3>
-
-                            <p>
-                                Experience misty mountains,
-                                tea country and ancient cultural treasures.
-                            </p>
-
-                            <div class="province-card-meta">
-
-                                <span>
-                                    📍 3 Districts
-                                </span>
-
-                                <span>
-                                    ⛰️ Scenic
-                                </span>
-
-                            </div>
-
-                            <a href="#" class="province-view-button disabled-link">
-                                Coming Soon →
-                            </a>
-
-                        </div>
-
-                    </article>
-
-
-
-                    <!-- ==================================================
-                     SOUTHERN PROVINCE
-                =================================================== -->
-
-                    <article class="province-card" data-province="southern"
-                        data-search="southern province galle matara hambantota">
-
-                        <div class="province-card-image">
-
-                            <div class="province-placeholder">
-                                🌊
-                            </div>
-
-                        </div>
-
-                        <div class="province-card-content">
-
-                            <span class="province-label">
-                                Southern Province
-                            </span>
-
-                            <h3>
-                                Coast, Forts & Wildlife
-                            </h3>
-
-                            <p>
-                                Discover golden beaches,
-                                historic forts and spectacular wildlife.
-                            </p>
-
-                            <div class="province-card-meta">
-
-                                <span>
-                                    📍 3 Districts
-                                </span>
-
-                                <span>
-                                    🌊 Coastal
-                                </span>
-
-                            </div>
-
-                            <a href="#" class="province-view-button disabled-link">
-                                Coming Soon →
-                            </a>
-
-                        </div>
-
-                    </article>
-
-
-                </div>
-
-
-                <!-- NO RESULTS -->
-
-                <div id="noProvinceResults" class="no-province-results" hidden>
-
-                    <div>
-                        🔎
-                    </div>
-
-                    <h3>
-                        No attractions found
-                    </h3>
-
-                    <p>
-                        Try another province or search term.
-                    </p>
-
-                </div>
+                </span>
 
             </div>
 
-        </section>
 
+            <div class="province-card-content">
+
+                <span class="province-label">
+                    Province
+                </span>
+
+
+                <h3>
+                    Uva Province
+                </h3>
+
+
+                <p>
+                    Explore tourist attractions
+                    across
+                    Uva Province.
+                </p>
+
+
+                <div class="province-card-meta">
+
+                    <span>
+                        📍
+                        3
+                        Places
+                    </span>
+
+
+                    
+                                <span>
+                                    ⭐
+                                    2
+                                    Featured
+                                </span>
+                              
+
+                </div>
+
+
+                <a
+                    href="attractions-generated/uva-province.html"
+                    class="province-view-button"
+                >
+
+                    <span>
+                        Explore Province
+                    </span>
+
+                    <span>
+                        →
+                    </span>
+
+                </a>
+
+            </div>
+
+        </article>
+
+    
+
+        <article
+            class="province-card"
+            data-province="southern-province"
+            data-search="southern province galle fort ගාල්ල කොටුව galle heritage &amp; history yala national park යාල ජාතික උද්‍යානය hambantota wildlife &amp; safari mirissa මිරිස්ස matara beaches &amp; coast unawatuna උණවටුන galle beaches &amp; coast bundala national park බුන්දල ජාතික උද්‍යානය hambantota wildlife &amp; safari hikkaduwa හික්කඩුව galle beaches &amp; coast"
+        >
+
+            <div class="province-card-image">
+
+                
+                            <img
+                                src="images/destinations/galle-fort/galle-fort-main.jpg"
+                                alt="Southern Province"
+                                loading="lazy"
+                            >
+                          
+
+
+                <span class="province-card-badge">
+
+                    6
+                    Attractions
+
+                </span>
+
+            </div>
+
+
+            <div class="province-card-content">
+
+                <span class="province-label">
+                    Province
+                </span>
+
+
+                <h3>
+                    Southern Province
+                </h3>
+
+
+                <p>
+                    Explore tourist attractions
+                    across
+                    Southern Province.
+                </p>
+
+
+                <div class="province-card-meta">
+
+                    <span>
+                        📍
+                        6
+                        Places
+                    </span>
+
+
+                    
+                                <span>
+                                    ⭐
+                                    3
+                                    Featured
+                                </span>
+                              
+
+                </div>
+
+
+                <a
+                    href="attractions-generated/southern-province.html"
+                    class="province-view-button"
+                >
+
+                    <span>
+                        Explore Province
+                    </span>
+
+                    <span>
+                        →
+                    </span>
+
+                </a>
+
+            </div>
+
+        </article>
+
+    
+
+        <article
+            class="province-card"
+            data-province="north-central-province"
+            data-search="north central province anuradhapura අනුරාධපුරය anuradhapura heritage &amp; history polonnaruwa පොළොන්නරුව polonnaruwa heritage &amp; history minneriya national park මින්නේරිය ජාතික උද්‍යානය polonnaruwa wildlife &amp; safari sri maha bodhiya ශ්‍රී මහා බෝධිය anuradhapura culture &amp; religion ruwanweli maha seya රුවන්වැලි මහා සෑය anuradhapura culture &amp; religion thuparamaya ථූපාරාමය anuradhapura culture &amp; religion lovamahapaya ලෝවාමහාපාය anuradhapura heritage &amp; history abhayagiri dagoba අභයගිරි දාගැබ anuradhapura heritage &amp; history jetavanaramaya ජේතවනාරාමය anuradhapura heritage &amp; history mirisaveti stupa මිරිසවැටිය සෑය anuradhapura heritage &amp; history lankarama ලංකාරාමය anuradhapura heritage &amp; history"
+        >
+
+            <div class="province-card-image">
+
+                
+                            <img
+                                src="images/destinations/anuradhapura/anuradhapura-main.jpg"
+                                alt="North Central Province"
+                                loading="lazy"
+                            >
+                          
+
+
+                <span class="province-card-badge">
+
+                    11
+                    Attractions
+
+                </span>
+
+            </div>
+
+
+            <div class="province-card-content">
+
+                <span class="province-label">
+                    Province
+                </span>
+
+
+                <h3>
+                    North Central Province
+                </h3>
+
+
+                <p>
+                    Explore tourist attractions
+                    across
+                    North Central Province.
+                </p>
+
+
+                <div class="province-card-meta">
+
+                    <span>
+                        📍
+                        11
+                        Places
+                    </span>
+
+
+                    
+                                <span>
+                                    ⭐
+                                    7
+                                    Featured
+                                </span>
+                              
+
+                </div>
+
+
+                <a
+                    href="attractions-generated/north-central-province.html"
+                    class="province-view-button"
+                >
+
+                    <span>
+                        Explore Province
+                    </span>
+
+                    <span>
+                        →
+                    </span>
+
+                </a>
+
+            </div>
+
+        </article>
+
+    
+
+        <article
+            class="province-card"
+            data-province="western-province"
+            data-search="western province bentota බෙන්තොට galle beaches &amp; coast negombo මීගමුව gampaha beaches &amp; coast colombo කොළඹ colombo cities &amp; urban thamba dola තඹ දොළ kalutara nature &amp; mountains kalu ganga කළු ගඟ kalutara nature &amp; mountains panadura beach පානදුර වෙරළ kalutara beaches &amp; coast kalutara bodhiya කළුතර බෝධිය kalutara culture &amp; religion pelawatte reservoir පැලවත්ත ජලාශය kalutara nature &amp; mountains pinnakanda tourism center පින්නකන්ද සංචාරක මධ්‍යස්ථානය kalutara nature &amp; mountains agalawatta streams and cascades අගලවත්ත දොළ සහ දිය ඇලි kalutara nature &amp; mountains baduraliya waterfalls බදුරලිය දිය ඇලි kalutara nature &amp; mountains wadduwa beach වාද්දුව වෙරළ kalutara beaches &amp; coast kudagankanda කුඩාගන්කන්ද kalutara nature &amp; mountains"
+        >
+
+            <div class="province-card-image">
+
+                
+                            <img
+                                src="images/destinations/bentota/bentota-main.jpg"
+                                alt="Western Province"
+                                loading="lazy"
+                            >
+                          
+
+
+                <span class="province-card-badge">
+
+                    13
+                    Attractions
+
+                </span>
+
+            </div>
+
+
+            <div class="province-card-content">
+
+                <span class="province-label">
+                    Province
+                </span>
+
+
+                <h3>
+                    Western Province
+                </h3>
+
+
+                <p>
+                    Explore tourist attractions
+                    across
+                    Western Province.
+                </p>
+
+
+                <div class="province-card-meta">
+
+                    <span>
+                        📍
+                        13
+                        Places
+                    </span>
+
+
+                    
+                                <span>
+                                    ⭐
+                                    2
+                                    Featured
+                                </span>
+                              
+
+                </div>
+
+
+                <a
+                    href="attractions-generated/western-province.html"
+                    class="province-view-button"
+                >
+
+                    <span>
+                        Explore Province
+                    </span>
+
+                    <span>
+                        →
+                    </span>
+
+                </a>
+
+            </div>
+
+        </article>
+
+    
+
+        <article
+            class="province-card"
+            data-province="eastern-province"
+            data-search="eastern province arugam bay ආරුගම්බේ ampara beaches &amp; coast trincomalee ත්‍රිකුණාමලය trincomalee beaches &amp; coast pasikudah පාසිකුඩා batticaloa beaches &amp; coast"
+        >
+
+            <div class="province-card-image">
+
+                
+                            <img
+                                src="images/destinations/arugam-bay/arugam-bay-main.jpg"
+                                alt="Eastern Province"
+                                loading="lazy"
+                            >
+                          
+
+
+                <span class="province-card-badge">
+
+                    3
+                    Attractions
+
+                </span>
+
+            </div>
+
+
+            <div class="province-card-content">
+
+                <span class="province-label">
+                    Province
+                </span>
+
+
+                <h3>
+                    Eastern Province
+                </h3>
+
+
+                <p>
+                    Explore tourist attractions
+                    across
+                    Eastern Province.
+                </p>
+
+
+                <div class="province-card-meta">
+
+                    <span>
+                        📍
+                        3
+                        Places
+                    </span>
+
+
+                    
+                                <span>
+                                    ⭐
+                                    3
+                                    Featured
+                                </span>
+                              
+
+                </div>
+
+
+                <a
+                    href="attractions-generated/eastern-province.html"
+                    class="province-view-button"
+                >
+
+                    <span>
+                        Explore Province
+                    </span>
+
+                    <span>
+                        →
+                    </span>
+
+                </a>
+
+            </div>
+
+        </article>
+
+    
+
+        <article
+            class="province-card"
+            data-province="sabaragamuwa-province"
+            data-search="sabaragamuwa province adam&#039;s peak ශ්‍රී පාදය ratnapura culture &amp; religion udawalawe national park උඩවලව ජාතික උද්‍යානය ratnapura wildlife &amp; safari sinharaja forest reserve සිංහරාජ වනාන්තරය ratnapura nature &amp; mountains"
+        >
+
+            <div class="province-card-image">
+
+                
+                            <img
+                                src="images/destinations/adams-peak/adams-peak-main.jpg"
+                                alt="Sabaragamuwa Province"
+                                loading="lazy"
+                            >
+                          
+
+
+                <span class="province-card-badge">
+
+                    3
+                    Attractions
+
+                </span>
+
+            </div>
+
+
+            <div class="province-card-content">
+
+                <span class="province-label">
+                    Province
+                </span>
+
+
+                <h3>
+                    Sabaragamuwa Province
+                </h3>
+
+
+                <p>
+                    Explore tourist attractions
+                    across
+                    Sabaragamuwa Province.
+                </p>
+
+
+                <div class="province-card-meta">
+
+                    <span>
+                        📍
+                        3
+                        Places
+                    </span>
+
+
+                    
+                                <span>
+                                    ⭐
+                                    3
+                                    Featured
+                                </span>
+                              
+
+                </div>
+
+
+                <a
+                    href="attractions-generated/sabaragamuwa-province.html"
+                    class="province-view-button"
+                >
+
+                    <span>
+                        Explore Province
+                    </span>
+
+                    <span>
+                        →
+                    </span>
+
+                </a>
+
+            </div>
+
+        </article>
+
+    
+
+        <article
+            class="province-card"
+            data-province="northern-province"
+            data-search="northern province jaffna යාපනය jaffna culture &amp; heritage"
+        >
+
+            <div class="province-card-image">
+
+                
+                            <img
+                                src="images/destinations/jaffna/jaffna-main.jpg"
+                                alt="Northern Province"
+                                loading="lazy"
+                            >
+                          
+
+
+                <span class="province-card-badge">
+
+                    1
+                    Attractions
+
+                </span>
+
+            </div>
+
+
+            <div class="province-card-content">
+
+                <span class="province-label">
+                    Province
+                </span>
+
+
+                <h3>
+                    Northern Province
+                </h3>
+
+
+                <p>
+                    Explore tourist attractions
+                    across
+                    Northern Province.
+                </p>
+
+
+                <div class="province-card-meta">
+
+                    <span>
+                        📍
+                        1
+                        Places
+                    </span>
+
+
+                    
+
+                </div>
+
+
+                <a
+                    href="attractions-generated/northern-province.html"
+                    class="province-view-button"
+                >
+
+                    <span>
+                        Explore Province
+                    </span>
+
+                    <span>
+                        →
+                    </span>
+
+                </a>
+
+            </div>
+
+        </article>
+
+    
+
+        <article
+            class="province-card"
+            data-province="north-western-province"
+            data-search="north western province kalpitiya කල්පිටිය puttalam adventure &amp; experiences"
+        >
+
+            <div class="province-card-image">
+
+                
+                            <img
+                                src="images/destinations/kalpitiya/kalpitiya-main.jpg"
+                                alt="North Western Province"
+                                loading="lazy"
+                            >
+                          
+
+
+                <span class="province-card-badge">
+
+                    1
+                    Attractions
+
+                </span>
+
+            </div>
+
+
+            <div class="province-card-content">
+
+                <span class="province-label">
+                    Province
+                </span>
+
+
+                <h3>
+                    North Western Province
+                </h3>
+
+
+                <p>
+                    Explore tourist attractions
+                    across
+                    North Western Province.
+                </p>
+
+
+                <div class="province-card-meta">
+
+                    <span>
+                        📍
+                        1
+                        Places
+                    </span>
+
+
+                    
+
+                </div>
+
+
+                <a
+                    href="attractions-generated/north-western-province.html"
+                    class="province-view-button"
+                >
+
+                    <span>
+                        Explore Province
+                    </span>
+
+                    <span>
+                        →
+                    </span>
+
+                </a>
+
+            </div>
+
+        </article>
+
+    
+
+            </div>
+
+
+            <!-- NO RESULTS -->
+
+            <div class="no-province-results" id="noProvinceResults" hidden>
+
+                <div>
+                    🔎
+                </div>
+
+                <h3>
+                    No attractions found
+                </h3>
+
+                <p>
+                    Try another place, district or province.
+                </p>
+
+            </div>
+
+        </div>
 
     </main>
 
 
+    <!-- ============================================================
+     FOOTER
+============================================================ -->
+
+    <footer class="province-footer">
+
+        <p>
+            © 2026 LankaQuest.
+            Explore Sri Lanka with confidence.
+        </p>
+
+    </footer>
+
 
     <!-- ============================================================
-     MAIN PROJECT JS
-============================================================= -->
-
-    <script src="js/places.js"></script>
-
-
-    <!-- ============================================================
-     ATTRACTIONS JS
-============================================================= -->
+     JAVASCRIPT
+============================================================ -->
 
     <script type="module" src="js/attractions.js"></script>
+
 
 </body>
 

@@ -1,0 +1,296 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+        content="Explore Sri Lanka's best tourist attractions, destinations and experiences with LankaQuest.">
+
+    <title>Explore Attractions | LankaQuest</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <link rel="stylesheet" href="css/attractions.css">
+
+</head>
+
+
+<body>
+
+
+    <!-- ============================================================
+     HEADER
+============================================================ -->
+
+    <header class="site-header">
+
+        <div class="section-container">
+
+            <a href="index.html" class="brand-link">
+
+                <img src="images/logo.png" alt="LankaQuest" class="brand-icon">
+
+                <span>
+                    LankaQuest
+                </span>
+
+            </a>
+
+
+            <nav class="main-navigation">
+
+                <a href="index.html">
+                    Home
+                </a>
+
+                <a href="attractions.html" class="active">
+                    Attractions
+                </a>
+
+                <a href="find-guides.html">
+                    Find Guides
+                </a>
+
+                <a href="trip-planner.html">
+                    Trip Planner
+                </a>
+
+            </nav>
+
+
+            <div class="header-actions">
+
+                <a href="login.html" class="tourist-login-button">
+                    <span>Login</span>
+                </a>
+
+
+                <a href="trip-planner.html" class="my-trip-button" id="myTripButton">
+
+                    <span>
+                        ❤️ My Trip
+                    </span>
+
+                    <span class="trip-counter" id="tripCounter" hidden>
+                        0
+                    </span>
+
+                </a>
+
+
+                <button type="button" class="mobile-menu-button" id="mobileMenuButton" aria-label="Open navigation"
+                    aria-expanded="false">
+                    ☰
+                </button>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- ============================================================
+     HERO
+============================================================ -->
+
+    <section class="attractions-hero">
+
+        <div class="hero-overlay"></div>
+
+
+        <div class="attractions-hero-content">
+
+            <span class="hero-eyebrow">
+                🇱🇰 Explore Sri Lanka
+            </span>
+
+
+            <h1>
+                Discover Sri Lanka
+            </h1>
+
+
+            <p>
+                Explore breathtaking destinations,
+                ancient heritage sites, beautiful beaches,
+                mountains, wildlife and unforgettable
+                experiences across Sri Lanka.
+            </p>
+
+
+            <!-- ====================================================
+             SEARCH
+        ===================================================== -->
+
+            <div class="attraction-search-box">
+
+                <span>
+                    🔍
+                </span>
+
+
+                <input type="search" id="attractionSearch" placeholder="Search places, districts, provinces..."
+                    autocomplete="off" aria-label="Search attractions">
+
+            </div>
+
+
+            <!-- SEARCH DROPDOWN -->
+
+            <div id="attractionSearchResults" class="attraction-search-results" hidden></div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ============================================================
+     SPONSORED
+============================================================ -->
+
+    <section class="attraction-sponsored-section" id="sponsoredSection">
+
+        <div class="section-container">
+
+            <div class="section-heading">
+
+                <span class="section-eyebrow">
+                    Sponsored
+                </span>
+
+                <h2>
+                    Featured Experiences
+                </h2>
+
+            </div>
+
+
+            <div class="sponsored-grid" id="sponsoredGrid">
+
+                <!--
+                Generated automatically by generator
+            -->
+
+                __SPONSORED_CARDS__
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ============================================================
+     EXPLORE TOOLS
+============================================================ -->
+
+    <section class="attraction-tools">
+
+        <div class="section-container">
+
+            <div class="section-heading">
+
+                <span class="section-eyebrow">
+                    Explore
+                </span>
+
+                <h2>
+                    Find Your Next Destination
+                </h2>
+
+                <p>
+                    Browse attractions by province
+                    or search for a specific destination.
+                </p>
+
+            </div>
+
+
+            <!-- ====================================================
+             PROVINCE FILTER
+        ===================================================== -->
+
+            <div class="province-filter" id="provinceFilter">
+
+                <button type="button" class="province-filter-button active" data-province="all">
+                    All Provinces
+                </button>
+
+
+                __PROVINCE_FILTERS__
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ============================================================
+     ATTRACTIONS
+============================================================ -->
+
+    <main class="provinces-section">
+
+        <div class="section-container">
+
+            <div class="province-grid" id="provinceGrid">
+
+                __PROVINCE_CARDS__
+
+            </div>
+
+
+            <!-- NO RESULTS -->
+
+            <div class="no-province-results" id="noProvinceResults" hidden>
+
+                <div>
+                    🔎
+                </div>
+
+                <h3>
+                    No attractions found
+                </h3>
+
+                <p>
+                    Try another place, district or province.
+                </p>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- ============================================================
+     FOOTER
+============================================================ -->
+
+    <footer class="province-footer">
+
+        <p>
+            © 2026 LankaQuest.
+            Explore Sri Lanka with confidence.
+        </p>
+
+    </footer>
+
+
+    <!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+
+    <script type="module" src="js/attractions.js"></script>
+
+
+</body>
+
+</html>
