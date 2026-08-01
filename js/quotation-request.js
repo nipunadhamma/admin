@@ -498,6 +498,8 @@ async function submitQuotationRequest() {
     const requestData = {
       touristId: currentTourist.uid,
 
+      touristName: currentTourist.fullName || "",
+
       touristEmail: currentTourist.email || "",
 
       tripId: currentTrip.id,

@@ -124,7 +124,7 @@ const requestStatusBadge =
 
 const touristName =
     document.getElementById(
-        "touristName"
+        "touristFullName"
     );
 
 

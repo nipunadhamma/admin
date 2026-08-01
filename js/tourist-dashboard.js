@@ -1,18 +1,21 @@
 /* ============================================================
-   TOURIST DASHBOARD LOGIC
-   LankaQuest
+   LANKAQUEST
+   TOURIST DASHBOARD
 
-   FIREBASE FIRST VERSION
+   FIREBASE FIRST ARCHITECTURE
 
-   Architecture:
-
+   AUTHENTICATION
+        ↓
    Firebase Authentication
-          ↓
+        ↓
    Firebase UID
-          ↓
-   Firestore
+        ↓
+   lankaQuestTourists/{UID}
+        ↓
+   Tourist Dashboard
 
-   Collections:
+
+   FIRESTORE COLLECTIONS
 
    lankaQuestTourists
    lankaQuestTouristTrips
@@ -20,10 +23,41 @@
    lankaQuestQuotations
 
 
-   NO localStorage
-   NO sessionStorage
-   NO JSON DATABASE
+   QUOTATION FLOW
 
+   Tourist
+      ↓
+   Create Trip
+      ↓
+   lankaQuestTouristTrips
+      ↓
+   Create Quotation Request
+      ↓
+   lankaQuestQuotationRequests
+      ↓
+   Select Guide
+      ↓
+   Guide Sends Quotation
+      ↓
+   lankaQuestQuotations
+      ↓
+   requestId links quotation to request
+      ↓
+   Tourist Dashboard
+      ↓
+   Accept / Reject
+
+
+   IMPORTANT
+
+   ❌ No localStorage
+   ❌ No sessionStorage
+   ❌ No request.quotations[]
+   ❌ No old quotation architecture
+
+   ✅ Firebase Authentication
+   ✅ Firestore
+   ✅ Separate quotation collection
 ============================================================ */
 
 /* ============================================================
@@ -32,7 +66,10 @@
 
 import { auth, db } from "./firebase-config.js";
 
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import {
+  onAuthStateChanged,
+  signOut,
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 import {
   doc,
@@ -40,8 +77,9 @@ import {
   collection,
   query,
   where,
-  orderBy,
   getDocs,
+  updateDoc,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 /* ============================================================
@@ -53,6 +91,8 @@ const TOURIST_COLLECTION = "lankaQuestTourists";
 const TRIP_COLLECTION = "lankaQuestTouristTrips";
 
 const REQUEST_COLLECTION = "lankaQuestQuotationRequests";
+
+const QUOTATION_COLLECTION = "lankaQuestQuotations";
 
 /* ============================================================
    3. CURRENT USER
@@ -91,26 +131,42 @@ const selectedGuideContainer = document.getElementById(
 );
 
 /* ============================================================
-   5. GET FIREBASE TOURIST PROFILE
+   5. HTML ESCAPE
+============================================================ */
+
+function escapeHTML(value) {
+  const div = document.createElement("div");
+
+  div.textContent = value == null ? "" : String(value);
+
+  return div.innerHTML;
+}
+
+/* ============================================================
+   6. GET TOURIST PROFILE
 ============================================================ */
 
 async function getTouristProfile(uid) {
+  if (!uid) {
+    return null;
+  }
+
   try {
     const touristRef = doc(db, TOURIST_COLLECTION, uid);
 
-    const touristSnap = await getDoc(touristRef);
+    const touristSnapshot = await getDoc(touristRef);
 
-    if (touristSnap.exists()) {
-      return {
-        id: uid,
+    if (!touristSnapshot.exists()) {
+      console.warn("Tourist profile not found:", uid);
 
-        ...touristSnap.data(),
-      };
+      return null;
     }
 
-    console.warn("Tourist profile not found");
+    return {
+      id: touristSnapshot.id,
 
-    return null;
+      ...touristSnapshot.data(),
+    };
   } catch (error) {
     console.error("Tourist profile loading error:", error);
 
@@ -119,53 +175,61 @@ async function getTouristProfile(uid) {
 }
 
 /* ============================================================
-   6. GET TOURIST TRIP FROM FIRESTORE
+   7. GET TOURIST TRIP
 ============================================================ */
 
 async function getTouristTrip(uid) {
+  if (!uid) {
+    return {
+      destinations: [],
+    };
+  }
+
   try {
     const tripRef = doc(db, TRIP_COLLECTION, uid);
 
-    const tripSnap = await getDoc(tripRef);
+    const tripSnapshot = await getDoc(tripRef);
 
-    if (tripSnap.exists()) {
-      const data = tripSnap.data();
-
+    if (!tripSnapshot.exists()) {
       return {
-        destinations: Array.isArray(data.destinations) ? data.destinations : [],
+        destinations: [],
 
-        startDate: data.startDate || "",
+        startDate: "",
 
-        endDate: data.endDate || "",
+        endDate: "",
 
-        travelers: data.travelers || "",
+        travelers: "",
 
-        travelStyle: data.travelStyle || "",
+        travelStyle: "",
 
-        transport: data.transport || "",
+        transport: "",
 
-        accommodation: data.accommodation || "",
+        accommodation: "",
 
-        specialRequests: data.specialRequests || "",
+        specialRequests: "",
       };
     }
 
+    const data = tripSnapshot.data();
+
     return {
-      destinations: [],
+      id: tripSnapshot.id,
 
-      startDate: "",
+      destinations: Array.isArray(data.destinations) ? data.destinations : [],
 
-      endDate: "",
+      startDate: data.startDate || "",
 
-      travelers: "",
+      endDate: data.endDate || "",
 
-      travelStyle: "",
+      travelers: data.travelers || "",
 
-      transport: "",
+      travelStyle: data.travelStyle || "",
 
-      accommodation: "",
+      transport: data.transport || "",
 
-      specialRequests: "",
+      accommodation: data.accommodation || "",
+
+      specialRequests: data.specialRequests || "",
     };
   } catch (error) {
     console.error("Firestore trip loading error:", error);
@@ -177,7 +241,7 @@ async function getTouristTrip(uid) {
 }
 
 /* ============================================================
-   7. UPDATE DASHBOARD USER DISPLAY
+   8. UPDATE DASHBOARD USER
 ============================================================ */
 
 function updateDashboardUser() {
@@ -186,7 +250,10 @@ function updateDashboardUser() {
   }
 
   const name =
-    currentTouristProfile.fullName || currentTouristProfile.email || "Tourist";
+    currentTouristProfile.fullName ||
+    currentTouristProfile.email ||
+    currentFirebaseUser?.displayName ||
+    "Tourist";
 
   if (headerUserName) {
     headerUserName.textContent = name;
@@ -198,7 +265,7 @@ function updateDashboardUser() {
 }
 
 /* ============================================================
-   8. RENDER MY TRIP
+   9. RENDER MY TRIP
 ============================================================ */
 
 async function renderDashboardTrip() {
@@ -217,44 +284,28 @@ async function renderDashboardTrip() {
   if (destinations.length === 0) {
     dashboardTripContainer.innerHTML = `
 
+            <div class="dashboard-empty-state">
 
-        <div class="dashboard-empty-state">
+                <div>
+                    🗺️
+                </div>
 
+                <h4>
+                    No Destinations Yet
+                </h4>
 
-            🗺️
+                <p>
+                    Start planning your Sri Lanka journey.
+                </p>
 
+                <a
+                    href="trip-planner.html"
+                    class="dashboard-action-button"
+                >
+                    Explore Destinations
+                </a>
 
-            <h4>
-
-                No Destinations Yet
-
-            </h4>
-
-
-
-            <p>
-
-                Start planning your Sri Lanka journey.
-
-            </p>
-
-
-
-            <a
-
-            href="trip-planner.html"
-
-            class="dashboard-action-button"
-
-            >
-
-                Explore Destinations
-
-            </a>
-
-
-        </div>
-
+            </div>
 
         `;
 
@@ -270,38 +321,23 @@ async function renderDashboardTrip() {
 
     card.innerHTML = `
 
+                <img
+                    src="${escapeHTML(place.image || "")}"
+                    alt="${escapeHTML(place.name || "Destination")}"
+                    loading="lazy"
+                >
 
-            <img
+                <h4>
+                    ${escapeHTML(place.name || "Destination")}
+                </h4>
 
-            src="${place.image || ""}"
+                <p>
+                    📍
 
-            alt="${place.name || "Destination"}"
+                    ${escapeHTML(place.district || "")}
 
-            loading="lazy"
-
-            >
-
-
-
-            <h4>
-
-            ${place.name || "Destination"}
-
-            </h4>
-
-
-
-            <p>
-
-            📍
-
-            ${place.district || ""}
-
-            ${place.province ? " · " + place.province : ""}
-
-
-            </p>
-
+                    ${place.province ? " · " + escapeHTML(place.province) : ""}
+                </p>
 
             `;
 
@@ -310,1930 +346,1250 @@ async function renderDashboardTrip() {
 }
 
 /* ============================================================
-   PART 01 END
-============================================================ */
-/* ============================================================
-   TOURIST DASHBOARD LOGIC
-   PART 02
+   10. GET TOURIST QUOTATION REQUESTS
 
-   FIRESTORE QUOTATION SYSTEM
+   IMPORTANT
 
-   FLOW:
+   Requests are loaded from:
 
-   Guide
-      ↓
-   Send Quotation
-      ↓
-   lankaQuestQuotationRequests
-      ↓
-   Tourist Dashboard
-      ↓
-   Accept / Reject
-      ↓
-   Firestore Update
+       lankaQuestQuotationRequests
 
+   Only requests belonging to the current
+   Firebase tourist UID are loaded.
 ============================================================ */
 
-
-/* ============================================================
-   9. GET TOURIST QUOTATION REQUESTS
-============================================================ */
-
-
-async function getMyQuotationRequests(){
-
-
-    if(
-        !currentFirebaseUser
-    ){
-
-        return [];
-
-    }
-
-
-
-
-    try{
-
-
-        const requestsQuery =
-
-        query(
-
-            collection(
-
-                db,
-
-                REQUEST_COLLECTION
-
-            ),
-
-
-            where(
-
-                "touristId",
-
-                "==",
-
-                currentFirebaseUser.uid
-
-            ),
-
-
-            orderBy(
-
-                "createdAt",
-
-                "desc"
-
-            )
-
-        );
-
-
-
-
-        const snapshot =
-
-        await getDocs(
-            requestsQuery
-        );
-
-
-
-
-        const requests = [];
-
-
-
-
-        snapshot.forEach(
-
-            document => {
-
-
-                requests.push({
-
-
-                    firebaseId:
-
-                        document.id,
-
-
-                    ...document.data()
-
-
-                });
-
-
-            }
-
-        );
-
-
-
-
-        return requests;
-
-
-
-    }
-
-
-    catch(error){
-
-
-        console.error(
-
-            "Quotation request loading error:",
-
-            error
-
-        );
-
-
-
-        return [];
-
-
-    }
-
-
-
-}
-
-
-
-
-
-/* ============================================================
-   10. GET LATEST QUOTATION
-============================================================ */
-
-
-function getLatestQuotation(
-    request
-){
-
-
-    if(
-
-        !request ||
-
-        !Array.isArray(
-
-            request.quotations
-
-        )
-
-    ){
-
-        return null;
-
-    }
-
-
-
-    if(
-
-        request.quotations.length === 0
-
-    ){
-
-        return null;
-
-    }
-
-
-
-    return (
-
-        request.quotations[
-
-            request.quotations.length - 1
-
-        ]
-
+async function getMyQuotationRequests() {
+  if (!currentFirebaseUser) {
+    return [];
+  }
+
+  try {
+    const requestsQuery = query(
+      collection(db, REQUEST_COLLECTION),
+
+      where("touristId", "==", currentFirebaseUser.uid),
     );
 
+    const snapshot = await getDocs(requestsQuery);
 
+    const requests = [];
+
+    snapshot.forEach((documentSnapshot) => {
+      requests.push({
+        firebaseId: documentSnapshot.id,
+
+        id: documentSnapshot.id,
+
+        ...documentSnapshot.data(),
+      });
+    });
+
+    /*
+           Sort newest first.
+
+           We intentionally do this in JavaScript
+           instead of:
+
+           orderBy("createdAt", "desc")
+
+           This avoids requiring a composite
+           Firestore index.
+        */
+
+    requests.sort((a, b) => {
+      const dateA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+
+      const dateB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+
+      return dateB - dateA;
+    });
+
+    console.log("Tourist quotation requests:", requests);
+
+    return requests;
+  } catch (error) {
+    console.error("Quotation request loading error:", error);
+
+    return [];
+  }
 }
 
-
-
-
-
 /* ============================================================
-   11. FORMAT DATE
+   11. GET TOURIST QUOTATIONS
+
+   IMPORTANT
+
+   Quotations are stored separately:
+
+       lankaQuestQuotations
+
+   NOT:
+
+       request.quotations[]
 ============================================================ */
 
+async function getMyQuotations() {
+  const quotationMap = new Map();
 
-function formatDashboardDate(
-    value
-){
+  if (!currentFirebaseUser) {
+    return quotationMap;
+  }
 
+  try {
+    const quotationsQuery = query(
+      collection(db, QUOTATION_COLLECTION),
 
-    if(
-        !value
-    ){
-
-        return "Not specified";
-
-    }
-
-
-
-    try{
-
-
-        if(
-            value.toDate
-        ){
-
-            return value
-
-            .toDate()
-
-            .toLocaleDateString();
-
-
-        }
-
-
-
-        return new Date(value)
-
-        .toLocaleDateString();
-
-
-
-    }
-
-
-    catch(error){
-
-
-        return "Not specified";
-
-
-    }
-
-
-
-}
-
-
-
-
-
-/* ============================================================
-   12. STATUS TEXT
-============================================================ */
-
-
-function formatRequestStatus(
-    status
-){
-
-
-    const statusMap = {
-
-
-        pending:
-
-            "Pending",
-
-
-
-        quotation_sent:
-
-            "Quotation Received",
-
-
-
-        quotation_accepted:
-
-            "Quotation Accepted",
-
-
-
-        quotation_rejected:
-
-            "Quotation Rejected",
-
-
-
-        guide_selected:
-
-            "Guide Selected"
-
-
-    };
-
-
-
-    return (
-
-        statusMap[status]
-
-        ||
-
-        "Pending"
-
+      where("touristId", "==", currentFirebaseUser.uid),
     );
 
+    const snapshot = await getDocs(quotationsQuery);
 
+    snapshot.forEach((documentSnapshot) => {
+      const quotationData = documentSnapshot.data();
 
+      const quotation = {
+        firebaseId: documentSnapshot.id,
+
+        id: documentSnapshot.id,
+
+        ...quotationData,
+      };
+
+      /*
+                   Primary connection:
+
+                   quotation.requestId
+                */
+
+      if (quotation.requestId) {
+        quotationMap.set(String(quotation.requestId), quotation);
+      }
+
+      /*
+                   Backup connection:
+
+                   quotation.requestFirestoreId
+                */
+
+      if (quotation.requestFirestoreId) {
+        quotationMap.set(String(quotation.requestFirestoreId), quotation);
+      }
+    });
+
+    console.log("Tourist quotations:", Array.from(quotationMap.values()));
+
+    return quotationMap;
+  } catch (error) {
+    console.error("Quotation loading error:", error);
+
+    return quotationMap;
+  }
 }
 
-
-
-
-
 /* ============================================================
-   13. RENDER QUOTATION CARD
+   12. FIND QUOTATION FOR REQUEST
 ============================================================ */
 
+function getQuotationForRequest(request, quotationMap) {
+  if (!request || !quotationMap) {
+    return null;
+  }
 
-function renderQuotation(
-    request
-){
+  /*
+       1. request.requestId
+    */
 
+  if (request.requestId) {
+    const quotation = quotationMap.get(String(request.requestId));
 
+    if (quotation) {
+      return quotation;
+    }
+  }
 
-    const quotation =
+  /*
+       2. Firestore request document ID
+    */
 
-        getLatestQuotation(
-            request
-        );
+  if (request.firebaseId) {
+    const quotation = quotationMap.get(String(request.firebaseId));
 
+    if (quotation) {
+      return quotation;
+    }
+  }
 
+  /*
+       3. request.id
+    */
 
+  if (request.id) {
+    const quotation = quotationMap.get(String(request.id));
 
+    if (quotation) {
+      return quotation;
+    }
+  }
 
-    if(
-        !quotation
-    ){
+  return null;
+}
 
+/* ============================================================
+   13. FORMAT DATE
+============================================================ */
 
-        return `
+function formatDashboardDate(value) {
+  if (!value) {
+    return "Not specified";
+  }
 
+  try {
+    /*
+           Firestore Timestamp
+        */
 
-        <div class="quotation-not-received">
-
-
-            <h4>
-
-            ⏳ Waiting for Guide Quotation
-
-            </h4>
-
-
-
-            <p>
-
-            A registered guide has not sent
-            a quotation yet.
-
-            </p>
-
-
-        </div>
-
-
-        `;
-
-
+    if (typeof value.toDate === "function") {
+      return value.toDate().toLocaleDateString();
     }
 
+    /*
+           Date object / string
+        */
 
+    const date = new Date(value);
 
+    if (Number.isNaN(date.getTime())) {
+      return String(value);
+    }
 
+    return date.toLocaleDateString();
+  } catch (error) {
+    return "Not specified";
+  }
+}
 
-    const guide =
+/* ============================================================
+   14. FORMAT REQUEST STATUS
+============================================================ */
 
-        quotation.guide || {};
+function formatRequestStatus(status) {
+  const statusMap = {
+    pending: "Pending",
 
+    guide_selected: "Guide Selected",
 
+    quotation_sent: "Quotation Received",
 
+    quotation_accepted: "Quotation Accepted",
 
+    quotation_rejected: "Quotation Rejected",
 
+    completed: "Completed",
+  };
+
+  return statusMap[status] || status || "Pending";
+}
+
+/* ============================================================
+   15. FORMAT GUIDE LANGUAGES
+============================================================ */
+
+function formatGuideLanguages(languages) {
+  if (Array.isArray(languages)) {
+    return languages.map((language) => String(language)).join(", ");
+  }
+
+  if (typeof languages === "string" && languages.trim()) {
+    return languages;
+  }
+
+  return "Not specified";
+}
+
+/* ============================================================
+   16. RENDER QUOTATION
+
+   Reads directly from:
+
+       lankaQuestQuotations
+============================================================ */
+
+function renderQuotation(request, quotation) {
+  /*
+       No quotation yet
+    */
+
+  if (!quotation) {
     return `
 
-
-    <div class="tourist-quotation-card">
-
-
-        <div class="quotation-card-header">
-
-
-            <h4>
-
-            🧑‍💼
-
-            ${
-
-                guide.fullName ||
-
-                "Registered Guide"
-
-            }
-
-
-            </h4>
-
-
-
-            <span class="request-status">
-
-
-            ${
-
-                formatRequestStatus(
-
-                    request.status
-
-                )
-
-            }
-
-
-            </span>
-
-
-        </div>
-
-
-
-
-        <div class="quotation-price">
-
-
-            ${
-
-                quotation.amount ||
-
-                "0"
-
-            }
-
-
-            ${
-
-                quotation.currency ||
-
-                ""
-
-            }
-
-
-        </div>
-
-
-
-
-        <div class="quotation-details">
-
-
-            <p>
-
-            📍
-
-            ${
-
-                guide.district ||
-
-                "Sri Lanka"
-
-            }
-
-
-            </p>
-
-
-
-            <p>
-
-            🗣️
-
-            ${
-
-                Array.isArray(
-
-                    guide.languages
-
-                )
-
-                ?
-
-                guide.languages.join(", ")
-
-                :
-
-                "Not specified"
-
-            }
-
-
-            </p>
-
-
-
-            <p>
-
-            📅 Valid Until:
-
-            ${
-
-                formatDashboardDate(
-
-                    quotation.validUntil
-
-                )
-
-            }
-
-
-            </p>
-
-
-        </div>
-
-
-
-
-
-        <div class="quotation-actions">
-
-
-            <button
-
-            class="accept-quotation-button"
-
-            data-request-id="${request.requestId}"
-
-            >
-
-            ✓ Accept
-
-            </button>
-
-
-
-
-
-            <button
-
-            class="reject-quotation-button"
-
-            data-request-id="${request.requestId}"
-
-            >
-
-            ✕ Reject
-
-            </button>
-
-
-
-        </div>
-
-
-
-    </div>
-
-
-    `;
-
-
-}
-
-
-
-
-
-
-/* ============================================================
-   14. ACCEPT QUOTATION
-============================================================ */
-
-
-async function acceptQuotation(
-    requestId
-){
-
-
-    try{
-
-
-        const requests =
-
-            await getMyQuotationRequests();
-
-
-
-
-        const request =
-
-        requests.find(
-
-            item =>
-
-            item.requestId === requestId
-
-        );
-
-
-
-
-        if(
-            !request
-        ){
-
-            alert(
-                "Request not found."
-            );
-
-            return;
-
-        }
-
-
-
-
-
-        await updateDoc(
-
-            doc(
-
-                db,
-
-                REQUEST_COLLECTION,
-
-                request.firebaseId
-
-            ),
-
-
-            {
-
-
-                status:
-
-                    "quotation_accepted",
-
-
-
-                updatedAt:
-
-                    new Date()
-
-
-
-            }
-
-
-        );
-
-
-
-
-
-        alert(
-
-            "Quotation accepted successfully."
-
-        );
-
-
-
-
-
-        await renderQuotationRequests();
-
-
-
-    }
-
-
-    catch(error){
-
-
-        console.error(
-
-            "Accept quotation error:",
-
-            error
-
-        );
-
-
-
-        alert(
-
-            "Unable to accept quotation."
-
-        );
-
-
-    }
-
-
-}
-
-
-
-
-
-
-/* ============================================================
-   15. REJECT QUOTATION
-============================================================ */
-
-
-async function rejectQuotation(
-    requestId
-){
-
-
-    try{
-
-
-        const requests =
-
-            await getMyQuotationRequests();
-
-
-
-
-        const request =
-
-        requests.find(
-
-            item =>
-
-            item.requestId === requestId
-
-        );
-
-
-
-
-        if(
-            !request
-        ){
-
-            alert(
-                "Request not found."
-            );
-
-            return;
-
-        }
-
-
-
-
-
-        await updateDoc(
-
-            doc(
-
-                db,
-
-                REQUEST_COLLECTION,
-
-                request.firebaseId
-
-            ),
-
-
-            {
-
-
-                status:
-
-                    "quotation_rejected",
-
-
-
-                updatedAt:
-
-                    new Date()
-
-
-
-            }
-
-
-        );
-
-
-
-
-
-        alert(
-
-            "Quotation rejected."
-
-        );
-
-
-
-
-
-        await renderQuotationRequests();
-
-
-
-    }
-
-
-    catch(error){
-
-
-        console.error(
-
-            "Reject quotation error:",
-
-            error
-
-        );
-
-
-
-        alert(
-
-            "Unable to reject quotation."
-
-        );
-
-
-    }
-
-
-}
-
-
-
-
-
-
-/* ============================================================
-   16. RENDER QUOTATION REQUESTS
-
-   (continued in PART 03)
-
-============================================================ */
-/* ============================================================
-   TOURIST DASHBOARD LOGIC
-   PART 03
-
-   FIRESTORE DASHBOARD RENDER
-
-============================================================ */
-
-
-/* ============================================================
-   16. RENDER QUOTATION REQUESTS
-============================================================ */
-
-
-async function renderQuotationRequests(){
-
-
-    if(
-        !quotationRequestsContainer
-    ){
-
-        return;
-
-    }
-
-
-
-
-    const requests =
-
-        await getMyQuotationRequests();
-
-
-
-
-
-    if(
-        dashboardRequestCount
-    ){
-
-        dashboardRequestCount.textContent =
-
-            requests.length;
-
-    }
-
-
-
-
-
-
-    if(
-        requests.length === 0
-    ){
-
-
-        quotationRequestsContainer.innerHTML = `
-
-
-        <div class="dashboard-empty-state">
-
-
-            <div>
-
-                📋
+            <div class="quotation-not-received">
+
+                <h4>
+                    ⏳ Waiting for Guide Quotation
+                </h4>
+
+                <p>
+                    Your selected guide has not
+                    sent a quotation yet.
+                </p>
 
             </div>
 
-
-
-            <h4>
-
-                No Quotation Requests Yet
-
-            </h4>
-
-
-
-            <p>
-
-                Start planning your Sri Lanka journey.
-
-            </p>
-
-
-
-            <a
-
-            href="trip-planner.html"
-
-            class="dashboard-action-button"
-
-            >
-
-                Plan My Journey
-
-            </a>
-
-
-        </div>
-
-
         `;
+  }
+
+  /*
+       Guide information
 
+       Current quotation document stores:
 
-        return;
+       guideName
+       guideEmail
+       guidePhone
+    */
 
+  const guideName =
+    quotation.guideName ||
+    request.guideName ||
+    request.selectedGuide?.fullName ||
+    "Registered Guide";
 
-    }
+  const guideEmail =
+    quotation.guideEmail ||
+    request.guideEmail ||
+    request.selectedGuide?.email ||
+    "Email not available";
 
+  const guidePhone =
+    quotation.guidePhone ||
+    request.guidePhone ||
+    request.selectedGuide?.phone ||
+    "Phone not available";
 
+  const guideDistrict =
+    quotation.guide?.district || request.selectedGuide?.district || "Sri Lanka";
 
+  const guideLanguages = formatGuideLanguages(
+    quotation.guide?.languages || request.selectedGuide?.languages,
+  );
 
+  const quotationStatus = quotation.status || "sent";
 
-    quotationRequestsContainer.innerHTML = "";
+  /*
+       Accept / Reject buttons
+    */
 
+  const actionButtons =
+    quotationStatus === "sent"
+      ? `
 
+                <div class="quotation-actions">
 
+                    <button
+                        type="button"
+                        class="accept-quotation-button"
+                        data-request-id="${escapeHTML(
+                          request.requestId ||
+                            request.firebaseId ||
+                            request.id ||
+                            "",
+                        )}"
+                        data-quotation-id="${escapeHTML(
+                          quotation.firebaseId || quotation.id || "",
+                        )}"
+                    >
+                        ✓ Accept
+                    </button>
 
 
+                    <button
+                        type="button"
+                        class="reject-quotation-button"
+                        data-request-id="${escapeHTML(
+                          request.requestId ||
+                            request.firebaseId ||
+                            request.id ||
+                            "",
+                        )}"
+                        data-quotation-id="${escapeHTML(
+                          quotation.firebaseId || quotation.id || "",
+                        )}"
+                    >
+                        ✕ Reject
+                    </button>
 
-    requests.forEach(
+                </div>
 
-        request => {
+            `
+      : "";
 
+  return `
 
+        <div class="tourist-quotation-card">
 
-            const card =
+            <div class="quotation-card-header">
 
-            document.createElement(
-                "article"
-            );
+                <div>
 
+                    <h4>
 
+                        🧑‍💼
 
-            card.className =
+                        ${escapeHTML(guideName)}
 
-            "quotation-request-card";
+                    </h4>
 
 
+                    <p>
 
+                        📧
 
+                        ${escapeHTML(guideEmail)}
 
-            const destinations =
+                    </p>
 
-                Array.isArray(
 
-                    request.destinations
+                    <p>
 
-                )
+                        📞
 
-                ?
+                        ${escapeHTML(guidePhone)}
 
-                request.destinations
+                    </p>
 
-                :
-
-                [];
-
-
-
-
-
-
-            const destinationNames =
-
-                destinations.map(
-
-                    place =>
-
-                    place.name ||
-
-                    "Destination"
-
-                )
-
-                .join(", ");
-
-
-
-
-
-
-            card.innerHTML = `
-
-
-
-            <div class="request-card-header">
-
-
-                <h4>
-
-                    🧾
-
-                    ${
-
-                    request.requestId ||
-
-                    "Request"
-
-                    }
-
-                </h4>
-
-
+                </div>
 
 
                 <span class="request-status">
 
-
-                    ${
-
-                    formatRequestStatus(
-
-                        request.status
-
-                    )
-
-                    }
-
+                    ${escapeHTML(
+                      formatRequestStatus(
+                        request.status === "quotation_sent"
+                          ? "quotation_sent"
+                          : quotationStatus,
+                      ),
+                    )}
 
                 </span>
 
+            </div>
+
+
+            <div class="quotation-price">
+
+                ${escapeHTML(quotation.amount ?? "0")}
+
+                ${escapeHTML(quotation.currency || "")}
 
             </div>
 
 
+            <div class="quotation-details">
 
+                <p>
 
+                    📍
 
+                    ${escapeHTML(guideDistrict)}
 
+                </p>
 
-            <div class="request-details-grid">
 
+                <p>
 
+                    🗣️
 
-                <div>
+                    ${escapeHTML(guideLanguages)}
 
+                </p>
 
-                    <span>
 
-                    Destinations
+                <p>
 
-                    </span>
+                    📅
 
+                    Valid Until:
 
+                    ${escapeHTML(formatDashboardDate(quotation.validUntil))}
 
-                    <strong>
-
-                    ${
-
-                    destinationNames ||
-
-                    "None"
-
-                    }
-
-
-                    </strong>
-
-
-                </div>
-
-
-
-
-
-
-                <div>
-
-
-                    <span>
-
-                    Travel Dates
-
-                    </span>
-
-
-
-                    <strong>
-
-
-                    ${
-
-                    request.startDate &&
-
-                    request.endDate
-
-
-                    ?
-
-
-                    request.startDate +
-
-                    " → " +
-
-                    request.endDate
-
-
-                    :
-
-
-                    "Not selected"
-
-
-                    }
-
-
-                    </strong>
-
-
-                </div>
-
-
-
-
-
-
-                <div>
-
-
-                    <span>
-
-                    Travelers
-
-                    </span>
-
-
-
-                    <strong>
-
-
-                    ${
-
-                    request.travelers ||
-
-                    "Not selected"
-
-
-                    }
-
-
-                    </strong>
-
-
-                </div>
-
-
-
-            </div>
-
-
-
-
-
-
-
-            <div class="request-quotation-area">
+                </p>
 
 
                 ${
+                  quotation.included
+                    ? `
 
-                renderQuotation(
+                            <div>
 
-                    request
+                                <strong>
+                                    ✅ What's Included
+                                </strong>
 
-                )
+                                <p>
+                                    ${escapeHTML(quotation.included)}
+                                </p>
 
+                            </div>
 
+                        `
+                    : ""
                 }
 
+
+                ${
+                  quotation.excluded
+                    ? `
+
+                            <div>
+
+                                <strong>
+                                    ❌ What's Not Included
+                                </strong>
+
+                                <p>
+                                    ${escapeHTML(quotation.excluded)}
+                                </p>
+
+                            </div>
+
+                        `
+                    : ""
+                }
+
+
+                ${
+                  quotation.notes
+                    ? `
+
+                            <div>
+
+                                <strong>
+                                    💬 Message from Guide
+                                </strong>
+
+                                <p>
+                                    ${escapeHTML(quotation.notes)}
+                                </p>
+
+                            </div>
+
+                        `
+                    : ""
+                }
 
             </div>
 
 
+            ${actionButtons}
+
+        </div>
+
+    `;
+}
+
+/* ============================================================
+   17. UPDATE REQUEST STATUS
+============================================================ */
+
+async function updateQuotationRequestStatus(request, status) {
+  if (!request?.firebaseId) {
+    throw new Error("Quotation request Firestore ID is missing.");
+  }
+
+  const requestRef = doc(db, REQUEST_COLLECTION, request.firebaseId);
+
+  await updateDoc(requestRef, {
+    status: status,
+
+    updatedAt: serverTimestamp(),
+  });
+}
+
+/* ============================================================
+   18. UPDATE QUOTATION STATUS
+============================================================ */
+
+async function updateQuotationStatus(quotation, status) {
+  if (!quotation?.firebaseId) {
+    throw new Error("Quotation Firestore ID is missing.");
+  }
+
+  const quotationRef = doc(db, QUOTATION_COLLECTION, quotation.firebaseId);
+
+  await updateDoc(quotationRef, {
+    status: status,
+
+    updatedAt: serverTimestamp(),
+  });
+}
+
+/* ============================================================
+   19. FIND REQUEST BY ID
+============================================================ */
+
+async function findRequestById(requestId) {
+  const requests = await getMyQuotationRequests();
+
+  return (
+    requests.find(
+      (request) =>
+        String(request.requestId || "") === String(requestId) ||
+        String(request.firebaseId || "") === String(requestId) ||
+        String(request.id || "") === String(requestId),
+    ) || null
+  );
+}
+
+/* ============================================================
+   20. ACCEPT QUOTATION
+============================================================ */
+
+async function acceptQuotation(requestId, quotationId) {
+  try {
+    if (!currentFirebaseUser) {
+      alert("Please login again.");
+
+      return;
+    }
+
+    const request = await findRequestById(requestId);
+
+    if (!request) {
+      alert("Quotation request not found.");
+
+      return;
+    }
+
+    let quotation = null;
+
+    /*
+           Direct quotation lookup
+        */
+
+    if (quotationId) {
+      const quotationRef = doc(db, QUOTATION_COLLECTION, quotationId);
+
+      const quotationSnapshot = await getDoc(quotationRef);
+
+      if (quotationSnapshot.exists()) {
+        quotation = {
+          firebaseId: quotationSnapshot.id,
+
+          id: quotationSnapshot.id,
+
+          ...quotationSnapshot.data(),
+        };
+      }
+    }
+
+    /*
+           Fallback quotation lookup
+        */
+
+    if (!quotation) {
+      const quotationMap = await getMyQuotations();
+
+      quotation = getQuotationForRequest(request, quotationMap);
+    }
+
+    if (!quotation) {
+      alert("Quotation not found.");
+
+      return;
+    }
+
+    /*
+           Security check
+        */
+
+    if (
+      quotation.touristId &&
+      quotation.touristId !== currentFirebaseUser.uid
+    ) {
+      alert("Access denied.");
+
+      return;
+    }
+
+    /*
+           Update quotation
+        */
+
+    await updateQuotationStatus(quotation, "accepted");
+
+    /*
+           Update request
+        */
+
+    await updateQuotationRequestStatus(request, "quotation_accepted");
+
+    alert("Quotation accepted successfully.");
+
+    await renderQuotationRequests();
+
+    await renderSelectedGuide();
+  } catch (error) {
+    console.error("Accept quotation error:", error);
+
+    alert(error.message || "Unable to accept quotation.");
+  }
+}
+
+/* ============================================================
+   21. REJECT QUOTATION
+============================================================ */
+
+async function rejectQuotation(requestId, quotationId) {
+  try {
+    if (!currentFirebaseUser) {
+      alert("Please login again.");
+
+      return;
+    }
+
+    const request = await findRequestById(requestId);
+
+    if (!request) {
+      alert("Quotation request not found.");
+
+      return;
+    }
+
+    let quotation = null;
+
+    /*
+           Direct quotation lookup
+        */
+
+    if (quotationId) {
+      const quotationRef = doc(db, QUOTATION_COLLECTION, quotationId);
+
+      const quotationSnapshot = await getDoc(quotationRef);
+
+      if (quotationSnapshot.exists()) {
+        quotation = {
+          firebaseId: quotationSnapshot.id,
+
+          id: quotationSnapshot.id,
+
+          ...quotationSnapshot.data(),
+        };
+      }
+    }
+
+    /*
+           Fallback lookup
+        */
+
+    if (!quotation) {
+      const quotationMap = await getMyQuotations();
+
+      quotation = getQuotationForRequest(request, quotationMap);
+    }
+
+    if (!quotation) {
+      alert("Quotation not found.");
+
+      return;
+    }
+
+    /*
+           Security check
+        */
+
+    if (
+      quotation.touristId &&
+      quotation.touristId !== currentFirebaseUser.uid
+    ) {
+      alert("Access denied.");
+
+      return;
+    }
+
+    /*
+           Update quotation
+        */
+
+    await updateQuotationStatus(quotation, "rejected");
+
+    /*
+           Update request
+        */
+
+    await updateQuotationRequestStatus(request, "quotation_rejected");
+
+    alert("Quotation rejected.");
+
+    await renderQuotationRequests();
+
+    await renderSelectedGuide();
+  } catch (error) {
+    console.error("Reject quotation error:", error);
+
+    alert(error.message || "Unable to reject quotation.");
+  }
+}
+
+/* ============================================================
+   22. RENDER QUOTATION REQUESTS
+============================================================ */
+
+async function renderQuotationRequests() {
+  if (!quotationRequestsContainer) {
+    return;
+  }
+
+  if (!currentFirebaseUser) {
+    return;
+  }
+
+  /*
+       Load requests
+    */
+
+  const requests = await getMyQuotationRequests();
+
+  /*
+       Load quotations separately
+    */
+
+  const quotationMap = await getMyQuotations();
+
+  console.log("Requests loaded:", requests);
+
+  console.log("Quotation map:", quotationMap);
+
+  if (dashboardRequestCount) {
+    dashboardRequestCount.textContent = requests.length;
+  }
+
+  if (requests.length === 0) {
+    quotationRequestsContainer.innerHTML = `
+
+            <div class="dashboard-empty-state">
+
+                <div>
+                    📋
+                </div>
+
+                <h4>
+                    No Quotation Requests Yet
+                </h4>
+
+                <p>
+                    Start planning your Sri Lanka journey.
+                </p>
+
+                <a
+                    href="trip-planner.html"
+                    class="dashboard-action-button"
+                >
+                    Plan My Journey
+                </a>
+
+            </div>
+
+        `;
+
+    return;
+  }
+
+  quotationRequestsContainer.innerHTML = "";
+
+  requests.forEach((request) => {
+    const card = document.createElement("article");
+
+    card.className = "quotation-request-card";
+
+    const destinations = Array.isArray(request.destinations)
+      ? request.destinations
+      : [];
+
+    const destinationNames = destinations
+      .map((place) => place.name || "Destination")
+      .join(", ");
+
+    /*
+               Find quotation belonging
+               to this request.
+            */
+
+    const quotation = getQuotationForRequest(request, quotationMap);
+
+    card.innerHTML = `
+
+                <div class="request-card-header">
+
+                    <h4>
+
+                        🧾
+
+                        ${escapeHTML(
+                          request.requestId || request.firebaseId || "Request",
+                        )}
+
+                    </h4>
+
+
+                    <span class="request-status">
+
+                        ${escapeHTML(formatRequestStatus(request.status))}
+
+                    </span>
+
+                </div>
+
+
+                <div class="request-details-grid">
+
+                    <div>
+
+                        <span>
+                            Destinations
+                        </span>
+
+                        <strong>
+
+                            ${escapeHTML(destinationNames || "None")}
+
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Travel Dates
+                        </span>
+
+                        <strong>
+
+                            ${
+                              request.startDate && request.endDate
+                                ? escapeHTML(
+                                    request.startDate + " → " + request.endDate,
+                                  )
+                                : "Not selected"
+                            }
+
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Travelers
+                        </span>
+
+                        <strong>
+
+                            ${escapeHTML(request.travelers || "Not selected")}
+
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="request-quotation-area">
+
+                    ${renderQuotation(request, quotation)}
+
+                </div>
 
             `;
 
+    quotationRequestsContainer.appendChild(card);
+  });
 
-
-
-
-            quotationRequestsContainer.appendChild(
-
-                card
-
-            );
-
-
-
-        }
-
-
-    );
-
-
-
-
-
-    attachQuotationButtons();
-
-
-
+  attachQuotationButtons();
 }
 
-
-
-
-
-
 /* ============================================================
-   17. ATTACH QUOTATION BUTTON EVENTS
+   23. ATTACH ACCEPT / REJECT BUTTONS
 ============================================================ */
 
+function attachQuotationButtons() {
+  document.querySelectorAll(".accept-quotation-button").forEach((button) => {
+    button.addEventListener("click", async () => {
+      button.disabled = true;
 
-function attachQuotationButtons(){
+      await acceptQuotation(
+        button.dataset.requestId,
 
+        button.dataset.quotationId,
+      );
+    });
+  });
 
+  document.querySelectorAll(".reject-quotation-button").forEach((button) => {
+    button.addEventListener("click", async () => {
+      button.disabled = true;
 
-    document
+      await rejectQuotation(
+        button.dataset.requestId,
 
-    .querySelectorAll(
-
-        ".accept-quotation-button"
-
-    )
-
-    .forEach(
-
-        button => {
-
-
-            button.addEventListener(
-
-                "click",
-
-                ()=>{
-
-
-                    acceptQuotation(
-
-                        button.dataset.requestId
-
-                    );
-
-
-                }
-
-            );
-
-
-        }
-
-
-    );
-
-
-
-
-
-
-
-    document
-
-    .querySelectorAll(
-
-        ".reject-quotation-button"
-
-    )
-
-    .forEach(
-
-        button => {
-
-
-            button.addEventListener(
-
-                "click",
-
-                ()=>{
-
-
-                    rejectQuotation(
-
-                        button.dataset.requestId
-
-                    );
-
-
-                }
-
-            );
-
-
-        }
-
-
-    );
-
-
-
+        button.dataset.quotationId,
+      );
+    });
+  });
 }
 
-
-
-
-
-
 /* ============================================================
-   18. RENDER SELECTED GUIDE
+   24. RENDER SELECTED GUIDE
 ============================================================ */
 
+async function renderSelectedGuide() {
+  if (!selectedGuideContainer) {
+    return;
+  }
 
-async function renderSelectedGuide(){
+  const requests = await getMyQuotationRequests();
 
+  /*
+       Find request with selected guide
+    */
 
+  const selectedRequest = requests.find(
+    (request) => request.selectedGuide || request.guideId,
+  );
 
-    if(
-        !selectedGuideContainer
-    ){
+  if (!selectedRequest) {
+    selectedGuideContainer.innerHTML = `
 
-        return;
+            <div class="no-selected-guide">
 
-    }
+                <div>
+                    🧑‍💼
+                </div>
 
+                <h4>
+                    No Guide Selected Yet
+                </h4>
 
+                <p>
+                    Select a registered guide
+                    for your journey.
+                </p>
 
-
-
-    const requests =
-
-        await getMyQuotationRequests();
-
-
-
-
-
-    const selectedRequest =
-
-        requests.find(
-
-            request =>
-
-            request.selectedGuide
-
-        );
-
-
-
-
-
-
-    if(
-        !selectedRequest
-    ){
-
-
-
-        selectedGuideContainer.innerHTML = `
-
-
-        <div class="no-selected-guide">
-
-
-            <div>
-
-            🧑‍💼
+                <a
+                    href="find-guides.html"
+                    class="dashboard-action-button"
+                >
+                    Find Guides
+                </a>
 
             </div>
 
+        `;
 
+    if (dashboardGuideCount) {
+      dashboardGuideCount.textContent = 0;
+    }
+
+    return;
+  }
+
+  /*
+       Selected guide snapshot
+    */
+
+  const guide = selectedRequest.selectedGuide || {
+    uid: selectedRequest.guideId,
+
+    fullName: selectedRequest.guideName,
+
+    email: selectedRequest.guideEmail,
+
+    phone: selectedRequest.guidePhone,
+  };
+
+  selectedGuideContainer.innerHTML = `
+
+        <div class="selected-guide-card">
 
             <h4>
 
-            No Guide Selected Yet
+                🧑‍💼
+
+                ${escapeHTML(
+                  guide.fullName || selectedRequest.guideName || "Guide",
+                )}
 
             </h4>
 
 
+            ${
+              guide.email || selectedRequest.guideEmail
+                ? `
+
+                        <p>
+
+                            📧
+
+                            ${escapeHTML(
+                              guide.email || selectedRequest.guideEmail,
+                            )}
+
+                        </p>
+
+                    `
+                : ""
+            }
+
+
+            ${
+              guide.phone || selectedRequest.guidePhone
+                ? `
+
+                        <p>
+
+                            📞
+
+                            ${escapeHTML(
+                              guide.phone || selectedRequest.guidePhone,
+                            )}
+
+                        </p>
+
+                    `
+                : ""
+            }
+
 
             <p>
 
-            Select a registered guide
-            for your journey.
+                📍
+
+                ${escapeHTML(guide.district || "Sri Lanka")}
 
             </p>
 
 
+            <p>
 
-            <a
+                🗣️
 
-            href="find-guides.html"
+                ${escapeHTML(formatGuideLanguages(guide.languages))}
 
-            class="dashboard-action-button"
-
-            >
-
-            Find Guides
-
-            </a>
+            </p>
 
 
+            <span>
+                ✓ Guide Selected
+            </span>
 
         </div>
 
-
-        `;
-
-
-        if(
-            dashboardGuideCount
-        ){
-
-            dashboardGuideCount.textContent = 0;
-
-        }
-
-
-        return;
-
-
-    }
-
-
-
-
-
-
-    const guide =
-
-        selectedRequest.selectedGuide;
-
-
-
-
-
-
-
-    selectedGuideContainer.innerHTML = `
-
-
-
-    <div class="selected-guide-card">
-
-
-
-        <h4>
-
-        🧑‍💼
-
-        ${
-
-        guide.fullName ||
-
-        "Guide"
-
-        }
-
-
-        </h4>
-
-
-
-        <p>
-
-
-        📍
-
-        ${
-
-        guide.district ||
-
-        "Sri Lanka"
-
-        }
-
-
-        </p>
-
-
-
-        <p>
-
-
-        🗣️
-
-        ${
-
-        Array.isArray(
-
-            guide.languages
-
-        )
-
-
-        ?
-
-
-        guide.languages.join(", ")
-
-
-        :
-
-
-        "Not specified"
-
-
-        }
-
-
-        </p>
-
-
-
-        <span>
-
-
-        ✓ Guide Selected
-
-
-        </span>
-
-
-
-    </div>
-
-
-
     `;
 
-
-
-
-    if(
-        dashboardGuideCount
-    ){
-
-        dashboardGuideCount.textContent = 1;
-
-    }
-
-
-
+  if (dashboardGuideCount) {
+    dashboardGuideCount.textContent = 1;
+  }
 }
 
-
-
-
-
-
 /* ============================================================
-   19. UPDATE DASHBOARD SUMMARY
+   25. UPDATE DASHBOARD SUMMARY
 ============================================================ */
 
+async function updateDashboardSummary() {
+  if (!currentFirebaseUser) {
+    return;
+  }
 
-async function updateDashboardSummary(){
+  const trip = await getTouristTrip(currentFirebaseUser.uid);
 
+  const requests = await getMyQuotationRequests();
 
+  if (dashboardTripCount) {
+    dashboardTripCount.textContent = (trip.destinations || []).length;
+  }
 
-    if(
-        !currentFirebaseUser
-    ){
-
-        return;
-
-    }
-
-
-
-
-
-    const trip =
-
-        await getTouristTrip(
-
-            currentFirebaseUser.uid
-
-        );
-
-
-
-
-
-    const requests =
-
-        await getMyQuotationRequests();
-
-
-
-
-
-
-
-    if(
-        dashboardTripCount
-    ){
-
-        dashboardTripCount.textContent =
-
-        (
-
-            trip.destinations ||
-
-            []
-
-        )
-
-        .length;
-
-
-    }
-
-
-
-
-
-
-    if(
-        dashboardRequestCount
-    ){
-
-        dashboardRequestCount.textContent =
-
-            requests.length;
-
-    }
-
-
-
+  if (dashboardRequestCount) {
+    dashboardRequestCount.textContent = requests.length;
+  }
 }
 
-
-
-
-
-
 /* ============================================================
-   20. FIREBASE LOGOUT
+   26. LOGOUT
 ============================================================ */
 
+async function handleLogout() {
+  try {
+    await signOut(auth);
 
-async function handleLogout(){
-
-
-
-    try{
-
-
-        const {
-
-            signOut
-
-        } = await import(
-
-        "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js"
-
-        );
-
-
-
-
-
-        await signOut(
-
-            auth
-
-        );
-
-
-
-
-
-        window.location.href =
-
-            "index.html";
-
-
-
-    }
-
-
-    catch(error){
-
-
-        console.error(
-
-            "Logout error:",
-
-            error
-
-        );
-
-
-    }
-
-
-
+    window.location.href = "index.html";
+  } catch (error) {
+    console.error("Logout error:", error);
+  }
 }
 
-
-
-
-
-
 /* ============================================================
-   21. PAGE INITIALIZATION
+   27. AUTH STATE
 ============================================================ */
 
+onAuthStateChanged(auth, async (user) => {
+  /*
+           Firebase Authentication is
+           the authoritative identity source.
+        */
 
-onAuthStateChanged(
+  if (!user) {
+    window.location.href = "login.html";
 
-    auth,
+    return;
+  }
 
+  currentFirebaseUser = user;
 
-    async(user)=>{
+  console.log("Tourist Firebase UID:", user.uid);
 
+  console.log("Tourist Firebase Email:", user.email);
 
+  /*
+           Load tourist profile
+        */
 
-        if(
-            !user
-        ){
+  currentTouristProfile = await getTouristProfile(user.uid);
 
+  if (!currentTouristProfile) {
+    console.error("Tourist profile missing:", user.uid);
 
-            window.location.href =
+    return;
+  }
 
-                "login.html";
+  /*
+           Update user information
+        */
 
+  updateDashboardUser();
 
-            return;
+  /*
+           Load dashboard
+        */
 
+  await updateDashboardSummary();
 
-        }
+  await renderDashboardTrip();
 
+  await renderSelectedGuide();
 
+  await renderQuotationRequests();
 
-
-
-        currentFirebaseUser = user;
-
-
-
-
-
-        currentTouristProfile =
-
-            await getTouristProfile(
-
-                user.uid
-
-            );
-
-
-
-
-
-
-        if(
-            !currentTouristProfile
-        ){
-
-
-            console.error(
-
-                "Tourist profile missing"
-
-            );
-
-
-            return;
-
-
-        }
-
-
-
-
-
-
-
-        updateDashboardUser();
-
-
-
-
-        await updateDashboardSummary();
-
-
-
-
-        await renderDashboardTrip();
-
-
-
-
-        await renderSelectedGuide();
-
-
-
-
-        await renderQuotationRequests();
-
-
-
-
-
-
-
-        console.log(
-
-            "LankaQuest Tourist Dashboard Loaded",
-
-            user.uid
-
-        );
-
-
-
-    }
-
-
-);
-
-
-
-
-
+  console.log("LankaQuest Tourist Dashboard Loaded:", user.uid);
+});
 
 /* ============================================================
-   22. LOGOUT BUTTON
+   28. LOGOUT BUTTON
 ============================================================ */
 
-
-if(
-    logoutButton
-){
-
-
-    logoutButton.addEventListener(
-
-        "click",
-
-        handleLogout
-
-    );
-
-
+if (logoutButton) {
+  logoutButton.addEventListener("click", handleLogout);
 }
-
 
 /* ============================================================
    END
