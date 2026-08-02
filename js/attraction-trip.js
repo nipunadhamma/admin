@@ -143,11 +143,62 @@ function isAlreadyInMyTrip(
    6. CREATE DESTINATION OBJECT
 ============================================================ */
 
+
+/* ============================================================
+   6. CREATE DESTINATION OBJECT
+============================================================ */
+
 function getAttractionData() {
 
     if (
         !addToMyTripButton
     ) {
+
+        return null;
+
+    }
+
+
+    /* ========================================================
+       READ COORDINATES
+    ======================================================== */
+
+    let coordinates = [];
+
+
+    try {
+
+        coordinates =
+            JSON.parse(
+                addToMyTripButton.dataset.placeCoordinates ||
+                "[]"
+            );
+
+    } catch (error) {
+
+        console.error(
+            "LankaQuest: Invalid attraction coordinates.",
+            error
+        );
+
+        coordinates = [];
+
+    }
+
+
+    /* ========================================================
+       VALIDATE COORDINATES
+    ======================================================== */
+
+    if (
+        !Array.isArray(coordinates) ||
+        coordinates.length < 2
+    ) {
+
+        console.error(
+            "LankaQuest: Attraction coordinates are missing.",
+            addToMyTripButton.dataset.placeId
+        );
 
         return null;
 
@@ -191,12 +242,20 @@ function getAttractionData() {
             "",
 
 
+        coordinates: [
+            Number(coordinates[0]),
+            Number(coordinates[1])
+        ],
+
+
         page:
             window.location.pathname,
 
     };
 
 }
+
+
 
 
 /* ============================================================

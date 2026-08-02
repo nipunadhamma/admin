@@ -619,6 +619,35 @@ async function loadTrip() {
 
 /* ============================================================
    15. ADD PLACE TO MY TRIP
+
+   FIREBASE + LOCAL PLANNER DRAFT
+
+   Firebase:
+       lankaQuestTouristTrips/{UID}
+
+   Local temporary planner:
+       sriLankaMyTrip
+
+   Live update:
+       lankaquest-trip-updated
+============================================================ */
+
+/* ============================================================
+   15. ADD PLACE TO MY TRIP
+
+   PRODUCTION ARCHITECTURE
+
+   Firebase:
+       lankaQuestTouristTrips/{UID}
+
+   Local planner:
+       sriLankaMyTrip
+
+   Same-tab live update:
+       lankaquest-trip-updated
+
+   Cross-tab update:
+       localStorage "storage" event
 ============================================================ */
 
 async function addPlaceToTrip(
@@ -626,99 +655,169 @@ async function addPlaceToTrip(
     button
 ) {
 
-    if (
-        !currentUser
-    ) {
+    /* ========================================================
+       1. AUTHENTICATION
+    ======================================================== */
+
+    if (!currentUser) {
 
         const redirect =
             encodeURIComponent(
                 "attractions.html"
             );
 
-
         window.location.href =
             `login.html?redirect=${redirect}`;
 
-
-        return;
-
+        return false;
     }
 
 
+    /* ========================================================
+       2. VALIDATE PLACE
+    ======================================================== */
+
+    if (
+        !place ||
+        typeof place !== "object"
+    ) {
+
+        console.error(
+            "❌ LankaQuest: Invalid place supplied.",
+            place
+        );
+
+        return false;
+    }
+
+
+    /* ========================================================
+       3. NORMALIZE PLACE ID
+    ======================================================== */
+
+    const placeId =
+        String(
+            place.id ??
+            place.placeId ??
+            place.slug ??
+            ""
+        ).trim();
+
+
+    if (!placeId) {
+
+        console.error(
+            "❌ LankaQuest: Place has no valid ID.",
+            place
+        );
+
+        return false;
+    }
+
+
+    /* ========================================================
+       4. CHECK CURRENT TRIP DUPLICATE
+    ======================================================== */
+
     if (
         isPlaceInTrip(
-            place.id
+            placeId
         )
     ) {
+
+        console.log(
+            "ℹ️ LankaQuest: Place already exists in My Trip.",
+            placeId
+        );
 
         window.location.href =
             "trip-planner.html";
 
-
-        return;
-
+        return false;
     }
 
 
     try {
 
-        const tripRef =
-            doc(
-                db,
-                TRIP_COLLECTION,
-                currentUser.uid
+        /* ====================================================
+           5. CREATE CLEAN DESTINATION OBJECT
+        ==================================================== */
+
+        const latitude =
+            Number(
+                place.latitude
+            );
+
+
+        const longitude =
+            Number(
+                place.longitude
             );
 
 
         const destinationData = {
 
             id:
-                place.id ||
-                "",
+                placeId,
 
             name:
-                place.name ||
-                "",
+                String(
+                    place.name ?? ""
+                ).trim(),
 
             sinhalaName:
-                place.sinhalaName ||
-                "",
+                String(
+                    place.sinhalaName ?? ""
+                ).trim(),
 
             title:
-                place.title ||
-                "",
+                String(
+                    place.title ?? ""
+                ).trim(),
 
             category:
-                place.category ||
-                "",
+                String(
+                    place.category ?? ""
+                ).trim(),
 
             categoryName:
-                place.categoryName ||
-                "",
+                String(
+                    place.categoryName ?? ""
+                ).trim(),
 
             province:
-                place.province ||
-                "",
+                String(
+                    place.province ?? ""
+                ).trim(),
 
             district:
-                place.district ||
-                "",
+                String(
+                    place.district ?? ""
+                ).trim(),
 
             location:
-                place.location ||
-                "",
+                String(
+                    place.location ?? ""
+                ).trim(),
 
             image:
-                place.image ||
-                "",
+                String(
+                    place.image ?? ""
+                ).trim(),
 
             rating:
-                place.rating ??
-                "",
+                place.rating ?? "",
 
             bestTime:
-                place.bestTime ||
-                "",
+                String(
+                    place.bestTime ?? ""
+                ).trim(),
+
+            latitude:
+                latitude,
+
+            longitude:
+                longitude,
 
             page:
                 getAttractionPath(
@@ -729,6 +828,207 @@ async function addPlaceToTrip(
                 new Date().toISOString()
 
         };
+
+
+        /* ====================================================
+           6. VALIDATE MAP COORDINATES
+        ==================================================== */
+
+        if (
+            !Number.isFinite(
+                latitude
+            ) ||
+            !Number.isFinite(
+                longitude
+            )
+        ) {
+
+            console.error(
+                "❌ LankaQuest: Cannot add place without valid coordinates.",
+                {
+                    id:
+                        placeId,
+
+                    name:
+                        destinationData.name,
+
+                    latitude:
+                        place.latitude,
+
+                    longitude:
+                        place.longitude
+                }
+            );
+
+
+            alert(
+                "This destination does not have valid map coordinates."
+            );
+
+
+            return false;
+        }
+
+
+        /* ====================================================
+           7. READ LOCAL TRIP
+        ==================================================== */
+
+        let localTrip = [];
+
+
+        try {
+
+            const storedTrip =
+                localStorage.getItem(
+                    "sriLankaMyTrip"
+                );
+
+
+            if (storedTrip) {
+
+                const parsedTrip =
+                    JSON.parse(
+                        storedTrip
+                    );
+
+
+                if (
+                    Array.isArray(
+                        parsedTrip
+                    )
+                ) {
+
+                    localTrip =
+                        parsedTrip;
+
+                }
+
+            }
+
+        } catch (
+            storageError
+        ) {
+
+            console.error(
+                "❌ LankaQuest: Failed to read sriLankaMyTrip.",
+                storageError
+            );
+
+
+            throw new Error(
+                "Unable to read your current trip."
+            );
+        }
+
+
+        /* ====================================================
+           8. LOCAL DUPLICATE CHECK
+        ==================================================== */
+
+        const localDuplicate =
+            localTrip.some(
+                destination => {
+
+                    if (
+                        !destination ||
+                        typeof destination !==
+                        "object"
+                    ) {
+
+                        return false;
+                    }
+
+
+                    const existingId =
+                        String(
+                            destination.id ??
+                            destination.placeId ??
+                            destination.slug ??
+                            ""
+                        ).trim();
+
+
+                    return (
+                        existingId ===
+                        placeId
+                    );
+
+                }
+            );
+
+
+        if (
+            localDuplicate
+        ) {
+
+            console.log(
+                "ℹ️ LankaQuest: Place already exists in sriLankaMyTrip.",
+                placeId
+            );
+
+
+            currentTrip =
+                localTrip;
+
+
+            updateTripCounter();
+
+
+            window.location.href =
+                "trip-planner.html";
+
+
+            return false;
+        }
+
+
+        /* ====================================================
+           9. ADD TO LOCAL TRIP FIRST
+
+           This is the source used by the Trip Planner
+           live map.
+
+           IMPORTANT:
+
+           The custom event is dispatched only after the
+           localStorage write succeeds.
+        ==================================================== */
+
+        localTrip.push(
+            destinationData
+        );
+
+
+        localStorage.setItem(
+            "sriLankaMyTrip",
+            JSON.stringify(
+                localTrip
+            )
+        );
+
+
+        /* ====================================================
+           10. UPDATE ATTRACTIONS PAGE STATE
+        ==================================================== */
+
+        currentTrip =
+            localTrip;
+
+
+        updateTripCounter();
+
+
+        /* ====================================================
+           11. FIREBASE SYNC
+        ==================================================== */
+
+        const tripRef =
+            doc(
+                db,
+                TRIP_COLLECTION,
+                currentUser.uid
+            );
 
 
         const snapshot =
@@ -773,13 +1073,9 @@ async function addPlaceToTrip(
         }
 
 
-        currentTrip.push(
-            destinationData
-        );
-
-
-        updateTripCounter();
-
+        /* ====================================================
+           12. UPDATE BUTTON
+        ==================================================== */
 
         if (
             button
@@ -790,34 +1086,173 @@ async function addPlaceToTrip(
             );
 
 
-            button.textContent =
-                "✓ Added to My Trip";
+            button.classList.add(
+                "in-trip"
+            );
+
+
+            button.dataset.added =
+                "true";
+
+
+            const textElement =
+                button.querySelector(
+                    ".add-trip-text"
+                );
+
+
+            if (
+                textElement
+            ) {
+
+                textElement.textContent =
+                    "Added to My Trip";
+
+            } else {
+
+                button.textContent =
+                    "✓ Added to My Trip";
+
+            }
 
         }
 
 
-        console.log(
-            "✅ Added to My Trip:",
-            place.name
+        /* ====================================================
+           13. LIVE CUSTOM EVENT
+
+           IMPORTANT:
+
+           "storage" event does NOT fire in the same tab
+           that changed localStorage.
+
+           Therefore Trip Planner listens for this event.
+
+           trip-map.js should listen for:
+
+               lankaquest-trip-updated
+        ==================================================== */
+
+        window.dispatchEvent(
+            new CustomEvent(
+                "lankaquest-trip-updated",
+                {
+                    detail: {
+
+                        action:
+                            "add",
+
+                        place:
+                            destinationData,
+
+                        trip:
+                            localTrip
+
+                    }
+                }
+            )
         );
+
+
+        /* ====================================================
+           14. PRODUCTION LOG
+        ==================================================== */
+
+        console.log(
+            "✅ LankaQuest: Destination added successfully.",
+            {
+                id:
+                    destinationData.id,
+
+                name:
+                    destinationData.name,
+
+                latitude:
+                    destinationData.latitude,
+
+                longitude:
+                    destinationData.longitude,
+
+                localTripCount:
+                    localTrip.length,
+
+                firebase:
+                    true,
+
+                localStorage:
+                    true,
+
+                liveEvent:
+                    "lankaquest-trip-updated"
+
+            }
+        );
+
+
+        return true;
+
 
     } catch (
         error
     ) {
 
         console.error(
-            "❌ Unable to add destination:",
+            "❌ LankaQuest: Unable to add destination.",
             error
         );
 
 
+        /* ====================================================
+           FIRESTORE PERMISSION
+        ==================================================== */
+
+        if (
+            error.code ===
+            "permission-denied"
+        ) {
+
+            alert(
+                "You do not have permission to add this destination. Please check your account."
+            );
+
+
+            return false;
+        }
+
+
+        /* ====================================================
+           NETWORK
+        ==================================================== */
+
+        if (
+            error.code ===
+            "unavailable"
+        ) {
+
+            alert(
+                "Network error. Please check your internet connection and try again."
+            );
+
+
+            return false;
+        }
+
+
+        /* ====================================================
+           DEFAULT
+        ==================================================== */
+
         alert(
+            error.message ||
             "Unable to add this destination to My Trip. Please try again."
         );
 
+
+        return false;
     }
 
 }
+
 
 
 /* ============================================================

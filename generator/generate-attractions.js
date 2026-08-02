@@ -1553,24 +1553,24 @@ function createIndividualPage(
                 
                <div class="attraction-actions">
 
-                   <button
-                        type="button"
-                        class="attraction-action trip-button"
-                        id="addToMyTripButton"
-                        data-place-id="${escapeHTML(place.id)}"
-                        data-place-name="${escapeHTML(place.name)}"
-                        data-place-image="${escapeHTML(place.image)}"
-                        data-place-province="${escapeHTML(place.province)}"
-                        data-place-district="${escapeHTML(place.district)}"
-                        data-place-location="${escapeHTML(place.location)}"
-                        data-place-rating="${escapeHTML(
-                         place.rating !== ""
-                          ? String(place.rating)
-                           : ""
-                      )}"
-                     >
-                       ❤️ Add to My Trip
-                  </button>
+                 
+<button
+    type="button"
+    class="attraction-action trip-button"
+    id="addToMyTripButton"
+    data-place-id="${escapeHTML(place.id)}"
+    data-place-name="${escapeHTML(place.name)}"
+    data-place-image="${escapeHTML(place.image)}"
+    data-place-province="${escapeHTML(place.province)}"
+    data-place-district="${escapeHTML(place.district)}"
+    data-place-location="${escapeHTML(place.location)}"
+    data-place-rating="${escapeHTML(place.rating !== "" ? String(place.rating) : "")}"
+    data-place-coordinates="${escapeHTML(JSON.stringify(place.coordinates || []))}"
+>
+    ❤️ Add to My Trip
+</button>
+
+
 
 
                    <a

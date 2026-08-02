@@ -1491,7 +1491,9 @@ function startTripWatcher() {
 
         }
     );
-    window.addEventListener("lankaquest-trip-updated", () => {
+    window.addEventListener(
+        "lankaquest-trip-updated",
+         () => {
       updateTripMap(true);
     });
 
