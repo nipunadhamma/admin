@@ -2,45 +2,36 @@
 /* ============================================================
    LANKAQUEST
    ATTRACTIONS SYSTEM
-   FINAL VERSION
+   FINAL SEARCH-INDEX VERSION
 
    DATA SOURCE
-      js/places.js
-          ↓
-      window.touristPlaces
-          ↓
-      attractions.html
 
-   STRUCTURE
-
-      Province
-          ↓
-      District
-          ↓
-      Attraction
+      generator/generate-attractions.js
+                    ↓
+      data/generated/search-index.json
+                    ↓
+      js/attractions.js
 
    FEATURES
 
-      • Automatic province generation
-      • Automatic district generation
-      • Automatic attraction cards
-      • Featured attractions
-      • Search
-      • Province filtering
-      • Sinhala name search
-      • Category search
-      • District search
-      • Location search
-      • Rating
-      • Best time
-      • Destination page navigation
-      • Firebase My Trip
-      • Mobile menu
+      ✔ Generated search index
+      ✔ Live search dropdown
+      ✔ English search
+      ✔ Sinhala search
+      ✔ Province search
+      ✔ District search
+      ✔ Category search
+      ✔ Attraction navigation
+      ✔ Province filtering
+      ✔ Firebase My Trip
+      ✔ Mobile menu
+      ✔ No places.js dependency
+      ✔ No place.page dependency
 ============================================================ */
 
 
 /* ============================================================
-   FIREBASE
+   1. FIREBASE
 ============================================================ */
 
 import {
@@ -64,32 +55,38 @@ import {
 
 
 /* ============================================================
-   DATA SOURCE CHECK
+   2. CONFIGURATION
 ============================================================ */
 
-const touristPlaces = Array.isArray(
-    window.touristPlaces
-)
-    ? window.touristPlaces
-    : [];
+const SEARCH_INDEX_URL =
+    "data/generated/search-index.json";
 
-
-console.log(
-    "🇱🇰 LankaQuest Places:",
-    touristPlaces.length
-);
-
-
-/* ============================================================
-   FIRESTORE COLLECTION
-============================================================ */
 
 const TRIP_COLLECTION =
     "lankaQuestTouristTrips";
 
 
 /* ============================================================
-   DOM ELEMENTS
+   3. STATE
+============================================================ */
+
+let places = [];
+
+let currentProvince =
+    "all";
+
+let currentUser =
+    null;
+
+let currentTrip =
+    [];
+
+let searchTimer =
+    null;
+
+
+/* ============================================================
+   4. DOM ELEMENTS
 ============================================================ */
 
 const attractionSearch =
@@ -98,15 +95,9 @@ const attractionSearch =
     );
 
 
-const clearAttractionSearch =
+const attractionSearchResults =
     document.getElementById(
-        "clearAttractionSearch"
-    );
-
-
-const attractionSearchInfo =
-    document.getElementById(
-        "attractionSearchInfo"
+        "attractionSearchResults"
     );
 
 
@@ -122,33 +113,9 @@ const provinceGrid =
     );
 
 
-const featuredAttractions =
-    document.getElementById(
-        "featuredAttractions"
-    );
-
-
-const featuredSection =
-    document.getElementById(
-        "featuredSection"
-    );
-
-
 const noProvinceResults =
     document.getElementById(
         "noProvinceResults"
-    );
-
-
-const resetAttractionSearch =
-    document.getElementById(
-        "resetAttractionSearch"
-    );
-
-
-const attractionsLoading =
-    document.getElementById(
-        "attractionsLoading"
     );
 
 
@@ -177,30 +144,12 @@ const tripCounter =
 
 
 /* ============================================================
-   STATE
+   5. NORMALIZE TEXT
 ============================================================ */
 
-let currentProvince =
-    "all";
-
-
-let currentSearch =
-    "";
-
-
-let currentUser =
-    null;
-
-
-let currentTrip =
-    [];
-
-
-/* ============================================================
-   TEXT NORMALIZER
-============================================================ */
-
-function normalizeText(value) {
+function normalizeText(
+    value
+) {
 
     return String(
         value ?? ""
@@ -212,30 +161,37 @@ function normalizeText(value) {
 
 
 /* ============================================================
-   HTML ESCAPE
+   6. ESCAPE HTML
 ============================================================ */
 
-function escapeHTML(value) {
+function escapeHTML(
+    value
+) {
 
     return String(
         value ?? ""
     )
+
         .replace(
             /&/g,
             "&amp;"
         )
+
         .replace(
             /</g,
             "&lt;"
         )
+
         .replace(
             />/g,
             "&gt;"
         )
+
         .replace(
             /"/g,
             "&quot;"
         )
+
         .replace(
             /'/g,
             "&#039;"
@@ -245,24 +201,31 @@ function escapeHTML(value) {
 
 
 /* ============================================================
-   SLUG
+   7. SLUGIFY
 ============================================================ */
 
-function slugify(value) {
+function slugify(
+    value
+) {
 
     return String(
         value ?? ""
     )
-        .toLowerCase()
+
         .trim()
+
+        .toLowerCase()
+
         .replace(
             /&/g,
             "and"
         )
+
         .replace(
             /[^a-z0-9]+/g,
             "-"
         )
+
         .replace(
             /^-+|-+$/g,
             "");
@@ -271,31 +234,27 @@ function slugify(value) {
 
 
 /* ============================================================
-   GET PLACE IMAGE
+   8. GET ATTRACTION PATH
 ============================================================ */
 
-function getPlaceImage(place) {
+/*
+   search-index.json already contains:
 
-    if (
-        place &&
-        place.image
-    ) {
+   attractions-generated/
+   province/
+   district/
+   attraction.html
 
-        return place.image;
+   Therefore use the generated page path
+   directly when available.
 
-    }
+   This keeps the browser and generator
+   architecture synchronized.
+*/
 
-
-    return "";
-
-}
-
-
-/* ============================================================
-   GET PLACE PAGE
-============================================================ */
-
-function getPlacePage(place) {
+function getAttractionPath(
+    place
+) {
 
     if (
         place &&
@@ -307,28 +266,221 @@ function getPlacePage(place) {
     }
 
 
-    /*
-       Fallback
-
-       This allows future places that do not yet
-       have a page field.
-    */
-
-    const id =
-        place.id ||
-        slugify(place.name);
+    const provinceSlug =
+        slugify(
+            place.province
+        );
 
 
-    return `destinations/${id}.html`;
+    const districtSlug =
+        slugify(
+            place.district
+        );
+
+
+    const attractionSlug =
+        slugify(
+            place.id ||
+            place.name
+        );
+
+
+    return (
+        `attractions-generated/` +
+        `${provinceSlug}/` +
+        `${districtSlug}/` +
+        `${attractionSlug}.html`
+    );
 
 }
 
 
 /* ============================================================
-   CHECK TRIP
+   9. SEARCH TEXT
 ============================================================ */
 
-function isPlaceInTrip(placeId) {
+function getSearchText(
+    place
+) {
+
+    return [
+
+        place.id,
+
+        place.name,
+
+        place.sinhalaName,
+
+        place.title,
+
+        place.category,
+
+        place.categoryName,
+
+        place.province,
+
+        place.district,
+
+        place.location,
+
+        place.shortDescription,
+
+        place.description,
+
+        place.bestTime
+
+    ]
+
+        .filter(Boolean)
+
+        .join(" ")
+
+        .toLowerCase();
+
+}
+
+
+/* ============================================================
+   10. LOAD SEARCH INDEX
+============================================================ */
+
+async function loadSearchIndex() {
+
+    try {
+
+        console.log(
+            "🔎 Loading LankaQuest search index..."
+        );
+
+
+        const response =
+            await fetch(
+                SEARCH_INDEX_URL,
+                {
+                    cache:
+                        "no-cache"
+                }
+            );
+
+
+        if (
+            !response.ok
+        ) {
+
+            throw new Error(
+                `HTTP ${response.status}`
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !Array.isArray(data)
+        ) {
+
+            throw new Error(
+                "Search index is not an array."
+            );
+
+        }
+
+
+        places =
+            data.filter(
+                place =>
+                    place &&
+                    !place.hide
+            );
+
+
+        console.log(
+            `🇱🇰 LankaQuest search index loaded: ${places.length} places`
+        );
+
+
+        return true;
+
+    } catch (
+        error
+    ) {
+
+        console.error(
+            "❌ Unable to load search index:",
+            error
+        );
+
+
+        places =
+            [];
+
+
+        showSearchIndexError();
+
+
+        return false;
+
+    }
+
+}
+
+
+/* ============================================================
+   11. SEARCH INDEX ERROR
+============================================================ */
+
+function showSearchIndexError() {
+
+    if (
+        noProvinceResults
+    ) {
+
+        noProvinceResults.hidden =
+            false;
+
+
+        const title =
+            noProvinceResults.querySelector(
+                "h3"
+            );
+
+
+        const message =
+            noProvinceResults.querySelector(
+                "p"
+            );
+
+
+        if (title) {
+
+            title.textContent =
+                "Unable to load attractions";
+
+        }
+
+
+        if (message) {
+
+            message.textContent =
+                "Please refresh the page and try again.";
+
+        }
+
+    }
+
+}
+
+
+/* ============================================================
+   12. IS PLACE IN MY TRIP
+============================================================ */
+
+function isPlaceInTrip(
+    placeId
+) {
 
     return currentTrip.some(
         destination => {
@@ -358,827 +510,13 @@ function isPlaceInTrip(placeId) {
 
 
 /* ============================================================
-   CREATE PLACE SEARCH TEXT
+   13. UPDATE TRIP COUNTER
 ============================================================ */
 
-function getPlaceSearchText(place) {
-
-    return [
-
-        place.id,
-
-        place.name,
-
-        place.sinhalaName,
-
-        place.title,
-
-        place.shortDescription,
-
-        place.description,
-
-        place.category,
-
-        place.categoryName,
-
-        place.province,
-
-        place.district,
-
-        place.location,
-
-        place.bestTime
-
-    ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-
-}
-
-
-/* ============================================================
-   CREATE PROVINCE DATA
-============================================================ */
-
-function getProvinceData() {
-
-    const provinceMap =
-        new Map();
-
-
-    touristPlaces.forEach(
-        place => {
-
-            const provinceName =
-                place.province ||
-                "Unknown Province";
-
-
-            const provinceSlug =
-                slugify(
-                    provinceName
-                );
-
-
-            if (
-                !provinceMap.has(
-                    provinceSlug
-                )
-            ) {
-
-                provinceMap.set(
-                    provinceSlug,
-                    {
-
-                        name:
-                            provinceName,
-
-                        slug:
-                            provinceSlug,
-
-                        places: []
-
-                    }
-                );
-
-            }
-
-
-            provinceMap
-                .get(
-                    provinceSlug
-                )
-                .places
-                .push(
-                    place
-                );
-
-        }
-    );
-
-
-    return Array.from(
-        provinceMap.values()
-    );
-
-}
-
-
-/* ============================================================
-   CREATE PROVINCE FILTER BUTTONS
-============================================================ */
-
-function renderProvinceFilters() {
-
-    if (!provinceFilter) {
-
-        return;
-
-    }
-
-
-    const provinces =
-        getProvinceData();
-
-
-    provinceFilter.innerHTML = "";
-
-
-    /*
-       ALL PROVINCES
-    */
-
-    const allButton =
-        document.createElement(
-            "button"
-        );
-
-
-    allButton.type =
-        "button";
-
-
-    allButton.className =
-        "province-filter-button active";
-
-
-    allButton.dataset.province =
-        "all";
-
-
-    allButton.textContent =
-        `All Provinces (${touristPlaces.length})`;
-
-
-    provinceFilter.appendChild(
-        allButton
-    );
-
-
-    /*
-       INDIVIDUAL PROVINCES
-    */
-
-    provinces.forEach(
-        province => {
-
-            const button =
-                document.createElement(
-                    "button"
-                );
-
-
-            button.type =
-                "button";
-
-
-            button.className =
-                "province-filter-button";
-
-
-            button.dataset.province =
-                province.slug;
-
-
-            button.textContent =
-                `${province.name} (${province.places.length})`;
-
-
-            provinceFilter.appendChild(
-                button
-            );
-
-        }
-    );
-
-
-    /*
-       CLICK HANDLER
-    */
-
-    provinceFilter
-        .querySelectorAll(
-            ".province-filter-button"
-        )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        currentProvince =
-                            button.dataset.province ||
-                            "all";
-
-
-                        provinceFilter
-                            .querySelectorAll(
-                                ".province-filter-button"
-                            )
-                            .forEach(
-                                item => {
-
-                                    item.classList
-                                        .toggle(
-                                            "active",
-                                            item ===
-                                            button
-                                        );
-
-                                }
-                            );
-
-
-                        renderAttractions();
-
-                    }
-                );
-
-            }
-        );
-
-}
-
-
-/* ============================================================
-   CREATE FEATURED CARD
-============================================================ */
-
-function createAttractionCard(
-    place
-) {
-
-    const article =
-        document.createElement(
-            "article"
-        );
-
-
-    article.className =
-        "attraction-card";
-
-
-    article.dataset.placeId =
-        place.id || "";
-
-
-    article.dataset.search =
-        getPlaceSearchText(
-            place
-        );
-
-
-    const image =
-        getPlaceImage(
-            place
-        );
-
-
-    const page =
-        getPlacePage(
-            place
-        );
-
-
-    const rating =
-        place.rating !==
-            undefined &&
-        place.rating !==
-            null &&
-        place.rating !==
-            ""
-            ? `⭐ ${escapeHTML(place.rating)}`
-            : "";
-
-
-    const featuredBadge =
-        place.featured
-            ? `
-                <span class="featured">
-                    ⭐ Featured
-                </span>
-              `
-            : "";
-
-
-    const sinhalaName =
-        place.sinhalaName
-            ? `
-                <div class="attraction-sinhala-name">
-                    ${escapeHTML(
-                        place.sinhalaName
-                    )}
-                </div>
-              `
-            : "";
-
-
-    const bestTime =
-        place.bestTime
-            ? `
-                <span>
-                    🗓️ ${escapeHTML(
-                        place.bestTime
-                    )}
-                </span>
-              `
-            : "";
-
-
-    const tripAdded =
-        isPlaceInTrip(
-            place.id
-        );
-
-
-    const tripButtonText =
-        tripAdded
-            ? "✓ Added to My Trip"
-            : "❤️ Add to My Trip";
-
-
-    const imageHTML =
-        image
-            ? `
-                <div class="attraction-image">
-
-                    <img
-                        src="${escapeHTML(image)}"
-                        alt="${escapeHTML(
-                            place.name
-                        )}"
-                        loading="lazy"
-                    >
-
-                </div>
-              `
-            : `
-                <div class="attraction-image">
-
-                    <div class="province-placeholder">
-                        🇱🇰
-                    </div>
-
-                </div>
-              `;
-
-
-    article.innerHTML = `
-
-        ${imageHTML}
-
-
-        <div class="attraction-content">
-
-
-            ${featuredBadge}
-
-
-            <span class="attraction-category">
-
-                ${escapeHTML(
-                    place.categoryName ||
-                    place.category ||
-                    "Attraction"
-                )}
-
-            </span>
-
-
-            <h3>
-
-                ${escapeHTML(
-                    place.name ||
-                    "Unnamed Attraction"
-                )}
-
-            </h3>
-
-
-            ${sinhalaName}
-
-
-            <p>
-
-                ${escapeHTML(
-                    place.shortDescription ||
-                    place.description ||
-                    ""
-                )}
-
-            </p>
-
-
-            <div class="attraction-meta">
-
-
-                <span>
-
-                    📍
-                    ${escapeHTML(
-                        place.district ||
-                        ""
-                    )}
-
-                </span>
-
-
-                ${
-                    rating
-                        ? `
-                            <span>
-                                ${rating}
-                            </span>
-                          `
-                        : ""
-                }
-
-
-            </div>
-
-
-            ${
-                bestTime
-                    ? `
-                        <div class="attraction-best-time">
-                            ${bestTime}
-                        </div>
-                      `
-                    : ""
-            }
-
-
-            <div class="attraction-actions">
-
-
-                <a
-                    href="${escapeHTML(page)}"
-                    class="attraction-action view-place"
-                >
-
-                    View Details →
-
-                </a>
-
-
-                <button
-                    type="button"
-                    class="attraction-action trip-button ${
-                        tripAdded
-                            ? "added"
-                            : ""
-                    }"
-                    data-place-id="${escapeHTML(
-                        place.id ||
-                        ""
-                    )}"
-                >
-
-                    ${tripButtonText}
-
-                </button>
-
-
-            </div>
-
-
-        </div>
-
-    `;
-
-
-    /*
-       ADD TO TRIP
-    */
-
-    const tripButton =
-        article.querySelector(
-            ".trip-button"
-        );
-
-
-    if (tripButton) {
-
-        tripButton.addEventListener(
-            "click",
-            async () => {
-
-                await addPlaceToTrip(
-                    place,
-                    tripButton
-                );
-
-            }
-        );
-
-    }
-
-
-    return article;
-
-}
-
-
-/* ============================================================
-   CREATE DISTRICT SECTION
-============================================================ */
-
-function createDistrictSection(
-    district
-) {
-
-    const section =
-        document.createElement(
-            "section"
-        );
-
-
-    section.className =
-        "district-section";
-
-
-    section.dataset.district =
-        district.slug;
-
-
-    section.innerHTML = `
-
-        <div class="district-header">
-
-
-            <h2>
-
-                📍
-                ${escapeHTML(
-                    district.name
-                )}
-
-            </h2>
-
-
-            <p>
-
-                ${district.places.length}
-                attraction${
-                    district.places.length ===
-                    1
-                        ? ""
-                        : "s"
-                }
-
-            </p>
-
-
-        </div>
-
-
-        <div class="attraction-grid">
-
-        </div>
-
-    `;
-
-
-    const grid =
-        section.querySelector(
-            ".attraction-grid"
-        );
-
-
-    district.places.forEach(
-        place => {
-
-            grid.appendChild(
-                createAttractionCard(
-                    place
-                )
-            );
-
-        }
-    );
-
-
-    return section;
-
-}
-
-
-/* ============================================================
-   CREATE PROVINCE SECTION
-============================================================ */
-
-function createProvinceSection(
-    province
-) {
-
-    const section =
-        document.createElement(
-            "section"
-        );
-
-
-    section.className =
-        "province-section";
-
-
-    section.dataset.province =
-        province.slug;
-
-
-    const districtMap =
-        new Map();
-
-
-    province.places.forEach(
-        place => {
-
-            const districtName =
-                place.district ||
-                "Unknown District";
-
-
-            const districtSlug =
-                slugify(
-                    districtName
-                );
-
-
-            if (
-                !districtMap.has(
-                    districtSlug
-                )
-            ) {
-
-                districtMap.set(
-                    districtSlug,
-                    {
-
-                        name:
-                            districtName,
-
-                        slug:
-                            districtSlug,
-
-                        places: []
-
-                    }
-                );
-
-            }
-
-
-            districtMap
-                .get(
-                    districtSlug
-                )
-                .places
-                .push(
-                    place
-                );
-
-        }
-    );
-
-
-    const districts =
-        Array.from(
-            districtMap.values()
-        );
-
-
-    section.innerHTML = `
-
-        <div class="province-detail-hero">
-
-
-            <h2>
-
-                ${escapeHTML(
-                    province.name
-                )}
-
-            </h2>
-
-
-            <p>
-
-                Explore
-                ${province.places.length}
-                attractions across
-                ${districts.length}
-                district${
-                    districts.length ===
-                    1
-                        ? ""
-                        : "s"
-                }.
-
-            </p>
-
-
-        </div>
-
-
-        <div class="province-districts">
-
-        </div>
-
-    `;
-
-
-    const districtsContainer =
-        section.querySelector(
-            ".province-districts"
-        );
-
-
-    districts.forEach(
-        district => {
-
-            districtsContainer.appendChild(
-                createDistrictSection(
-                    district
-                )
-            );
-
-        }
-    );
-
-
-    return section;
-
-}
-
-
-/* ============================================================
-   FILTER PLACES
-============================================================ */
-
-function getFilteredPlaces() {
-
-    return touristPlaces.filter(
-        place => {
-
-            /*
-               PROVINCE
-            */
-
-            const provinceMatch =
-                currentProvince ===
-                    "all" ||
-                slugify(
-                    place.province
-                ) ===
-                    currentProvince;
-
-
-            if (!provinceMatch) {
-
-                return false;
-
-            }
-
-
-            /*
-               SEARCH
-            */
-
-            if (
-                !currentSearch
-            ) {
-
-                return true;
-
-            }
-
-
-            const searchableText =
-                getPlaceSearchText(
-                    place
-                );
-
-
-            return searchableText
-                .includes(
-                    currentSearch
-                );
-
-        }
-    );
-
-}
-
-
-/* ============================================================
-   RENDER FEATURED
-============================================================ */
-
-function renderFeatured() {
+function updateTripCounter() {
 
     if (
-        !featuredAttractions
+        !tripCounter
     ) {
 
         return;
@@ -1186,395 +524,22 @@ function renderFeatured() {
     }
 
 
-    const featured =
-        touristPlaces
-            .filter(
-                place =>
-                    Boolean(
-                        place.featured
-                    )
-            )
-            .slice(
-                0,
-                12
-            );
-
-
-    featuredAttractions.innerHTML =
-        "";
-
-
-    if (
-        featured.length ===
-        0
-    ) {
-
-        if (
-            featuredSection
-        ) {
-
-            featuredSection.hidden =
-                true;
-
-        }
-
-        return;
-
-    }
-
-
-    if (
-        featuredSection
-    ) {
-
-        featuredSection.hidden =
-            false;
-
-    }
-
-
-    featured.forEach(
-        place => {
-
-            featuredAttractions.appendChild(
-                createAttractionCard(
-                    place
-                )
-            );
-
-        }
-    );
-
-}
-
-
-/* ============================================================
-   RENDER MAIN ATTRACTIONS
-============================================================ */
-
-function renderAttractions() {
-
-    if (
-        !provinceGrid
-    ) {
-
-        return;
-
-    }
-
-
-    provinceGrid.innerHTML =
-        "";
-
-
-    const filteredPlaces =
-        getFilteredPlaces();
-
-
-    /*
-       SEARCH INFO
-    */
-
-    if (
-        attractionSearchInfo
-    ) {
-
-        if (
-            currentSearch
-        ) {
-
-            attractionSearchInfo.textContent =
-                `${filteredPlaces.length} attraction${
-                    filteredPlaces.length ===
-                    1
-                        ? ""
-                        : "s"
-                } found for "${currentSearch}"`;
-
-        } else {
-
-            attractionSearchInfo.textContent =
-                `${filteredPlaces.length} attractions`;
-
-        }
-
-    }
-
-
-    /*
-       NO RESULTS
-    */
-
-    if (
-        filteredPlaces.length ===
-        0
-    ) {
-
-        if (
-            noProvinceResults
-        ) {
-
-            noProvinceResults.hidden =
-                false;
-
-        }
-
-
-        return;
-
-    }
-
-
-    if (
-        noProvinceResults
-    ) {
-
-        noProvinceResults.hidden =
-            true;
-
-    }
-
-
-    /*
-       GROUP BY PROVINCE
-    */
-
-    const provinceMap =
-        new Map();
-
-
-    filteredPlaces.forEach(
-        place => {
-
-            const provinceName =
-                place.province ||
-                "Unknown Province";
-
-
-            const provinceSlug =
-                slugify(
-                    provinceName
-                );
-
-
-            if (
-                !provinceMap.has(
-                    provinceSlug
-                )
-            ) {
-
-                provinceMap.set(
-                    provinceSlug,
-                    {
-
-                        name:
-                            provinceName,
-
-                        slug:
-                            provinceSlug,
-
-                        places: []
-
-                    }
-                );
-
-            }
-
-
-            provinceMap
-                .get(
-                    provinceSlug
-                )
-                .places
-                .push(
-                    place
-                );
-
-        }
-    );
-
-
-    /*
-       CREATE PROVINCE SECTIONS
-    */
-
-    provinceMap.forEach(
-        province => {
-
-            provinceGrid.appendChild(
-                createProvinceSection(
-                    province
-                )
-            );
-
-        }
-    );
-
-
-    /*
-       SEARCH RESULT SCROLL
-
-       If user searched, move to
-       results instead of staying
-       at the top of the page.
-    */
-
-    if (
-        currentSearch
-    ) {
-
-        setTimeout(
-            () => {
-
-                provinceGrid.scrollIntoView(
-                    {
-                        behavior:
-                            "smooth",
-
-                        block:
-                            "start"
-
-                    }
-                );
-
-            },
-            50
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   SEARCH
-============================================================ */
-
-function handleSearch(
-    value
-) {
-
-    currentSearch =
-        normalizeText(
-            value
+    tripCounter.textContent =
+        String(
+            currentTrip.length
         );
 
 
-    if (
-        clearAttractionSearch
-    ) {
-
-        clearAttractionSearch.hidden =
-            !currentSearch;
-
-    }
-
-
-    renderAttractions();
+    tripCounter.style.display =
+        currentTrip.length > 0
+            ? ""
+            : "none";
 
 }
 
 
 /* ============================================================
-   CLEAR SEARCH
-============================================================ */
-
-function clearSearch() {
-
-    currentSearch =
-        "";
-
-
-    if (
-        attractionSearch
-    ) {
-
-        attractionSearch.value =
-            "";
-
-    }
-
-
-    if (
-        clearAttractionSearch
-    ) {
-
-        clearAttractionSearch.hidden =
-            true;
-
-    }
-
-
-    renderAttractions();
-
-}
-
-
-/* ============================================================
-   RESET ALL FILTERS
-============================================================ */
-
-function resetFilters() {
-
-    currentProvince =
-        "all";
-
-
-    currentSearch =
-        "";
-
-
-    if (
-        attractionSearch
-    ) {
-
-        attractionSearch.value =
-            "";
-
-    }
-
-
-    if (
-        clearAttractionSearch
-    ) {
-
-        clearAttractionSearch.hidden =
-            true;
-
-    }
-
-
-    if (
-        provinceFilter
-    ) {
-
-        provinceFilter
-            .querySelectorAll(
-                ".province-filter-button"
-            )
-            .forEach(
-                button => {
-
-                    button.classList.toggle(
-                        "active",
-
-                        button.dataset.province ===
-                            "all"
-                    );
-
-                }
-            );
-
-    }
-
-
-    renderAttractions();
-
-}
-
-
-/* ============================================================
-   FIREBASE TRIP
+   14. LOAD MY TRIP
 ============================================================ */
 
 async function loadTrip() {
@@ -1585,7 +550,6 @@ async function loadTrip() {
 
         currentTrip =
             [];
-
 
         updateTripCounter();
 
@@ -1604,23 +568,18 @@ async function loadTrip() {
             );
 
 
-        const tripSnapshot =
+        const snapshot =
             await getDoc(
                 tripRef
             );
 
 
         if (
-            !tripSnapshot.exists()
+            snapshot.exists()
         ) {
 
-            currentTrip =
-                [];
-
-        } else {
-
             const data =
-                tripSnapshot.data();
+                snapshot.data();
 
 
             currentTrip =
@@ -1630,15 +589,19 @@ async function loadTrip() {
                     ? data.destinations
                     : [];
 
-        }
+        } else {
 
+            currentTrip =
+                [];
+
+        }
 
     } catch (
         error
     ) {
 
         console.error(
-            "❌ Trip loading error:",
+            "❌ My Trip loading error:",
             error
         );
 
@@ -1655,44 +618,13 @@ async function loadTrip() {
 
 
 /* ============================================================
-   UPDATE TRIP COUNTER
-============================================================ */
-
-function updateTripCounter() {
-
-    if (
-        !tripCounter
-    ) {
-
-        return;
-
-    }
-
-
-    tripCounter.textContent =
-        currentTrip.length;
-
-
-    tripCounter.style.display =
-        currentTrip.length > 0
-            ? ""
-            : "none";
-
-}
-
-
-/* ============================================================
-   ADD PLACE TO TRIP
+   15. ADD PLACE TO MY TRIP
 ============================================================ */
 
 async function addPlaceToTrip(
     place,
     button
 ) {
-
-    /*
-       LOGIN REQUIRED
-    */
 
     if (
         !currentUser
@@ -1713,20 +645,11 @@ async function addPlaceToTrip(
     }
 
 
-    /*
-       ALREADY ADDED
-    */
-
     if (
         isPlaceInTrip(
             place.id
         )
     ) {
-
-        /*
-           Go to My Trip instead of
-           adding duplicate.
-        */
 
         window.location.href =
             "trip-planner.html";
@@ -1747,55 +670,60 @@ async function addPlaceToTrip(
             );
 
 
-        /*
-           Store the complete destination
-           snapshot.
-
-           This means the trip planner does
-           not need to search places.js
-           to display the saved destination.
-        */
-
         const destinationData = {
 
             id:
-                place.id,
+                place.id ||
+                "",
 
             name:
-                place.name || "",
+                place.name ||
+                "",
 
             sinhalaName:
-                place.sinhalaName || "",
+                place.sinhalaName ||
+                "",
 
             title:
-                place.title || "",
+                place.title ||
+                "",
 
             category:
-                place.category || "",
+                place.category ||
+                "",
 
             categoryName:
-                place.categoryName || "",
+                place.categoryName ||
+                "",
 
             province:
-                place.province || "",
+                place.province ||
+                "",
 
             district:
-                place.district || "",
+                place.district ||
+                "",
 
             location:
-                place.location || "",
+                place.location ||
+                "",
 
             image:
-                place.image || "",
+                place.image ||
+                "",
 
             rating:
-                place.rating ?? "",
+                place.rating ??
+                "",
 
             bestTime:
-                place.bestTime || "",
+                place.bestTime ||
+                "",
 
             page:
-                place.page || "",
+                getAttractionPath(
+                    place
+                ),
 
             addedAt:
                 new Date().toISOString()
@@ -1803,14 +731,14 @@ async function addPlaceToTrip(
         };
 
 
-        const tripSnapshot =
+        const snapshot =
             await getDoc(
                 tripRef
             );
 
 
         if (
-            tripSnapshot.exists()
+            snapshot.exists()
         ) {
 
             await updateDoc(
@@ -1845,10 +773,6 @@ async function addPlaceToTrip(
         }
 
 
-        /*
-           Update local state
-        */
-
         currentTrip.push(
             destinationData
         );
@@ -1857,11 +781,9 @@ async function addPlaceToTrip(
         updateTripCounter();
 
 
-        /*
-           Update button
-        */
-
-        if (button) {
+        if (
+            button
+        ) {
 
             button.classList.add(
                 "added"
@@ -1878,7 +800,6 @@ async function addPlaceToTrip(
             "✅ Added to My Trip:",
             place.name
         );
-
 
     } catch (
         error
@@ -1900,7 +821,878 @@ async function addPlaceToTrip(
 
 
 /* ============================================================
-   MOBILE MENU
+   16. CREATE PROVINCE FILTERS
+============================================================ */
+
+function renderProvinceFilters() {
+
+    if (
+        !provinceFilter
+    ) {
+
+        return;
+
+    }
+
+
+    const provinceMap =
+        new Map();
+
+
+    places.forEach(
+        place => {
+
+            const slug =
+                slugify(
+                    place.province
+                );
+
+
+            if (
+                !slug
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                !provinceMap.has(
+                    slug
+                )
+            ) {
+
+                provinceMap.set(
+                    slug,
+                    {
+
+                        name:
+                            place.province,
+
+                        count:
+                            0
+
+                    }
+                );
+
+            }
+
+
+            provinceMap.get(
+                slug
+            ).count++;
+
+        }
+    );
+
+
+    provinceFilter.innerHTML =
+        "";
+
+
+    const allButton =
+        document.createElement(
+            "button"
+        );
+
+
+    allButton.type =
+        "button";
+
+
+    allButton.className =
+        "province-filter-button active";
+
+
+    allButton.dataset.province =
+        "all";
+
+
+    allButton.textContent =
+        `All Provinces (${places.length})`;
+
+
+    provinceFilter.appendChild(
+        allButton
+    );
+
+
+    provinceMap.forEach(
+        (
+            province,
+            slug
+        ) => {
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+
+            button.type =
+                "button";
+
+
+            button.className =
+                "province-filter-button";
+
+
+            button.dataset.province =
+                slug;
+
+
+            button.textContent =
+                `${province.name} (${province.count})`;
+
+
+            provinceFilter.appendChild(
+                button
+            );
+
+        }
+    );
+
+
+    provinceFilter
+        .querySelectorAll(
+            ".province-filter-button"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        currentProvince =
+                            button.dataset.province ||
+                            "all";
+
+
+                        provinceFilter
+                            .querySelectorAll(
+                                ".province-filter-button"
+                            )
+                            .forEach(
+                                item => {
+
+                                    item.classList.toggle(
+                                        "active",
+                                        item ===
+                                        button
+                                    );
+
+                                }
+                            );
+
+
+                        applyProvinceFilter();
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+/* ============================================================
+   17. APPLY PROVINCE FILTER
+============================================================ */
+
+function applyProvinceFilter() {
+
+    if (
+        !provinceGrid
+    ) {
+
+        return;
+
+    }
+
+
+    const cards =
+        provinceGrid.querySelectorAll(
+            ".province-card"
+        );
+
+
+    let visibleCount =
+        0;
+
+
+    cards.forEach(
+        card => {
+
+            const cardProvince =
+                normalizeText(
+                    card.dataset.province
+                );
+
+
+            const matches =
+                currentProvince ===
+                    "all" ||
+                cardProvince ===
+                    currentProvince;
+
+
+            card.hidden =
+                !matches;
+
+
+            if (
+                matches
+            ) {
+
+                visibleCount++;
+
+            }
+
+        }
+    );
+
+
+    if (
+        noProvinceResults
+    ) {
+
+        noProvinceResults.hidden =
+            visibleCount > 0;
+
+    }
+
+}
+
+
+/* ============================================================
+   18. SEARCH MATCH SCORE
+============================================================ */
+
+function getSearchScore(
+    place,
+    query
+) {
+
+    const q =
+        normalizeText(
+            query
+        );
+
+
+    const name =
+        normalizeText(
+            place.name
+        );
+
+
+    const sinhalaName =
+        normalizeText(
+            place.sinhalaName
+        );
+
+
+    const title =
+        normalizeText(
+            place.title
+        );
+
+
+    const district =
+        normalizeText(
+            place.district
+        );
+
+
+    const province =
+        normalizeText(
+            place.province
+        );
+
+
+    const category =
+        normalizeText(
+            place.categoryName
+        );
+
+
+    if (
+        name === q
+    ) {
+
+        return 100;
+
+    }
+
+
+    if (
+        sinhalaName === q
+    ) {
+
+        return 95;
+
+    }
+
+
+    if (
+        title === q
+    ) {
+
+        return 90;
+
+    }
+
+
+    if (
+        name.startsWith(q)
+    ) {
+
+        return 80;
+
+    }
+
+
+    if (
+        sinhalaName.startsWith(q)
+    ) {
+
+        return 75;
+
+    }
+
+
+    if (
+        district === q
+    ) {
+
+        return 70;
+
+    }
+
+
+    if (
+        province === q
+    ) {
+
+        return 65;
+
+    }
+
+
+    if (
+        category === q
+    ) {
+
+        return 60;
+
+    }
+
+
+    if (
+        name.includes(q)
+    ) {
+
+        return 50;
+
+    }
+
+
+    if (
+        title.includes(q)
+    ) {
+
+        return 45;
+
+    }
+
+
+    return 10;
+
+}
+
+
+/* ============================================================
+   19. FIND SEARCH RESULTS
+============================================================ */
+
+function findSearchResults(
+    query
+) {
+
+    const q =
+        normalizeText(
+            query
+        );
+
+
+    if (
+        !q
+    ) {
+
+        return [];
+
+    }
+
+
+    const results =
+        places
+
+            .filter(
+                place => {
+
+                    const provinceMatch =
+                        currentProvince ===
+                            "all" ||
+                        slugify(
+                            place.province
+                        ) ===
+                            currentProvince;
+
+
+                    if (
+                        !provinceMatch
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    return getSearchText(
+                        place
+                    ).includes(
+                        q
+                    );
+
+                }
+            )
+
+            .map(
+                place => ({
+
+                    place,
+
+                    score:
+                        getSearchScore(
+                            place,
+                            q
+                        )
+
+                })
+            )
+
+            .sort(
+                (
+                    a,
+                    b
+                ) =>
+                    b.score -
+                    a.score
+            )
+
+            .slice(
+                0,
+                8
+            );
+
+
+    return results;
+
+}
+
+
+/* ============================================================
+   20. RENDER SEARCH DROPDOWN
+============================================================ */
+
+function renderSearchResults(
+    query
+) {
+
+    if (
+        !attractionSearchResults
+    ) {
+
+        return;
+
+    }
+
+
+    const q =
+        normalizeText(
+            query
+        );
+
+
+    if (
+        !q
+    ) {
+
+        attractionSearchResults.innerHTML =
+            "";
+
+
+        attractionSearchResults.hidden =
+            true;
+
+
+        return;
+
+    }
+
+
+    const results =
+        findSearchResults(
+            q
+        );
+
+
+    attractionSearchResults.innerHTML =
+        "";
+
+
+    if (
+        results.length ===
+        0
+    ) {
+
+        attractionSearchResults.innerHTML = `
+
+            <div class="search-no-results">
+
+                <span>
+                    🔍
+                </span>
+
+                <p>
+                    No attractions found
+                </p>
+
+            </div>
+
+        `;
+
+
+        attractionSearchResults.hidden =
+            false;
+
+
+        return;
+
+    }
+
+
+    results.forEach(
+        ({
+            place
+        }) => {
+
+            const item =
+                document.createElement(
+                    "a"
+                );
+
+
+            item.className =
+                "attraction-search-result";
+
+
+            item.href =
+                getAttractionPath(
+                    place
+                );
+
+
+            const image =
+                place.image
+                    ? `
+                        <img
+                            src="${escapeHTML(
+                                place.image
+                            )}"
+                            alt="${escapeHTML(
+                                place.name
+                            )}"
+                            loading="lazy"
+                        >
+                      `
+                    : `
+                        <div
+                            class="search-result-placeholder"
+                        >
+                            🇱🇰
+                        </div>
+                      `;
+
+
+            item.innerHTML = `
+
+                <div
+                    class="search-result-image"
+                >
+
+                    ${image}
+
+                </div>
+
+
+                <div
+                    class="search-result-content"
+                >
+
+                    <strong>
+                        ${escapeHTML(
+                            place.name
+                        )}
+                    </strong>
+
+
+                    ${
+                        place.sinhalaName
+                            ? `
+                                <span>
+                                    ${escapeHTML(
+                                        place.sinhalaName
+                                    )}
+                                </span>
+                              `
+                            : ""
+                    }
+
+
+                    <small>
+
+                        ${escapeHTML(
+                            place.district ||
+                            ""
+                        )}
+
+                        ·
+
+                        ${escapeHTML(
+                            place.province ||
+                            ""
+                        )}
+
+                    </small>
+
+                </div>
+
+
+                <span
+                    class="search-result-arrow"
+                >
+                    →
+                </span>
+
+            `;
+
+
+            item.addEventListener(
+                "click",
+                () => {
+
+                    hideSearchResults();
+
+                }
+            );
+
+
+            attractionSearchResults.appendChild(
+                item
+            );
+
+        }
+    );
+
+
+    attractionSearchResults.hidden =
+        false;
+
+}
+
+
+/* ============================================================
+   21. HIDE SEARCH RESULTS
+============================================================ */
+
+function hideSearchResults() {
+
+    if (
+        !attractionSearchResults
+    ) {
+
+        return;
+
+    }
+
+
+    attractionSearchResults.hidden =
+        true;
+
+}
+
+
+/* ============================================================
+   22. SEARCH INPUT
+============================================================ */
+
+function initializeSearch() {
+
+    if (
+        !attractionSearch
+    ) {
+
+        return;
+
+    }
+
+
+    attractionSearch.addEventListener(
+        "input",
+        event => {
+
+            const value =
+                event.target.value;
+
+
+            clearTimeout(
+                searchTimer
+            );
+
+
+            searchTimer =
+                setTimeout(
+                    () => {
+
+                        renderSearchResults(
+                            value
+                        );
+
+                    },
+                    80
+                );
+
+        }
+    );
+
+
+    attractionSearch.addEventListener(
+        "focus",
+        () => {
+
+            if (
+                attractionSearch.value.trim()
+            ) {
+
+                renderSearchResults(
+                    attractionSearch.value
+                );
+
+            }
+
+        }
+    );
+
+
+    attractionSearch.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key ===
+                "Escape"
+            ) {
+
+                hideSearchResults();
+
+
+                attractionSearch.blur();
+
+            }
+
+
+            if (
+                event.key ===
+                "Enter"
+            ) {
+
+                const firstResult =
+                    attractionSearchResults
+                        ?.querySelector(
+                            ".attraction-search-result"
+                        );
+
+
+                if (
+                    firstResult
+                ) {
+
+                    event.preventDefault();
+
+
+                    firstResult.click();
+
+                }
+
+            }
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   23. CLICK OUTSIDE SEARCH
+============================================================ */
+
+document.addEventListener(
+    "click",
+    event => {
+
+        if (
+            !attractionSearchResults
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            attractionSearchResults.contains(
+                event.target
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            attractionSearch &&
+            attractionSearch.contains(
+                event.target
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        hideSearchResults();
+
+    }
+);
+
+
+/* ============================================================
+   24. MOBILE MENU
 ============================================================ */
 
 function initializeMobileMenu() {
@@ -1919,7 +1711,7 @@ function initializeMobileMenu() {
         "click",
         () => {
 
-            const isOpen =
+            const opened =
                 mainNavigation.classList.toggle(
                     "mobile-navigation-open"
                 );
@@ -1927,8 +1719,7 @@ function initializeMobileMenu() {
 
             mobileMenuButton.setAttribute(
                 "aria-expanded",
-
-                isOpen
+                opened
                     ? "true"
                     : "false"
             );
@@ -1936,11 +1727,39 @@ function initializeMobileMenu() {
         }
     );
 
+
+    mainNavigation
+        .querySelectorAll(
+            "a"
+        )
+        .forEach(
+            link => {
+
+                link.addEventListener(
+                    "click",
+                    () => {
+
+                        mainNavigation.classList.remove(
+                            "mobile-navigation-open"
+                        );
+
+
+                        mobileMenuButton.setAttribute(
+                            "aria-expanded",
+                            "false"
+                        );
+
+                    }
+                );
+
+            }
+        );
+
 }
 
 
 /* ============================================================
-   MY TRIP BUTTON
+   25. MY TRIP BUTTON
 ============================================================ */
 
 function initializeMyTripButton() {
@@ -1968,57 +1787,7 @@ function initializeMyTripButton() {
 
 
 /* ============================================================
-   SEARCH EVENTS
-============================================================ */
-
-function initializeSearch() {
-
-    if (
-        attractionSearch
-    ) {
-
-        attractionSearch.addEventListener(
-            "input",
-            event => {
-
-                handleSearch(
-                    event.target.value
-                );
-
-            }
-        );
-
-    }
-
-
-    if (
-        clearAttractionSearch
-    ) {
-
-        clearAttractionSearch.addEventListener(
-            "click",
-            clearSearch
-        );
-
-    }
-
-
-    if (
-        resetAttractionSearch
-    ) {
-
-        resetAttractionSearch.addEventListener(
-            "click",
-            resetFilters
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   FIREBASE AUTH STATE
+   26. INITIALIZE FIREBASE AUTH
 ============================================================ */
 
 function initializeAuth() {
@@ -2032,7 +1801,7 @@ function initializeAuth() {
 
 
             console.log(
-                "Firebase user:",
+                "🔥 Firebase user:",
                 user
                     ? user.uid
                     : "Not logged in"
@@ -2041,17 +1810,6 @@ function initializeAuth() {
 
             await loadTrip();
 
-
-            /*
-               Re-render cards because
-               Add to My Trip buttons depend
-               on current trip state.
-            */
-
-            renderFeatured();
-
-            renderAttractions();
-
         }
     );
 
@@ -2059,168 +1817,56 @@ function initializeAuth() {
 
 
 /* ============================================================
-   HIDE LOADING
+   27. INITIALIZE
 ============================================================ */
 
-function hideLoading() {
+async function initializeAttractions() {
+
+    console.log(
+        "🇱🇰 LankaQuest Attractions initializing..."
+    );
+
+
+    const loaded =
+        await loadSearchIndex();
+
 
     if (
-        attractionsLoading
+        !loaded
     ) {
-
-        attractionsLoading.hidden =
-            true;
-
-    }
-
-}
-
-
-/* ============================================================
-   INITIALIZE
-============================================================ */
-
-function initializeAttractions() {
-
-    /*
-       Data check
-    */
-
-    if (
-        touristPlaces.length ===
-        0
-    ) {
-
-        console.error(
-            "❌ No tourist places found."
-        );
-
-
-        if (
-            attractionsLoading
-        ) {
-
-            attractionsLoading.hidden =
-                true;
-
-        }
-
-
-        if (
-            noProvinceResults
-        ) {
-
-            noProvinceResults.hidden =
-                false;
-
-        }
-
 
         return;
 
     }
 
 
-    /*
-       Province filters
-    */
-
     renderProvinceFilters();
 
 
-    /*
-       Initial featured
-    */
+    applyProvinceFilter();
 
-    renderFeatured();
-
-
-    /*
-       Initial attractions
-    */
-
-    renderAttractions();
-
-
-    /*
-       Search
-    */
 
     initializeSearch();
 
 
-    /*
-       Mobile menu
-    */
-
     initializeMobileMenu();
 
-
-    /*
-       My Trip
-    */
 
     initializeMyTripButton();
 
 
-    /*
-       Firebase authentication
-    */
-
     initializeAuth();
 
 
-    /*
-       Loading complete
-    */
-
-    hideLoading();
-
-
     console.log(
-        "=============================================="
-    );
-
-
-    console.log(
-        "🇱🇰 LankaQuest Attractions System"
-    );
-
-
-    console.log(
-        "=============================================="
-    );
-
-
-    console.log(
-        `Places: ${touristPlaces.length}`
-    );
-
-
-    console.log(
-        `Provinces: ${getProvinceData().length}`
-    );
-
-
-    console.log(
-        "Search: Ready"
-    );
-
-
-    console.log(
-        "Firebase Trip: Ready"
-    );
-
-
-    console.log(
-        "=============================================="
+        "✅ LankaQuest Attractions ready."
     );
 
 }
 
 
 /* ============================================================
-   START
+   28. START
 ============================================================ */
 
 if (
