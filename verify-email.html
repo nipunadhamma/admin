@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Verify Your Email | LankaQuest</title>
+
+    <link rel="stylesheet" href="css/verify-email.css">
+
+</head>
+
+
+<body>
+
+
+    <main class="verification-page">
+
+
+        <section class="verification-card">
+
+
+            <!-- ==================================================
+           ICON
+      ================================================== -->
+
+            <div class="verification-icon">
+                ✉️
+            </div>
+
+
+            <!-- ==================================================
+           TITLE
+      ================================================== -->
+
+            <h1>
+                Verify Your Email
+            </h1>
+
+
+            <!-- ==================================================
+           MESSAGE
+      ================================================== -->
+
+            <p class="verification-intro">
+
+                We have sent a verification link to:
+
+            </p>
+
+
+            <p id="verificationEmail" class="verification-email">
+                Loading...
+            </p>
+
+
+            <p class="verification-description">
+
+                Please check your inbox and click the
+                verification link to activate your
+                LankaQuest account.
+
+            </p>
+
+
+            <!-- ==================================================
+           STATUS MESSAGE
+      ================================================== -->
+
+            <div id="verificationMessage" class="verification-message" role="alert"></div>
+
+
+            <!-- ==================================================
+           CHECK VERIFICATION
+      ================================================== -->
+
+            <button id="checkVerificationButton" type="button" class="primary-button">
+
+                I Have Verified My Email
+
+            </button>
+
+
+            <!-- ==================================================
+           RESEND EMAIL
+      ================================================== -->
+
+            <button id="resendVerificationButton" type="button" class="secondary-button">
+
+                Resend Verification Email
+
+            </button>
+
+
+            <!-- ==================================================
+           CHANGE EMAIL / LOGIN
+      ================================================== -->
+
+            <button id="backToLoginButton" type="button" class="text-button">
+
+                Back to Login
+
+            </button>
+
+
+            <!-- ==================================================
+           HELP
+      ================================================== -->
+
+            <p class="verification-help">
+
+                Didn't receive the email?
+                Check your spam or junk folder.
+
+            </p>
+
+
+        </section>
+
+
+    </main>
+
+
+    <!-- ======================================================
+       FIREBASE / VERIFICATION SCRIPT
+  ====================================================== -->
+
+    <script type="module" src="js/verify-email.js"></script>
+
+
+</body>
+
+</html>

@@ -1550,24 +1550,38 @@ function createIndividualPage(
                 }
 
 
-                <div class="attraction-actions">
+                
+               <div class="attraction-actions">
 
-                    <a
-                        href="../../../../trip-planner.html"
+                   <button
+                        type="button"
                         class="attraction-action trip-button"
-                    >
-                        ❤️ Add to My Trip
-                    </a>
+                        id="addToMyTripButton"
+                        data-place-id="${escapeHTML(place.id)}"
+                        data-place-name="${escapeHTML(place.name)}"
+                        data-place-image="${escapeHTML(place.image)}"
+                        data-place-province="${escapeHTML(place.province)}"
+                        data-place-district="${escapeHTML(place.district)}"
+                        data-place-location="${escapeHTML(place.location)}"
+                        data-place-rating="${escapeHTML(
+                         place.rating !== ""
+                          ? String(place.rating)
+                           : ""
+                      )}"
+                     >
+                       ❤️ Add to My Trip
+                  </button>
 
 
-                    <a
-                        href="../../${escapeHTML(provinceSlug)}.html"
-                        class="attraction-action map-button"
-                    >
-                        ← Back to Province
-                    </a>
+                   <a
+                    href="../../${escapeHTML(provinceSlug)}.html"
+                    class="attraction-action map-button" >
+                    ← Back to Province
+                   </a>
 
                 </div>
+
+
 
 
             </div>
@@ -1591,6 +1605,12 @@ function createIndividualPage(
 </footer>
 
 <script src="../../../../js/mobile-menu.js"></script>
+
+
+
+<script src="../../../../js/attraction-trip.js"></script>
+
+
 
 
 </body>

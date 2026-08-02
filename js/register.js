@@ -3,7 +3,7 @@
    LANKAQUEST
    REGISTRATION SYSTEM
 
-   Firebase First Architecture
+   FIREBASE FIRST ARCHITECTURE
 
    ACCOUNT TYPES:
 
@@ -17,9 +17,19 @@
         ↓
    Firebase Authentication
         ↓
-   Firebase UID
+   Verification Email
         ↓
-   Firestore Profile
+   User Verifies Email
+        ↓
+   Reload Firebase User
+        ↓
+   emailVerified === true
+        ↓
+   Check Existing Profile
+        ↓
+   Create Firestore Profile
+        ↓
+   Dashboard
 
 
    GOOGLE REGISTRATION:
@@ -63,6 +73,8 @@ import {
 import {
   onAuthStateChanged,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
+  reload,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 
@@ -147,17 +159,17 @@ const isGoogleRegistration =
 
 
 /*
-   This variable stores the authenticated
-   Firebase user.
+   Authenticated Firebase user.
 
-   For normal registration this will normally
-   be null before account creation.
+   Normal registration:
+   Created after email/password registration.
 
-   For Google registration this must already
-   contain the authenticated Google user.
+   Google registration:
+   Already authenticated before reaching this page.
 */
 
 let authenticatedUser = null;
+
 
 
 /* ============================================================
@@ -303,11 +315,8 @@ function setupGoogleRegistrationUI() {
 
 
   /*
-     Password is NOT required for Google
+     Password is not required for Google
      registration.
-
-     Firebase Authentication already has
-     the authenticated Google account.
   */
 
   if (passwordInput) {
@@ -339,8 +348,7 @@ function setupGoogleRegistrationUI() {
 
 
   /*
-     Make the email field read-only because
-     the email comes from Google Authentication.
+     Google email is controlled by Firebase.
   */
 
   if (
@@ -358,8 +366,8 @@ function setupGoogleRegistrationUI() {
 
 
   /*
-     Google display name can be used as the
-     initial full name.
+     Use Google display name
+     as initial full name.
   */
 
   if (
@@ -393,6 +401,10 @@ async function checkExistingProfile(
   uid
 ) {
 
+  /* ==========================================================
+     CHECK TOURIST
+  ========================================================== */
+
   const touristRef =
     doc(
       db,
@@ -410,13 +422,23 @@ async function checkExistingProfile(
   if (touristSnap.exists()) {
 
     return {
+
       exists: true,
-      accountType: "tourist",
-      data: touristSnap.data(),
+
+      accountType:
+        "tourist",
+
+      data:
+        touristSnap.data(),
+
     };
 
   }
 
+
+  /* ==========================================================
+     CHECK GUIDE
+  ========================================================== */
 
   const guideRef =
     doc(
@@ -435,18 +457,28 @@ async function checkExistingProfile(
   if (guideSnap.exists()) {
 
     return {
+
       exists: true,
-      accountType: "guide",
-      data: guideSnap.data(),
+
+      accountType:
+        "guide",
+
+      data:
+        guideSnap.data(),
+
     };
 
   }
 
 
   return {
+
     exists: false,
+
     accountType: null,
+
     data: null,
+
   };
 
 }
@@ -491,6 +523,10 @@ async function createTouristProfile(
       : "";
 
 
+  /* ==========================================================
+     VALIDATION
+  ========================================================== */
+
   if (!fullName) {
 
     throw new Error(
@@ -510,20 +546,47 @@ async function createTouristProfile(
 
 
   /* ==========================================================
-     TOURIST PROFILE DATA
+     SECURITY CHECK
+
+     Normal email accounts must have
+     verified email before profile creation.
+
+     Google accounts are already trusted
+     through Google Authentication.
+  ========================================================== */
+
+  if (
+    !isGoogleRegistration &&
+    !firebaseUser.emailVerified
+  ) {
+
+    throw new Error(
+      "Please verify your email address before creating your LankaQuest profile."
+    );
+
+  }
+
+
+  /* ==========================================================
+     TOURIST PROFILE
   ========================================================== */
 
   const profileData = {
 
-    uid: uid,
+    uid:
+      uid,
 
-    fullName: fullName,
+    fullName:
+      fullName,
 
-    email: email,
+    email:
+      email,
 
-    accountType: "tourist",
+    accountType:
+      "tourist",
 
-    country: country,
+    country:
+      country,
 
     createdAt:
       serverTimestamp(),
@@ -636,6 +699,10 @@ async function createGuideProfile(
       : "";
 
 
+  /* ==========================================================
+     VALIDATION
+  ========================================================== */
+
   if (!fullName) {
 
     throw new Error(
@@ -655,29 +722,50 @@ async function createGuideProfile(
 
 
   /* ==========================================================
-     GUIDE PROFILE DATA
+     EMAIL VERIFICATION CHECK
+  ========================================================== */
 
-     These fields are important because the
-     Firestore rules require them during create.
+  if (
+    !isGoogleRegistration &&
+    !firebaseUser.emailVerified
+  ) {
+
+    throw new Error(
+      "Please verify your email address before creating your LankaQuest guide profile."
+    );
+
+  }
+
+
+  /* ==========================================================
+     GUIDE PROFILE
   ========================================================== */
 
   const profileData = {
 
-    uid: uid,
+    uid:
+      uid,
 
-    fullName: fullName,
+    fullName:
+      fullName,
 
-    email: email,
+    email:
+      email,
 
-    accountType: "guide",
+    accountType:
+      "guide",
 
-    phone: phone,
+    phone:
+      phone,
 
-    district: district,
+    district:
+      district,
 
-    languages: languages,
+    languages:
+      languages,
 
-    experience: experience,
+    experience:
+      experience,
 
     verificationStatus:
       "pending",
@@ -722,10 +810,160 @@ async function createGuideProfile(
 
 
 /* ============================================================
+   CREATE FIRESTORE PROFILE
+============================================================ */
+
+async function createFirestoreProfile(
+  firebaseUser,
+  accountType
+) {
+
+  if (
+    accountType ===
+    "tourist"
+  ) {
+
+    return await createTouristProfile(
+      firebaseUser
+    );
+
+  }
+
+
+  if (
+    accountType ===
+    "guide"
+  ) {
+
+    return await createGuideProfile(
+      firebaseUser
+    );
+
+  }
+
+
+  throw new Error(
+    "Invalid account type."
+  );
+
+}
+
+
+/* ============================================================
    NORMAL EMAIL/PASSWORD REGISTRATION
+
+   STEP 1:
+
+   Email + Password
+        ↓
+   Firebase Authentication
+        ↓
+   Send Verification Email
+
+   IMPORTANT:
+
+   Firestore profile is NOT created here.
 ============================================================ */
 
 async function registerWithEmailPassword() {
+  const email = emailInput ? emailInput.value.trim() : "";
+
+  const password = passwordInput ? passwordInput.value : "";
+
+  const confirmPassword = confirmPasswordInput
+    ? confirmPasswordInput.value
+    : "";
+
+  /* ==========================================================
+     VALIDATE EMAIL
+  ========================================================== */
+
+  if (!email) {
+    throw new Error("Please enter your email address.");
+  }
+
+  /* ==========================================================
+     VALIDATE PASSWORD
+  ========================================================== */
+
+  if (!password) {
+    throw new Error("Please enter a password.");
+  }
+
+  /* ==========================================================
+     CONFIRM PASSWORD
+  ========================================================== */
+
+  if (password !== confirmPassword) {
+    throw new Error("Passwords do not match.");
+  }
+
+  /* ==========================================================
+     CREATE FIREBASE AUTH ACCOUNT
+  ========================================================== */
+
+  const userCredential = await createUserWithEmailAndPassword(
+    auth,
+    email,
+    password,
+  );
+
+  const firebaseUser = userCredential.user;
+
+  if (!firebaseUser) {
+    throw new Error("Firebase authentication failed.");
+  }
+
+  /* ============================================================
+   SEND EMAIL VERIFICATION 
+   ============================================================ */ 
+  await sendEmailVerification(
+    firebaseUser,
+  );
+  console.log(
+    "Verification email sent:", 
+    firebaseUser.email
+  );
+
+  /* ==========================================================
+     SAVE PENDING PROFILE DATA
+  ========================================================== */
+
+  savePendingRegistrationData();
+
+  /* ==========================================================
+     KEEP FIREBASE AUTH SESSION ACTIVE
+  ========================================================== */
+
+  authenticatedUser = firebaseUser;
+
+  console.log("Verification email sent:", firebaseUser.email);
+
+  /* ==========================================================
+     REDIRECT TO VERIFICATION PAGE
+  ========================================================== */
+
+  window.location.href = "verify-email.html";
+
+  return firebaseUser;
+}
+
+
+/* ============================================================
+   SAVE PENDING REGISTRATION DATA
+============================================================ */
+
+function savePendingRegistrationData() {
+
+  const accountType =
+    getSelectedAccountType();
+
+
+  const fullName =
+    fullNameInput
+      ? fullNameInput.value.trim()
+      : "";
+
 
   const email =
     emailInput
@@ -733,63 +971,76 @@ async function registerWithEmailPassword() {
       : "";
 
 
-  const password =
-    passwordInput
-      ? passwordInput.value
-      : "";
+  /*
+     IMPORTANT:
+
+     DO NOT store password or confirmPassword
+     in sessionStorage.
+  */
 
 
-  const confirmPassword =
-    confirmPasswordInput
-      ? confirmPasswordInput.value
-      : "";
+  const pendingData = {
 
+    accountType:
+      accountType,
 
-  if (!email) {
+    fullName:
+      fullName,
 
-    throw new Error(
-      "Please enter your email address."
-    );
-
-  }
-
-
-  if (!password) {
-
-    throw new Error(
-      "Please enter a password."
-    );
-
-  }
-
-
-  if (
-    password !==
-    confirmPassword
-  ) {
-
-    throw new Error(
-      "Passwords do not match."
-    );
-
-  }
-
-
-  /* ==========================================================
-     FIREBASE AUTHENTICATION
-  ========================================================== */
-
-  const userCredential =
-    await createUserWithEmailAndPassword(
-      auth,
+    email:
       email,
-      password
-    );
+
+    country:
+      document.getElementById("country")
+        ? document.getElementById("country").value.trim()
+        : "",
+
+    phone:
+      document.getElementById("phone")
+        ? document.getElementById("phone").value.trim()
+        : "",
+
+    district:
+      document.getElementById("guideDistrict")
+        ? document.getElementById("guideDistrict").value
+        : "",
+
+    languages:
+      document.getElementById("languages")
+        ? document.getElementById("languages").value.trim()
+        : "",
+
+    experience:
+      document.getElementById("experience")
+        ? document.getElementById("experience").value
+        : "",
+
+    createdAt:
+      Date.now(),
+
+  };
 
 
-  return userCredential.user;
+  sessionStorage.setItem(
+    "lankaQuestPendingRegistration",
+    JSON.stringify(pendingData)
+  );
+
+
+  console.log(
+    "Pending registration data saved to sessionStorage."
+  );
+
+
+  return pendingData;
 
 }
+
+
+
+
+
+
 
 
 /* ============================================================
@@ -799,10 +1050,11 @@ async function registerWithEmailPassword() {
 async function registerWithGoogle() {
 
   /*
-     Google user MUST already be authenticated.
+     Google user must already be authenticated.
 
-     This happens because auth.js sends the user
-     here after successful Google authentication.
+     auth.js should have sent the user to:
+
+     register.html?google=1
   */
 
   const currentUser =
@@ -830,7 +1082,194 @@ async function registerWithGoogle() {
   );
 
 
-  return currentUser;
+  /*
+     Google Authentication normally provides
+     a verified email.
+
+     Still check the Firebase user state.
+  */
+
+  await reload(
+    currentUser
+  );
+
+
+  const refreshedUser =
+    auth.currentUser;
+
+
+  if (!refreshedUser) {
+
+    throw new Error(
+      "Unable to load your Google account."
+    );
+
+  }
+
+
+  if (
+    !refreshedUser.emailVerified
+  ) {
+
+    throw new Error(
+      "Your Google email could not be verified by Firebase."
+    );
+
+  }
+
+
+  authenticatedUser =
+    refreshedUser;
+
+
+  return refreshedUser;
+
+}
+
+
+/* ============================================================
+   COMPLETE REGISTRATION
+============================================================ */
+
+async function completeRegistration(
+  firebaseUser
+) {
+
+  /* ==========================================================
+     ACCOUNT TYPE
+  ========================================================== */
+
+  const accountType =
+    getSelectedAccountType();
+
+
+  if (
+    accountType !== "tourist" &&
+    accountType !== "guide"
+  ) {
+
+    throw new Error(
+      "Please select an account type."
+    );
+
+  }
+
+
+  /* ==========================================================
+     CHECK PROFILE
+  ========================================================== */
+
+  const existingProfile =
+    await checkExistingProfile(
+      firebaseUser.uid
+    );
+
+
+  if (existingProfile.exists) {
+
+    console.log(
+      "Existing LankaQuest profile found:",
+      existingProfile.accountType
+    );
+
+
+    showRegistrationMessage(
+      "A LankaQuest profile already exists for this account.",
+      "error"
+    );
+
+
+    setTimeout(
+      () => {
+
+        window.location.href =
+          "login.html";
+
+      },
+      1500
+    );
+
+
+    return;
+
+  }
+
+
+  /* ==========================================================
+     GOOGLE / VERIFIED USER
+  ========================================================== */
+
+  if (
+    !isGoogleRegistration &&
+    !firebaseUser.emailVerified
+  ) {
+
+    throw new Error(
+      "Email verification is required before creating your LankaQuest profile."
+    );
+
+  }
+
+
+  /* ==========================================================
+     CREATE FIRESTORE PROFILE
+  ========================================================== */
+
+  await createFirestoreProfile(
+    firebaseUser,
+    accountType
+  );
+
+
+  /* ==========================================================
+     SUCCESS
+  ========================================================== */
+
+  if (
+    accountType ===
+    "tourist"
+  ) {
+
+    showRegistrationMessage(
+      "Tourist account created successfully.",
+      "success"
+    );
+
+  } else {
+
+    showRegistrationMessage(
+      "Guide registration submitted successfully. Your profile is pending verification.",
+      "success"
+    );
+
+  }
+
+
+  /* ==========================================================
+     REDIRECT
+  ========================================================== */
+
+  setTimeout(
+    () => {
+
+      if (
+        accountType ===
+        "tourist"
+      ) {
+
+        window.location.href =
+          "tourist-dashboard.html";
+
+      } else {
+
+        window.location.href =
+          "guide-verification.html";
+
+      }
+
+    },
+    1500
+  );
 
 }
 
@@ -864,78 +1303,19 @@ async function registerUser() {
 
 
     /* ========================================================
-       GET FIREBASE USER
+       GOOGLE REGISTRATION
     ======================================================== */
 
-    let firebaseUser;
+    if (
+      isGoogleRegistration
+    ) {
 
-
-    if (isGoogleRegistration) {
-
-      /*
-         Google account already authenticated.
-      */
-
-      firebaseUser =
+      const firebaseUser =
         await registerWithGoogle();
 
-    } else {
 
-      /*
-         Normal email/password registration.
-      */
-
-      firebaseUser =
-        await registerWithEmailPassword();
-
-    }
-
-
-    if (!firebaseUser) {
-
-      throw new Error(
-        "Firebase authentication failed."
-      );
-
-    }
-
-
-    /* ========================================================
-       CHECK WHETHER PROFILE ALREADY EXISTS
-    ======================================================== */
-
-    const existingProfile =
-      await checkExistingProfile(
-        firebaseUser.uid
-      );
-
-
-    if (existingProfile.exists) {
-
-      /*
-         Do not create duplicate profiles.
-      */
-
-      console.log(
-        "Existing LankaQuest profile found:",
-        existingProfile.accountType
-      );
-
-
-      showRegistrationMessage(
-        "A LankaQuest profile already exists for this Google account.",
-        "error"
-      );
-
-
-      setTimeout(
-        () => {
-
-          window.location.href =
-            "login.html";
-
-        },
-        1500
+      await completeRegistration(
+        firebaseUser
       );
 
 
@@ -945,64 +1325,25 @@ async function registerUser() {
 
 
     /* ========================================================
-       CREATE FIRESTORE PROFILE
+       NORMAL EMAIL REGISTRATION
     ======================================================== */
 
-    if (
-      accountType ===
-      "tourist"
-    ) {
-
-      await createTouristProfile(
-        firebaseUser
-      );
+    const firebaseUser =
+      await registerWithEmailPassword();
 
 
-      showRegistrationMessage(
-        "Tourist account created successfully.",
-        "success"
-      );
+    /*
+       At this point:
 
-    } else {
+       Firebase Auth account exists.
 
-      await createGuideProfile(
-        firebaseUser
-      );
+       Email verification email has been sent.
 
-
-      showRegistrationMessage(
-        "Guide registration submitted successfully. Your profile is pending verification.",
-        "success"
-      );
-
-    }
+       DO NOT create Firestore profile yet.
+    */
 
 
-    /* ========================================================
-       REGISTRATION COMPLETE
-    ======================================================== */
-
-    setTimeout(
-      () => {
-
-        if (
-          accountType ===
-          "tourist"
-        ) {
-
-          window.location.href =
-            "tourist-dashboard.html";
-
-        } else {
-
-          window.location.href =
-            "guide-verification.html";
-
-        }
-
-      },
-      1500
-    );
+    
 
 
   } catch (error) {
@@ -1017,6 +1358,10 @@ async function registerUser() {
       "Registration failed.";
 
 
+    /* ========================================================
+       FIREBASE AUTH ERRORS
+    ======================================================== */
+
     switch (
       error.code
     ) {
@@ -1024,7 +1369,7 @@ async function registerUser() {
       case "auth/email-already-in-use":
 
         message =
-          "Email already registered.";
+          "This email address is already registered. Please login instead.";
 
         break;
 
@@ -1040,7 +1385,7 @@ async function registerUser() {
       case "auth/weak-password":
 
         message =
-          "Password is too weak.";
+          "Password is too weak. Please choose a stronger password.";
 
         break;
 
@@ -1049,6 +1394,22 @@ async function registerUser() {
 
         message =
           "Network error. Please check your internet connection.";
+
+        break;
+
+
+      case "auth/too-many-requests":
+
+        message =
+          "Too many requests. Please wait a moment and try again.";
+
+        break;
+
+
+      case "auth/operation-not-allowed":
+
+        message =
+          "Email/password registration is not enabled in Firebase Authentication.";
 
         break;
 
@@ -1097,9 +1458,9 @@ if (registrationForm) {
       event.preventDefault();
 
 
-      /*
-         Prevent duplicate submissions.
-      */
+      /* ======================================================
+         PREVENT DUPLICATE SUBMISSIONS
+      ====================================================== */
 
       const submitButton =
         registrationForm.querySelector(
@@ -1122,10 +1483,10 @@ if (registrationForm) {
       } finally {
 
         /*
-           If registration succeeds,
-           navigation will happen shortly.
+           If verification is pending,
+           the verification button remains available.
 
-           If it fails, unlock the button.
+           The main submit button can be unlocked.
         */
 
         if (submitButton) {
@@ -1164,14 +1525,9 @@ onAuthStateChanged(
     );
 
 
-    /*
-       Google registration requires an
-       authenticated Firebase user.
-
-       If register.html?google=1 is opened
-       directly without a Google session,
-       send the user back to login.
-    */
+    /* ========================================================
+       GOOGLE REGISTRATION WITHOUT SESSION
+    ======================================================== */
 
     if (
       isGoogleRegistration &&
@@ -1200,10 +1556,9 @@ onAuthStateChanged(
     }
 
 
-    /*
-       Once Firebase confirms the user,
-       populate Google registration fields.
-    */
+    /* ========================================================
+       GOOGLE REGISTRATION
+    ======================================================== */
 
     if (
       isGoogleRegistration &&

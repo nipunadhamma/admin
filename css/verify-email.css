@@ -1,0 +1,879 @@
+
+/* ============================================================
+   LANKAQUEST
+   VERIFY EMAIL PAGE
+   verify-email.css
+
+   Purpose:
+   Email verification waiting screen
+   ============================================================ */
+
+
+/* ============================================================
+   RESET
+============================================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+/* ============================================================
+   ROOT
+============================================================ */
+
+:root {
+
+    --primary: #176044;
+    --primary-dark: #104a35;
+    --primary-light: #edf8f1;
+
+    --accent: #d9a441;
+
+    --text-dark: #17211b;
+    --text-medium: #536158;
+    --text-light: #7a857e;
+
+    --background: #f5f8f6;
+    --card-background: #ffffff;
+
+    --border: #dfe7e2;
+
+    --error-background: #fff0f0;
+    --error-text: #b42318;
+
+    --shadow:
+        0 20px 55px rgba(23, 96, 68, 0.10);
+
+    --radius-large: 24px;
+    --radius-medium: 14px;
+
+}
+
+
+/* ============================================================
+   BODY
+============================================================ */
+
+body {
+
+    min-height: 100vh;
+
+    font-family:
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+
+    background:
+        linear-gradient(135deg,
+            #f5f8f6 0%,
+            #edf5f0 100%);
+
+    color: var(--text-dark);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 24px;
+
+}
+
+
+/* ============================================================
+   MAIN CONTAINER
+============================================================ */
+
+.verify-container {
+
+    width: 100%;
+
+    max-width: 520px;
+
+}
+
+
+/* ============================================================
+   VERIFY CARD
+============================================================ */
+
+.verify-card {
+
+    width: 100%;
+
+    background:
+        var(--card-background);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        var(--radius-large);
+
+    padding:
+        42px 38px;
+
+    text-align: center;
+
+    box-shadow:
+        var(--shadow);
+
+}
+
+
+/* ============================================================
+   LOGO / BRAND
+============================================================ */
+
+.verify-brand {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    margin-bottom: 28px;
+
+}
+
+
+.verify-brand-icon {
+
+    width: 42px;
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background:
+        var(--primary-light);
+
+    color:
+        var(--primary);
+
+    font-size: 21px;
+
+}
+
+
+.verify-brand-name {
+
+    font-size: 24px;
+
+    font-weight: 700;
+
+    letter-spacing: -0.4px;
+
+    color:
+        var(--primary);
+
+}
+
+
+/* ============================================================
+   EMAIL ICON
+============================================================ */
+
+.verify-icon-wrapper {
+
+    width: 92px;
+
+    height: 92px;
+
+    margin:
+        0 auto 26px;
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background:
+        var(--primary-light);
+
+    color:
+        var(--primary);
+
+    box-shadow:
+        0 0 0 10px rgba(23, 96, 68, 0.04);
+
+}
+
+
+.verify-icon {
+
+    font-size: 42px;
+
+    line-height: 1;
+
+}
+
+
+/* ============================================================
+   TITLE
+============================================================ */
+
+.verify-title {
+
+    font-size: 30px;
+
+    line-height: 1.2;
+
+    font-weight: 700;
+
+    letter-spacing: -0.7px;
+
+    color:
+        var(--text-dark);
+
+    margin-bottom: 14px;
+
+}
+
+
+/* ============================================================
+   DESCRIPTION
+============================================================ */
+
+.verify-description {
+
+    max-width: 420px;
+
+    margin:
+        0 auto;
+
+    font-size: 15px;
+
+    line-height: 1.7;
+
+    color:
+        var(--text-medium);
+
+}
+
+
+/* ============================================================
+   EMAIL DISPLAY
+============================================================ */
+
+.verify-email {
+
+    display: inline-block;
+
+    max-width: 100%;
+
+    margin-top: 14px;
+
+    padding:
+        10px 16px;
+
+    border-radius:
+        10px;
+
+    background:
+        var(--primary-light);
+
+    color:
+        var(--primary);
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    word-break: break-word;
+
+}
+
+
+/* ============================================================
+   VERIFICATION STATUS
+============================================================ */
+
+.verify-status {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    margin:
+        28px 0 22px;
+
+    padding:
+        14px 16px;
+
+    border:
+        1px solid #d7e9de;
+
+    border-radius:
+        var(--radius-medium);
+
+    background:
+        #f7fbf8;
+
+    color:
+        var(--text-medium);
+
+    font-size: 14px;
+
+    line-height: 1.5;
+
+}
+
+
+/* ============================================================
+   STATUS DOT
+============================================================ */
+
+.verify-status-dot {
+
+    width: 10px;
+
+    height: 10px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background:
+        var(--accent);
+
+    box-shadow:
+        0 0 0 5px rgba(217, 164, 65, 0.12);
+
+}
+
+
+/* ============================================================
+   ACTION BUTTONS
+============================================================ */
+
+.verify-actions {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+
+    margin-top: 24px;
+
+}
+
+
+/* ============================================================
+   PRIMARY BUTTON
+============================================================ */
+
+.verify-button {
+
+    width: 100%;
+
+    min-height: 48px;
+
+    padding:
+        12px 20px;
+
+    border:
+        none;
+
+    border-radius:
+        var(--radius-medium);
+
+    background:
+        var(--primary);
+
+    color:
+        #ffffff;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    font-family: inherit;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+}
+
+
+.verify-button:hover {
+
+    background:
+        var(--primary-dark);
+
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 8px 20px rgba(23, 96, 68, 0.18);
+
+}
+
+
+.verify-button:active {
+
+    transform:
+        translateY(0);
+
+    box-shadow:
+        none;
+
+}
+
+
+.verify-button:disabled {
+
+    opacity: 0.6;
+
+    cursor: not-allowed;
+
+    transform: none;
+
+    box-shadow: none;
+
+}
+
+
+/* ============================================================
+   SECONDARY BUTTON
+============================================================ */
+
+.verify-secondary-button {
+
+    width: 100%;
+
+    min-height: 46px;
+
+    padding:
+        11px 20px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        var(--radius-medium);
+
+    background:
+        #ffffff;
+
+    color:
+        var(--primary);
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    font-family: inherit;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+
+}
+
+
+.verify-secondary-button:hover {
+
+    background:
+        #f7faf8;
+
+    border-color:
+        #bfd4c8;
+
+}
+
+
+/* ============================================================
+   RESEND MESSAGE
+============================================================ */
+
+.verify-message {
+
+    display: none;
+
+    margin-top: 18px;
+
+    padding:
+        12px 14px;
+
+    border-radius:
+        10px;
+
+    background:
+        var(--primary-light);
+
+    color:
+        var(--primary);
+
+    font-size: 13px;
+
+    line-height: 1.5;
+
+}
+
+
+/* ============================================================
+   ERROR MESSAGE
+============================================================ */
+
+.verify-message.error {
+
+    background:
+        var(--error-background);
+
+    color:
+        var(--error-text);
+
+}
+
+
+/* ============================================================
+   HELP TEXT
+============================================================ */
+
+.verify-help {
+
+    margin-top: 24px;
+
+    padding-top: 22px;
+
+    border-top:
+        1px solid var(--border);
+
+    color:
+        var(--text-light);
+
+    font-size: 13px;
+
+    line-height: 1.7;
+
+}
+
+
+.verify-help strong {
+
+    color:
+        var(--text-medium);
+
+    font-weight: 600;
+
+}
+
+
+/* ============================================================
+   LOGIN LINK
+============================================================ */
+
+.verify-login {
+
+    margin-top: 20px;
+
+    font-size: 14px;
+
+    color:
+        var(--text-medium);
+
+}
+
+
+.verify-login a {
+
+    color:
+        var(--primary);
+
+    font-weight: 600;
+
+    text-decoration: none;
+
+}
+
+
+.verify-login a:hover {
+
+    text-decoration:
+        underline;
+
+}
+
+
+/* ============================================================
+   FOOTER
+============================================================ */
+
+.verify-footer {
+
+    margin-top: 22px;
+
+    text-align: center;
+
+    color:
+        var(--text-light);
+
+    font-size: 12px;
+
+}
+
+
+/* ============================================================
+   LOADING STATE
+============================================================ */
+
+.verify-loading {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 9px;
+
+}
+
+
+.verify-spinner {
+
+    width: 16px;
+
+    height: 16px;
+
+    border:
+        2px solid rgba(255, 255, 255, 0.35);
+
+    border-top-color:
+        #ffffff;
+
+    border-radius: 50%;
+
+    animation:
+        verifySpin 0.8s linear infinite;
+
+}
+
+
+@keyframes verifySpin {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 600px) {
+
+    body {
+
+        padding:
+            16px;
+
+    }
+
+
+    .verify-card {
+
+        padding:
+            34px 22px;
+
+        border-radius:
+            20px;
+
+    }
+
+
+    .verify-brand {
+
+        margin-bottom:
+            24px;
+
+    }
+
+
+    .verify-brand-name {
+
+        font-size:
+            22px;
+
+    }
+
+
+    .verify-icon-wrapper {
+
+        width:
+            82px;
+
+        height:
+            82px;
+
+        margin-bottom:
+            22px;
+
+    }
+
+
+    .verify-icon {
+
+        font-size:
+            36px;
+
+    }
+
+
+    .verify-title {
+
+        font-size:
+            25px;
+
+    }
+
+
+    .verify-description {
+
+        font-size:
+            14px;
+
+    }
+
+
+    .verify-status {
+
+        font-size:
+            13px;
+
+    }
+
+}
+
+
+/* ============================================================
+   SMALL MOBILE
+============================================================ */
+
+@media (max-width: 380px) {
+
+    body {
+
+        padding:
+            12px;
+
+    }
+
+
+    .verify-card {
+
+        padding:
+            28px 18px;
+
+    }
+
+
+    .verify-title {
+
+        font-size:
+            23px;
+
+    }
+
+
+    .verify-icon-wrapper {
+
+        width:
+            74px;
+
+        height:
+            74px;
+
+    }
+
+
+    .verify-icon {
+
+        font-size:
+            32px;
+
+    }
+
+}
+
+
+/* ============================================================
+   ACCESSIBILITY
+============================================================ */
+
+.verify-button:focus-visible,
+.verify-secondary-button:focus-visible,
+.verify-login a:focus-visible {
+
+    outline:
+        3px solid rgba(217, 164, 65, 0.45);
+
+    outline-offset:
+        3px;
+
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .verify-button,
+    .verify-secondary-button {
+
+        transition:
+            none;
+
+    }
+
+
+    .verify-spinner {
+
+        animation:
+            none;
+
+    }
+
+}
+
+
+/* ============================================================
+   END VERIFY-EMAIL.CSS
+============================================================ */

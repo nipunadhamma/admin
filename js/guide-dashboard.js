@@ -47,12 +47,13 @@ import {
 
 
 import {
-    doc,
-    getDoc,
-    collection,
-    getDocs,
-    query,
-    where
+  doc,
+  getDoc,
+  collection,
+  getDocs,
+  query,
+  where,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 
@@ -145,9 +146,9 @@ let currentFirebaseUser =
    4. CURRENT GUIDE FIRESTORE PROFILE
 ============================================================ */
 
-let currentGuide =
-    null;
+let currentGuide = null;
 
+let quotationRequestsUnsubscribe = null;
 
 /* ============================================================
    5. ESCAPE HTML
@@ -840,7 +841,9 @@ function updateGuideStatus(
 
 
 /* ============================================================
-   12. LOAD GUIDE REQUESTS
+   12. GET GUIDE REQUESTS
+
+   FIRESTORE REAL-TIME LISTENER
 
    Collection:
 
@@ -850,15 +853,21 @@ function updateGuideStatus(
 
    guideId == Firebase UID
 
+   IMPORTANT:
+
+   onSnapshot() keeps the dashboard synchronized
+   with Firestore automatically.
+
 ============================================================ */
 
-async function getCurrentGuideRequests(
-    guide
+function listenToGuideRequests(
+    guide,
+    callback
 ) {
 
     if (!guide) {
 
-        return [];
+        return null;
 
     }
 
@@ -872,95 +881,106 @@ async function getCurrentGuideRequests(
     if (!guideId) {
 
         console.error(
-            "Guide UID missing while loading requests."
+            "Guide UID missing while listening for requests."
         );
 
 
-        return [];
+        return null;
 
     }
 
 
     console.log(
-        "Loading requests for guide:",
+        "Starting real-time request listener for guide:",
         guideId
     );
 
 
-    try {
-
-        const requestsRef =
-            collection(
-                db,
-                "lankaQuestQuotationRequests"
-            );
+    const requestsRef =
+        collection(
+            db,
+            "lankaQuestQuotationRequests"
+        );
 
 
-        const requestsQuery =
-            query(
-                requestsRef,
-                where(
-                    "guideId",
-                    "==",
-                    guideId
-                )
-            );
+    const requestsQuery =
+        query(
+            requestsRef,
+            where(
+                "guideId",
+                "==",
+                guideId
+            )
+        );
 
 
-        const snapshot =
-            await getDocs(
-                requestsQuery
-            );
+    const unsubscribe =
+        onSnapshot(
+            requestsQuery,
 
-
-        const requests =
-            [];
-
-
-        snapshot.forEach(
             (
-                requestSnapshot
+                snapshot
             ) => {
 
-                requests.push({
+                const requests =
+                    [];
 
-                    id:
-                        requestSnapshot.id,
 
-                    ...requestSnapshot.data()
+                snapshot.forEach(
+                    (
+                        requestSnapshot
+                    ) => {
 
-                });
+                        requests.push({
+
+                            id:
+                                requestSnapshot.id,
+
+                            ...requestSnapshot.data()
+
+                        });
+
+                    }
+                );
+
+
+                console.log(
+                    "Real-time guide requests:",
+                    requests.length
+                );
+
+
+                console.log(
+                    "Guide requests:",
+                    requests
+                );
+
+
+                callback(
+                    requests
+                );
+
+            },
+
+            (
+                error
+            ) => {
+
+                console.error(
+                    "Real-time quotation request listener error:",
+                    error
+                );
+
+
+                callback(
+                    []
+                );
 
             }
         );
 
 
-        console.log(
-            "Guide requests found:",
-            requests.length
-        );
-
-
-        console.log(
-            "Guide requests:",
-            requests
-        );
-
-
-        return requests;
-
-
-    } catch (error) {
-
-        console.error(
-            "Request loading error:",
-            error
-        );
-
-
-        return [];
-
-    }
+    return unsubscribe;
 
 }
 
@@ -1091,16 +1111,29 @@ function getRequestStatus(
 
 /* ============================================================
    15. UPDATE DASHBOARD COUNTS
+
+   Uses the latest real-time request data.
+
 ============================================================ */
 
 async function updateDashboardCounts(
-    guide
+    guide,
+    requests = null
 ) {
 
-    const requests =
-        await getCurrentGuideRequests(
-            guide
-        );
+    /*
+       If requests were not supplied,
+       load them once as fallback.
+    */
+
+    if (!requests) {
+
+        requests =
+            await getCurrentGuideRequestsOnce(
+                guide
+            );
+
+    }
 
 
     const quotations =
@@ -1126,9 +1159,8 @@ async function updateDashboardCounts(
     /*
        Pending requests
 
-       guide_selected is an incoming request
-       and should also remain visible to guide.
-
+       guide_selected is also an
+       incoming request for the guide.
     */
 
     const pendingRequests =
@@ -1184,6 +1216,105 @@ async function updateDashboardCounts(
 
         quotationCount.textContent =
             quotations.length;
+
+    }
+
+}
+
+/* ============================================================
+   15A. GET GUIDE REQUESTS ONCE
+
+   Used only as a fallback.
+
+   Real-time dashboard updates use
+   listenToGuideRequests().
+
+============================================================ */
+
+async function getCurrentGuideRequestsOnce(
+    guide
+) {
+
+    if (!guide) {
+
+        return [];
+
+    }
+
+
+    const guideId =
+        guide.uid ||
+        guide.id ||
+        "";
+
+
+    if (!guideId) {
+
+        return [];
+
+    }
+
+
+    try {
+
+        const requestsRef =
+            collection(
+                db,
+                "lankaQuestQuotationRequests"
+            );
+
+
+        const requestsQuery =
+            query(
+                requestsRef,
+                where(
+                    "guideId",
+                    "==",
+                    guideId
+                )
+            );
+
+
+        const snapshot =
+            await getDocs(
+                requestsQuery
+            );
+
+
+        const requests =
+            [];
+
+
+        snapshot.forEach(
+            (
+                requestSnapshot
+            ) => {
+
+                requests.push({
+
+                    id:
+                        requestSnapshot.id,
+
+                    ...requestSnapshot.data()
+
+                });
+
+            }
+        );
+
+
+        return requests;
+
+
+    } catch (error) {
+
+        console.error(
+            "Guide request loading error:",
+            error
+        );
+
+
+        return [];
 
     }
 
@@ -1519,10 +1650,14 @@ function createRequestCard(
 
 /* ============================================================
    18. RENDER INCOMING REQUESTS
+
+   Receives requests directly from
+   the real-time Firestore listener.
+
 ============================================================ */
 
-async function renderIncomingRequests(
-    guide
+function renderIncomingRequests(
+    requests
 ) {
 
     if (
@@ -1532,12 +1667,6 @@ async function renderIncomingRequests(
         return;
 
     }
-
-
-    const requests =
-        await getCurrentGuideRequests(
-            guide
-        );
 
 
     /*
@@ -1553,8 +1682,8 @@ async function renderIncomingRequests(
     */
 
     if (
-        requests.length ===
-        0
+        !requests ||
+        requests.length === 0
     ) {
 
         incomingRequestsContainer.style.display =
@@ -1656,7 +1785,6 @@ async function renderIncomingRequests(
     );
 
 }
-
 
 /* ============================================================
    19. TIMESTAMP TO MILLISECONDS
@@ -1804,9 +1932,164 @@ function showDashboardError(
 
 }
 
+/* ============================================================
+   21A. START REAL-TIME GUIDE REQUEST LISTENER
+
+   Firestore changes are automatically pushed
+   to the Guide Dashboard.
+
+============================================================ */
+
+function startGuideRequestListener(
+    guide
+) {
+
+    /*
+       Remove previous listener first.
+
+       Prevents duplicate listeners when
+       dashboard is refreshed/reloaded.
+    */
+
+    if (
+        quotationRequestsUnsubscribe
+    ) {
+
+        quotationRequestsUnsubscribe();
+
+        quotationRequestsUnsubscribe =
+            null;
+
+    }
+
+
+    if (!guide) {
+
+        return;
+
+    }
+
+
+    quotationRequestsUnsubscribe =
+        listenToGuideRequests(
+            guide,
+
+            async (
+                requests
+            ) => {
+
+                console.log(
+                    "Guide Dashboard received live request update:",
+                    requests.length
+                );
+
+
+                /*
+                   Update counts immediately
+                */
+
+                const quotations =
+                    await getCurrentGuideQuotations(
+                        guide
+                    );
+
+
+                /*
+                   Total requests
+                */
+
+                if (
+                    totalRequestCount
+                ) {
+
+                    totalRequestCount.textContent =
+                        requests.length;
+
+                }
+
+
+                /*
+                   Pending requests
+                */
+
+                const pendingRequests =
+                    requests.filter(
+                        (
+                            request
+                        ) => {
+
+                            const status =
+                                getRequestStatus(
+                                    request
+                                );
+
+
+                            return (
+
+                                status ===
+                                "pending"
+
+                                ||
+
+                                status ===
+                                "new"
+
+                                ||
+
+                                status ===
+                                "guide_selected"
+
+                            );
+
+                        }
+                    );
+
+
+                if (
+                    pendingRequestCount
+                ) {
+
+                    pendingRequestCount.textContent =
+                        pendingRequests.length;
+
+                }
+
+
+                /*
+                   Quotation count
+                */
+
+                if (
+                    quotationCount
+                ) {
+
+                    quotationCount.textContent =
+                        quotations.length;
+
+                }
+
+
+                /*
+                   Render latest requests
+                */
+
+                renderIncomingRequests(
+                    requests
+                );
+
+            }
+        );
+
+
+    console.log(
+        "Guide quotation request real-time listener started."
+    );
+
+}
+
 
 /* ============================================================
-   21. LOAD GUIDE DASHBOARD
+   21B. LOAD GUIDE DASHBOARD
 
    IMPORTANT FIX
 
@@ -1832,298 +2115,147 @@ function showDashboardError(
 
 ============================================================ */
 
-async function loadGuideDashboard(
-    firebaseUser
-) {
+async function loadGuideDashboard(firebaseUser) {
+  console.log("============================================");
 
-    console.log(
-        "============================================"
-    );
+  console.log("LANKAQUEST GUIDE DASHBOARD INITIALIZING");
 
+  console.log("Firebase User:", firebaseUser);
 
-    console.log(
-        "LANKAQUEST GUIDE DASHBOARD INITIALIZING"
-    );
-
-
-    console.log(
-        "Firebase User:",
-        firebaseUser
-    );
-
-
-    /* ========================================================
+  /* ========================================================
        1. AUTHENTICATION CHECK
     ======================================================== */
 
-    if (
-        !firebaseUser
-    ) {
+  if (!firebaseUser) {
+    console.error("No Firebase authenticated user.");
 
-        console.error(
-            "No Firebase authenticated user."
-        );
+    window.location.href = "login.html";
 
+    return;
+  }
 
-        window.location.href =
-            "login.html";
+  currentFirebaseUser = firebaseUser;
 
+  console.log("Firebase UID:", firebaseUser.uid);
 
-        return;
+  console.log("Firebase Email:", firebaseUser.email);
 
-    }
+  console.log("Firebase Provider:", firebaseUser.providerData);
 
-
-    currentFirebaseUser =
-        firebaseUser;
-
-
-    console.log(
-        "Firebase UID:",
-        firebaseUser.uid
-    );
-
-
-    console.log(
-        "Firebase Email:",
-        firebaseUser.email
-    );
-
-
-    console.log(
-        "Firebase Provider:",
-        firebaseUser.providerData
-    );
-
-
-    /* ========================================================
+  /* ========================================================
        2. LOAD GUIDE FIRESTORE PROFILE
     ======================================================== */
 
-    const guide =
-        await loadCurrentGuideProfile(
-            firebaseUser
-        );
+  const guide = await loadCurrentGuideProfile(firebaseUser);
 
+  currentGuide = guide;
 
-    currentGuide =
-        guide;
+  if (!guide) {
+    showDashboardError("Guide profile not found.");
 
-
-    if (
-        !guide
-    ) {
-
-        showDashboardError(
-            "Guide profile not found."
-        );
-
-
-        /*
+    /*
            DO NOT redirect immediately.
 
            This allows the real error to remain visible
            and makes debugging possible.
         */
 
-        return;
+    return;
+  }
 
-    }
-
-
-    /* ========================================================
+  /* ========================================================
        3. VERIFY GUIDE ACCOUNT TYPE
     ======================================================== */
 
-    if (
-        !isGuideProfile(
-            guide
-        )
-    ) {
+  if (!isGuideProfile(guide)) {
+    console.error("This Firestore profile is not a guide.");
 
-        console.error(
-            "This Firestore profile is not a guide."
-        );
+    showDashboardError("This account is not registered as a guide.");
 
+    return;
+  }
 
-        showDashboardError(
-            "This account is not registered as a guide."
-        );
-
-
-        return;
-
-    }
-
-
-    /* ========================================================
+  /* ========================================================
        4. CHECK GUIDE APPROVAL
     ======================================================== */
 
-    const accessAllowed =
-        canAccessGuideDashboard(
-            guide
-        );
+  const accessAllowed = canAccessGuideDashboard(guide);
 
+  if (!accessAllowed) {
+    console.warn("Guide dashboard access denied.");
 
-    if (
-        !accessAllowed
-    ) {
+    console.warn("Guide profile:", guide);
 
-        console.warn(
-            "Guide dashboard access denied."
-        );
-
-
-        console.warn(
-            "Guide profile:",
-            guide
-        );
-
-
-        /*
+    /*
            Only redirect when the Firestore profile
            itself clearly says the guide is not allowed.
         */
 
-        const verificationStatus =
-            String(
-                guide.verificationStatus || ""
-            )
-            .trim()
-            .toLowerCase();
+    const verificationStatus = String(guide.verificationStatus || "")
+      .trim()
+      .toLowerCase();
 
+    const status = String(guide.status || "")
+      .trim()
+      .toLowerCase();
 
-        const status =
-            String(
-                guide.status || ""
-            )
-            .trim()
-            .toLowerCase();
+    const profileStatus = String(guide.profileStatus || "")
+      .trim()
+      .toLowerCase();
 
+    const explicitlyInactive = guide.isActive === false;
 
-        const profileStatus =
-            String(
-                guide.profileStatus || ""
-            )
-            .trim()
-            .toLowerCase();
+    if (
+      verificationStatus === "rejected" ||
+      status === "rejected" ||
+      profileStatus === "inactive" ||
+      explicitlyInactive
+    ) {
+      window.location.href = "guide-verification.html";
 
+      return;
+    }
 
-        const explicitlyInactive =
-            guide.isActive === false;
-
-
-        if (
-            verificationStatus ===
-            "rejected"
-            ||
-            status ===
-            "rejected"
-            ||
-            profileStatus ===
-            "inactive"
-            ||
-            explicitlyInactive
-        ) {
-
-            window.location.href =
-                "guide-verification.html";
-
-
-            return;
-
-        }
-
-
-        /*
+    /*
            Pending approval
         */
 
-        showDashboardError(
-            "Guide account is not approved for dashboard access."
-        );
+    showDashboardError("Guide account is not approved for dashboard access.");
 
+    return;
+  }
 
-        return;
-
-    }
-
-
-    /* ========================================================
+  /* ========================================================
        5. UPDATE GUIDE UI
     ======================================================== */
 
-    updateGuideName(
-        guide
-    );
+  updateGuideName(guide);
 
+  updateGuideStatus(guide);
 
-    updateGuideStatus(
-        guide
-    );
+  /* ========================================================
+   6. START REAL-TIME REQUEST LISTENER
+======================================================== */
 
+  startGuideRequestListener(guide);
 
-    /* ========================================================
-       6. LOAD DASHBOARD COUNTS
-    ======================================================== */
-
-    await updateDashboardCounts(
-        guide
-    );
-
-
-    /* ========================================================
-       7. LOAD INCOMING REQUESTS
-    ======================================================== */
-
-    await renderIncomingRequests(
-        guide
-    );
-
-
-    /* ========================================================
+  /* ========================================================
        8. FINAL DEBUG
     ======================================================== */
 
-    console.log(
-        "============================================"
-    );
+  console.log("============================================");
 
+  console.log("GUIDE DASHBOARD READY");
 
-    console.log(
-        "GUIDE DASHBOARD READY"
-    );
+  console.log("Firebase UID:", firebaseUser.uid);
 
+  console.log("Firestore Guide UID:", guide.uid);
 
-    console.log(
-        "Firebase UID:",
-        firebaseUser.uid
-    );
+  console.log("Guide Name:", guide.fullName);
 
+  console.log("Guide Email:", guide.email);
 
-    console.log(
-        "Firestore Guide UID:",
-        guide.uid
-    );
-
-
-    console.log(
-        "Guide Name:",
-        guide.fullName
-    );
-
-
-    console.log(
-        "Guide Email:",
-        guide.email
-    );
-
-
-    console.log(
-        "============================================"
-    );
-
+  console.log("============================================");
 }
 
 
@@ -2161,9 +2293,19 @@ if (
                latest Firestore data.
             */
 
-            await loadGuideDashboard(
-                currentFirebaseUser
-            );
+            if (refreshRequestsButton) {
+              refreshRequestsButton.addEventListener("click", async () => {
+                if (!currentGuide) {
+                  console.warn("Cannot refresh: Guide profile unavailable.");
+
+                  return;
+                }
+
+                console.log("Refreshing guide requests...");
+
+                startGuideRequestListener(currentGuide);
+              });
+            }
 
         }
     );

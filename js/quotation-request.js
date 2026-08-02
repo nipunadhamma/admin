@@ -1,3 +1,4 @@
+
 /* ============================================================
    LANKAQUEST
    QUOTATION REQUEST PAGE
@@ -6,599 +7,1450 @@
 
    FLOW:
 
-   Tourist Login
-        |
-        ↓
+   Tourist
+      ↓
    Firebase Authentication
-        |
-        ↓
-   Load Trip
-        |
-        ↓
-   lankaQuestTouristTrips
-        |
-        ↓
-   Create Request
-        |
-        ↓
-   lankaQuestQuotationRequests
-        |
-        ↓
+      ↓
+   Load Tourist Trip
+      ↓
+   lankaQuestTouristTrips/{tripId}
+      ↓
+   Verify Tourist Ownership
+      ↓
+   Create Quotation Request
+      ↓
+   lankaQuestQuotationRequests/{requestId}
+      ↓
+   Update Tourist Trip
+      ↓
+   quotationRequested = true
+      ↓
    Find Guides
-        |
-        ↓
+      ↓
    Select Guide
-        |
-        ↓
-   Return to this page with requestId
-        |
-        ↓
+      ↓
    Existing Request
 ============================================================ */
+
 
 /* ============================================================
    1. FIREBASE IMPORTS
 ============================================================ */
 
-import { auth, db } from "./firebase-config.js";
+import {
+    auth,
+    db
+} from "./firebase-config.js";
 
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 import {
-  collection,
-  addDoc,
-  getDoc,
-  doc,
-  serverTimestamp,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+
+import {
+    collection,
+    addDoc,
+    getDoc,
+    getDocs,
+    doc,
+    query,
+    where,
+    updateDoc,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
 
 /* ============================================================
    2. FIRESTORE COLLECTIONS
 ============================================================ */
 
-const TRIP_COLLECTION = "lankaQuestTouristTrips";
+const TRIP_COLLECTION =
+    "lankaQuestTouristTrips";
 
-const QUOTATION_COLLECTION = "lankaQuestQuotationRequests";
+
+const QUOTATION_COLLECTION =
+    "lankaQuestQuotationRequests";
+
 
 /* ============================================================
-   3. GLOBAL VARIABLES
+   3. GLOBAL STATE
 ============================================================ */
 
-let currentTourist = null;
+let currentTourist =
+    null;
 
-let currentTrip = null;
 
-let currentQuotationRequest = null;
+let currentTrip =
+    null;
+
+
+let currentQuotationRequest =
+    null;
+
+
+let quotationSubmissionInProgress =
+    false;
+
 
 /* ============================================================
    4. DOM ELEMENTS
 ============================================================ */
 
-const quotationDestinations = document.getElementById("quotationDestinations");
+const quotationDestinations =
+    document.getElementById(
+        "quotationDestinations"
+    );
 
-const quotationPlaceCount = document.getElementById("quotationPlaceCount");
 
-const quotationStartDate = document.getElementById("quotationStartDate");
+const quotationPlaceCount =
+    document.getElementById(
+        "quotationPlaceCount"
+    );
 
-const quotationEndDate = document.getElementById("quotationEndDate");
 
-const quotationTravelers = document.getElementById("quotationTravelers");
+const quotationStartDate =
+    document.getElementById(
+        "quotationStartDate"
+    );
 
-const quotationTravelStyle = document.getElementById("quotationTravelStyle");
 
-const quotationTransport = document.getElementById("quotationTransport");
+const quotationEndDate =
+    document.getElementById(
+        "quotationEndDate"
+    );
 
-const quotationAccommodation = document.getElementById(
-  "quotationAccommodation",
-);
 
-const quotationSpecialRequests = document.getElementById(
-  "quotationSpecialRequests",
-);
+const quotationTravelers =
+    document.getElementById(
+        "quotationTravelers"
+    );
 
-const submitQuotationButton = document.getElementById("submitQuotationButton");
+
+const quotationTravelStyle =
+    document.getElementById(
+        "quotationTravelStyle"
+    );
+
+
+const quotationTransport =
+    document.getElementById(
+        "quotationTransport"
+    );
+
+
+const quotationAccommodation =
+    document.getElementById(
+        "quotationAccommodation"
+    );
+
+
+const quotationSpecialRequests =
+    document.getElementById(
+        "quotationSpecialRequests"
+    );
+
+
+const submitQuotationButton =
+    document.getElementById(
+        "submitQuotationButton"
+    );
+
 
 /* ============================================================
-   5. GET URL PARAMETERS
+   5. URL PARAMETERS
 ============================================================ */
 
 function getURLParameters() {
-  const params = new URLSearchParams(window.location.search);
 
-  return {
-    tripId: params.get("trip"),
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
 
-    requestId: params.get("requestId"),
 
-    guideId: params.get("guideId"),
-  };
+    return {
+
+        tripId:
+            params.get("trip"),
+
+        requestId:
+            params.get("requestId"),
+
+        guideId:
+            params.get("guideId")
+
+    };
+
 }
 
+
 /* ============================================================
-   6. AUTHENTICATION
+   6. FIREBASE AUTH STATE
 ============================================================ */
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "login.html?redirect=quotation-request.html";
+onAuthStateChanged(
+    auth,
+    async (user) => {
 
-    return;
-  }
+        if (!user) {
 
-  currentTourist = user;
+            redirectToLogin();
 
-  /*
-           Determine which flow we are in.
+            return;
 
-           1. Initial quotation:
-              ?trip=TRIP_ID
+        }
 
-           2. Existing quotation:
-              ?requestId=REQUEST_ID
-        */
 
-  const { tripId, requestId } = getURLParameters();
+        currentTourist =
+            user;
 
-  try {
-    if (requestId) {
-      await loadExistingQuotationRequest(requestId);
-    } else if (tripId) {
-      await loadTrip();
-    } else {
-      showError("Trip not found");
+
+        console.log(
+            "LankaQuest Tourist authenticated:",
+            user.uid
+        );
+
+
+        try {
+
+            const {
+                tripId,
+                requestId
+            } =
+                getURLParameters();
+
+
+            /*
+               EXISTING REQUEST FLOW
+            */
+
+            if (requestId) {
+
+                await loadExistingQuotationRequest(
+                    requestId
+                );
+
+                return;
+
+            }
+
+
+            /*
+               NEW REQUEST FLOW
+            */
+
+            if (tripId) {
+
+                await loadTrip(
+                    tripId
+                );
+
+                return;
+
+            }
+
+
+            showError(
+                "Trip information was not found."
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Quotation page initialization error:",
+                error
+            );
+
+
+            showError(
+                "Unable to load quotation information."
+            );
+
+        }
+
     }
-  } catch (error) {
-    console.error("Quotation page initialization error:", error);
+);
 
-    showError("Unable to load quotation information.");
-  }
-});
 
 /* ============================================================
-   7. LOAD TOURIST TRIP
+   7. LOGIN REDIRECT
 ============================================================ */
 
-async function loadTrip() {
-  try {
-    const { tripId } = getURLParameters();
+function redirectToLogin() {
+
+    const redirect =
+        encodeURIComponent(
+            window.location.pathname +
+            window.location.search
+        );
+
+
+    window.location.href =
+        "login.html?redirect=" +
+        redirect;
+
+}
+
+
+/* ============================================================
+   8. LOAD TOURIST TRIP
+============================================================ */
+
+async function loadTrip(
+    tripId
+) {
 
     if (!tripId) {
-      showError("Trip not found");
 
-      return;
+        showError(
+            "Trip not found."
+        );
+
+        return;
+
     }
 
-    console.log("Loading tourist trip:", tripId);
 
-    const tripRef = doc(db, TRIP_COLLECTION, tripId);
+    console.log(
+        "Loading tourist trip:",
+        tripId
+    );
 
-    const snapshot = await getDoc(tripRef);
+
+    const tripRef =
+        doc(
+            db,
+            TRIP_COLLECTION,
+            tripId
+        );
+
+
+    const snapshot =
+        await getDoc(
+            tripRef
+        );
+
 
     if (!snapshot.exists()) {
-      console.error("Trip does not exist:", tripId);
 
-      showError("Trip does not exist");
+        console.error(
+            "Trip does not exist:",
+            tripId
+        );
 
-      return;
+
+        showError(
+            "This trip does not exist."
+        );
+
+        return;
+
     }
 
-    const data = snapshot.data();
+
+    const data =
+        snapshot.data();
+
 
     /*
-           Security check.
+       SECURITY CHECK
 
-           The trip must belong
-           to the authenticated tourist.
-        */
+       The authenticated tourist must
+       own this trip.
+    */
 
-    if (data.touristId !== currentTourist.uid) {
-      console.error("Trip ownership mismatch.");
+    if (
+        data.touristId !==
+        currentTourist.uid
+    ) {
 
-      showError("Access denied");
+        console.error(
+            "Trip ownership mismatch."
+        );
 
-      return;
+
+        showError(
+            "You do not have permission to access this trip."
+        );
+
+        return;
+
     }
 
-    currentTrip = {
-      id: snapshot.id,
 
-      ...data,
+    currentTrip = {
+
+        id:
+            snapshot.id,
+
+        ...data
+
     };
 
-    console.log("Tourist trip loaded:", currentTrip);
+
+    console.log(
+        "Tourist trip loaded:",
+        currentTrip
+    );
+
+
+    /*
+       If the trip already has a quotation
+       request, check it before allowing
+       another one.
+    */
+
+    if (
+        currentTrip.quotationRequestId
+    ) {
+
+        await loadExistingQuotationRequest(
+            currentTrip.quotationRequestId
+        );
+
+        return;
+
+    }
+
 
     renderQuotationData();
-  } catch (error) {
-    console.error("Trip loading error:", error);
 
-    showError("Unable to load trip");
-  }
 }
 
+
 /* ============================================================
-   8. LOAD EXISTING QUOTATION REQUEST
+   9. LOAD EXISTING QUOTATION REQUEST
 ============================================================ */
 
-async function loadExistingQuotationRequest(requestId) {
-  try {
-    console.log("Loading existing quotation request:", requestId);
+async function loadExistingQuotationRequest(
+    requestId
+) {
 
-    const requestRef = doc(db, QUOTATION_COLLECTION, requestId);
+    if (!requestId) {
 
-    const snapshot = await getDoc(requestRef);
+        showError(
+            "Quotation request not found."
+        );
+
+        return;
+
+    }
+
+
+    console.log(
+        "Loading quotation request:",
+        requestId
+    );
+
+
+    const requestRef =
+        doc(
+            db,
+            QUOTATION_COLLECTION,
+            requestId
+        );
+
+
+    const snapshot =
+        await getDoc(
+            requestRef
+        );
+
 
     if (!snapshot.exists()) {
-      console.error("Quotation request does not exist:", requestId);
 
-      showError("Quotation request not found");
+        console.error(
+            "Quotation request does not exist:",
+            requestId
+        );
 
-      return;
+
+        showError(
+            "Quotation request not found."
+        );
+
+        return;
+
     }
 
-    const data = snapshot.data();
+
+    const data =
+        snapshot.data();
+
 
     /*
-           Security check.
+       SECURITY CHECK
 
-           Only the tourist who created
-           the request can access it.
-        */
+       Only the tourist who created
+       this request can access it.
+    */
 
-    if (data.touristId !== currentTourist.uid) {
-      console.error("Quotation request ownership mismatch.");
+    if (
+        data.touristId !==
+        currentTourist.uid
+    ) {
 
-      showError("Access denied");
+        console.error(
+            "Quotation request ownership mismatch."
+        );
 
-      return;
+
+        showError(
+            "You do not have permission to access this quotation request."
+        );
+
+        return;
+
     }
+
 
     currentQuotationRequest = {
-      id: snapshot.id,
 
-      ...data,
+        id:
+            snapshot.id,
+
+        ...data
+
     };
 
-    console.log("Existing quotation request loaded:", currentQuotationRequest);
+
+    console.log(
+        "Existing quotation request:",
+        currentQuotationRequest
+    );
+
 
     /*
-           The request already contains
-           all trip information.
+       Build a compatible trip object
+       from the quotation request.
 
-           Therefore we do NOT need to
-           create another quotation request.
-        */
+       This allows the same renderer
+       to be used.
+    */
 
     currentTrip = {
-      id: data.tripId,
 
-      destinations: data.destinations || [],
+        id:
+            data.tripId || "",
 
-      startDate: data.startDate,
+        destinations:
+            Array.isArray(
+                data.destinations
+            )
+                ? data.destinations
+                : [],
 
-      endDate: data.endDate,
+        startDate:
+            data.startDate || "",
 
-      travelers: data.travelers,
+        endDate:
+            data.endDate || "",
 
-      travelStyle: data.travelStyle,
+        travelers:
+            data.travelers || "",
 
-      transport: data.transport,
+        travelStyle:
+            data.travelStyle || "",
 
-      accommodation: data.accommodation,
+        transport:
+            data.transport || "",
 
-      specialRequests: data.specialRequests,
+        accommodation:
+            data.accommodation || "",
 
-      touristId: data.touristId,
+        specialRequests:
+            data.specialRequests || "",
 
-      touristEmail: data.touristEmail,
+        touristId:
+            data.touristId || "",
+
+        touristEmail:
+            data.touristEmail || "",
+
+        touristName:
+            data.touristName || ""
+
     };
+
 
     renderQuotationData();
 
-    /*
-           Existing request means that
-           the tourist already submitted
-           the quotation request.
-
-           Therefore disable the
-           "Submit Quotation Request"
-           button.
-
-           Guide selection has already
-           happened or is being continued.
-        */
-
-    if (submitQuotationButton) {
-      submitQuotationButton.disabled = true;
-
-      submitQuotationButton.textContent = "Quotation Request Submitted";
-    }
 
     /*
-           Show selected guide information
-           if available.
-        */
+       Existing request cannot be
+       submitted again.
+    */
+
+    disableQuotationButton();
+
+
+    /*
+       Show selected guide if available.
+    */
 
     renderSelectedGuide();
-  } catch (error) {
-    console.error("Quotation request loading error:", error);
 
-    showError("Unable to load quotation request");
-  }
 }
 
+
 /* ============================================================
-   9. RENDER QUOTATION DATA
+   10. RENDER QUOTATION DATA
 ============================================================ */
 
 function renderQuotationData() {
-  if (!currentTrip) {
-    return;
-  }
 
-  const destinations = currentTrip.destinations || [];
+    if (!currentTrip) {
 
-  /* --------------------------------------------------------
+        return;
+
+    }
+
+
+    const destinations =
+        Array.isArray(
+            currentTrip.destinations
+        )
+            ? currentTrip.destinations
+            : [];
+
+
+    /*
        PLACE COUNT
-    -------------------------------------------------------- */
+    */
 
-  if (quotationPlaceCount) {
-    quotationPlaceCount.textContent =
-      destinations.length + (destinations.length === 1 ? " Place" : " Places");
-  }
+    if (
+        quotationPlaceCount
+    ) {
 
-  /* --------------------------------------------------------
+        quotationPlaceCount.textContent =
+            destinations.length +
+            (
+                destinations.length === 1
+                    ? " Place"
+                    : " Places"
+            );
+
+    }
+
+
+    /*
        DESTINATIONS
-    -------------------------------------------------------- */
+    */
 
-  if (quotationDestinations) {
-    quotationDestinations.innerHTML = "";
+    if (
+        quotationDestinations
+    ) {
 
-    destinations.forEach((place) => {
-      const card = document.createElement("div");
+        quotationDestinations.innerHTML =
+            "";
 
-      card.className = "quotation-destination-card";
 
-      const image = place.image || "";
+        destinations.forEach(
+            (
+                place,
+                index
+            ) => {
 
-      const name = place.name || "Destination";
+                const card =
+                    document.createElement(
+                        "div"
+                    );
 
-      const district = place.district || "";
 
-      card.innerHTML = `
+                card.className =
+                    "quotation-destination-card";
+
+
+                const image =
+                    place.image ||
+                    "";
+
+
+                const name =
+                    place.name ||
+                    "Destination";
+
+
+                const district =
+                    place.district ||
+                    "";
+
+
+                card.innerHTML = `
 
                     <img
-                        src="${escapeHTML(image)}"
-                        alt="${escapeHTML(name)}"
+                        src="${escapeHTML(
+                            image
+                        )}"
+                        alt="${escapeHTML(
+                            name
+                        )}"
+                        loading="lazy"
                     >
 
                     <h4>
-                        ${escapeHTML(name)}
+                        ${index + 1}.
+                        ${escapeHTML(
+                            name
+                        )}
                     </h4>
 
                     <p>
                         📍
-                        ${escapeHTML(district)}
+                        ${escapeHTML(
+                            district
+                        )}
                     </p>
 
                 `;
 
-      quotationDestinations.appendChild(card);
-    });
-  }
 
-  /* --------------------------------------------------------
+                quotationDestinations.appendChild(
+                    card
+                );
+
+            }
+        );
+
+    }
+
+
+    /*
        TRAVEL DETAILS
-    -------------------------------------------------------- */
+    */
 
-  if (quotationStartDate) {
-    quotationStartDate.textContent = currentTrip.startDate || "Not selected";
-  }
+    setText(
+        quotationStartDate,
+        currentTrip.startDate ||
+        "Not selected"
+    );
 
-  if (quotationEndDate) {
-    quotationEndDate.textContent = currentTrip.endDate || "Not selected";
-  }
 
-  if (quotationTravelers) {
-    quotationTravelers.textContent = currentTrip.travelers || "Not selected";
-  }
+    setText(
+        quotationEndDate,
+        currentTrip.endDate ||
+        "Not selected"
+    );
 
-  if (quotationTravelStyle) {
-    quotationTravelStyle.textContent =
-      currentTrip.travelStyle || "Not selected";
-  }
 
-  if (quotationTransport) {
-    quotationTransport.textContent = currentTrip.transport || "Not selected";
-  }
+    setText(
+        quotationTravelers,
+        currentTrip.travelers ||
+        "Not selected"
+    );
 
-  if (quotationAccommodation) {
-    quotationAccommodation.textContent =
-      currentTrip.accommodation || "Not selected";
-  }
 
-  if (quotationSpecialRequests) {
-    quotationSpecialRequests.textContent =
-      currentTrip.specialRequests || "No special requests";
-  }
+    setText(
+        quotationTravelStyle,
+        currentTrip.travelStyle ||
+        "Not selected"
+    );
+
+
+    setText(
+        quotationTransport,
+        currentTrip.transport ||
+        "Not selected"
+    );
+
+
+    setText(
+        quotationAccommodation,
+        currentTrip.accommodation ||
+        "Not selected"
+    );
+
+
+    setText(
+        quotationSpecialRequests,
+        currentTrip.specialRequests ||
+        "No special requests"
+    );
+
 }
 
+
 /* ============================================================
-   10. RENDER SELECTED GUIDE
+   11. SET TEXT HELPER
 ============================================================ */
 
-function renderSelectedGuide() {
-  if (!currentQuotationRequest) {
-    return;
-  }
+function setText(
+    element,
+    value
+) {
 
-  const selectedGuide = currentQuotationRequest.selectedGuide;
+    if (!element) {
 
-  if (!selectedGuide) {
-    return;
-  }
+        return;
 
-  console.log("Selected guide:", selectedGuide);
+    }
 
-  /*
-       We intentionally do not create
-       a new data source here.
 
-       selectedGuide comes directly
-       from Firestore quotation request.
-    */
+    element.textContent =
+        value;
+
 }
 
+
 /* ============================================================
-   11. CREATE QUOTATION REQUEST
+   12. CHECK EXISTING REQUEST FOR TRIP
+============================================================ */
+
+async function findExistingRequestForTrip(
+    tripId
+) {
+
+    if (!tripId) {
+
+        return null;
+
+    }
+
+
+    const requestsRef =
+        collection(
+            db,
+            QUOTATION_COLLECTION
+        );
+
+
+    const requestQuery =
+        query(
+            requestsRef,
+            where(
+                "tripId",
+                "==",
+                tripId
+            ),
+            where(
+                "touristId",
+                "==",
+                currentTourist.uid
+            )
+        );
+
+
+    const snapshot =
+        await getDocs(
+            requestQuery
+        );
+
+
+    if (
+        snapshot.empty
+    ) {
+
+        return null;
+
+    }
+
+
+    /*
+       Return the first existing request.
+
+       A trip should normally have
+       only one active quotation request.
+    */
+
+    const requestDoc =
+        snapshot.docs[0];
+
+
+    return {
+
+        id:
+            requestDoc.id,
+
+        ...requestDoc.data()
+
+    };
+
+}
+
+
+/* ============================================================
+   13. CREATE QUOTATION REQUEST
 ============================================================ */
 
 async function submitQuotationRequest() {
-  try {
-    if (!currentTourist) {
-      alert("Please login first.");
 
-      return;
+    if (
+        quotationSubmissionInProgress
+    ) {
+
+        return;
+
     }
 
-    if (!currentTrip) {
-      alert("Trip not loaded");
 
-      return;
-    }
+    quotationSubmissionInProgress =
+        true;
 
-    /*
-           IMPORTANT:
 
-           If this page was opened with
-           an existing requestId, NEVER
-           create another request.
+    const originalButtonText =
+        submitQuotationButton
+            ? submitQuotationButton.textContent
+            : "";
+
+
+    try {
+
+        /*
+           AUTH CHECK
         */
 
-    const { requestId } = getURLParameters();
+        if (
+            !currentTourist
+        ) {
 
-    if (requestId) {
-      console.warn("Quotation request already exists:", requestId);
+            redirectToLogin();
 
-      alert("This quotation request has already been submitted.");
+            return;
 
-      return;
-    }
+        }
 
-    /*
-           Create a NEW quotation request.
 
-           IMPORTANT:
-
-           guideId is NOT added here.
-
-           Guide will be selected later
-           from Find Guides.
+        /*
+           TRIP CHECK
         */
 
-    const requestData = {
-      touristId: currentTourist.uid,
+        if (
+            !currentTrip ||
+            !currentTrip.id
+        ) {
 
-      touristName: currentTourist.fullName || "",
+            alert(
+                "Trip information is not available."
+            );
 
-      touristEmail: currentTourist.email || "",
+            return;
 
-      tripId: currentTrip.id,
+        }
 
-      destinations: currentTrip.destinations || [],
 
-      startDate: currentTrip.startDate || "",
+        /*
+           EXISTING REQUEST CHECK
+        */
 
-      endDate: currentTrip.endDate || "",
+        if (
+            currentQuotationRequest
+        ) {
 
-      travelers: currentTrip.travelers || "",
+            alert(
+                "This quotation request has already been submitted."
+            );
 
-      travelStyle: currentTrip.travelStyle || "",
+            return;
 
-      transport: currentTrip.transport || "",
+        }
 
-      accommodation: currentTrip.accommodation || "",
 
-      specialRequests: currentTrip.specialRequests || "",
+        /*
+           DISABLE BUTTON
+        */
 
-      /*
-               No guideId here.
+        if (
+            submitQuotationButton
+        ) {
 
-               No guideName here.
+            submitQuotationButton.disabled =
+                true;
 
-               No guideEmail here.
 
-               No selected guide yet.
+            submitQuotationButton.textContent =
+                "Checking Request...";
+        }
+
+
+        /*
+           CHECK FIRESTORE
+
+           This prevents duplicate quotation
+           requests even if the tourist
+           refreshes or clicks twice.
+        */
+
+        const existingRequest =
+            await findExistingRequestForTrip(
+                currentTrip.id
+            );
+
+
+        if (
+            existingRequest
+        ) {
+
+            currentQuotationRequest =
+                existingRequest;
+
+
+            disableQuotationButton();
+
+
+            alert(
+                "A quotation request already exists for this trip."
+            );
+
+
+            window.location.href =
+                "quotation-request.html?requestId=" +
+                encodeURIComponent(
+                    existingRequest.id
+                );
+
+
+            return;
+
+        }
+
+
+        /*
+           CREATE REQUEST
+        */
+
+        if (
+            submitQuotationButton
+        ) {
+
+            submitQuotationButton.textContent =
+                "Sending Request...";
+        }
+
+
+        const requestData = {
+
+            /*
+               TOURIST
             */
 
-      status: "pending",
+            touristId:
+                currentTourist.uid,
 
-      quotationRequested: false,
+            touristName:
+                currentTourist.displayName ||
+                currentTourist.email ||
+                "",
 
-      createdAt: serverTimestamp(),
+            touristEmail:
+                currentTourist.email ||
+                "",
 
-      updatedAt: serverTimestamp(),
-    };
 
-    const docRef = await addDoc(
-      collection(db, QUOTATION_COLLECTION),
-      requestData,
-    );
+            /*
+               TRIP
+            */
 
-    console.log("Quotation Request Created:", docRef.id);
+            tripId:
+                currentTrip.id,
 
-    alert("Quotation request created successfully.");
 
-    /*
-           IMPORTANT
+            /*
+               DESTINATIONS
+            */
 
-           Pass the Firestore request ID
-           to Find Guides.
+            destinations:
+                Array.isArray(
+                    currentTrip.destinations
+                )
+                    ? currentTrip.destinations
+                    : [],
 
-           Find Guides will use this exact
-           document and update it after
-           guide selection.
+
+            /*
+               TRAVEL DETAILS
+            */
+
+            startDate:
+                currentTrip.startDate ||
+                "",
+
+            endDate:
+                currentTrip.endDate ||
+                "",
+
+            travelers:
+                currentTrip.travelers ||
+                "",
+
+            travelStyle:
+                currentTrip.travelStyle ||
+                "",
+
+            transport:
+                currentTrip.transport ||
+                "",
+
+            accommodation:
+                currentTrip.accommodation ||
+                "",
+
+            specialRequests:
+                currentTrip.specialRequests ||
+                "",
+
+
+            /*
+               GUIDE
+
+               Guide is selected later.
+            */
+
+            guideId:
+                null,
+
+            guideName:
+                "",
+
+            guideEmail:
+                "",
+
+
+            /*
+               WORKFLOW
+            */
+
+            status:
+                "pending",
+
+            quotationRequested:
+                true,
+
+            guideSelected:
+                false,
+
+
+            /*
+               TIMESTAMPS
+            */
+
+            createdAt:
+                serverTimestamp(),
+
+            updatedAt:
+                serverTimestamp()
+
+        };
+
+
+        /*
+           SAVE QUOTATION REQUEST
         */
 
-    window.location.href = `find-guides.html?requestId=${encodeURIComponent(
-      docRef.id,
-    )}`;
-  } catch (error) {
-    console.error("Quotation error:", error);
+        const requestRef =
+            await addDoc(
+                collection(
+                    db,
+                    QUOTATION_COLLECTION
+                ),
+                requestData
+            );
 
-    alert(error.message || "Unable to submit quotation request");
-  }
+
+        console.log(
+            "Quotation request created:",
+            requestRef.id
+        );
+
+
+        /*
+           UPDATE TOURIST TRIP
+
+           The Trip now knows which
+           quotation request belongs to it.
+        */
+
+        const tripRef =
+            doc(
+                db,
+                TRIP_COLLECTION,
+                currentTrip.id
+            );
+
+
+        await updateDoc(
+            tripRef,
+            {
+
+                quotationRequestId:
+                    requestRef.id,
+
+                quotationRequested:
+                    true,
+
+                status:
+                    "quotation_requested",
+
+                updatedAt:
+                    serverTimestamp()
+
+            }
+        );
+
+
+        console.log(
+            "Tourist trip updated:",
+            currentTrip.id
+        );
+
+
+        /*
+           STORE CURRENT REQUEST
+        */
+
+        currentQuotationRequest = {
+
+            id:
+                requestRef.id,
+
+            ...requestData
+
+        };
+
+
+        /*
+           SUCCESS
+        */
+
+        alert(
+            "Quotation request created successfully."
+        );
+
+
+        /*
+           Continue to Find Guides.
+        */
+
+        window.location.href =
+            "find-guides.html?requestId=" +
+            encodeURIComponent(
+                requestRef.id
+            );
+
+    } catch (error) {
+
+        console.error(
+            "Quotation request error:",
+            error
+        );
+
+
+        /*
+           FIRESTORE PERMISSION
+        */
+
+        if (
+            error.code ===
+            "permission-denied"
+        ) {
+
+            alert(
+                "Firestore denied this request. Please make sure you are logged in as the correct Tourist."
+            );
+
+            return;
+
+        }
+
+
+        /*
+           GENERAL ERROR
+        */
+
+        alert(
+            error.message ||
+            "Unable to submit quotation request."
+        );
+
+    } finally {
+
+        quotationSubmissionInProgress =
+            false;
+
+
+        /*
+           Only restore the button
+           if we did not navigate away
+           or permanently disable it.
+        */
+
+        if (
+            submitQuotationButton &&
+            !currentQuotationRequest
+        ) {
+
+            submitQuotationButton.disabled =
+                false;
+
+
+            submitQuotationButton.textContent =
+                originalButtonText;
+
+        }
+
+    }
+
 }
+
 
 /* ============================================================
-   12. BUTTON EVENT
+   14. DISABLE SUBMIT BUTTON
 ============================================================ */
 
-if (submitQuotationButton) {
-  submitQuotationButton.addEventListener("click", submitQuotationRequest);
+function disableQuotationButton() {
+
+    if (
+        !submitQuotationButton
+    ) {
+
+        return;
+
+    }
+
+
+    submitQuotationButton.disabled =
+        true;
+
+
+    submitQuotationButton.textContent =
+        "Quotation Request Submitted";
+
 }
+
 
 /* ============================================================
-   13. HTML ESCAPE
+   15. SELECTED GUIDE
 ============================================================ */
 
-function escapeHTML(value) {
-  const div = document.createElement("div");
+function renderSelectedGuide() {
 
-  div.textContent = value == null ? "" : String(value);
+    if (
+        !currentQuotationRequest
+    ) {
 
-  return div.innerHTML;
+        return;
+
+    }
+
+
+    const selectedGuide =
+        currentQuotationRequest.selectedGuide ||
+        null;
+
+
+    /*
+       Guide information is optional here.
+
+       Find Guides is responsible for
+       selecting and updating the guide.
+
+       This function intentionally does
+       not create another Firestore source.
+    */
+
+    if (
+        selectedGuide
+    ) {
+
+        console.log(
+            "Selected guide:",
+            selectedGuide
+        );
+
+    }
+
+
+    /*
+       Also support the cleaner guideId
+       structure.
+    */
+
+    if (
+        currentQuotationRequest.guideId
+    ) {
+
+        console.log(
+            "Selected guide ID:",
+            currentQuotationRequest.guideId
+        );
+
+    }
+
 }
+
 
 /* ============================================================
-   14. ERROR MESSAGE
+   16. BUTTON EVENT
 ============================================================ */
 
-function showError(message) {
-  console.error(message);
+if (
+    submitQuotationButton
+) {
 
-  alert(message);
+    submitQuotationButton.addEventListener(
+        "click",
+        submitQuotationRequest
+    );
+
 }
+
+
+/* ============================================================
+   17. HTML ESCAPE
+============================================================ */
+
+function escapeHTML(
+    value
+) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.textContent =
+        value == null
+            ? ""
+            : String(value);
+
+
+    return div.innerHTML;
+
+}
+
+
+/* ============================================================
+   18. ERROR HANDLING
+============================================================ */
+
+function showError(
+    message
+) {
+
+    console.error(
+        "Quotation Request Error:",
+        message
+    );
+
+
+    alert(
+        message
+    );
+
+}
+
+
+/* ============================================================
+   19. INITIAL STATE
+============================================================ */
+
+console.log(
+    "LankaQuest Quotation Request loaded."
+);
+
 
 /* ============================================================
    END QUOTATION-REQUEST.JS
 ============================================================ */
+
