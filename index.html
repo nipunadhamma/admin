@@ -591,37 +591,42 @@
     
     
     
-        <!-- =========================================
-             Search Box
-        ========================================== -->
-        
-        <div class="map-search">
-        
-            <div class="search-input-wrapper">
-        
-                <span class="search-icon">
-                    🔍
-                </span>
-        
-                <input type="search" id="placeSearch" placeholder="Search destinations..." autocomplete="off">
-        
-                <button type="button" id="clearSearch" class="clear-search" aria-label="Clear search">
-                    ×
-                </button>
-        
-            </div>
-        
-        
-            <!-- =====================================
-                 Live Search Suggestions
-        
-                 User type කරන විට මෙතැන
-                 results පෙන්වයි.
-            ====================================== -->
-        
-            <div id="searchSuggestions" class="search-suggestions"></div>
-        
+    <!-- =========================================
+         LANKAQUEST DESTINATION SEARCH
+    ========================================== -->
+    
+    <div class="map-search">
+    
+        <div class="search-input-wrapper">
+    
+            <span class="search-icon" aria-hidden="true">
+                🔍
+            </span>
+    
+    
+            <input type="search" id="placeSearch" name="placeSearch" placeholder="Search destinations..." autocomplete="off"
+                spellcheck="false" aria-label="Search Sri Lanka destinations" aria-controls="searchSuggestions"
+                aria-autocomplete="list">
+    
+    
+            <button type="button" id="clearSearch" class="clear-search" aria-label="Clear search" title="Clear search">
+                ×
+            </button>
+    
         </div>
+    
+    
+        <!-- =====================================
+             LIVE SEARCH SUGGESTIONS
+    
+             Data source:
+             data/generated/search-index.json
+        ====================================== -->
+    
+        <div id="searchSuggestions" class="search-suggestions" role="listbox" aria-label="Destination search suggestions">
+        </div>
+    
+    </div>
         
 
     
