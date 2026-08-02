@@ -18,6 +18,12 @@
 
     <link rel="stylesheet" href="css/style.css">
 
+    <!-- ========================================================
+         TRIP MAP CSS
+    ========================================================= -->
+    
+    <link rel="stylesheet" href="css/trip-map.css">
+
 
     <!-- ========================================================
          TRIP PLANNER CSS
@@ -321,7 +327,116 @@
 
                 </section>
 
-
+                <!-- ============================================================
+                     TRIP JOURNEY MAP
+                ============================================================ -->
+                
+                <section class="trip-map-card">
+                
+                    <!-- ========================================================
+                         MAP HEADER
+                    ========================================================= -->
+                
+                    <div class="trip-map-header">
+                
+                        <div class="trip-map-header-content">
+                
+                            <h3>
+                                🗺️ Your Journey Map
+                            </h3>
+                
+                            <p>
+                                See your selected destinations and the road route between them.
+                            </p>
+                
+                        </div>
+                
+                
+                        <span class="trip-map-badge">
+                            🛣️ Road Route
+                        </span>
+                
+                    </div>
+                
+                
+                    <!-- ========================================================
+                         MAP
+                    ========================================================= -->
+                
+                    <div class="trip-map-wrapper">
+                
+                        <div id="tripJourneyMap" aria-label="Your LankaQuest journey map"></div>
+                
+                    </div>
+                
+                
+                    <!-- ========================================================
+                         ROUTE SUMMARY
+                    ========================================================= -->
+                
+                    <div class="trip-map-summary">
+                
+                        <!-- ====================================================
+                             DISTANCE
+                        ===================================================== -->
+                
+                        <div class="trip-map-summary-item">
+                
+                            <div class="trip-map-summary-icon">
+                                📏
+                            </div>
+                
+                            <div>
+                
+                                <span class="trip-map-summary-label">
+                                    Total Distance
+                                </span>
+                
+                                <strong id="tripMapDistance" class="trip-map-summary-value">
+                                    —
+                                </strong>
+                
+                            </div>
+                
+                        </div>
+                
+                
+                        <!-- ====================================================
+                             DURATION
+                        ===================================================== -->
+                
+                        <div class="trip-map-summary-item">
+                
+                            <div class="trip-map-summary-icon">
+                                ⏱️
+                            </div>
+                
+                            <div>
+                
+                                <span class="trip-map-summary-label">
+                                    Estimated Driving Time
+                                </span>
+                
+                                <strong id="tripMapDuration" class="trip-map-summary-value">
+                                    —
+                                </strong>
+                
+                            </div>
+                
+                        </div>
+                
+                    </div>
+                
+                
+                    <!-- ========================================================
+                         ROUTE STATUS
+                    ========================================================= -->
+                
+                    <div id="tripMapRouteStatus" class="trip-map-route-status" role="status" aria-live="polite">
+                        Select at least two destinations to see the road route.
+                    </div>
+                
+                </section>
 
                 <!-- ==================================================
                      TRAVEL DETAILS
@@ -822,6 +937,19 @@
     ============================================================ -->
     
     <script type="module" src="js/trip-planner.js"></script>
+
+    <!-- ============================================================
+         TRIP PLANNER LOGIC
+    ============================================================ -->
+    
+    <script type="module" src="js/trip-planner.js"></script>
+    
+    
+    <!-- ============================================================
+         TRIP MAP
+    ============================================================ -->
+    
+    <script type="module" src="js/trip-map.js"></script>
 
 </body>
 

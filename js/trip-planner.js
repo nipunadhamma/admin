@@ -832,13 +832,9 @@ function saveTripPlannerDraft() {
 
     try {
 
-        localStorage.setItem(
-            TRIP_PLANNER_DATA_KEY,
-            JSON.stringify(
-                data
-            )
-        );
+        localStorage.setItem(TRIP_PLANNER_DATA_KEY, JSON.stringify(data));
 
+        window.dispatchEvent(new CustomEvent("lankaQuestTripUpdated"));
 
         console.log(
             "Trip Planner draft saved."
