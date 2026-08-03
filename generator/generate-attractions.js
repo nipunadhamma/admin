@@ -1,6 +1,6 @@
 
 /* ============================================================
-   LANKAQUEST
+    LANKAWAYFARER
    ATTRACTION GENERATOR
    FINAL TEMPLATE-BASED VERSION
 
@@ -121,20 +121,19 @@ const SITEMAP_OUTPUT =
 
    PowerShell:
 
-   $env:LANKAQUEST_SITE_URL="https://your-domain.com"
+   $env:LANKAWAYFARER_SITE_URL="https://your-domain.com"
 
    node generator/generate-attractions.js
 
    If no environment variable is supplied,
    replace the fallback below with your real
-   LankaQuest domain before production deployment.
+   LankaWayfarer domain before production deployment.
 */
 
 const SITE_URL = (
-    process.env.LANKAQUEST_SITE_URL ||
-    "https://lankaquest.com"
-)
-    .replace(/\/+$/, "");
+  process.env.LANKAWAYFARER_SITE_URL || 
+  "https://lankawayfarer.com"
+).replace(/\/+$/, "");
 
 
 /* ============================================================
@@ -1320,7 +1319,7 @@ function createIndividualPage(
 
     <title>
         ${escapeHTML(place.title || place.name)}
-        | LankaQuest
+        | LankaWayfarer
     </title>
 
 
@@ -1350,17 +1349,17 @@ function createIndividualPage(
 
         <a href="../../../../index.html" class="brand-link">
           <div class="brand-icon">
-            <img src="../../../../images/logo.png" alt="LankaQuest Logo">
+            <img src="../../../../images/logo.png" alt="LankaWayfarer Logo">
           </div>
 
             <div class="brand-text">
         
                 <h1>
-                    LankaQuest
+                    LankaWayfarer
                 </h1>
         
                 <p>
-                    Discover the Wonder of Sri Lanka
+                    Discover Sri Lanka. Travel Freely.
                  </p>
         
             </div>
@@ -1599,7 +1598,7 @@ function createIndividualPage(
 <footer class="province-footer">
 
     <p>
-        © 2026 LankaQuest.
+        © 2026 LankaWayfarer.
     </p>
 
 </footer>
@@ -2165,7 +2164,7 @@ console.log(
 
 
 console.log(
-    "🇱🇰 LankaQuest Attraction Generator"
+    "🇱🇰 LankaWayfarer Attraction Generator"
 );
 
 

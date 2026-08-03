@@ -1,6 +1,6 @@
 /* ============================================================
    FIREBASE CONFIGURATION
-   LankaQuest
+   LankaWayfarer
 
    Firebase Project:
    lankaquest-13df9

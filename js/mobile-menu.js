@@ -1,6 +1,6 @@
 /* ============================================================
    MOBILE MENU SYSTEM
-   LankaQuest
+   LankaWayfarer
    Explore Sri Lanka
 
    Purpose:

@@ -1,7 +1,7 @@
 
 
 /* ============================================================
-LANKAQUEST
+LANKAWAYFARER
 ADMIN GUIDE MANAGEMENT SYSTEM
 
 File:
@@ -50,7 +50,7 @@ guide-register.js
 ↓
 localStorage
 ↓
-"lankaQuestGuides"
+"lankaWayfarerGuides"
 ↓
 admin-guides.js
 ↓

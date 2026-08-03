@@ -1,5 +1,5 @@
 /* ============================================================
-   LANKAQUEST
+   LankaWayfarer
    SRI LANKA TOURISM DATABASE
 
    MAIN DESTINATION DATABASE

@@ -1,6 +1,6 @@
 
 /* ============================================================
-   LANKAQUEST
+   LankaWayfarer
    FIND GUIDES
 
    FIREBASE / FIRESTORE FIRST ARCHITECTURE
@@ -2074,9 +2074,7 @@ document.addEventListener(
     "DOMContentLoaded",
     async () => {
 
-        console.log(
-            "LankaQuest Find Guides loading..."
-        );
+        console.log("LankaWayfarer Find Guides loading...");
 
 
         /*

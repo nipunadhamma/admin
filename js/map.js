@@ -39,7 +39,7 @@
 ============================================================ */
 
 /* ============================================================
-   LANKAQUEST
+   LANKAWAYFARER
    INTERACTIVE TOURIST MAP + SEARCH
 
    DATA ARCHITECTURE:
@@ -365,10 +365,7 @@ function loadSearchIndex() {
           true;
 
 
-        console.log(
-          "LankaQuest search index loaded:",
-          searchIndex.length
-        );
+        console.log("LankaWayfarer search index loaded:", searchIndex.length);
 
 
         return searchIndex;
@@ -383,7 +380,7 @@ function loadSearchIndex() {
 
 
         console.error(
-          "LankaQuest search index error:",
+          "LankaWayfarer search index error:",
           error
         );
 

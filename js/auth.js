@@ -1,7 +1,7 @@
 
 /* ============================================================
    AUTHENTICATION CORE
-   LankaQuest
+  LankaWayfarer
 
    FIREBASE FIRST ARCHITECTURE
 
@@ -150,29 +150,19 @@ function createAdminSession(
 ) {
 
     return {
+      uid: firebaseUser.uid,
 
-        uid:
-            firebaseUser.uid,
+      id: firebaseUser.uid,
 
-        id:
-            firebaseUser.uid,
+      email: firebaseUser.email || ADMIN_EMAIL,
 
-        email:
-            firebaseUser.email || ADMIN_EMAIL,
+      fullName: firebaseUser.displayName || "LankaWayfarer Administrator",
 
-        fullName:
-            firebaseUser.displayName ||
-            "LankaQuest Administrator",
+      accountType: "admin",
 
-        accountType:
-            "admin",
+      role: "admin",
 
-        role:
-            "admin",
-
-        emailVerified:
-            firebaseUser.emailVerified === true
-
+      emailVerified: firebaseUser.emailVerified === true,
     };
 
 }
@@ -182,7 +172,7 @@ function createAdminSession(
    7. CREATE GUIDE SESSION OBJECT
 
    Firestore:
-   lankaQuestGuides/{UID}
+   LankaWayfarerGuides/{UID}
 ============================================================ */
 
 function createGuideSession(
@@ -457,10 +447,7 @@ async function googleLogin() {
                 guideSnap.data();
 
 
-            console.log(
-                "LankaQuest guide profile found.",
-                guideData
-            );
+            console.log("LankaWayfarer guide profile found.", guideData);
 
 
             const guideUser =
@@ -515,10 +502,7 @@ async function googleLogin() {
                 touristSnap.data();
 
 
-            console.log(
-                "LankaQuest tourist profile found.",
-                touristData
-            );
+            console.log("LankaWayfarer tourist profile found.", touristData);
 
 
             const touristUser =
@@ -548,7 +532,7 @@ async function googleLogin() {
 
 
         /* ====================================================
-           NO LANKAQUEST PROFILE
+           NO LANKAWAYFARER PROFILE
 
            IMPORTANT:
 
@@ -564,7 +548,7 @@ async function googleLogin() {
 
 
         console.log(
-            "No LankaQuest profile found."
+            "No LankaWayfarer profile found."
         );
 
 

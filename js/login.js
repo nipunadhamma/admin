@@ -1,6 +1,6 @@
 /* ============================================================
    LOGIN PAGE LOGIC
-   LankaQuest
+   LankaWayfarer
 
    FIREBASE AUTH VERSION
 
@@ -265,7 +265,7 @@ if (googleLoginButton) {
         ) {
 
           console.log(
-            "Google user has no LankaQuest profile."
+            "Google user has no LankaWayfarer profile."
           );
 
 
@@ -297,7 +297,7 @@ if (googleLoginButton) {
 
 
         /* ====================================================
-           EXISTING LANKAQUEST USER
+           EXISTING LANKAWAYFARER USER
         ==================================================== */
 
         showLoginMessage(

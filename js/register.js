@@ -1,6 +1,6 @@
 
 /* ============================================================
-   LANKAQUEST
+   LankaWayfarer
    REGISTRATION SYSTEM
 
    FIREBASE FIRST ARCHITECTURE
@@ -1168,8 +1168,8 @@ async function completeRegistration(
   if (existingProfile.exists) {
 
     console.log(
-      "Existing LankaQuest profile found:",
-      existingProfile.accountType
+      "Existing LankaWayfarer profile found:",
+      existingProfile.accountType,
     );
 
 

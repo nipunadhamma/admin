@@ -1,6 +1,6 @@
 
 /* ============================================================
-   LANKAQUEST
+   LankaWayfarer
    GUIDE DASHBOARD
 
    FIREBASE-FIRST ARCHITECTURE
@@ -275,8 +275,8 @@ async function loadCurrentGuideProfile(
 
 
             console.error(
-                "Expected document:",
-                `lankaQuestGuides/${guideId}`
+              "Expected document:",
+              `LankaWayfarerGuides/${guideId}`,
             );
 
 
@@ -2118,7 +2118,7 @@ function startGuideRequestListener(
 async function loadGuideDashboard(firebaseUser) {
   console.log("============================================");
 
-  console.log("LANKAQUEST GUIDE DASHBOARD INITIALIZING");
+  console.log("LankaWayfarer GUIDE DASHBOARD INITIALIZING");
 
   console.log("Firebase User:", firebaseUser);
 

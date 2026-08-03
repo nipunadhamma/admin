@@ -1,6 +1,6 @@
 
 /* ============================================================
-   LANKAQUEST
+  LankaWayfarer
    TRIP PLANNER MAP
 
    GOOGLE-MAPS-STYLE JOURNEY MAP
@@ -161,7 +161,7 @@ function getCurrentTrip() {
     } catch (error) {
 
         console.error(
-            "LankaQuest Trip Map: unable to read trip data.",
+            "LankaWayfarer Trip Map: unable to read trip data.",
             error
         );
 
@@ -235,7 +235,7 @@ function loadLeafletCSS() {
 
     const existing =
         document.querySelector(
-            'link[data-lankaquest-leaflet="true"]'
+            'link[data-lankawayfarer-leaflet="true"]'
         );
 
 
@@ -454,7 +454,7 @@ async function initializeMap() {
     ) {
 
         console.warn(
-            `LankaQuest Trip Map: #${MAP_CONTAINER_ID} was not found.`
+          `LankaWayfarer Trip Map: #${MAP_CONTAINER_ID} was not found.`,
         );
 
 
@@ -559,9 +559,7 @@ async function initializeMap() {
         );
 
 
-        console.log(
-            "LankaQuest Trip Map initialized."
-        );
+        console.log("LankaWayfarer Trip Map initialized.");
 
 
         return true;
@@ -570,7 +568,7 @@ async function initializeMap() {
     } catch (error) {
 
         console.error(
-            "LankaQuest Trip Map initialization failed:",
+            "LankaWayfarer Trip Map initialization failed:",
             error
         );
 
@@ -1576,7 +1574,7 @@ async function initializeTripMapModule() {
     ) {
 
         console.log(
-            "LankaQuest Trip Map module loaded. Waiting for #tripJourneyMap."
+          "LankaWayfarer Trip Map module loaded. Waiting for #tripJourneyMap.",
         );
 
 

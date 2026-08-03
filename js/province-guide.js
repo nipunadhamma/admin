@@ -1,5 +1,5 @@
 /* ============================================================
-   LANKAQUEST
+   LankaWayfarer  
    PROVINCE GUIDE
 
    FIREBASE VERSION
@@ -241,7 +241,7 @@ function initProvinceTripButton() {
 ============================================================ */
 
 /* ============================================================
-   LANKAQUEST
+   LANKAWAYFARER
    ATTRACTION TRIP BUTTON SYSTEM
 
    Firebase First Architecture
@@ -441,6 +441,6 @@ document.addEventListener(
 
     initAttractionTripButtons();
 
-    console.log("LankaQuest Province Guide Firebase Loaded");
+    console.log("LankaWayfarer Province Guide Firebase Loaded");
   },
 );

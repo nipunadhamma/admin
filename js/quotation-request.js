@@ -1,6 +1,6 @@
 
 /* ============================================================
-   LANKAQUEST
+   LankaWayfarer
    QUOTATION REQUEST PAGE
 
    FIREBASE FIRST ARCHITECTURE
@@ -207,7 +207,7 @@ onAuthStateChanged(
 
 
         console.log(
-            "LankaQuest Tourist authenticated:",
+            "LankaWayfarer Tourist authenticated:",
             user.uid
         );
 
@@ -1445,9 +1445,7 @@ function showError(
    19. INITIAL STATE
 ============================================================ */
 
-console.log(
-    "LankaQuest Quotation Request loaded."
-);
+console.log("LankaWayfarer Quotation Request loaded.");
 
 
 /* ============================================================

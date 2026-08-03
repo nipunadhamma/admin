@@ -1,6 +1,6 @@
 /* ============================================================
    GUIDE VERIFICATION PAGE LOGIC
-   LankaQuest
+   LankaWayfarer
 
    PURPOSE:
 

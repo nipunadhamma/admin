@@ -1,6 +1,6 @@
 
 /* ============================================================
-   LANKAQUEST
+   LANKAWAYFARER
    ATTRACTION → MY TRIP
 
    PURPOSE
@@ -78,7 +78,7 @@ function getMyTrip() {
     } catch (error) {
 
         console.error(
-            "LankaQuest My Trip data error:",
+            "LankaWayfarer My Trip data error:",
             error
         );
 
@@ -177,7 +177,7 @@ function getAttractionData() {
     } catch (error) {
 
         console.error(
-            "LankaQuest: Invalid attraction coordinates.",
+            "LankaWayfarer: Invalid attraction coordinates.",
             error
         );
 
@@ -196,7 +196,7 @@ function getAttractionData() {
     ) {
 
         console.error(
-            "LankaQuest: Attraction coordinates are missing.",
+            "LankaWayfarer: Attraction coordinates are missing.",
             addToMyTripButton.dataset.placeId
         );
 
@@ -271,7 +271,7 @@ function addAttractionToMyTrip() {
     if (!place) {
 
         console.error(
-            "LankaQuest: Attraction data not found."
+            "LankaWayfarer: Attraction data not found."
         );
 
         return;
@@ -282,7 +282,7 @@ function addAttractionToMyTrip() {
     if (!place.id) {
 
         console.error(
-            "LankaQuest: Attraction ID is missing."
+            "LankaWayfarer: Attraction ID is missing."
         );
 
         return;
@@ -330,7 +330,7 @@ function addAttractionToMyTrip() {
 
 
     console.log(
-        "LankaQuest destination added:",
+        "LankaWayfarer destination added:",
         place
     );
 

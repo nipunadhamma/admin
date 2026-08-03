@@ -1,6 +1,6 @@
 
 /* ============================================================
-   LANKAQUEST
+   LankaWayfarer
    GUIDE REQUESTS & QUOTATION SYSTEM
 
    FIRESTORE-FIRST ARCHITECTURE

@@ -1,5 +1,5 @@
 /* ============================================================
-   LANKAQUEST
+   LankaWayfarer
    TOURIST DASHBOARD
 
    FIREBASE FIRST ARCHITECTURE
@@ -1580,7 +1580,7 @@ onAuthStateChanged(auth, async (user) => {
 
   await renderQuotationRequests();
 
-  console.log("LankaQuest Tourist Dashboard Loaded:", user.uid);
+  console.log("LankaWayfarer Tourist Dashboard Loaded:", user.uid);
 });
 
 /* ============================================================

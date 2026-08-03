@@ -1,6 +1,6 @@
 
 /* ============================================================
-   LANKAQUEST
+   LankaWayfarer
    ATTRACTIONS SYSTEM
    FINAL SEARCH-INDEX VERSION
 
@@ -349,7 +349,7 @@ async function loadSearchIndex() {
     try {
 
         console.log(
-            "🔎 Loading LankaQuest search index..."
+            "🔎 Loading LankaWayfarer search index..."
         );
 
 
@@ -398,7 +398,7 @@ async function loadSearchIndex() {
 
 
         console.log(
-            `🇱🇰 LankaQuest search index loaded: ${places.length} places`
+          `🇱🇰 LankaWayfarer search index loaded: ${places.length} places`,
         );
 
 
@@ -623,13 +623,13 @@ async function loadTrip() {
    FIREBASE + LOCAL PLANNER DRAFT
 
    Firebase:
-       lankaQuestTouristTrips/{UID}
+       LANKAWAYFARERTouristTrips/{UID}
 
    Local temporary planner:
        sriLankaMyTrip
 
    Live update:
-       lankaquest-trip-updated
+       lankaWayfarer-trip-updated
 ============================================================ */
 
 /* ============================================================
@@ -638,13 +638,13 @@ async function loadTrip() {
    PRODUCTION ARCHITECTURE
 
    Firebase:
-       lankaQuestTouristTrips/{UID}
+       LankaWayfarerTouristTrips/{UID}
 
    Local planner:
        sriLankaMyTrip
 
    Same-tab live update:
-       lankaquest-trip-updated
+       LankaWayfarer-trip-updated
 
    Cross-tab update:
        localStorage "storage" event
@@ -682,10 +682,7 @@ async function addPlaceToTrip(
         typeof place !== "object"
     ) {
 
-        console.error(
-            "❌ LankaQuest: Invalid place supplied.",
-            place
-        );
+        console.error("❌ LankaWayfarer: Invalid place supplied.", place);
 
         return false;
     }
@@ -707,7 +704,7 @@ async function addPlaceToTrip(
     if (!placeId) {
 
         console.error(
-            "❌ LankaQuest: Place has no valid ID.",
+            "❌ LankaWayfarer: Place has no valid ID.",
             place
         );
 
@@ -726,7 +723,7 @@ async function addPlaceToTrip(
     ) {
 
         console.log(
-            "ℹ️ LankaQuest: Place already exists in My Trip.",
+            "ℹ️ LankaWayfarer: Place already exists in My Trip.",
             placeId
         );
 
@@ -844,7 +841,7 @@ async function addPlaceToTrip(
         ) {
 
             console.error(
-                "❌ LankaQuest: Cannot add place without valid coordinates.",
+                "❌ LankaWayfarer: Cannot add place without valid coordinates.",
                 {
                     id:
                         placeId,
@@ -911,7 +908,7 @@ async function addPlaceToTrip(
         ) {
 
             console.error(
-                "❌ LankaQuest: Failed to read sriLankaMyTrip.",
+                "❌ LankaWayfarer: Failed to read sriLankaMyTrip.",
                 storageError
             );
 
@@ -963,7 +960,7 @@ async function addPlaceToTrip(
         ) {
 
             console.log(
-                "ℹ️ LankaQuest: Place already exists in sriLankaMyTrip.",
+                "ℹ️ LankaWayfarer: Place already exists in sriLankaMyTrip.",
                 placeId
             );
 
@@ -1130,7 +1127,7 @@ async function addPlaceToTrip(
 
            trip-map.js should listen for:
 
-               lankaquest-trip-updated
+               lankawayfarer-trip-updated
         ==================================================== */
 
         window.dispatchEvent(
@@ -1158,35 +1155,23 @@ async function addPlaceToTrip(
            14. PRODUCTION LOG
         ==================================================== */
 
-        console.log(
-            "✅ LankaQuest: Destination added successfully.",
-            {
-                id:
-                    destinationData.id,
+        console.log("✅ LankaWayfarer: Destination added successfully.", {
+          id: destinationData.id,
 
-                name:
-                    destinationData.name,
+          name: destinationData.name,
 
-                latitude:
-                    destinationData.latitude,
+          latitude: destinationData.latitude,
 
-                longitude:
-                    destinationData.longitude,
+          longitude: destinationData.longitude,
 
-                localTripCount:
-                    localTrip.length,
+          localTripCount: localTrip.length,
 
-                firebase:
-                    true,
+          firebase: true,
 
-                localStorage:
-                    true,
+          localStorage: true,
 
-                liveEvent:
-                    "lankaquest-trip-updated"
-
-            }
-        );
+          liveEvent: "LankaWayfarer-trip-updated",
+        });
 
 
         return true;
@@ -1196,10 +1181,7 @@ async function addPlaceToTrip(
         error
     ) {
 
-        console.error(
-            "❌ LankaQuest: Unable to add destination.",
-            error
-        );
+        console.error("❌ LankaWayfarer: Unable to add destination.", error);
 
 
         /* ====================================================
@@ -2258,7 +2240,7 @@ function initializeAuth() {
 async function initializeAttractions() {
 
     console.log(
-        "🇱🇰 LankaQuest Attractions initializing..."
+        "🇱🇰 LankaWayfarer Attractions initializing..."
     );
 
 
@@ -2294,7 +2276,7 @@ async function initializeAttractions() {
 
 
     console.log(
-        "✅ LankaQuest Attractions ready."
+        "✅ LankaWayfarer Attractions ready."
     );
 
 }

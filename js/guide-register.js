@@ -1,6 +1,6 @@
 /* ============================================================
    GUIDE REGISTRATION SYSTEM
-   LankaQuest
+   LankaWayfarer
 
    Firebase Architecture:
 
@@ -13,7 +13,7 @@
    Firestore
           |
           ↓
-   lankaQuestGuides
+   LankaWayfarerGuides
 
 ============================================================ */
 
