@@ -34,6 +34,7 @@
 ============================================================ */
 
 
+
 /* ============================================================
    1. FIREBASE IMPORTS
 ============================================================ */
@@ -56,6 +57,25 @@ import {
     doc,
     serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+
+/* ============================================================
+   1A. DESTINATION DATABASE
+============================================================ */
+
+/*
+   places.js is the single source of truth
+   for LankaQuest destinations.
+
+   It creates:
+
+       window.touristPlaces
+
+   Trip Planner search uses the same database
+   that is used by the attraction generator.
+*/
+
+import "./places.js";
 
 
 /* ============================================================
@@ -333,6 +353,534 @@ function clearPlannerDraft() {
 
 
 /* ============================================================
+   TRIP PLANNER DESTINATION SEARCH
+============================================================ */
+
+/*
+   Destination search uses the existing
+   touristPlaces array from places.js.
+*/
+
+const plannerDestinationSearch =
+    document.getElementById(
+        "plannerDestinationSearch"
+    );
+
+
+const plannerDestinationResults =
+    document.getElementById(
+        "plannerDestinationResults"
+    );
+
+
+const clearPlannerDestinationSearch =
+    document.getElementById(
+        "clearPlannerDestinationSearch"
+    );
+
+
+/* ============================================================
+   SEARCH DESTINATIONS
+============================================================ */
+
+function searchPlannerDestinations(
+    searchTerm
+) {
+
+    if (
+        !plannerDestinationResults
+    ) {
+
+        return;
+
+    }
+
+
+    const query =
+        String(
+            searchTerm || ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    /*
+       Clear results when search is empty.
+    */
+
+    if (!query) {
+
+        plannerDestinationResults.innerHTML =
+            "";
+
+        return;
+
+    }
+
+
+    /*
+       Make sure places.js exists.
+    */
+
+    if (
+        !Array.isArray(
+            window.touristPlaces
+        )
+    ) {
+
+        plannerDestinationResults.innerHTML = `
+
+            <div class="planner-destination-no-results">
+
+                Destinations are temporarily unavailable.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    /*
+       Search by:
+
+       - Name
+       - Sinhala name
+       - Province
+       - District
+       - Category
+    */
+
+    const results =
+        window.touristPlaces
+            .filter(
+                place => {
+
+                    if (
+                        !place ||
+                        place.hide === true
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    const searchableText = [
+
+                        place.name,
+
+                        place.sinhalaName,
+
+                        place.title,
+
+                        place.province,
+
+                        place.district,
+
+                        place.category,
+
+                        place.categoryName,
+
+                        place.location
+
+                    ]
+                        .filter(Boolean)
+                        .join(" ")
+                        .toLowerCase();
+
+
+                    return searchableText.includes(
+                        query
+                    );
+
+                }
+            )
+            .slice(
+                0,
+                8
+            );
+
+
+    /*
+       No results.
+    */
+
+    if (
+        results.length === 0
+    ) {
+
+        plannerDestinationResults.innerHTML = `
+
+            <div class="planner-destination-no-results">
+
+                No destinations found for
+                "<strong>${escapePlannerSearchText(query)}</strong>"
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    /*
+       Render results.
+    */
+
+    plannerDestinationResults.innerHTML =
+        results
+            .map(
+                createPlannerDestinationResult
+            )
+            .join("");
+
+
+    /*
+       Add button events.
+    */
+
+    plannerDestinationResults
+        .querySelectorAll(
+            ".planner-destination-add"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        addPlannerDestination(
+                            button.dataset.id
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+/* ============================================================
+   CREATE SEARCH RESULT
+============================================================ */
+
+function createPlannerDestinationResult(
+    place
+) {
+
+    return `
+
+        <div
+            class="planner-destination-result"
+        >
+
+            <img
+                class="planner-destination-result-image"
+                src="${place.image || ""}"
+                alt="${escapePlannerSearchText(place.name || "")}"
+                loading="lazy"
+            >
+
+
+            <div
+                class="planner-destination-result-info"
+            >
+
+                <h4
+                    class="planner-destination-result-name"
+                >
+                    ${escapePlannerSearchText(
+                        place.name || "Destination"
+                    )}
+                </h4>
+
+
+                <p
+                    class="planner-destination-result-location"
+                >
+                    ${escapePlannerSearchText(
+                        [
+                            place.district,
+                            place.province
+                        ]
+                            .filter(Boolean)
+                            .join(" • ")
+                    )}
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="planner-destination-add"
+                data-id="${escapePlannerSearchText(
+                    place.id || ""
+                )}"
+            >
+                + Add
+            </button>
+
+        </div>
+
+    `;
+
+}
+
+
+/* ============================================================
+   ADD DESTINATION TO EXISTING MY TRIP
+============================================================ */
+
+function addPlannerDestination(
+    placeId
+) {
+
+    if (
+        !placeId ||
+        !Array.isArray(
+            window.touristPlaces
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    const place =
+        window.touristPlaces.find(
+            item =>
+                item &&
+                item.id === placeId
+        );
+
+
+    if (!place) {
+
+        return;
+
+    }
+
+
+    let trip =
+        getMyTrip();
+
+
+    /*
+       Prevent duplicates.
+    */
+
+    const alreadyAdded =
+        trip.some(
+            item =>
+                item &&
+                item.id === place.id
+        );
+
+
+    if (
+        alreadyAdded
+    ) {
+
+        alert(
+            `${place.name} is already in your trip.`
+        );
+
+        return;
+
+    }
+
+
+    /*
+       Add the complete destination object.
+
+       This keeps compatibility with the
+       existing Trip Planner rendering logic.
+    */
+
+    trip.push(
+        place
+    );
+
+
+    /*
+       Use the EXISTING save function.
+    */
+
+    saveMyTrip(
+        trip
+    );
+
+
+    /*
+       Use the EXISTING render function.
+    */
+
+    renderPlannerDestinations();
+
+
+    /*
+       Clear search after adding.
+    */
+
+    if (
+        plannerDestinationSearch
+    ) {
+
+        plannerDestinationSearch.value =
+            "";
+
+    }
+
+
+    if (
+        plannerDestinationResults
+    ) {
+
+        plannerDestinationResults.innerHTML =
+            "";
+
+    }
+
+
+    if (
+        clearPlannerDestinationSearch
+    ) {
+
+        clearPlannerDestinationSearch.hidden =
+            true;
+
+    }
+
+}
+
+
+/* ============================================================
+   ESCAPE SEARCH TEXT
+============================================================ */
+
+function escapePlannerSearchText(
+    value
+) {
+
+    return String(
+        value || ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+/* ============================================================
+   SEARCH INPUT EVENTS
+============================================================ */
+
+if (
+    plannerDestinationSearch
+) {
+
+    plannerDestinationSearch.addEventListener(
+        "input",
+        event => {
+
+            const value =
+                event.target.value;
+
+
+            if (
+                clearPlannerDestinationSearch
+            ) {
+
+                clearPlannerDestinationSearch.hidden =
+                    !value;
+
+            }
+
+
+            searchPlannerDestinations(
+                value
+            );
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   CLEAR SEARCH
+============================================================ */
+
+if (
+    clearPlannerDestinationSearch
+) {
+
+    clearPlannerDestinationSearch.addEventListener(
+        "click",
+        () => {
+
+            if (
+                plannerDestinationSearch
+            ) {
+
+                plannerDestinationSearch.value =
+                    "";
+
+                plannerDestinationSearch.focus();
+
+            }
+
+
+            if (
+                plannerDestinationResults
+            ) {
+
+                plannerDestinationResults.innerHTML =
+                    "";
+
+            }
+
+
+            clearPlannerDestinationSearch.hidden =
+                true;
+
+        }
+    );
+
+}
+
+
+
+
+/* ============================================================
    9. RENDER DESTINATIONS
 ============================================================ */
 
@@ -381,37 +929,31 @@ function renderPlannerDestinations() {
     }
 
 
-    /* --------------------------------------------------------
-       EMPTY STATE
-    -------------------------------------------------------- */
+/* --------------------------------------------------------
+   EMPTY STATE MESSAGE
+-------------------------------------------------------- */
 
-    if (
+/*
+   The destination search is NOT inside the empty state.
+
+   Therefore the search box remains visible whether
+   the tourist has 0, 1, or many destinations.
+
+   Only the introductory empty-state message is hidden
+   after the first destination is added.
+*/
+
+if (
+    plannerEmptyState
+) {
+
+    plannerEmptyState.style.display =
         trip.length === 0
-    ) {
+            ? "block"
+            : "none";
 
-        if (
-            plannerEmptyState
-        ) {
+}
 
-            plannerEmptyState.style.display =
-                "block";
-
-        }
-
-
-        return;
-
-    }
-
-
-    if (
-        plannerEmptyState
-    ) {
-
-        plannerEmptyState.style.display =
-            "none";
-
-    }
 
 
     /* --------------------------------------------------------

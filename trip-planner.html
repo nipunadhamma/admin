@@ -7,10 +7,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    !-- ============================================================
-    LANKAWAYFARER — SEO
-    ============================================================ -->
-    
+
     <meta name="description"
         content="Discover Sri Lanka with LankaWayfarer. Explore destinations, attractions, travel experiences, local guides and plan your journey across Sri Lanka.">
     
@@ -29,12 +26,12 @@
     
     
     
+    <!-- ============================================================
+             OPEN GRAPH
+        ============================================================ -->
+
     
-        <!-- ============================================================
-         OPEN GRAPH
-    ============================================================ -->
-    
-    <meta property=" og:type" content="website">
+    <meta property="og:type" content="website">
     
     <meta property="og:site_name" content="LankaWayfarer">
     
@@ -365,31 +362,75 @@
                     </div>
 
 
-                    <!-- Empty State -->
+                    
 
+                  
+                    <!-- ============================================================
+                         DESTINATION SEARCH
+                    ============================================================ -->
+                    
+                  
+                    <!-- ============================================================
+                         DESTINATION SEARCH
+                    ============================================================ -->
+                    
                     <div id="plannerEmptyState" class="planner-empty-state">
-
-                        <div>
-                            🗺️
+                    
+                        <div class="planner-search-icon">
+                            🔍
                         </div>
-
+                    
                         <h3>
-                            No destinations selected
+                            Add Destinations to Your Trip
                         </h3>
-
+                    
                         <p>
-                            Go back to the map and add
-                            places to your My Trip.
+                            Search for a destination and add it directly to your journey.
                         </p>
-
-
-                        <a href="index.html" class="explore-map-btn">
-
-                            Explore Destinations →
-
-                        </a>
-
+                    
                     </div>
+                    
+                    
+                    <!-- ============================================================
+                         DESTINATION SEARCH BOX
+                         
+                         IMPORTANT:
+                         This is OUTSIDE plannerEmptyState.
+                    
+                         Therefore it remains visible even after
+                         destinations have been added.
+                    ============================================================ -->
+                    
+                    <div class="planner-destination-search">
+                    
+                        <div class="planner-search-input-wrapper">
+                    
+                            <span class="planner-search-input-icon">
+                                🔍
+                            </span>
+                    
+                            <input type="search" id="plannerDestinationSearch" class="planner-destination-input"
+                                placeholder="Search destinations..." autocomplete="off" aria-label="Search destinations">
+                    
+                            <button type="button" id="clearPlannerDestinationSearch" class="planner-search-clear" aria-label="Clear search"
+                                hidden>
+                                ×
+                            </button>
+                    
+                        </div>
+                    
+                    
+                        <!-- ========================================================
+                             SEARCH RESULTS
+                        ========================================================= -->
+                    
+                        <div id="plannerDestinationResults" class="planner-destination-results" aria-live="polite"></div>
+                    
+                    </div>
+                   
+
+                  
+
 
                 </section>
 
@@ -991,31 +1032,32 @@
 
 
 
-    <!-- ============================================================
-         AUTHENTICATION CORE
-    ============================================================ -->
-    
-    <script type="module" src="js/auth.js"></script>
-    
-    
-    <!-- ============================================================
-         TRIP PLANNER LOGIC
-    ============================================================ -->
-    
-    <script type="module" src="js/trip-planner.js"></script>
+ <!-- ============================================================
+     AUTHENTICATION CORE
+============================================================ -->
 
-    <!-- ============================================================
-         TRIP PLANNER LOGIC
-    ============================================================ -->
-    
-    <script type="module" src="js/trip-planner.js"></script>
-    
-    
-    <!-- ============================================================
-         TRIP MAP
-    ============================================================ -->
-    
-    <script type="module" src="js/trip-map.js"></script>
+<script type="module" src="js/auth.js"></script>
+
+
+<!-- ============================================================
+     DESTINATION DATABASE
+============================================================ -->
+
+
+
+
+<!-- ============================================================
+     TRIP PLANNER LOGIC
+============================================================ -->
+
+<script type="module" src="js/trip-planner.js"></script>
+
+
+<!-- ============================================================
+     TRIP MAP
+============================================================ -->
+
+<script type="module" src="js/trip-map.js"></script>
 
 </body>
 

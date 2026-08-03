@@ -39,7 +39,7 @@
 ============================================================ */
 
 /* ============================================================
-   LANKAWAYFARER
+   LANKAQUEST
    INTERACTIVE TOURIST MAP + SEARCH
 
    DATA ARCHITECTURE:
@@ -365,7 +365,10 @@ function loadSearchIndex() {
           true;
 
 
-        console.log("LankaWayfarer search index loaded:", searchIndex.length);
+        console.log(
+          "LankaWayfarer search index loaded:",
+          searchIndex.length
+        );
 
 
         return searchIndex;
@@ -380,7 +383,7 @@ function loadSearchIndex() {
 
 
         console.error(
-          "LankaWayfarer search index error:",
+          "LankaQuest search index error:",
           error
         );
 
@@ -486,9 +489,20 @@ function getMapPlaceById(
    8. CREATE DESTINATION POPUP
 ============================================================ */
 
+/* ============================================================
+   8. CREATE DESTINATION POPUP
+============================================================ */
+
 function createPopup(
   place
 ) {
+
+  const detailPage =
+    `attractions-generated/` +
+    `${place.provinceSlug || ""}/` +
+    `${place.districtSlug || ""}/` +
+    `${place.slug || place.id}.html`;
+
 
   return `
     <div class="tourist-popup">
@@ -524,7 +538,7 @@ function createPopup(
 
 
         <a
-          href="${place.page || "#"}"
+          href="${detailPage}"
           class="view-details-btn"
         >
           View Details →
@@ -536,6 +550,8 @@ function createPopup(
   `;
 
 }
+
+
 
 
 /* ============================================================
