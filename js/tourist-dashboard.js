@@ -1,5 +1,6 @@
+
 /* ============================================================
-   LankaWayfarer
+   LankaQuest
    TOURIST DASHBOARD
 
    FIREBASE FIRST ARCHITECTURE
@@ -23,29 +24,35 @@
    lankaQuestQuotations
 
 
-   QUOTATION FLOW
+   CANONICAL ID ARCHITECTURE
 
    Tourist
       ↓
    Create Trip
       ↓
-   lankaQuestTouristTrips
+   lankaQuestTouristTrips/{tripId}
       ↓
-   Create Quotation Request
+   Generate requestId
       ↓
-   lankaQuestQuotationRequests
+   lankaQuestQuotationRequests/{requestId}
+      ↓
+   requestId field = requestId
+      ↓
+   tripId field = tripId
+      ↓
+   lankaQuestTouristTrips/{tripId}
+      ↓
+   quotationRequestId = requestId
       ↓
    Select Guide
       ↓
    Guide Sends Quotation
       ↓
-   lankaQuestQuotations
+   lankaQuestQuotations/{quotationId}
       ↓
-   requestId links quotation to request
+   requestId = requestId
       ↓
    Tourist Dashboard
-      ↓
-   Accept / Reject
 
 
    IMPORTANT
@@ -53,236 +60,585 @@
    ❌ No localStorage
    ❌ No sessionStorage
    ❌ No request.quotations[]
-   ❌ No old quotation architecture
+   ❌ No matching by quotation arrays
+   ❌ No trip document ID = tourist UID assumption
 
    ✅ Firebase Authentication
    ✅ Firestore
+   ✅ requestId is the quotation request document ID
+   ✅ requestId field is stored inside request
+   ✅ tripId identifies the tourist trip
+   ✅ trip.quotationRequestId links trip → request
+   ✅ quotation.requestId links quotation → request
+   ✅ Tourist ownership checks
    ✅ Separate quotation collection
+
+
+   DELETE POLICY
+
+   Tourist can delete OWN quotation requests regardless
+   of request status:
+
+   pending             → DELETE ✅
+   guide_selected      → DELETE ✅
+   quotation_sent      → DELETE ✅
+   quotation_accepted  → DELETE ✅
+   quotation_rejected  → DELETE ✅
+   completed           → DELETE ✅
+
+   Other Tourist request → DELETE ❌
+   Guide deleting Tourist request → DELETE ❌
+
+   IMPORTANT DELETE FLOW
+
+       requestId
+          ↓
+       Find request
+          ↓
+       Verify touristId === current Firebase UID
+          ↓
+       Find linked quotation by quotation.requestId
+          ↓
+       Try to delete linked quotation
+          ↓
+       Delete request
+          ↓
+       Refresh dashboard
+
+   IMPORTANT
+
+   Linked quotation deletion failure MUST NOT prevent
+   deletion of the Tourist's own quotation request.
+
 ============================================================ */
+
 
 /* ============================================================
    1. FIREBASE IMPORTS
 ============================================================ */
 
-import { auth, db } from "./firebase-config.js";
+import {
+    auth,
+    db
+} from "./firebase-config.js";
+
 
 import {
-  onAuthStateChanged,
-  signOut,
+    onAuthStateChanged,
+    signOut
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
+
 import {
-  doc,
-  getDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-  updateDoc,
-  serverTimestamp,
+    collection,
+    getDocs,
+    getDoc,
+    doc,
+    updateDoc,
+    deleteDoc,
+    query,
+    where,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
 
 /* ============================================================
    2. FIRESTORE COLLECTIONS
 ============================================================ */
 
-const TOURIST_COLLECTION = "lankaQuestTourists";
+const TOURIST_COLLECTION =
+    "lankaQuestTourists";
 
-const TRIP_COLLECTION = "lankaQuestTouristTrips";
 
-const REQUEST_COLLECTION = "lankaQuestQuotationRequests";
+const TRIP_COLLECTION =
+    "lankaQuestTouristTrips";
 
-const QUOTATION_COLLECTION = "lankaQuestQuotations";
+
+const REQUEST_COLLECTION =
+    "lankaQuestQuotationRequests";
+
+
+const QUOTATION_COLLECTION =
+    "lankaQuestQuotations";
+
 
 /* ============================================================
    3. CURRENT USER
 ============================================================ */
 
-let currentFirebaseUser = null;
+let currentFirebaseUser =
+    null;
 
-let currentTouristProfile = null;
+
+let currentTouristProfile =
+    null;
+
 
 /* ============================================================
    4. DOM ELEMENTS
 ============================================================ */
 
-const headerUserName = document.getElementById("headerUserName");
+const headerUserName =
+    document.getElementById(
+        "headerUserName"
+    );
 
-const welcomeUserName = document.getElementById("welcomeUserName");
 
-const logoutButton = document.getElementById("logoutButton");
+const welcomeUserName =
+    document.getElementById(
+        "welcomeUserName"
+    );
 
-const dashboardTripCount = document.getElementById("dashboardTripCount");
 
-const dashboardRequestCount = document.getElementById("dashboardRequestCount");
+const logoutButton =
+    document.getElementById(
+        "logoutButton"
+    );
 
-const dashboardGuideCount = document.getElementById("dashboardGuideCount");
 
-const dashboardTripContainer = document.getElementById(
-  "dashboardTripContainer",
-);
+const dashboardTripCount =
+    document.getElementById(
+        "dashboardTripCount"
+    );
 
-const quotationRequestsContainer = document.getElementById(
-  "quotationRequestsContainer",
-);
 
-const selectedGuideContainer = document.getElementById(
-  "selectedGuideContainer",
-);
+const dashboardRequestCount =
+    document.getElementById(
+        "dashboardRequestCount"
+    );
+
+
+const dashboardGuideCount =
+    document.getElementById(
+        "dashboardGuideCount"
+    );
+
+
+const dashboardTripContainer =
+    document.getElementById(
+        "dashboardTripContainer"
+    );
+
+
+const quotationRequestsContainer =
+    document.getElementById(
+        "quotationRequestsContainer"
+    );
+
+
+const selectedGuideContainer =
+    document.getElementById(
+        "selectedGuideContainer"
+    );
+
 
 /* ============================================================
    5. HTML ESCAPE
 ============================================================ */
 
-function escapeHTML(value) {
-  const div = document.createElement("div");
+function escapeHTML(
+    value
+) {
 
-  div.textContent = value == null ? "" : String(value);
+    const div =
+        document.createElement(
+            "div"
+        );
 
-  return div.innerHTML;
+
+    div.textContent =
+        value == null
+            ? ""
+            : String(value);
+
+
+    return div.innerHTML;
+
 }
+
 
 /* ============================================================
    6. GET TOURIST PROFILE
 ============================================================ */
 
-async function getTouristProfile(uid) {
-  if (!uid) {
-    return null;
-  }
+async function getTouristProfile(
+    uid
+) {
 
-  try {
-    const touristRef = doc(db, TOURIST_COLLECTION, uid);
+    if (!uid) {
 
-    const touristSnapshot = await getDoc(touristRef);
+        return null;
 
-    if (!touristSnapshot.exists()) {
-      console.warn("Tourist profile not found:", uid);
-
-      return null;
     }
 
-    return {
-      id: touristSnapshot.id,
 
-      ...touristSnapshot.data(),
-    };
-  } catch (error) {
-    console.error("Tourist profile loading error:", error);
+    try {
 
-    return null;
-  }
+        const touristRef =
+            doc(
+                db,
+                TOURIST_COLLECTION,
+                uid
+            );
+
+
+        const touristSnapshot =
+            await getDoc(
+                touristRef
+            );
+
+
+        if (
+            !touristSnapshot.exists()
+        ) {
+
+            console.warn(
+                "Tourist profile not found:",
+                uid
+            );
+
+
+            return null;
+
+        }
+
+
+        return {
+
+            id:
+                touristSnapshot.id,
+
+            ...touristSnapshot.data()
+
+        };
+
+
+    } catch (error) {
+
+        console.error(
+            "Tourist profile loading error:",
+            error
+        );
+
+
+        return null;
+
+    }
+
 }
 
+
 /* ============================================================
-   7. GET TOURIST TRIP
+   7. GET TOURIST TRIPS
 ============================================================ */
 
-async function getTouristTrip(uid) {
-  if (!uid) {
-    return {
-      destinations: [],
-    };
-  }
+async function getTouristTrips(
+    uid
+) {
 
-  try {
-    const tripRef = doc(db, TRIP_COLLECTION, uid);
+    if (!uid) {
 
-    const tripSnapshot = await getDoc(tripRef);
+        return [];
 
-    if (!tripSnapshot.exists()) {
-      return {
-        destinations: [],
-
-        startDate: "",
-
-        endDate: "",
-
-        travelers: "",
-
-        travelStyle: "",
-
-        transport: "",
-
-        accommodation: "",
-
-        specialRequests: "",
-      };
     }
 
-    const data = tripSnapshot.data();
 
-    return {
-      id: tripSnapshot.id,
+    try {
 
-      destinations: Array.isArray(data.destinations) ? data.destinations : [],
+        const tripsQuery =
+            query(
+                collection(
+                    db,
+                    TRIP_COLLECTION
+                ),
 
-      startDate: data.startDate || "",
+                where(
+                    "touristId",
+                    "==",
+                    uid
+                )
+            );
 
-      endDate: data.endDate || "",
 
-      travelers: data.travelers || "",
+        const snapshot =
+            await getDocs(
+                tripsQuery
+            );
 
-      travelStyle: data.travelStyle || "",
 
-      transport: data.transport || "",
+        const trips =
+            [];
 
-      accommodation: data.accommodation || "",
 
-      specialRequests: data.specialRequests || "",
-    };
-  } catch (error) {
-    console.error("Firestore trip loading error:", error);
+        snapshot.forEach(
+            (
+                tripSnapshot
+            ) => {
 
-    return {
-      destinations: [],
-    };
-  }
+                const data =
+                    tripSnapshot.data();
+
+
+                trips.push({
+
+                    tripId:
+                        tripSnapshot.id,
+
+                    id:
+                        tripSnapshot.id,
+
+                    ...data
+
+                });
+
+            }
+        );
+
+
+        trips.sort(
+            (
+                a,
+                b
+            ) => {
+
+                const dateA =
+                    a.createdAt?.toMillis
+                        ? a.createdAt.toMillis()
+                        : 0;
+
+
+                const dateB =
+                    b.createdAt?.toMillis
+                        ? b.createdAt.toMillis()
+                        : 0;
+
+
+                return dateB - dateA;
+
+            }
+        );
+
+
+        console.log(
+            "Tourist trips loaded:",
+            trips
+        );
+
+
+        return trips;
+
+
+    } catch (error) {
+
+        console.error(
+            "Firestore tourist trips loading error:",
+            error
+        );
+
+
+        return [];
+
+    }
+
 }
 
+
 /* ============================================================
-   8. UPDATE DASHBOARD USER
+   8. GET CURRENT TOURIST TRIP
+============================================================ */
+
+async function getCurrentTouristTrip(
+    uid
+) {
+
+    const trips =
+        await getTouristTrips(
+            uid
+        );
+
+
+    if (
+        trips.length === 0
+    ) {
+
+        return {
+
+            tripId:
+                null,
+
+            id:
+                null,
+
+            destinations:
+                [],
+
+            startDate:
+                "",
+
+            endDate:
+                "",
+
+            travelers:
+                "",
+
+            travelStyle:
+                "",
+
+            transport:
+                "",
+
+            accommodation:
+                "",
+
+            specialRequests:
+                "",
+
+            quotationRequestId:
+                ""
+
+        };
+
+    }
+
+
+    return {
+
+        tripId:
+            trips[0].tripId,
+
+        id:
+            trips[0].tripId,
+
+        destinations:
+            Array.isArray(
+                trips[0].destinations
+            )
+                ? trips[0].destinations
+                : [],
+
+        startDate:
+            trips[0].startDate ||
+            "",
+
+        endDate:
+            trips[0].endDate ||
+            "",
+
+        travelers:
+            trips[0].travelers ||
+            "",
+
+        travelStyle:
+            trips[0].travelStyle ||
+            "",
+
+        transport:
+            trips[0].transport ||
+            "",
+
+        accommodation:
+            trips[0].accommodation ||
+            "",
+
+        specialRequests:
+            trips[0].specialRequests ||
+            "",
+
+        quotationRequestId:
+            trips[0].quotationRequestId ||
+            ""
+
+    };
+
+}
+
+
+/* ============================================================
+   9. UPDATE DASHBOARD USER
 ============================================================ */
 
 function updateDashboardUser() {
-  if (!currentTouristProfile) {
-    return;
-  }
 
-  const name =
-    currentTouristProfile.fullName ||
-    currentTouristProfile.email ||
-    currentFirebaseUser?.displayName ||
-    "Tourist";
+    if (
+        !currentTouristProfile
+    ) {
 
-  if (headerUserName) {
-    headerUserName.textContent = name;
-  }
+        return;
 
-  if (welcomeUserName) {
-    welcomeUserName.textContent = name;
-  }
+    }
+
+
+    const name =
+        currentTouristProfile.fullName ||
+        currentTouristProfile.email ||
+        currentFirebaseUser?.displayName ||
+        "Tourist";
+
+
+    if (
+        headerUserName
+    ) {
+
+        headerUserName.textContent =
+            name;
+
+    }
+
+
+    if (
+        welcomeUserName
+    ) {
+
+        welcomeUserName.textContent =
+            name;
+
+    }
+
 }
 
+
 /* ============================================================
-   9. RENDER MY TRIP
+   10. RENDER MY CURRENT TRIP
 ============================================================ */
 
 async function renderDashboardTrip() {
-  if (!dashboardTripContainer || !currentFirebaseUser) {
-    return;
-  }
 
-  const trip = await getTouristTrip(currentFirebaseUser.uid);
+    if (
+        !dashboardTripContainer ||
+        !currentFirebaseUser
+    ) {
 
-  const destinations = trip.destinations || [];
+        return;
 
-  if (dashboardTripCount) {
-    dashboardTripCount.textContent = destinations.length;
-  }
+    }
 
-  if (destinations.length === 0) {
-    dashboardTripContainer.innerHTML = `
+
+    const trip =
+        await getCurrentTouristTrip(
+            currentFirebaseUser.uid
+        );
+
+
+    const destinations =
+        trip.destinations ||
+        [];
+
+
+    if (
+        dashboardTripCount
+    ) {
+
+        dashboardTripCount.textContent =
+            destinations.length;
+
+    }
+
+
+    if (
+        destinations.length === 0
+    ) {
+
+        dashboardTripContainer.innerHTML = `
 
             <div class="dashboard-empty-state">
 
@@ -309,318 +665,505 @@ async function renderDashboardTrip() {
 
         `;
 
-    return;
-  }
 
-  dashboardTripContainer.innerHTML = "";
+        return;
 
-  destinations.forEach((place) => {
-    const card = document.createElement("article");
+    }
 
-    card.className = "dashboard-destination-card";
 
-    card.innerHTML = `
+    dashboardTripContainer.innerHTML =
+        "";
+
+
+    destinations.forEach(
+        (
+            place
+        ) => {
+
+            const card =
+                document.createElement(
+                    "article"
+                );
+
+
+            card.className =
+                "dashboard-destination-card";
+
+
+            card.innerHTML = `
 
                 <img
-                    src="${escapeHTML(place.image || "")}"
-                    alt="${escapeHTML(place.name || "Destination")}"
+                    src="${escapeHTML(
+                        place.image ||
+                        ""
+                    )}"
+                    alt="${escapeHTML(
+                        place.name ||
+                        "Destination"
+                    )}"
                     loading="lazy"
                 >
 
+
                 <h4>
-                    ${escapeHTML(place.name || "Destination")}
+                    ${escapeHTML(
+                        place.name ||
+                        "Destination"
+                    )}
                 </h4>
 
+
                 <p>
+
                     📍
 
-                    ${escapeHTML(place.district || "")}
+                    ${escapeHTML(
+                        place.district ||
+                        ""
+                    )}
 
-                    ${place.province ? " · " + escapeHTML(place.province) : ""}
+                    ${
+                        place.province
+                            ? " · " +
+                              escapeHTML(
+                                  place.province
+                              )
+                            : ""
+                    }
+
                 </p>
 
             `;
 
-    dashboardTripContainer.appendChild(card);
-  });
+
+            dashboardTripContainer.appendChild(
+                card
+            );
+
+        }
+    );
+
 }
 
+
 /* ============================================================
-   10. GET TOURIST QUOTATION REQUESTS
-
-   IMPORTANT
-
-   Requests are loaded from:
-
-       lankaQuestQuotationRequests
-
-   Only requests belonging to the current
-   Firebase tourist UID are loaded.
+   11. GET TOURIST QUOTATION REQUESTS
 ============================================================ */
 
 async function getMyQuotationRequests() {
-  if (!currentFirebaseUser) {
-    return [];
-  }
 
-  try {
-    const requestsQuery = query(
-      collection(db, REQUEST_COLLECTION),
+    if (
+        !currentFirebaseUser
+    ) {
 
-      where("touristId", "==", currentFirebaseUser.uid),
-    );
+        return [];
 
-    const snapshot = await getDocs(requestsQuery);
+    }
 
-    const requests = [];
 
-    snapshot.forEach((documentSnapshot) => {
-      requests.push({
-        firebaseId: documentSnapshot.id,
+    try {
 
-        id: documentSnapshot.id,
+        const requestsQuery =
+            query(
+                collection(
+                    db,
+                    REQUEST_COLLECTION
+                ),
 
-        ...documentSnapshot.data(),
-      });
-    });
+                where(
+                    "touristId",
+                    "==",
+                    currentFirebaseUser.uid
+                )
+            );
 
-    /*
-           Sort newest first.
 
-           We intentionally do this in JavaScript
-           instead of:
+        const snapshot =
+            await getDocs(
+                requestsQuery
+            );
 
-           orderBy("createdAt", "desc")
 
-           This avoids requiring a composite
-           Firestore index.
-        */
+        const requests =
+            [];
 
-    requests.sort((a, b) => {
-      const dateA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
 
-      const dateB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+        snapshot.forEach(
+            (
+                documentSnapshot
+            ) => {
 
-      return dateB - dateA;
-    });
+                const data =
+                    documentSnapshot.data();
 
-    console.log("Tourist quotation requests:", requests);
 
-    return requests;
-  } catch (error) {
-    console.error("Quotation request loading error:", error);
+                const requestId =
+                    documentSnapshot.id;
 
-    return [];
-  }
+
+                requests.push({
+
+                    ...data,
+
+                    requestId:
+                        requestId,
+
+                    id:
+                        requestId,
+
+                    firebaseId:
+                        documentSnapshot.id
+
+                });
+
+            }
+        );
+
+
+        requests.sort(
+            (
+                a,
+                b
+            ) => {
+
+                const dateA =
+                    a.createdAt?.toMillis
+                        ? a.createdAt.toMillis()
+                        : 0;
+
+
+                const dateB =
+                    b.createdAt?.toMillis
+                        ? b.createdAt.toMillis()
+                        : 0;
+
+
+                return dateB - dateA;
+
+            }
+        );
+
+
+        console.log(
+            "Tourist quotation requests:",
+            requests
+        );
+
+
+        return requests;
+
+
+    } catch (error) {
+
+        console.error(
+            "Quotation request loading error:",
+            error
+        );
+
+
+        return [];
+
+    }
+
 }
 
+
 /* ============================================================
-   11. GET TOURIST QUOTATIONS
-
-   IMPORTANT
-
-   Quotations are stored separately:
-
-       lankaQuestQuotations
-
-   NOT:
-
-       request.quotations[]
+   12. GET TOURIST QUOTATIONS
 ============================================================ */
 
 async function getMyQuotations() {
-  const quotationMap = new Map();
 
-  if (!currentFirebaseUser) {
-    return quotationMap;
-  }
+    const quotationMap =
+        new Map();
 
-  try {
-    const quotationsQuery = query(
-      collection(db, QUOTATION_COLLECTION),
 
-      where("touristId", "==", currentFirebaseUser.uid),
+    if (
+        !currentFirebaseUser
+    ) {
+
+        return quotationMap;
+
+    }
+
+
+    try {
+
+        const quotationsQuery =
+            query(
+                collection(
+                    db,
+                    QUOTATION_COLLECTION
+                ),
+
+                where(
+                    "touristId",
+                    "==",
+                    currentFirebaseUser.uid
+                )
+            );
+
+
+        const snapshot =
+            await getDocs(
+                quotationsQuery
+            );
+
+
+        snapshot.forEach(
+            (
+                documentSnapshot
+            ) => {
+
+                const quotationData =
+                    documentSnapshot.data();
+
+
+                const quotation = {
+
+                    quotationId:
+                        documentSnapshot.id,
+
+                    id:
+                        documentSnapshot.id,
+
+                    ...quotationData
+
+                };
+
+
+                if (
+                    quotation.requestId
+                ) {
+
+                    quotationMap.set(
+                        String(
+                            quotation.requestId
+                        ),
+                        quotation
+                    );
+
+                }
+
+            }
+        );
+
+
+        console.log(
+            "Tourist quotations:",
+            Array.from(
+                quotationMap.values()
+            )
+        );
+
+
+        return quotationMap;
+
+
+    } catch (error) {
+
+        console.error(
+            "Quotation loading error:",
+            error
+        );
+
+
+        return quotationMap;
+
+    }
+
+}
+
+
+/* ============================================================
+   13. FIND QUOTATION FOR REQUEST
+============================================================ */
+
+function getQuotationForRequest(
+    request,
+    quotationMap
+) {
+
+    if (
+        !request ||
+        !quotationMap ||
+        !request.requestId
+    ) {
+
+        return null;
+
+    }
+
+
+    return (
+        quotationMap.get(
+            String(
+                request.requestId
+            )
+        ) || null
     );
 
-    const snapshot = await getDocs(quotationsQuery);
-
-    snapshot.forEach((documentSnapshot) => {
-      const quotationData = documentSnapshot.data();
-
-      const quotation = {
-        firebaseId: documentSnapshot.id,
-
-        id: documentSnapshot.id,
-
-        ...quotationData,
-      };
-
-      /*
-                   Primary connection:
-
-                   quotation.requestId
-                */
-
-      if (quotation.requestId) {
-        quotationMap.set(String(quotation.requestId), quotation);
-      }
-
-      /*
-                   Backup connection:
-
-                   quotation.requestFirestoreId
-                */
-
-      if (quotation.requestFirestoreId) {
-        quotationMap.set(String(quotation.requestFirestoreId), quotation);
-      }
-    });
-
-    console.log("Tourist quotations:", Array.from(quotationMap.values()));
-
-    return quotationMap;
-  } catch (error) {
-    console.error("Quotation loading error:", error);
-
-    return quotationMap;
-  }
 }
 
+
 /* ============================================================
-   12. FIND QUOTATION FOR REQUEST
+   14. FORMAT DATE
 ============================================================ */
 
-function getQuotationForRequest(request, quotationMap) {
-  if (!request || !quotationMap) {
-    return null;
-  }
+function formatDashboardDate(
+    value
+) {
 
-  /*
-       1. request.requestId
-    */
+    if (!value) {
 
-  if (request.requestId) {
-    const quotation = quotationMap.get(String(request.requestId));
+        return "Not specified";
 
-    if (quotation) {
-      return quotation;
     }
-  }
 
-  /*
-       2. Firestore request document ID
-    */
 
-  if (request.firebaseId) {
-    const quotation = quotationMap.get(String(request.firebaseId));
+    try {
 
-    if (quotation) {
-      return quotation;
+        if (
+            typeof value.toDate ===
+            "function"
+        ) {
+
+            return value
+                .toDate()
+                .toLocaleDateString();
+
+        }
+
+
+        const date =
+            new Date(
+                value
+            );
+
+
+        if (
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
+
+            return String(
+                value
+            );
+
+        }
+
+
+        return date.toLocaleDateString();
+
+
+    } catch (error) {
+
+        return "Not specified";
+
     }
-  }
 
-  /*
-       3. request.id
-    */
-
-  if (request.id) {
-    const quotation = quotationMap.get(String(request.id));
-
-    if (quotation) {
-      return quotation;
-    }
-  }
-
-  return null;
 }
 
+
 /* ============================================================
-   13. FORMAT DATE
+   15. FORMAT REQUEST STATUS
 ============================================================ */
 
-function formatDashboardDate(value) {
-  if (!value) {
+function formatRequestStatus(
+    status
+) {
+
+    const statusMap = {
+
+        pending:
+            "Pending",
+
+        guide_selected:
+            "Guide Selected",
+
+        quotation_sent:
+            "Quotation Received",
+
+        quotation_accepted:
+            "Quotation Accepted",
+
+        quotation_rejected:
+            "Quotation Rejected",
+
+        completed:
+            "Completed"
+
+    };
+
+
+    return (
+        statusMap[status] ||
+        status ||
+        "Pending"
+    );
+
+}
+
+
+/* ============================================================
+   16. FORMAT GUIDE LANGUAGES
+============================================================ */
+
+function formatGuideLanguages(
+    languages
+) {
+
+    if (
+        Array.isArray(
+            languages
+        )
+    ) {
+
+        return languages
+            .map(
+                language =>
+                    String(
+                        language
+                    )
+            )
+            .join(
+                ", "
+            );
+
+    }
+
+
+    if (
+        typeof languages ===
+            "string" &&
+        languages.trim()
+    ) {
+
+        return languages;
+
+    }
+
+
     return "Not specified";
-  }
 
-  try {
-    /*
-           Firestore Timestamp
-        */
-
-    if (typeof value.toDate === "function") {
-      return value.toDate().toLocaleDateString();
-    }
-
-    /*
-           Date object / string
-        */
-
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
-      return String(value);
-    }
-
-    return date.toLocaleDateString();
-  } catch (error) {
-    return "Not specified";
-  }
 }
 
-/* ============================================================
-   14. FORMAT REQUEST STATUS
-============================================================ */
-
-function formatRequestStatus(status) {
-  const statusMap = {
-    pending: "Pending",
-
-    guide_selected: "Guide Selected",
-
-    quotation_sent: "Quotation Received",
-
-    quotation_accepted: "Quotation Accepted",
-
-    quotation_rejected: "Quotation Rejected",
-
-    completed: "Completed",
-  };
-
-  return statusMap[status] || status || "Pending";
-}
 
 /* ============================================================
-   15. FORMAT GUIDE LANGUAGES
+   17. RENDER QUOTATION
 ============================================================ */
 
-function formatGuideLanguages(languages) {
-  if (Array.isArray(languages)) {
-    return languages.map((language) => String(language)).join(", ");
-  }
+function renderQuotation(
+    request,
+    quotation
+) {
 
-  if (typeof languages === "string" && languages.trim()) {
-    return languages;
-  }
+    if (
+        !quotation
+    ) {
 
-  return "Not specified";
-}
-
-/* ============================================================
-   16. RENDER QUOTATION
-
-   Reads directly from:
-
-       lankaQuestQuotations
-============================================================ */
-
-function renderQuotation(request, quotation) {
-  /*
-       No quotation yet
-    */
-
-  if (!quotation) {
-    return `
+        return `
 
             <div class="quotation-not-received">
 
@@ -636,52 +1179,54 @@ function renderQuotation(request, quotation) {
             </div>
 
         `;
-  }
 
-  /*
-       Guide information
+    }
 
-       Current quotation document stores:
 
-       guideName
-       guideEmail
-       guidePhone
-    */
+    const guideName =
+        quotation.guideName ||
+        request.guideName ||
+        request.selectedGuide?.fullName ||
+        "Registered Guide";
 
-  const guideName =
-    quotation.guideName ||
-    request.guideName ||
-    request.selectedGuide?.fullName ||
-    "Registered Guide";
 
-  const guideEmail =
-    quotation.guideEmail ||
-    request.guideEmail ||
-    request.selectedGuide?.email ||
-    "Email not available";
+    const guideEmail =
+        quotation.guideEmail ||
+        request.guideEmail ||
+        request.selectedGuide?.email ||
+        "Email not available";
 
-  const guidePhone =
-    quotation.guidePhone ||
-    request.guidePhone ||
-    request.selectedGuide?.phone ||
-    "Phone not available";
 
-  const guideDistrict =
-    quotation.guide?.district || request.selectedGuide?.district || "Sri Lanka";
+    const guidePhone =
+        quotation.guidePhone ||
+        request.guidePhone ||
+        request.selectedGuide?.phone ||
+        "Phone not available";
 
-  const guideLanguages = formatGuideLanguages(
-    quotation.guide?.languages || request.selectedGuide?.languages,
-  );
 
-  const quotationStatus = quotation.status || "sent";
+    const guideDistrict =
+        quotation.guide?.district ||
+        request.selectedGuide?.district ||
+        "Sri Lanka";
 
-  /*
-       Accept / Reject buttons
-    */
 
-  const actionButtons =
-    quotationStatus === "sent"
-      ? `
+    const guideLanguages =
+        formatGuideLanguages(
+            quotation.guide?.languages ||
+            request.selectedGuide?.languages
+        );
+
+
+    const quotationStatus =
+        quotation.status ||
+        "sent";
+
+
+    const actionButtons =
+        quotationStatus ===
+        "sent"
+
+            ? `
 
                 <div class="quotation-actions">
 
@@ -689,13 +1234,13 @@ function renderQuotation(request, quotation) {
                         type="button"
                         class="accept-quotation-button"
                         data-request-id="${escapeHTML(
-                          request.requestId ||
-                            request.firebaseId ||
-                            request.id ||
-                            "",
+                            request.requestId ||
+                            ""
                         )}"
                         data-quotation-id="${escapeHTML(
-                          quotation.firebaseId || quotation.id || "",
+                            quotation.quotationId ||
+                            quotation.id ||
+                            ""
                         )}"
                     >
                         ✓ Accept
@@ -706,13 +1251,13 @@ function renderQuotation(request, quotation) {
                         type="button"
                         class="reject-quotation-button"
                         data-request-id="${escapeHTML(
-                          request.requestId ||
-                            request.firebaseId ||
-                            request.id ||
-                            "",
+                            request.requestId ||
+                            ""
                         )}"
                         data-quotation-id="${escapeHTML(
-                          quotation.firebaseId || quotation.id || "",
+                            quotation.quotationId ||
+                            quotation.id ||
+                            ""
                         )}"
                     >
                         ✕ Reject
@@ -721,9 +1266,11 @@ function renderQuotation(request, quotation) {
                 </div>
 
             `
-      : "";
 
-  return `
+            : "";
+
+
+    return `
 
         <div class="tourist-quotation-card">
 
@@ -735,7 +1282,9 @@ function renderQuotation(request, quotation) {
 
                         🧑‍💼
 
-                        ${escapeHTML(guideName)}
+                        ${escapeHTML(
+                            guideName
+                        )}
 
                     </h4>
 
@@ -744,7 +1293,9 @@ function renderQuotation(request, quotation) {
 
                         📧
 
-                        ${escapeHTML(guideEmail)}
+                        ${escapeHTML(
+                            guideEmail
+                        )}
 
                     </p>
 
@@ -753,7 +1304,9 @@ function renderQuotation(request, quotation) {
 
                         📞
 
-                        ${escapeHTML(guidePhone)}
+                        ${escapeHTML(
+                            guidePhone
+                        )}
 
                     </p>
 
@@ -763,11 +1316,12 @@ function renderQuotation(request, quotation) {
                 <span class="request-status">
 
                     ${escapeHTML(
-                      formatRequestStatus(
-                        request.status === "quotation_sent"
-                          ? "quotation_sent"
-                          : quotationStatus,
-                      ),
+                        formatRequestStatus(
+                            request.status ===
+                            "quotation_sent"
+                                ? "quotation_sent"
+                                : quotationStatus
+                        )
                     )}
 
                 </span>
@@ -777,9 +1331,14 @@ function renderQuotation(request, quotation) {
 
             <div class="quotation-price">
 
-                ${escapeHTML(quotation.amount ?? "0")}
+                ${escapeHTML(
+                    quotation.amount ?? "0"
+                )}
 
-                ${escapeHTML(quotation.currency || "")}
+                ${escapeHTML(
+                    quotation.currency ||
+                    ""
+                )}
 
             </div>
 
@@ -790,7 +1349,9 @@ function renderQuotation(request, quotation) {
 
                     📍
 
-                    ${escapeHTML(guideDistrict)}
+                    ${escapeHTML(
+                        guideDistrict
+                    )}
 
                 </p>
 
@@ -799,7 +1360,9 @@ function renderQuotation(request, quotation) {
 
                     🗣️
 
-                    ${escapeHTML(guideLanguages)}
+                    ${escapeHTML(
+                        guideLanguages
+                    )}
 
                 </p>
 
@@ -810,14 +1373,18 @@ function renderQuotation(request, quotation) {
 
                     Valid Until:
 
-                    ${escapeHTML(formatDashboardDate(quotation.validUntil))}
+                    ${escapeHTML(
+                        formatDashboardDate(
+                            quotation.validUntil
+                        )
+                    )}
 
                 </p>
 
 
                 ${
-                  quotation.included
-                    ? `
+                    quotation.included
+                        ? `
 
                             <div>
 
@@ -826,19 +1393,21 @@ function renderQuotation(request, quotation) {
                                 </strong>
 
                                 <p>
-                                    ${escapeHTML(quotation.included)}
+                                    ${escapeHTML(
+                                        quotation.included
+                                    )}
                                 </p>
 
                             </div>
 
                         `
-                    : ""
+                        : ""
                 }
 
 
                 ${
-                  quotation.excluded
-                    ? `
+                    quotation.excluded
+                        ? `
 
                             <div>
 
@@ -847,19 +1416,21 @@ function renderQuotation(request, quotation) {
                                 </strong>
 
                                 <p>
-                                    ${escapeHTML(quotation.excluded)}
+                                    ${escapeHTML(
+                                        quotation.excluded
+                                    )}
                                 </p>
 
                             </div>
 
                         `
-                    : ""
+                        : ""
                 }
 
 
                 ${
-                  quotation.notes
-                    ? `
+                    quotation.notes
+                        ? `
 
                             <div>
 
@@ -868,13 +1439,15 @@ function renderQuotation(request, quotation) {
                                 </strong>
 
                                 <p>
-                                    ${escapeHTML(quotation.notes)}
+                                    ${escapeHTML(
+                                        quotation.notes
+                                    )}
                                 </p>
 
                             </div>
 
                         `
-                    : ""
+                        : ""
                 }
 
             </div>
@@ -885,286 +1458,1191 @@ function renderQuotation(request, quotation) {
         </div>
 
     `;
+
 }
 
-/* ============================================================
-   17. UPDATE REQUEST STATUS
-============================================================ */
-
-async function updateQuotationRequestStatus(request, status) {
-  if (!request?.firebaseId) {
-    throw new Error("Quotation request Firestore ID is missing.");
-  }
-
-  const requestRef = doc(db, REQUEST_COLLECTION, request.firebaseId);
-
-  await updateDoc(requestRef, {
-    status: status,
-
-    updatedAt: serverTimestamp(),
-  });
-}
 
 /* ============================================================
-   18. UPDATE QUOTATION STATUS
+   18. UPDATE REQUEST STATUS
 ============================================================ */
 
-async function updateQuotationStatus(quotation, status) {
-  if (!quotation?.firebaseId) {
-    throw new Error("Quotation Firestore ID is missing.");
-  }
-
-  const quotationRef = doc(db, QUOTATION_COLLECTION, quotation.firebaseId);
-
-  await updateDoc(quotationRef, {
-    status: status,
-
-    updatedAt: serverTimestamp(),
-  });
-}
-
-/* ============================================================
-   19. FIND REQUEST BY ID
-============================================================ */
-
-async function findRequestById(requestId) {
-  const requests = await getMyQuotationRequests();
-
-  return (
-    requests.find(
-      (request) =>
-        String(request.requestId || "") === String(requestId) ||
-        String(request.firebaseId || "") === String(requestId) ||
-        String(request.id || "") === String(requestId),
-    ) || null
-  );
-}
-
-/* ============================================================
-   20. ACCEPT QUOTATION
-============================================================ */
-
-async function acceptQuotation(requestId, quotationId) {
-  try {
-    if (!currentFirebaseUser) {
-      alert("Please login again.");
-
-      return;
-    }
-
-    const request = await findRequestById(requestId);
-
-    if (!request) {
-      alert("Quotation request not found.");
-
-      return;
-    }
-
-    let quotation = null;
-
-    /*
-           Direct quotation lookup
-        */
-
-    if (quotationId) {
-      const quotationRef = doc(db, QUOTATION_COLLECTION, quotationId);
-
-      const quotationSnapshot = await getDoc(quotationRef);
-
-      if (quotationSnapshot.exists()) {
-        quotation = {
-          firebaseId: quotationSnapshot.id,
-
-          id: quotationSnapshot.id,
-
-          ...quotationSnapshot.data(),
-        };
-      }
-    }
-
-    /*
-           Fallback quotation lookup
-        */
-
-    if (!quotation) {
-      const quotationMap = await getMyQuotations();
-
-      quotation = getQuotationForRequest(request, quotationMap);
-    }
-
-    if (!quotation) {
-      alert("Quotation not found.");
-
-      return;
-    }
-
-    /*
-           Security check
-        */
+async function updateQuotationRequestStatus(
+    request,
+    status
+) {
 
     if (
-      quotation.touristId &&
-      quotation.touristId !== currentFirebaseUser.uid
+        !request?.requestId
     ) {
-      alert("Access denied.");
 
-      return;
+        throw new Error(
+            "Quotation request ID is missing."
+        );
+
     }
 
-    /*
-           Update quotation
-        */
 
-    await updateQuotationStatus(quotation, "accepted");
+    const requestRef =
+        doc(
+            db,
+            REQUEST_COLLECTION,
+            request.requestId
+        );
 
-    /*
-           Update request
-        */
 
-    await updateQuotationRequestStatus(request, "quotation_accepted");
+    await updateDoc(
+        requestRef,
+        {
 
-    alert("Quotation accepted successfully.");
+            status:
+                status,
 
-    await renderQuotationRequests();
+            updatedAt:
+                serverTimestamp()
 
-    await renderSelectedGuide();
-  } catch (error) {
-    console.error("Accept quotation error:", error);
+        }
+    );
 
-    alert(error.message || "Unable to accept quotation.");
-  }
 }
 
+
 /* ============================================================
-   21. REJECT QUOTATION
+   19. UPDATE QUOTATION STATUS
 ============================================================ */
 
-async function rejectQuotation(requestId, quotationId) {
-  try {
-    if (!currentFirebaseUser) {
-      alert("Please login again.");
-
-      return;
-    }
-
-    const request = await findRequestById(requestId);
-
-    if (!request) {
-      alert("Quotation request not found.");
-
-      return;
-    }
-
-    let quotation = null;
-
-    /*
-           Direct quotation lookup
-        */
-
-    if (quotationId) {
-      const quotationRef = doc(db, QUOTATION_COLLECTION, quotationId);
-
-      const quotationSnapshot = await getDoc(quotationRef);
-
-      if (quotationSnapshot.exists()) {
-        quotation = {
-          firebaseId: quotationSnapshot.id,
-
-          id: quotationSnapshot.id,
-
-          ...quotationSnapshot.data(),
-        };
-      }
-    }
-
-    /*
-           Fallback lookup
-        */
-
-    if (!quotation) {
-      const quotationMap = await getMyQuotations();
-
-      quotation = getQuotationForRequest(request, quotationMap);
-    }
-
-    if (!quotation) {
-      alert("Quotation not found.");
-
-      return;
-    }
-
-    /*
-           Security check
-        */
+async function updateQuotationStatus(
+    quotation,
+    status
+) {
 
     if (
-      quotation.touristId &&
-      quotation.touristId !== currentFirebaseUser.uid
+        !quotation?.quotationId
     ) {
-      alert("Access denied.");
 
-      return;
+        throw new Error(
+            "Quotation Firestore ID is missing."
+        );
+
     }
 
-    /*
-           Update quotation
-        */
 
-    await updateQuotationStatus(quotation, "rejected");
+    const quotationRef =
+        doc(
+            db,
+            QUOTATION_COLLECTION,
+            quotation.quotationId
+        );
 
-    /*
-           Update request
-        */
 
-    await updateQuotationRequestStatus(request, "quotation_rejected");
+    await updateDoc(
+        quotationRef,
+        {
 
-    alert("Quotation rejected.");
+            status:
+                status,
 
-    await renderQuotationRequests();
+            updatedAt:
+                serverTimestamp()
 
-    await renderSelectedGuide();
-  } catch (error) {
-    console.error("Reject quotation error:", error);
+        }
+    );
 
-    alert(error.message || "Unable to reject quotation.");
-  }
 }
 
+
 /* ============================================================
-   22. RENDER QUOTATION REQUESTS
+   20. FIND REQUEST BY REQUEST ID
+============================================================ */
+
+async function findRequestById(
+    requestId
+) {
+
+    if (
+        !requestId ||
+        !currentFirebaseUser
+    ) {
+
+        return null;
+
+    }
+
+
+    try {
+
+        const requestRef =
+            doc(
+                db,
+                REQUEST_COLLECTION,
+                requestId
+            );
+
+
+        const snapshot =
+            await getDoc(
+                requestRef
+            );
+
+
+        if (
+            !snapshot.exists()
+        ) {
+
+            return null;
+
+        }
+
+
+        const data =
+            snapshot.data();
+
+
+        /*
+           SECURITY CHECK
+
+           The request MUST belong to
+           the currently authenticated Tourist.
+        */
+
+        if (
+            data.touristId !==
+            currentFirebaseUser.uid
+        ) {
+
+            console.warn(
+                "Request ownership mismatch:",
+                requestId
+            );
+
+
+            return null;
+
+        }
+
+
+        return {
+
+            requestId:
+                snapshot.id,
+
+            id:
+                snapshot.id,
+
+            firebaseId:
+                snapshot.id,
+
+            ...data
+
+        };
+
+
+    } catch (error) {
+
+        console.error(
+            "Find request by ID error:",
+            error
+        );
+
+
+        return null;
+
+    }
+
+}
+
+
+/* ============================================================
+   21. ACCEPT QUOTATION
+============================================================ */
+
+async function acceptQuotation(
+    requestId,
+    quotationId
+) {
+
+    try {
+
+        if (
+            !currentFirebaseUser
+        ) {
+
+            alert(
+                "Please login again."
+            );
+
+
+            return;
+
+        }
+
+
+        const request =
+            await findRequestById(
+                requestId
+            );
+
+
+        if (
+            !request
+        ) {
+
+            alert(
+                "Quotation request not found."
+            );
+
+
+            return;
+
+        }
+
+
+        let quotation =
+            null;
+
+
+        if (
+            quotationId
+        ) {
+
+            const quotationRef =
+                doc(
+                    db,
+                    QUOTATION_COLLECTION,
+                    quotationId
+                );
+
+
+            const quotationSnapshot =
+                await getDoc(
+                    quotationRef
+                );
+
+
+            if (
+                quotationSnapshot.exists()
+            ) {
+
+                const data =
+                    quotationSnapshot.data();
+
+
+                if (
+                    data.touristId !==
+                    currentFirebaseUser.uid
+                ) {
+
+                    alert(
+                        "Access denied."
+                    );
+
+
+                    return;
+
+                }
+
+
+                if (
+                    String(
+                        data.requestId ||
+                        ""
+                    ) !==
+                    String(
+                        request.requestId
+                    )
+                ) {
+
+                    alert(
+                        "Quotation does not belong to this request."
+                    );
+
+
+                    return;
+
+                }
+
+
+                quotation = {
+
+                    quotationId:
+                        quotationSnapshot.id,
+
+                    id:
+                        quotationSnapshot.id,
+
+                    ...data
+
+                };
+
+            }
+
+        }
+
+
+        if (
+            !quotation
+        ) {
+
+            const quotationMap =
+                await getMyQuotations();
+
+
+            quotation =
+                getQuotationForRequest(
+                    request,
+                    quotationMap
+                );
+
+        }
+
+
+        if (
+            !quotation
+        ) {
+
+            alert(
+                "Quotation not found."
+            );
+
+
+            return;
+
+        }
+
+
+        await updateQuotationStatus(
+            quotation,
+            "accepted"
+        );
+
+
+        await updateQuotationRequestStatus(
+            request,
+            "quotation_accepted"
+        );
+
+
+        alert(
+            "Quotation accepted successfully."
+        );
+
+
+        await renderQuotationRequests();
+
+        await renderSelectedGuide();
+
+
+    } catch (error) {
+
+        console.error(
+            "Accept quotation error:",
+            error
+        );
+
+
+        alert(
+            error.message ||
+            "Unable to accept quotation."
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   22. REJECT QUOTATION
+============================================================ */
+
+async function rejectQuotation(
+    requestId,
+    quotationId
+) {
+
+    try {
+
+        if (
+            !currentFirebaseUser
+        ) {
+
+            alert(
+                "Please login again."
+            );
+
+
+            return;
+
+        }
+
+
+        const request =
+            await findRequestById(
+                requestId
+            );
+
+
+        if (
+            !request
+        ) {
+
+            alert(
+                "Quotation request not found."
+            );
+
+
+            return;
+
+        }
+
+
+        let quotation =
+            null;
+
+
+        if (
+            quotationId
+        ) {
+
+            const quotationRef =
+                doc(
+                    db,
+                    QUOTATION_COLLECTION,
+                    quotationId
+                );
+
+
+            const quotationSnapshot =
+                await getDoc(
+                    quotationRef
+                );
+
+
+            if (
+                quotationSnapshot.exists()
+            ) {
+
+                const data =
+                    quotationSnapshot.data();
+
+
+                if (
+                    data.touristId !==
+                    currentFirebaseUser.uid
+                ) {
+
+                    alert(
+                        "Access denied."
+                    );
+
+
+                    return;
+
+                }
+
+
+                if (
+                    String(
+                        data.requestId ||
+                        ""
+                    ) !==
+                    String(
+                        request.requestId
+                    )
+                ) {
+
+                    alert(
+                        "Quotation does not belong to this request."
+                    );
+
+
+                    return;
+
+                }
+
+
+                quotation = {
+
+                    quotationId:
+                        quotationSnapshot.id,
+
+                    id:
+                        quotationSnapshot.id,
+
+                    ...data
+
+                };
+
+            }
+
+        }
+
+
+        if (
+            !quotation
+        ) {
+
+            const quotationMap =
+                await getMyQuotations();
+
+
+            quotation =
+                getQuotationForRequest(
+                    request,
+                    quotationMap
+                );
+
+        }
+
+
+        if (
+            !quotation
+        ) {
+
+            alert(
+                "Quotation not found."
+            );
+
+
+            return;
+
+        }
+
+
+        await updateQuotationStatus(
+            quotation,
+            "rejected"
+        );
+
+
+        await updateQuotationRequestStatus(
+            request,
+            "quotation_rejected"
+        );
+
+
+        alert(
+            "Quotation rejected."
+        );
+
+
+        await renderQuotationRequests();
+
+        await renderSelectedGuide();
+
+
+    } catch (error) {
+
+        console.error(
+            "Reject quotation error:",
+            error
+        );
+
+
+        alert(
+            error.message ||
+            "Unable to reject quotation."
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   23. DELETE LINKED QUOTATION
+============================================================ */
+
+/*
+   IMPORTANT
+
+   This function ONLY deletes a quotation if:
+
+       quotation.touristId
+              ===
+       currentFirebaseUser.uid
+
+   Therefore a Tourist cannot use this function to
+   delete another Tourist's quotation.
+
+   If quotation deletion fails, the error is returned
+   to the caller but the main request can still be deleted.
+============================================================ */
+
+async function deleteLinkedQuotation(
+    requestId
+) {
+
+    if (
+        !requestId ||
+        !currentFirebaseUser
+    ) {
+
+        return {
+
+            deleted:
+                false,
+
+            found:
+                false
+
+        };
+
+    }
+
+
+    try {
+
+        /*
+           Find quotations belonging to the
+           currently authenticated Tourist.
+        */
+
+        const quotationsQuery =
+            query(
+                collection(
+                    db,
+                    QUOTATION_COLLECTION
+                ),
+
+                where(
+                    "touristId",
+                    "==",
+                    currentFirebaseUser.uid
+                ),
+
+                where(
+                    "requestId",
+                    "==",
+                    requestId
+                )
+            );
+
+
+        const snapshot =
+            await getDocs(
+                quotationsQuery
+            );
+
+
+        if (
+            snapshot.empty
+        ) {
+
+            console.log(
+                "No linked quotation found for request:",
+                requestId
+            );
+
+
+            return {
+
+                deleted:
+                    false,
+
+                found:
+                    false
+
+            };
+
+        }
+
+
+        let deletedCount =
+            0;
+
+
+        for (
+            const quotationSnapshot
+            of snapshot.docs
+        ) {
+
+            const quotationData =
+                quotationSnapshot.data();
+
+
+            /*
+               Extra client-side ownership check.
+            */
+
+            if (
+                quotationData.touristId !==
+                currentFirebaseUser.uid
+            ) {
+
+                console.warn(
+                    "Skipping quotation belonging to another Tourist:",
+                    quotationSnapshot.id
+                );
+
+
+                continue;
+
+            }
+
+
+            const quotationRef =
+                doc(
+                    db,
+                    QUOTATION_COLLECTION,
+                    quotationSnapshot.id
+                );
+
+
+            try {
+
+                await deleteDoc(
+                    quotationRef
+                );
+
+
+                deletedCount++;
+
+
+                console.log(
+                    "Linked quotation deleted:",
+                    quotationSnapshot.id
+                );
+
+
+            } catch (quotationDeleteError) {
+
+                /*
+                   IMPORTANT
+
+                   Do NOT throw here.
+
+                   Even if the quotation cannot be deleted,
+                   the parent Tourist request must still be
+                   allowed to continue to deletion.
+                */
+
+                console.error(
+                    "Linked quotation deletion failed:",
+                    quotationSnapshot.id,
+                    quotationDeleteError
+                );
+
+            }
+
+        }
+
+
+        return {
+
+            deleted:
+                deletedCount > 0,
+
+            found:
+                true,
+
+            deletedCount:
+                deletedCount
+
+        };
+
+
+    } catch (error) {
+
+        /*
+           IMPORTANT
+
+           Quotation lookup itself failed.
+
+           Do not block deletion of the Tourist request.
+        */
+
+        console.error(
+            "Linked quotation lookup error:",
+            error
+        );
+
+
+        return {
+
+            deleted:
+                false,
+
+            found:
+                false,
+
+            error:
+                error
+
+        };
+
+    }
+
+}
+
+
+/* ============================================================
+   24. DELETE QUOTATION REQUEST
+============================================================ */
+
+/*
+   ============================================================
+   FINAL DELETE POLICY
+   ============================================================
+
+   Tourist can delete OWN request regardless of status:
+
+       pending
+       guide_selected
+       quotation_sent
+       quotation_accepted
+       quotation_rejected
+       completed
+
+   All are allowed.
+
+   SECURITY:
+
+       request.touristId
+              ===
+       currentFirebaseUser.uid
+
+   If another Tourist owns the request:
+
+       DELETE ❌
+
+   If a Guide tries to delete it:
+
+       DELETE ❌
+
+   Firestore Rules remain the final authority.
+
+   DELETE FLOW:
+
+       1. Authenticate Tourist
+       2. Validate requestId
+       3. Read request
+       4. Verify ownership
+       5. Confirm deletion
+       6. Try linked quotation deletion
+       7. Delete request
+       8. Refresh dashboard
+
+   IMPORTANT:
+
+   Linked quotation deletion failure does NOT stop
+   the request deletion.
+============================================================ */
+
+async function deleteQuotationRequest(
+    requestId
+) {
+
+    try {
+
+        /* ------------------------------------------------------
+           STEP 1
+           Authentication
+        ------------------------------------------------------ */
+
+        if (
+            !currentFirebaseUser
+        ) {
+
+            alert(
+                "Please login again."
+            );
+
+
+            return;
+
+        }
+
+
+        /* ------------------------------------------------------
+           STEP 2
+           Validate request ID
+        ------------------------------------------------------ */
+
+        if (
+            !requestId
+        ) {
+
+            alert(
+                "Quotation request ID is missing."
+            );
+
+
+            return;
+
+        }
+
+
+        /* ------------------------------------------------------
+           STEP 3
+           Find request
+        ------------------------------------------------------ */
+
+        const request =
+            await findRequestById(
+                requestId
+            );
+
+
+        if (
+            !request
+        ) {
+
+            alert(
+                "Quotation request not found, or you do not have permission to delete it."
+            );
+
+
+            return;
+
+        }
+
+
+        /* ------------------------------------------------------
+           STEP 4
+           FINAL CLIENT-SIDE OWNERSHIP CHECK
+        ------------------------------------------------------ */
+
+        if (
+            request.touristId !==
+            currentFirebaseUser.uid
+        ) {
+
+            console.warn(
+                "DELETE BLOCKED - ownership mismatch:",
+                {
+                    requestId:
+                        requestId,
+
+                    requestTouristId:
+                        request.touristId,
+
+                    currentUser:
+                        currentFirebaseUser.uid
+                }
+            );
+
+
+            alert(
+                "Access denied. You can only delete your own request."
+            );
+
+
+            return;
+
+        }
+
+
+        /* ------------------------------------------------------
+           IMPORTANT
+
+           DO NOT check request.status here.
+
+           Therefore ALL statuses can be deleted:
+
+           pending
+           guide_selected
+           quotation_sent
+           quotation_accepted
+           quotation_rejected
+           completed
+        ------------------------------------------------------ */
+
+
+        const confirmed =
+            window.confirm(
+                "Delete this quotation request?\n\n" +
+                "This will remove the request from your dashboard and delete its linked quotation if one exists.\n\n" +
+                "This action cannot be undone."
+            );
+
+
+        if (
+            !confirmed
+        ) {
+
+            return;
+
+        }
+
+
+        /* ------------------------------------------------------
+           STEP 5
+           TRY TO DELETE LINKED QUOTATION
+
+           IMPORTANT:
+
+           Failure here MUST NOT stop request deletion.
+        ------------------------------------------------------ */
+
+        const quotationDeleteResult =
+            await deleteLinkedQuotation(
+                requestId
+            );
+
+
+        console.log(
+            "Linked quotation deletion result:",
+            quotationDeleteResult
+        );
+
+
+        /* ------------------------------------------------------
+           STEP 6
+           DELETE MAIN REQUEST
+
+           requestId is the Firestore document ID.
+        ------------------------------------------------------ */
+
+        const requestRef =
+            doc(
+                db,
+                REQUEST_COLLECTION,
+                requestId
+            );
+
+
+        await deleteDoc(
+            requestRef
+        );
+
+
+        console.log(
+            "Quotation request deleted:",
+            requestId
+        );
+
+
+        /* ------------------------------------------------------
+           STEP 7
+           REFRESH DASHBOARD
+        ------------------------------------------------------ */
+
+        await renderQuotationRequests();
+
+        await renderSelectedGuide();
+
+        await updateDashboardSummary();
+
+
+        /* ------------------------------------------------------
+           SUCCESS MESSAGE
+        ------------------------------------------------------ */
+
+        if (
+            quotationDeleteResult.found &&
+            !quotationDeleteResult.deleted
+        ) {
+
+            alert(
+                "Quotation request deleted successfully.\n\n" +
+                "The linked quotation could not be removed, but the request itself was deleted."
+            );
+
+        } else {
+
+            alert(
+                "Quotation request deleted successfully."
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "Delete quotation request error:",
+            error
+        );
+
+
+        /* ------------------------------------------------------
+           FIRESTORE PERMISSION ERROR
+        ------------------------------------------------------ */
+
+        if (
+            error?.code ===
+            "permission-denied"
+        ) {
+
+            alert(
+                "Firestore denied permission to delete this request.\n\n" +
+                "Make sure the Firestore Rules allow the authenticated Tourist to delete their own request."
+            );
+
+
+            return;
+
+        }
+
+
+        alert(
+            error?.message ||
+            "Unable to delete quotation request."
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   25. RENDER QUOTATION REQUESTS
 ============================================================ */
 
 async function renderQuotationRequests() {
-  if (!quotationRequestsContainer) {
-    return;
-  }
 
-  if (!currentFirebaseUser) {
-    return;
-  }
+    if (
+        !quotationRequestsContainer
+    ) {
 
-  /*
-       Load requests
-    */
+        return;
 
-  const requests = await getMyQuotationRequests();
+    }
 
-  /*
-       Load quotations separately
-    */
 
-  const quotationMap = await getMyQuotations();
+    if (
+        !currentFirebaseUser
+    ) {
 
-  console.log("Requests loaded:", requests);
+        return;
 
-  console.log("Quotation map:", quotationMap);
+    }
 
-  if (dashboardRequestCount) {
-    dashboardRequestCount.textContent = requests.length;
-  }
 
-  if (requests.length === 0) {
-    quotationRequestsContainer.innerHTML = `
+    const requests =
+        await getMyQuotationRequests();
+
+
+    const quotationMap =
+        await getMyQuotations();
+
+
+    console.log(
+        "Requests loaded:",
+        requests
+    );
+
+
+    console.log(
+        "Quotation map:",
+        quotationMap
+    );
+
+
+    if (
+        dashboardRequestCount
+    ) {
+
+        dashboardRequestCount.textContent =
+            requests.length;
+
+    }
+
+
+    if (
+        requests.length === 0
+    ) {
+
+        quotationRequestsContainer.innerHTML = `
 
             <div class="dashboard-empty-state">
 
@@ -1191,32 +2669,64 @@ async function renderQuotationRequests() {
 
         `;
 
-    return;
-  }
 
-  quotationRequestsContainer.innerHTML = "";
+        return;
 
-  requests.forEach((request) => {
-    const card = document.createElement("article");
+    }
 
-    card.className = "quotation-request-card";
 
-    const destinations = Array.isArray(request.destinations)
-      ? request.destinations
-      : [];
+    quotationRequestsContainer.innerHTML =
+        "";
 
-    const destinationNames = destinations
-      .map((place) => place.name || "Destination")
-      .join(", ");
 
-    /*
-               Find quotation belonging
-               to this request.
-            */
+    requests.forEach(
+        (
+            request
+        ) => {
 
-    const quotation = getQuotationForRequest(request, quotationMap);
+            const card =
+                document.createElement(
+                    "article"
+                );
 
-    card.innerHTML = `
+
+            card.className =
+                "quotation-request-card";
+
+
+            const destinations =
+                Array.isArray(
+                    request.destinations
+                )
+                    ? request.destinations
+                    : [];
+
+
+            const destinationNames =
+                destinations
+                    .map(
+                        place =>
+                            place.name ||
+                            "Destination"
+                    )
+                    .join(
+                        ", "
+                    );
+
+
+            const quotation =
+                getQuotationForRequest(
+                    request,
+                    quotationMap
+                );
+
+
+            const requestId =
+                request.requestId ||
+                "";
+
+
+            card.innerHTML = `
 
                 <div class="request-card-header">
 
@@ -1225,7 +2735,7 @@ async function renderQuotationRequests() {
                         🧾
 
                         ${escapeHTML(
-                          request.requestId || request.firebaseId || "Request",
+                            requestId
                         )}
 
                     </h4>
@@ -1233,9 +2743,39 @@ async function renderQuotationRequests() {
 
                     <span class="request-status">
 
-                        ${escapeHTML(formatRequestStatus(request.status))}
+                        ${escapeHTML(
+                            formatRequestStatus(
+                                request.status
+                            )
+                        )}
 
                     </span>
+
+                </div>
+
+
+                <!--
+                    DELETE IS AVAILABLE FOR ALL REQUEST STATUSES.
+
+                    Firestore Rules decide whether the current
+                    authenticated Tourist actually owns this request.
+                -->
+
+                <div class="quotation-request-delete-area">
+
+                    <button
+                        type="button"
+                        class="delete-quotation-request-button"
+                        data-request-id="${escapeHTML(
+                            requestId
+                        )}"
+                    >
+
+                        🗑️
+
+                        Delete Request
+
+                    </button>
 
                 </div>
 
@@ -1250,7 +2790,10 @@ async function renderQuotationRequests() {
 
                         <strong>
 
-                            ${escapeHTML(destinationNames || "None")}
+                            ${escapeHTML(
+                                destinationNames ||
+                                "None"
+                            )}
 
                         </strong>
 
@@ -1266,11 +2809,14 @@ async function renderQuotationRequests() {
                         <strong>
 
                             ${
-                              request.startDate && request.endDate
-                                ? escapeHTML(
-                                    request.startDate + " → " + request.endDate,
-                                  )
-                                : "Not selected"
+                                request.startDate &&
+                                request.endDate
+                                    ? escapeHTML(
+                                        request.startDate +
+                                        " → " +
+                                        request.endDate
+                                    )
+                                    : "Not selected"
                             }
 
                         </strong>
@@ -1286,7 +2832,10 @@ async function renderQuotationRequests() {
 
                         <strong>
 
-                            ${escapeHTML(request.travelers || "Not selected")}
+                            ${escapeHTML(
+                                request.travelers ||
+                                "Not selected"
+                            )}
 
                         </strong>
 
@@ -1297,69 +2846,222 @@ async function renderQuotationRequests() {
 
                 <div class="request-quotation-area">
 
-                    ${renderQuotation(request, quotation)}
+                    ${renderQuotation(
+                        request,
+                        quotation
+                    )}
 
                 </div>
 
             `;
 
-    quotationRequestsContainer.appendChild(card);
-  });
 
-  attachQuotationButtons();
+            quotationRequestsContainer.appendChild(
+                card
+            );
+
+        }
+    );
+
+
+    attachQuotationButtons();
+
 }
 
+
 /* ============================================================
-   23. ATTACH ACCEPT / REJECT BUTTONS
+   26. ATTACH ACCEPT / REJECT / DELETE BUTTONS
 ============================================================ */
 
 function attachQuotationButtons() {
-  document.querySelectorAll(".accept-quotation-button").forEach((button) => {
-    button.addEventListener("click", async () => {
-      button.disabled = true;
 
-      await acceptQuotation(
-        button.dataset.requestId,
+    /* ---------------------------------------------------------
+       ACCEPT BUTTONS
+    --------------------------------------------------------- */
 
-        button.dataset.quotationId,
-      );
-    });
-  });
+    document
+        .querySelectorAll(
+            ".accept-quotation-button"
+        )
+        .forEach(
+            (
+                button
+            ) => {
 
-  document.querySelectorAll(".reject-quotation-button").forEach((button) => {
-    button.addEventListener("click", async () => {
-      button.disabled = true;
+                button.addEventListener(
+                    "click",
+                    async () => {
 
-      await rejectQuotation(
-        button.dataset.requestId,
+                        if (
+                            button.disabled
+                        ) {
 
-        button.dataset.quotationId,
-      );
-    });
-  });
+                            return;
+
+                        }
+
+
+                        button.disabled =
+                            true;
+
+
+                        await acceptQuotation(
+                            button.dataset.requestId,
+                            button.dataset.quotationId
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    /* ---------------------------------------------------------
+       REJECT BUTTONS
+    --------------------------------------------------------- */
+
+    document
+        .querySelectorAll(
+            ".reject-quotation-button"
+        )
+        .forEach(
+            (
+                button
+            ) => {
+
+                button.addEventListener(
+                    "click",
+                    async () => {
+
+                        if (
+                            button.disabled
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        button.disabled =
+                            true;
+
+
+                        await rejectQuotation(
+                            button.dataset.requestId,
+                            button.dataset.quotationId
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    /* ---------------------------------------------------------
+       DELETE REQUEST BUTTONS
+    --------------------------------------------------------- */
+
+    document
+        .querySelectorAll(
+            ".delete-quotation-request-button"
+        )
+        .forEach(
+            (
+                button
+            ) => {
+
+                button.addEventListener(
+                    "click",
+                    async () => {
+
+                        if (
+                            button.disabled
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        button.disabled =
+                            true;
+
+
+                        const originalText =
+                            button.textContent;
+
+
+                        button.textContent =
+                            " Deleting...";
+
+
+                        try {
+
+                            await deleteQuotationRequest(
+                                button.dataset.requestId
+                            );
+
+                        } finally {
+
+                            button.disabled =
+                                false;
+
+                            button.textContent =
+                                originalText;
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
 }
 
+
 /* ============================================================
-   24. RENDER SELECTED GUIDE
+   27. RENDER SELECTED GUIDE
 ============================================================ */
 
 async function renderSelectedGuide() {
-  if (!selectedGuideContainer) {
-    return;
-  }
 
-  const requests = await getMyQuotationRequests();
+    if (
+        !selectedGuideContainer
+    ) {
 
-  /*
-       Find request with selected guide
-    */
+        return;
 
-  const selectedRequest = requests.find(
-    (request) => request.selectedGuide || request.guideId,
-  );
+    }
 
-  if (!selectedRequest) {
-    selectedGuideContainer.innerHTML = `
+
+    const requests =
+        await getMyQuotationRequests();
+
+
+    const selectedRequests =
+        requests.filter(
+            (
+                request
+            ) =>
+                request.selectedGuide ||
+                request.guideId
+        );
+
+
+    const selectedRequest =
+        selectedRequests.length
+            ? selectedRequests[0]
+            : null;
+
+
+    if (
+        !selectedRequest
+    ) {
+
+        selectedGuideContainer.innerHTML = `
 
             <div class="no-selected-guide">
 
@@ -1387,28 +3089,42 @@ async function renderSelectedGuide() {
 
         `;
 
-    if (dashboardGuideCount) {
-      dashboardGuideCount.textContent = 0;
+
+        if (
+            dashboardGuideCount
+        ) {
+
+            dashboardGuideCount.textContent =
+                0;
+
+        }
+
+
+        return;
+
     }
 
-    return;
-  }
 
-  /*
-       Selected guide snapshot
-    */
+    const guide =
+        selectedRequest.selectedGuide ||
+        {
 
-  const guide = selectedRequest.selectedGuide || {
-    uid: selectedRequest.guideId,
+            uid:
+                selectedRequest.guideId,
 
-    fullName: selectedRequest.guideName,
+            fullName:
+                selectedRequest.guideName,
 
-    email: selectedRequest.guideEmail,
+            email:
+                selectedRequest.guideEmail,
 
-    phone: selectedRequest.guidePhone,
-  };
+            phone:
+                selectedRequest.guidePhone
 
-  selectedGuideContainer.innerHTML = `
+        };
+
+
+    selectedGuideContainer.innerHTML = `
 
         <div class="selected-guide-card">
 
@@ -1417,47 +3133,57 @@ async function renderSelectedGuide() {
                 🧑‍💼
 
                 ${escapeHTML(
-                  guide.fullName || selectedRequest.guideName || "Guide",
+                    guide.fullName ||
+                    selectedRequest.guideName ||
+                    "Guide"
                 )}
 
             </h4>
 
 
             ${
-              guide.email || selectedRequest.guideEmail
-                ? `
+                guide.email ||
+                selectedRequest.guideEmail
+
+                    ? `
 
                         <p>
 
                             📧
 
                             ${escapeHTML(
-                              guide.email || selectedRequest.guideEmail,
+                                guide.email ||
+                                selectedRequest.guideEmail
                             )}
 
                         </p>
 
                     `
-                : ""
+
+                    : ""
             }
 
 
             ${
-              guide.phone || selectedRequest.guidePhone
-                ? `
+                guide.phone ||
+                selectedRequest.guidePhone
+
+                    ? `
 
                         <p>
 
                             📞
 
                             ${escapeHTML(
-                              guide.phone || selectedRequest.guidePhone,
+                                guide.phone ||
+                                selectedRequest.guidePhone
                             )}
 
                         </p>
 
                     `
-                : ""
+
+                    : ""
             }
 
 
@@ -1465,7 +3191,10 @@ async function renderSelectedGuide() {
 
                 📍
 
-                ${escapeHTML(guide.district || "Sri Lanka")}
+                ${escapeHTML(
+                    guide.district ||
+                    "Sri Lanka"
+                )}
 
             </p>
 
@@ -1474,7 +3203,11 @@ async function renderSelectedGuide() {
 
                 🗣️
 
-                ${escapeHTML(formatGuideLanguages(guide.languages))}
+                ${escapeHTML(
+                    formatGuideLanguages(
+                        guide.languages
+                    )
+                )}
 
             </p>
 
@@ -1487,110 +3220,197 @@ async function renderSelectedGuide() {
 
     `;
 
-  if (dashboardGuideCount) {
-    dashboardGuideCount.textContent = 1;
-  }
+
+    if (
+        dashboardGuideCount
+    ) {
+
+        dashboardGuideCount.textContent =
+            1;
+
+    }
+
 }
 
+
 /* ============================================================
-   25. UPDATE DASHBOARD SUMMARY
+   28. UPDATE DASHBOARD SUMMARY
 ============================================================ */
 
 async function updateDashboardSummary() {
-  if (!currentFirebaseUser) {
-    return;
-  }
 
-  const trip = await getTouristTrip(currentFirebaseUser.uid);
+    if (
+        !currentFirebaseUser
+    ) {
 
-  const requests = await getMyQuotationRequests();
+        return;
 
-  if (dashboardTripCount) {
-    dashboardTripCount.textContent = (trip.destinations || []).length;
-  }
+    }
 
-  if (dashboardRequestCount) {
-    dashboardRequestCount.textContent = requests.length;
-  }
+
+    const trip =
+        await getCurrentTouristTrip(
+            currentFirebaseUser.uid
+        );
+
+
+    const requests =
+        await getMyQuotationRequests();
+
+
+    if (
+        dashboardTripCount
+    ) {
+
+        dashboardTripCount.textContent =
+            (
+                trip.destinations ||
+                []
+            ).length;
+
+    }
+
+
+    if (
+        dashboardRequestCount
+    ) {
+
+        dashboardRequestCount.textContent =
+            requests.length;
+
+    }
+
 }
 
+
 /* ============================================================
-   26. LOGOUT
+   29. LOGOUT
 ============================================================ */
 
 async function handleLogout() {
-  try {
-    await signOut(auth);
 
-    window.location.href = "index.html";
-  } catch (error) {
-    console.error("Logout error:", error);
-  }
+    try {
+
+        await signOut(
+            auth
+        );
+
+
+        window.location.href =
+            "index.html";
+
+
+    } catch (error) {
+
+        console.error(
+            "Logout error:",
+            error
+        );
+
+    }
+
 }
 
-/* ============================================================
-   27. AUTH STATE
-============================================================ */
-
-onAuthStateChanged(auth, async (user) => {
-  /*
-           Firebase Authentication is
-           the authoritative identity source.
-        */
-
-  if (!user) {
-    window.location.href = "login.html";
-
-    return;
-  }
-
-  currentFirebaseUser = user;
-
-  console.log("Tourist Firebase UID:", user.uid);
-
-  console.log("Tourist Firebase Email:", user.email);
-
-  /*
-           Load tourist profile
-        */
-
-  currentTouristProfile = await getTouristProfile(user.uid);
-
-  if (!currentTouristProfile) {
-    console.error("Tourist profile missing:", user.uid);
-
-    return;
-  }
-
-  /*
-           Update user information
-        */
-
-  updateDashboardUser();
-
-  /*
-           Load dashboard
-        */
-
-  await updateDashboardSummary();
-
-  await renderDashboardTrip();
-
-  await renderSelectedGuide();
-
-  await renderQuotationRequests();
-
-  console.log("LankaWayfarer Tourist Dashboard Loaded:", user.uid);
-});
 
 /* ============================================================
-   28. LOGOUT BUTTON
+   30. AUTH STATE
 ============================================================ */
 
-if (logoutButton) {
-  logoutButton.addEventListener("click", handleLogout);
+onAuthStateChanged(
+    auth,
+    async (
+        user
+    ) => {
+
+        if (!user) {
+
+            window.location.href =
+                "login.html";
+
+
+            return;
+
+        }
+
+
+        currentFirebaseUser =
+            user;
+
+
+        console.log(
+            "Tourist Firebase UID:",
+            user.uid
+        );
+
+
+        console.log(
+            "Tourist Firebase Email:",
+            user.email
+        );
+
+
+        currentTouristProfile =
+            await getTouristProfile(
+                user.uid
+            );
+
+
+        if (
+            !currentTouristProfile
+        ) {
+
+            console.error(
+                "Tourist profile missing:",
+                user.uid
+            );
+
+
+            return;
+
+        }
+
+
+        updateDashboardUser();
+
+
+        await updateDashboardSummary();
+
+
+        await renderDashboardTrip();
+
+
+        await renderSelectedGuide();
+
+
+        await renderQuotationRequests();
+
+
+        console.log(
+            "LankaQuest Tourist Dashboard Loaded:",
+            user.uid
+        );
+
+    }
+);
+
+
+/* ============================================================
+   31. LOGOUT BUTTON
+============================================================ */
+
+if (
+    logoutButton
+) {
+
+    logoutButton.addEventListener(
+        "click",
+        handleLogout
+    );
+
 }
 
+
 /* ============================================================
-   END
+   END TOURIST-DASHBOARD.JS
 ============================================================ */
+

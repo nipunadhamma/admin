@@ -6,7 +6,7 @@ service cloud.firestore {
 
 
     /* =========================================================
-       AUTHENTICATION HELPERS
+       AUTHENTICATION
     ========================================================= */
 
     function signedIn() {
@@ -20,14 +20,10 @@ service cloud.firestore {
     }
 
 
-    /*
-      ADMIN ACCOUNT
+    /* =========================================================
+       ADMIN
+    ========================================================= */
 
-      Admin:
-      kalawanesangamaji@gmail.com
-
-      Email verification is also required.
-    */
     function isAdmin() {
       return signedIn()
         && request.auth.token.email == "kalawanesangamaji@gmail.com"
@@ -36,38 +32,20 @@ service cloud.firestore {
 
 
     /* =========================================================
-       TOURIST PROFILES
+       1. TOURIST PROFILES
        lankaQuestTourists/{uid}
-       ========================================================= */
+    ========================================================= */
 
     match /lankaQuestTourists/{uid} {
 
-      /*
-        Tourist:
-        - read own profile
-
-        Admin:
-        - read all tourist profiles
-      */
       allow read: if isAdmin()
         || isOwner(uid);
 
 
-      /*
-        Tourist:
-        - create own profile only
-      */
       allow create: if isOwner(uid)
         && request.resource.data.uid == request.auth.uid;
 
 
-      /*
-        Tourist:
-        - update own profile
-
-        Admin:
-        - update tourist profile
-      */
       allow update: if isAdmin()
         || (
           isOwner(uid)
@@ -76,53 +54,30 @@ service cloud.firestore {
         );
 
 
-      /*
-        Client-side deletion disabled.
-      */
       allow delete: if false;
     }
 
 
     /* =========================================================
-       GUIDE PROFILES
+       2. GUIDE PROFILES
        lankaQuestGuides/{uid}
-       ========================================================= */
+    ========================================================= */
 
     match /lankaQuestGuides/{uid} {
 
       /*
-        Guide search currently reads this collection.
-
-        Admin:
-        - read all guides
-
-        Logged-in users:
-        - read guide profiles
+        Logged-in users can read guide profiles.
+        This is required by Find Guides.
       */
+
       allow read: if signedIn();
 
 
-      /*
-        Guide:
-        - create only own profile
-      */
       allow create: if isOwner(uid)
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.accountType == "guide";
 
 
-      /*
-        Admin:
-        - approve
-        - reject
-        - activate/deactivate
-        - update guide administration data
-
-        Guide:
-        - update own profile
-        - cannot change UID
-        - cannot change account type
-      */
       allow update: if isAdmin()
         || (
           isOwner(uid)
@@ -131,41 +86,24 @@ service cloud.firestore {
         );
 
 
-      /*
-        Client-side deletion disabled.
-
-        Admin currently uses status/soft-delete style
-        updates instead of Firestore document deletion.
-      */
       allow delete: if false;
     }
 
 
     /* =========================================================
-       TOURIST TRIPS
+       3. TOURIST TRIPS
        lankaQuestTouristTrips/{tripId}
-       ========================================================= */
+
+       Current architecture:
+       tripId = Tourist Firebase UID
+    ========================================================= */
 
     match /lankaQuestTouristTrips/{tripId} {
 
-      /*
-        Tourist:
-        - create own trip
-
-        Admin:
-        - read trip data
-      */
       allow create: if signedIn()
         && request.resource.data.touristId == request.auth.uid;
 
 
-      /*
-        Tourist:
-        - read own trips
-
-        Admin:
-        - read all trips
-      */
       allow read: if isAdmin()
         || (
           signedIn()
@@ -173,15 +111,6 @@ service cloud.firestore {
         );
 
 
-      /*
-        Tourist:
-        - update own trip
-
-        Admin:
-        - update trip if required
-
-        touristId cannot be changed.
-      */
       allow update: if isAdmin()
         || (
           signedIn()
@@ -190,27 +119,24 @@ service cloud.firestore {
         );
 
 
-      /*
-        Client-side deletion disabled.
-      */
       allow delete: if false;
     }
 
 
     /* =========================================================
-       QUOTATION REQUESTS
+       4. QUOTATION REQUESTS
        lankaQuestQuotationRequests/{requestId}
-       ========================================================= */
+
+       requestId = Firestore auto-generated document ID
+    ========================================================= */
 
     match /lankaQuestQuotationRequests/{requestId} {
 
-      /*
-        Tourist:
-        - create request only for themselves
 
-        Admin:
-        - can create if required by admin workflow
-      */
+      /* -------------------------------------------------------
+         CREATE
+      ------------------------------------------------------- */
+
       allow create: if isAdmin()
         || (
           signedIn()
@@ -218,21 +144,19 @@ service cloud.firestore {
         );
 
 
-      /*
-        READ
+      /* -------------------------------------------------------
+         READ
 
-        Admin:
-        - all requests
+         Tourist:
+           Own requests
 
-        Tourist:
-        - own requests
+         Guide:
+           Assigned requests
 
-        Guide:
-        - requests assigned directly to guideId
+         Admin:
+           All requests
+      ------------------------------------------------------- */
 
-        Guide:
-        - requests assigned through assignedGuideId
-      */
       allow read: if isAdmin()
         || (
           signedIn()
@@ -244,64 +168,79 @@ service cloud.firestore {
         );
 
 
-      /*
-        UPDATE
+      /* -------------------------------------------------------
+         UPDATE
 
-        Admin:
-        - all request management
+         Admin:
+           All requests
 
-        Tourist:
-        - own request
+         Tourist:
+           Own request
 
-        Guide:
-        - request assigned to them
+         Guide:
+           Assigned request
 
-        Ownership fields cannot be changed by
-        Tourist/Guide.
-      */
+         Ownership identity cannot be transferred.
+      ------------------------------------------------------- */
+
       allow update: if isAdmin()
         || (
           signedIn()
           && (
             (
               resource.data.touristId == request.auth.uid
-              && request.resource.data.touristId == resource.data.touristId
+              && request.resource.data.touristId
+                   == resource.data.touristId
             )
+
             ||
+
             (
               resource.data.guideId == request.auth.uid
-              && request.resource.data.guideId == resource.data.guideId
+              && request.resource.data.touristId
+                   == resource.data.touristId
             )
+
             ||
+
             (
               resource.data.assignedGuideId == request.auth.uid
-              && request.resource.data.assignedGuideId == resource.data.assignedGuideId
+              && request.resource.data.touristId
+                   == resource.data.touristId
             )
           )
         );
 
 
-      /*
-        Client-side deletion disabled.
-      */
-      allow delete: if false;
+      /* -------------------------------------------------------
+         DELETE
+
+         Tourist can delete OWN quotation request.
+      ------------------------------------------------------- */
+
+      allow delete: if signedIn()
+        && resource.data.touristId == request.auth.uid;
     }
 
 
     /* =========================================================
-       QUOTATIONS
+       5. QUOTATIONS
        lankaQuestQuotations/{quotationId}
-       ========================================================= */
+
+       quotationId = Firestore auto-generated document ID
+    ========================================================= */
 
     match /lankaQuestQuotations/{quotationId} {
 
-      /*
-        Guide:
-        - create quotation only for themselves
 
-        Admin:
-        - can create if required by admin workflow
-      */
+      /* -------------------------------------------------------
+         CREATE
+
+         Guide creates own quotation.
+
+         Admin can create if required.
+      ------------------------------------------------------- */
+
       allow create: if isAdmin()
         || (
           signedIn()
@@ -309,78 +248,104 @@ service cloud.firestore {
         );
 
 
-      /*
-        READ
+      /* -------------------------------------------------------
+         READ
 
-        Admin:
-        - all quotations
+         Tourist:
+           Own quotations
 
-        Guide:
-        - own quotations
+         Guide:
+           Own quotations
 
-        Tourist:
-        - quotations belonging to them
-      */
+         Admin:
+           All quotations
+      ------------------------------------------------------- */
+
       allow read: if isAdmin()
         || (
           signedIn()
           && (
-            resource.data.guideId == request.auth.uid
-            || resource.data.touristId == request.auth.uid
+            resource.data.touristId == request.auth.uid
+            || resource.data.guideId == request.auth.uid
           )
         );
 
 
-      /*
-        UPDATE
+      /* -------------------------------------------------------
+         UPDATE - TOURIST
 
-        Admin:
-        - all quotations
+         Tourist can update ONLY:
 
-        Guide:
-        - own quotation
+           status
+           updatedAt
 
-        Tourist:
-        - own quotation
+         Tourist ID cannot change.
+         Guide ID cannot change.
 
-        guideId and touristId cannot be changed
-        by normal users.
-      */
+         This specifically supports:
+
+           status = "accepted"
+           updatedAt = serverTimestamp()
+      ------------------------------------------------------- */
+
       allow update: if isAdmin()
         || (
           signedIn()
-          && (
-            (
-              resource.data.guideId == request.auth.uid
-              && request.resource.data.guideId == resource.data.guideId
-              && request.resource.data.touristId == resource.data.touristId
-            )
-            ||
-            (
-              resource.data.touristId == request.auth.uid
-              && request.resource.data.touristId == resource.data.touristId
-              && request.resource.data.guideId == resource.data.guideId
-            )
-          )
+          && resource.data.touristId == request.auth.uid
+          && request.resource.data.touristId
+               == resource.data.touristId
+          && request.resource.data.guideId
+               == resource.data.guideId
+          && request.resource.data.diff(
+               resource.data
+             ).affectedKeys().hasOnly([
+               "status",
+               "updatedAt"
+             ])
+        )
+
+        ||
+
+        (
+          signedIn()
+          && resource.data.guideId == request.auth.uid
+          && request.resource.data.guideId
+               == resource.data.guideId
+          && request.resource.data.touristId
+               == resource.data.touristId
         );
 
 
-      /*
-        Client-side deletion disabled.
-      */
-      allow delete: if false;
+      /* -------------------------------------------------------
+         DELETE - IMPORTANT
+
+         Tourist:
+           Can DELETE their own quotation.
+
+         Guide:
+           Can DELETE their own quotation.
+
+         Another user:
+           Cannot delete it.
+      ------------------------------------------------------- */
+
+      allow delete: if isAdmin()
+        || (
+          signedIn()
+          && (
+            resource.data.touristId == request.auth.uid
+            || resource.data.guideId == request.auth.uid
+          )
+        );
     }
 
 
     /* =========================================================
        DEFAULT DENY
-       ========================================================= */
+    ========================================================= */
 
-    /*
-      Any collection not explicitly listed above
-      is denied by default.
-    */
     match /{document=**} {
+
       allow read, write: if false;
     }
 
