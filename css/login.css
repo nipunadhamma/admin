@@ -635,3 +635,175 @@ Explore Sri Lanka
 
     
 }
+
+/* ============================================================
+   GOOGLE LOGIN BUTTON
+============================================================ */
+
+.google-login-button {
+
+    width: 100%;
+
+    min-height: 50px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 12px;
+
+    padding: 12px 20px;
+
+    background: #ffffff;
+
+    border: 1px solid #dadce0;
+
+    border-radius: 8px;
+
+    color: #3c4043;
+
+    font-family:
+        Arial,
+        sans-serif;
+
+    font-size: 15px;
+
+    font-weight: 500;
+
+    letter-spacing: 0.1px;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.15s ease;
+
+}
+
+
+/* ============================================================
+   GOOGLE ICON
+============================================================ */
+
+.google-icon {
+
+    width: 20px;
+
+    height: 20px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-shrink: 0;
+
+}
+
+
+.google-icon svg {
+
+    width: 20px;
+
+    height: 20px;
+
+    display: block;
+
+}
+
+
+/* ============================================================
+   GOOGLE BUTTON TEXT
+============================================================ */
+
+.google-button-text {
+
+    line-height: 1;
+
+    white-space: nowrap;
+
+}
+
+
+/* ============================================================
+   HOVER
+============================================================ */
+
+.google-login-button:hover {
+
+    background: #f8f9fa;
+
+    border-color: #c7c9cc;
+
+    box-shadow:
+        0 2px 6px rgba(60, 64, 67, 0.15);
+
+}
+
+
+/* ============================================================
+   ACTIVE
+============================================================ */
+
+.google-login-button:active {
+
+    background: #f1f3f4;
+
+    box-shadow: none;
+
+    transform: translateY(1px);
+
+}
+
+
+/* ============================================================
+   FOCUS
+============================================================ */
+
+.google-login-button:focus-visible {
+
+    outline: 3px solid rgba(66, 133, 244, 0.25);
+
+    outline-offset: 2px;
+
+}
+
+
+/* ============================================================
+   DISABLED
+============================================================ */
+
+.google-login-button:disabled {
+
+    opacity: 0.6;
+
+    cursor: not-allowed;
+
+    box-shadow: none;
+
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 600px) {
+
+    .google-login-button {
+
+        min-height: 48px;
+
+        padding:
+            11px 16px;
+
+        font-size: 14px;
+
+    }
+
+}
