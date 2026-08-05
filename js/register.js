@@ -1,4 +1,3 @@
-
 /* ============================================================
    LankaWayfarer
    REGISTRATION SYSTEM
@@ -16,6 +15,8 @@
    Register Form
         ↓
    Firebase Authentication
+        ↓
+   Guide Photo → Cloudinary
         ↓
    Verification Email
         ↓
@@ -40,9 +41,9 @@
         ↓
    register.html?google=1
         ↓
-   Existing Firebase User
-        ↓
    Tourist / Guide selection
+        ↓
+   Guide Photo → Cloudinary
         ↓
    Firestore Profile
         ↓
@@ -59,16 +60,11 @@
 
 ============================================================ */
 
-
 /* ============================================================
    FIREBASE IMPORTS
 ============================================================ */
 
-import {
-  auth,
-  db,
-} from "./firebase-config.js";
-
+import { auth, db } from "./firebase-config.js";
 
 import {
   onAuthStateChanged,
@@ -77,7 +73,6 @@ import {
   reload,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-
 import {
   doc,
   getDoc,
@@ -85,728 +80,941 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
+/* ============================================================
+   CLOUDINARY CONFIGURATION
+   LankaWayfarer — Guide Profile Photos
+============================================================ */
+
+const CLOUDINARY_CLOUD_NAME =
+    "uok813er";
+
+const CLOUDINARY_UPLOAD_PRESET =
+    "lankawayfarer_guides";
+
+/*
+   Cloudinary upload endpoint.
+*/
+
+const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+
+/* ============================================================
+   PROFILE PHOTO SETTINGS
+============================================================ */
+
+const MAX_PROFILE_PHOTO_SIZE = 2 * 1024 * 1024;
+
+const ALLOWED_PROFILE_PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 /* ============================================================
    DOM ELEMENTS
 ============================================================ */
 
-const registrationForm =
-  document.getElementById(
-    "registrationForm"
-  );
+const registrationForm = document.getElementById("registrationForm");
 
+const accountTypeInputs = document.querySelectorAll(
+  'input[name="accountType"]',
+);
 
-const accountTypeInputs =
-  document.querySelectorAll(
-    'input[name="accountType"]'
-  );
+const touristFields = document.getElementById("touristFields");
 
+const guideFields = document.getElementById("guideFields");
 
-const touristFields =
-  document.getElementById(
-    "touristFields"
-  );
+const registrationMessage = document.getElementById("registrationMessage");
 
+const fullNameInput = document.getElementById("fullName");
 
-const guideFields =
-  document.getElementById(
-    "guideFields"
-  );
+const emailInput = document.getElementById("email");
 
+const passwordInput = document.getElementById("password");
 
-const registrationMessage =
-  document.getElementById(
-    "registrationMessage"
-  );
+const confirmPasswordInput = document.getElementById("confirmPassword");
 
-
-const fullNameInput =
-  document.getElementById(
-    "fullName"
-  );
-
-
-const emailInput =
-  document.getElementById(
-    "email"
-  );
-
-
-const passwordInput =
-  document.getElementById(
-    "password"
-  );
-
-
-const confirmPasswordInput =
-  document.getElementById(
-    "confirmPassword"
-  );
-
+const profilePhotoInput = document.getElementById("profilePhoto");
 
 /* ============================================================
    GOOGLE REGISTRATION MODE
 ============================================================ */
 
-const urlParams =
-  new URLSearchParams(
-    window.location.search
-  );
+const urlParams = new URLSearchParams(window.location.search);
 
-
-const isGoogleRegistration =
-  urlParams.get("google") === "1";
-
+const isGoogleRegistration = urlParams.get("google") === "1";
 
 /*
    Authenticated Firebase user.
-
-   Normal registration:
-   Created after email/password registration.
-
-   Google registration:
-   Already authenticated before reaching this page.
 */
 
 let authenticatedUser = null;
 
+/*
+   Temporary photo URL.
 
+   This is kept in memory during registration.
+*/
+
+let pendingProfilePhotoURL = "";
 
 /* ============================================================
    MESSAGE SYSTEM
 ============================================================ */
 
-function showRegistrationMessage(
-  message,
-  type = "success"
-) {
-
+function showRegistrationMessage(message, type = "success") {
   if (!registrationMessage) {
     return;
   }
 
+  registrationMessage.textContent = message;
 
-  registrationMessage.textContent =
-    message;
-
-
-  registrationMessage.style.display =
-    "block";
-
+  registrationMessage.style.display = "block";
 
   if (type === "error") {
+    registrationMessage.style.background = "#fff0f0";
 
-    registrationMessage.style.background =
-      "#fff0f0";
-
-    registrationMessage.style.color =
-      "#b42318";
-
+    registrationMessage.style.color = "#b42318";
   } else {
+    registrationMessage.style.background = "#edf8f1";
 
-    registrationMessage.style.background =
-      "#edf8f1";
-
-    registrationMessage.style.color =
-      "#176044";
-
+    registrationMessage.style.color = "#176044";
   }
-
 }
-
 
 /* ============================================================
    ACCOUNT TYPE
 ============================================================ */
 
 function getSelectedAccountType() {
+  const selected = document.querySelector('input[name="accountType"]:checked');
 
-  const selected =
-    document.querySelector(
-      'input[name="accountType"]:checked'
-    );
-
-
-  return selected
-    ? selected.value
-    : "tourist";
-
+  return selected ? selected.value : "tourist";
 }
-
 
 /* ============================================================
    SWITCH ACCOUNT FIELDS
 ============================================================ */
 
 function updateAccountTypeFields() {
-
-  const accountType =
-    getSelectedAccountType();
-
+  const accountType = getSelectedAccountType();
 
   if (accountType === "tourist") {
-
     if (touristFields) {
-
-      touristFields.classList.remove(
-        "hidden"
-      );
-
+      touristFields.classList.remove("hidden");
     }
-
 
     if (guideFields) {
-
-      guideFields.classList.add(
-        "hidden"
-      );
-
+      guideFields.classList.add("hidden");
     }
-
   } else {
-
     if (touristFields) {
-
-      touristFields.classList.add(
-        "hidden"
-      );
-
+      touristFields.classList.add("hidden");
     }
-
 
     if (guideFields) {
-
-      guideFields.classList.remove(
-        "hidden"
-      );
-
+      guideFields.classList.remove("hidden");
     }
-
   }
-
 }
-
 
 /* ============================================================
    ACCOUNT TYPE LISTENERS
 ============================================================ */
 
-accountTypeInputs.forEach(
-  (input) => {
-
-    input.addEventListener(
-      "change",
-      updateAccountTypeFields
-    );
-
-  }
-);
-
+accountTypeInputs.forEach((input) => {
+  input.addEventListener("change", updateAccountTypeFields);
+});
 
 /* ============================================================
    GOOGLE REGISTRATION UI
 ============================================================ */
 
 function setupGoogleRegistrationUI() {
-
   if (!isGoogleRegistration) {
     return;
   }
 
-
-  /*
-     Password is not required for Google
-     registration.
-  */
+  /* --------------------------------------------------------
+       Password is not required for Google registration.
+    -------------------------------------------------------- */
 
   if (passwordInput) {
+    passwordInput.required = false;
 
-    passwordInput.required =
-      false;
+    passwordInput.disabled = true;
 
-    passwordInput.disabled =
-      true;
-
-    passwordInput.value =
-      "";
-
+    passwordInput.value = "";
   }
-
 
   if (confirmPasswordInput) {
+    confirmPasswordInput.required = false;
 
-    confirmPasswordInput.required =
-      false;
+    confirmPasswordInput.disabled = true;
 
-    confirmPasswordInput.disabled =
-      true;
-
-    confirmPasswordInput.value =
-      "";
-
+    confirmPasswordInput.value = "";
   }
 
+  /* --------------------------------------------------------
+       Google email
+    -------------------------------------------------------- */
 
-  /*
-     Google email is controlled by Firebase.
-  */
+  if (emailInput && authenticatedUser) {
+    emailInput.value = authenticatedUser.email || "";
 
-  if (
-    emailInput &&
-    authenticatedUser
-  ) {
-
-    emailInput.value =
-      authenticatedUser.email || "";
-
-    emailInput.readOnly =
-      true;
-
+    emailInput.readOnly = true;
   }
 
+  /* --------------------------------------------------------
+       Google display name
+    -------------------------------------------------------- */
 
-  /*
-     Use Google display name
-     as initial full name.
-  */
-
-  if (
-    fullNameInput &&
-    authenticatedUser &&
-    authenticatedUser.displayName
-  ) {
-
+  if (fullNameInput && authenticatedUser && authenticatedUser.displayName) {
     if (!fullNameInput.value.trim()) {
-
-      fullNameInput.value =
-        authenticatedUser.displayName;
-
+      fullNameInput.value = authenticatedUser.displayName;
     }
-
   }
 
-
-  console.log(
-    "Google registration mode enabled."
-  );
-
+  console.log("Google registration mode enabled.");
 }
-
 
 /* ============================================================
    CHECK EXISTING PROFILE
 ============================================================ */
 
-async function checkExistingProfile(
-  uid
-) {
+async function checkExistingProfile(uid) {
+  /* --------------------------------------------------------
+       TOURIST
+    -------------------------------------------------------- */
 
-  /* ==========================================================
-     CHECK TOURIST
-  ========================================================== */
+  const touristRef = doc(db, "lankaQuestTourists", uid);
 
-  const touristRef =
-    doc(
-      db,
-      "lankaQuestTourists",
-      uid
-    );
-
-
-  const touristSnap =
-    await getDoc(
-      touristRef
-    );
-
+  const touristSnap = await getDoc(touristRef);
 
   if (touristSnap.exists()) {
-
     return {
-
       exists: true,
 
-      accountType:
-        "tourist",
+      accountType: "tourist",
 
-      data:
-        touristSnap.data(),
-
+      data: touristSnap.data(),
     };
-
   }
 
+  /* --------------------------------------------------------
+       GUIDE
+    -------------------------------------------------------- */
 
-  /* ==========================================================
-     CHECK GUIDE
-  ========================================================== */
+  const guideRef = doc(db, "lankaQuestGuides", uid);
 
-  const guideRef =
-    doc(
-      db,
-      "lankaQuestGuides",
-      uid
-    );
-
-
-  const guideSnap =
-    await getDoc(
-      guideRef
-    );
-
+  const guideSnap = await getDoc(guideRef);
 
   if (guideSnap.exists()) {
-
     return {
-
       exists: true,
 
-      accountType:
-        "guide",
+      accountType: "guide",
 
-      data:
-        guideSnap.data(),
-
+      data: guideSnap.data(),
     };
-
   }
 
-
   return {
-
     exists: false,
 
     accountType: null,
 
     data: null,
-
   };
-
 }
 
+/* ============================================================
+   VALIDATE PROFILE PHOTO
+============================================================ */
+
+function validateProfilePhoto(file) {
+  if (!file) {
+    return null;
+  }
+
+  /* --------------------------------------------------------
+       FILE TYPE
+    -------------------------------------------------------- */
+
+  if (!ALLOWED_PROFILE_PHOTO_TYPES.includes(file.type)) {
+    throw new Error("Profile photo must be JPG, PNG or WEBP.");
+  }
+
+  /* --------------------------------------------------------
+       FILE SIZE
+    -------------------------------------------------------- */
+
+  if (file.size > MAX_PROFILE_PHOTO_SIZE) {
+    throw new Error("Profile photo must be 2 MB or smaller.");
+  }
+
+  return file;
+}
+
+/* ============================================================
+   UPLOAD GUIDE PROFILE PHOTO
+   CLOUDINARY DIRECT BROWSER UPLOAD
+============================================================ */
+
+async function uploadGuideProfilePhoto() {
+
+    /* --------------------------------------------------------
+       CHECK INPUT
+    -------------------------------------------------------- */
+
+    if (!profilePhotoInput) {
+
+        console.warn(
+            "Profile photo input element was not found."
+        );
+
+        return "";
+
+    }
+
+
+    /* --------------------------------------------------------
+       GET SELECTED FILE
+    -------------------------------------------------------- */
+
+    const file =
+        profilePhotoInput.files?.[0];
+
+
+    /* --------------------------------------------------------
+       PHOTO IS OPTIONAL
+    -------------------------------------------------------- */
+
+    if (!file) {
+
+        console.log(
+            "No guide profile photo selected."
+        );
+
+        return "";
+
+    }
+
+
+    /* --------------------------------------------------------
+       VALIDATE PHOTO
+    -------------------------------------------------------- */
+
+    validateProfilePhoto(file);
+
+
+    /* --------------------------------------------------------
+       CLOUDINARY CONFIGURATION
+    -------------------------------------------------------- */
+
+    if (
+        !CLOUDINARY_CLOUD_NAME ||
+        CLOUDINARY_CLOUD_NAME ===
+            "YOUR_CLOUD_NAME"
+    ) {
+
+        throw new Error(
+            "Cloudinary Cloud Name has not been configured."
+        );
+
+    }
+
+
+    if (
+        !CLOUDINARY_UPLOAD_PRESET ||
+        CLOUDINARY_UPLOAD_PRESET ===
+            "YOUR_UNSIGNED_UPLOAD_PRESET"
+    ) {
+
+        throw new Error(
+            "Cloudinary Upload Preset has not been configured."
+        );
+
+    }
+
+
+    /* --------------------------------------------------------
+       CREATE FORM DATA
+    -------------------------------------------------------- */
+
+    const formData =
+        new FormData();
+
+
+    formData.append(
+        "file",
+        file
+    );
+
+
+    formData.append(
+        "upload_preset",
+        CLOUDINARY_UPLOAD_PRESET
+    );
+
+
+    /*
+       Cloudinary folder
+    */
+
+    formData.append(
+        "folder",
+        "lankawayfarer/guide-profiles"
+    );
+
+
+    /* --------------------------------------------------------
+       DEBUG INFORMATION
+    -------------------------------------------------------- */
+
+    console.log(
+        "----------------------------------------"
+    );
+
+    console.log(
+        "Cloudinary Upload Started"
+    );
+
+    console.log(
+        "File Name:",
+        file.name
+    );
+
+    console.log(
+        "File Type:",
+        file.type
+    );
+
+    console.log(
+        "File Size:",
+        file.size
+    );
+
+    console.log(
+        "Cloud Name:",
+        CLOUDINARY_CLOUD_NAME
+    );
+
+    console.log(
+        "Upload Preset:",
+        CLOUDINARY_UPLOAD_PRESET
+    );
+
+    console.log(
+        "----------------------------------------"
+    );
+
+
+    /* --------------------------------------------------------
+       UPLOAD
+    -------------------------------------------------------- */
+
+    let response;
+
+    try {
+
+        response =
+            await fetch(
+                CLOUDINARY_UPLOAD_URL,
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
+
+    } catch (networkError) {
+
+        console.error(
+            "Cloudinary Network Error:",
+            networkError
+        );
+
+        throw new Error(
+            "Unable to connect to Cloudinary. Please check your internet connection."
+        );
+
+    }
+
+
+    /* --------------------------------------------------------
+       READ RESPONSE
+    -------------------------------------------------------- */
+
+    let result;
+
+    try {
+
+        result =
+            await response.json();
+
+    } catch (jsonError) {
+
+        console.error(
+            "Cloudinary Response Error:",
+            jsonError
+        );
+
+        throw new Error(
+            "Cloudinary returned an invalid response."
+        );
+
+    }
+
+
+    /* --------------------------------------------------------
+       CLOUDINARY ERROR
+    -------------------------------------------------------- */
+
+    if (!response.ok) {
+
+        console.error(
+            "Cloudinary Upload Failed:",
+            result
+        );
+
+        throw new Error(
+            result?.error?.message ||
+            "Profile photo upload failed."
+        );
+
+    }
+
+
+    /* --------------------------------------------------------
+       CHECK SECURE URL
+    -------------------------------------------------------- */
+
+    if (
+        !result ||
+        !result.secure_url
+    ) {
+
+        console.error(
+            "Cloudinary response did not contain secure_url:",
+            result
+        );
+
+        throw new Error(
+            "Cloudinary did not return a profile photo URL."
+        );
+
+    }
+
+
+    /* --------------------------------------------------------
+       PHOTO URL
+    -------------------------------------------------------- */
+
+    const photoURL =
+        result.secure_url;
+
+
+    /* --------------------------------------------------------
+       SUCCESS
+    -------------------------------------------------------- */
+
+    console.log(
+        "========================================"
+    );
+
+    console.log(
+        "Guide Profile Photo Uploaded Successfully"
+    );
+
+    console.log(
+        "Cloudinary URL:",
+        photoURL
+    );
+
+    console.log(
+        "Public ID:",
+        result.public_id || ""
+    );
+
+    console.log(
+        "========================================"
+    );
+
+
+    /* --------------------------------------------------------
+       RETURN URL
+    -------------------------------------------------------- */
+
+    return photoURL;
+
+}
 
 /* ============================================================
    CREATE TOURIST PROFILE
 ============================================================ */
 
-async function createTouristProfile(
-  firebaseUser
-) {
+async function createTouristProfile(firebaseUser) {
+  const uid = firebaseUser.uid;
 
-  const uid =
-    firebaseUser.uid;
-
-
-  const fullName =
-    fullNameInput
-      ? fullNameInput.value.trim()
-      : "";
-
+  const fullName = fullNameInput ? fullNameInput.value.trim() : "";
 
   const email =
-    firebaseUser.email ||
-    (
-      emailInput
-        ? emailInput.value.trim()
-        : ""
-    );
+    firebaseUser.email || (emailInput ? emailInput.value.trim() : "");
 
+  const countryElement = document.getElementById("country");
 
-  const countryElement =
-    document.getElementById(
-      "country"
-    );
+  const country = countryElement ? countryElement.value.trim() : "";
 
-
-  const country =
-    countryElement
-      ? countryElement.value.trim()
-      : "";
-
-
-  /* ==========================================================
-     VALIDATION
-  ========================================================== */
+  /* --------------------------------------------------------
+       VALIDATION
+    -------------------------------------------------------- */
 
   if (!fullName) {
-
-    throw new Error(
-      "Please enter your full name."
-    );
-
+    throw new Error("Please enter your full name.");
   }
-
 
   if (!email) {
-
-    throw new Error(
-      "A valid email address is required."
-    );
-
+    throw new Error("A valid email address is required.");
   }
 
+  /* --------------------------------------------------------
+       EMAIL VERIFICATION
+    -------------------------------------------------------- */
 
-  /* ==========================================================
-     SECURITY CHECK
-
-     Normal email accounts must have
-     verified email before profile creation.
-
-     Google accounts are already trusted
-     through Google Authentication.
-  ========================================================== */
-
-  if (
-    !isGoogleRegistration &&
-    !firebaseUser.emailVerified
-  ) {
-
+  if (!isGoogleRegistration && !firebaseUser.emailVerified) {
     throw new Error(
-      "Please verify your email address before creating your LankaQuest profile."
+      "Please verify your email address before creating your LankaWayfarer profile.",
     );
-
   }
 
-
-  /* ==========================================================
-     TOURIST PROFILE
-  ========================================================== */
+  /* --------------------------------------------------------
+       TOURIST PROFILE
+    -------------------------------------------------------- */
 
   const profileData = {
+    uid: uid,
 
-    uid:
-      uid,
+    fullName: fullName,
 
-    fullName:
-      fullName,
+    email: email,
 
-    email:
-      email,
+    accountType: "tourist",
 
-    accountType:
-      "tourist",
+    country: country,
 
-    country:
-      country,
-
-    createdAt:
-      serverTimestamp(),
-
+    createdAt: serverTimestamp(),
   };
 
-
-  /* ==========================================================
-     FIRESTORE
-
-     lankaQuestTourists/{UID}
-  ========================================================== */
+  /* --------------------------------------------------------
+       FIRESTORE
+    -------------------------------------------------------- */
 
   await setDoc(
+    doc(db, "lankaQuestTourists", uid),
 
-    doc(
-      db,
-      "lankaQuestTourists",
-      uid
-    ),
-
-    profileData
-
+    profileData,
   );
 
-
-  console.log(
-    "Tourist profile created:",
-    uid
-  );
-
+  console.log("Tourist profile created:", uid);
 
   return profileData;
-
 }
 
 
 /* ============================================================
    CREATE GUIDE PROFILE
+   FIREBASE FIRESTORE
 ============================================================ */
 
 async function createGuideProfile(
-  firebaseUser
+    firebaseUser,
+    profilePhotoURL = ""
 ) {
 
-  const uid =
-    firebaseUser.uid;
+    /* --------------------------------------------------------
+       USER ID
+    -------------------------------------------------------- */
+
+    const uid =
+        firebaseUser.uid;
 
 
-  const fullName =
-    fullNameInput
-      ? fullNameInput.value.trim()
-      : "";
+    /* --------------------------------------------------------
+       BASIC INFORMATION
+    -------------------------------------------------------- */
+
+    const fullName =
+        fullNameInput
+            ? fullNameInput.value.trim()
+            : "";
 
 
-  const email =
-    firebaseUser.email ||
-    (
-      emailInput
-        ? emailInput.value.trim()
-        : ""
+    const email =
+        firebaseUser.email ||
+        (
+            emailInput
+                ? emailInput.value.trim()
+                : ""
+        );
+
+
+    /* --------------------------------------------------------
+       GUIDE FORM ELEMENTS
+    -------------------------------------------------------- */
+
+    const phoneElement =
+        document.getElementById("phone");
+
+
+    const districtElement =
+        document.getElementById("guideDistrict");
+
+
+    const languagesElement =
+        document.getElementById("languages");
+
+
+    const experienceElement =
+        document.getElementById("experience");
+
+
+    /* --------------------------------------------------------
+       GUIDE VALUES
+    -------------------------------------------------------- */
+
+    const phone =
+        phoneElement
+            ? phoneElement.value.trim()
+            : "";
+
+
+    const district =
+        districtElement
+            ? districtElement.value
+            : "";
+
+
+    const languages =
+        languagesElement
+            ? languagesElement.value.trim()
+            : "";
+
+
+    const experience =
+        experienceElement
+            ? experienceElement.value
+            : "";
+
+
+    /* --------------------------------------------------------
+       VALIDATION
+    -------------------------------------------------------- */
+
+    if (!fullName) {
+
+        throw new Error(
+            "Please enter your full name."
+        );
+
+    }
+
+
+    if (!email) {
+
+        throw new Error(
+            "A valid email address is required."
+        );
+
+    }
+
+
+    /* --------------------------------------------------------
+       EMAIL VERIFICATION
+    -------------------------------------------------------- */
+
+    if (
+        !isGoogleRegistration &&
+        !firebaseUser.emailVerified
+    ) {
+
+        throw new Error(
+            "Please verify your email address before creating your LankaWayfarer guide profile."
+        );
+
+    }
+
+
+    /* --------------------------------------------------------
+       PHOTO URL DEBUG
+    -------------------------------------------------------- */
+
+    console.log(
+        "========================================"
+    );
+
+    console.log(
+        "GUIDE PROFILE PHOTO URL"
+    );
+
+    console.log(
+        "profilePhotoURL:",
+        profilePhotoURL
+    );
+
+    console.log(
+        "Photo available:",
+        Boolean(profilePhotoURL)
+    );
+
+    console.log(
+        "========================================"
     );
 
 
-  const phoneElement =
-    document.getElementById(
-      "phone"
+    /* --------------------------------------------------------
+       GUIDE PROFILE DATA
+    -------------------------------------------------------- */
+
+    const profileData = {
+
+        uid:
+            uid,
+
+
+        fullName:
+            fullName,
+
+
+        email:
+            email,
+
+
+        accountType:
+            "guide",
+
+
+        phone:
+            phone,
+
+
+        district:
+            district,
+
+
+        languages:
+            languages,
+
+
+        experience:
+            experience,
+
+
+        /*
+           IMPORTANT
+
+           Cloudinary secure URL.
+
+           Example:
+
+           https://res.cloudinary.com/uok813er/...
+
+        */
+
+        profilePhotoUrl:
+            profilePhotoURL || "",
+
+
+        /*
+           Guide verification
+        */
+
+        verificationStatus:
+            "pending",
+
+
+        status:
+            "pending",
+
+
+        /*
+           Firestore timestamp
+        */
+
+        createdAt:
+            serverTimestamp()
+
+    };
+
+
+    /* --------------------------------------------------------
+       FIRESTORE DEBUG
+    -------------------------------------------------------- */
+
+    console.log(
+        "Guide profile data before Firestore:",
+        profileData
     );
 
 
-  const districtElement =
-    document.getElementById(
-      "guideDistrict"
+    console.log(
+        "Firestore collection:",
+        "lankaQuestGuides"
     );
 
 
-  const languagesElement =
-    document.getElementById(
-      "languages"
+    console.log(
+        "Firestore document ID:",
+        uid
     );
 
 
-  const experienceElement =
-    document.getElementById(
-      "experience"
+    /* --------------------------------------------------------
+       SAVE GUIDE PROFILE
+    -------------------------------------------------------- */
+
+    await setDoc(
+
+        doc(
+            db,
+            "lankaQuestGuides",
+            uid
+        ),
+
+        profileData
+
     );
 
 
-  const phone =
-    phoneElement
-      ? phoneElement.value.trim()
-      : "";
+    /* --------------------------------------------------------
+       SUCCESS
+    -------------------------------------------------------- */
 
-
-  const district =
-    districtElement
-      ? districtElement.value
-      : "";
-
-
-  const languages =
-    languagesElement
-      ? languagesElement.value.trim()
-      : "";
-
-
-  const experience =
-    experienceElement
-      ? experienceElement.value
-      : "";
-
-
-  /* ==========================================================
-     VALIDATION
-  ========================================================== */
-
-  if (!fullName) {
-
-    throw new Error(
-      "Please enter your full name."
+    console.log(
+        "========================================"
     );
 
-  }
-
-
-  if (!email) {
-
-    throw new Error(
-      "A valid email address is required."
+    console.log(
+        "Guide profile created successfully."
     );
 
-  }
-
-
-  /* ==========================================================
-     EMAIL VERIFICATION CHECK
-  ========================================================== */
-
-  if (
-    !isGoogleRegistration &&
-    !firebaseUser.emailVerified
-  ) {
-
-    throw new Error(
-      "Please verify your email address before creating your LankaQuest guide profile."
+    console.log(
+        "Guide UID:",
+        uid
     );
 
-  }
+    console.log(
+        "Saved profilePhotoUrl:",
+        profileData.profilePhotoUrl
+    );
+
+    console.log(
+        "========================================"
+    );
 
 
-  /* ==========================================================
-     GUIDE PROFILE
-  ========================================================== */
+    /* --------------------------------------------------------
+       RETURN
+    -------------------------------------------------------- */
 
-  const profileData = {
-
-    uid:
-      uid,
-
-    fullName:
-      fullName,
-
-    email:
-      email,
-
-    accountType:
-      "guide",
-
-    phone:
-      phone,
-
-    district:
-      district,
-
-    languages:
-      languages,
-
-    experience:
-      experience,
-
-    verificationStatus:
-      "pending",
-
-    status:
-      "pending",
-
-    createdAt:
-      serverTimestamp(),
-
-  };
-
-
-  /* ==========================================================
-     FIRESTORE
-
-     lankaQuestGuides/{UID}
-  ========================================================== */
-
-  await setDoc(
-
-    doc(
-      db,
-      "lankaQuestGuides",
-      uid
-    ),
-
-    profileData
-
-  );
-
-
-  console.log(
-    "Guide profile created:",
-    uid
-  );
-
-
-  return profileData;
+    return profileData;
 
 }
+
 
 
 /* ============================================================
@@ -815,54 +1023,22 @@ async function createGuideProfile(
 
 async function createFirestoreProfile(
   firebaseUser,
-  accountType
+  accountType,
+  profilePhotoURL = "",
 ) {
-
-  if (
-    accountType ===
-    "tourist"
-  ) {
-
-    return await createTouristProfile(
-      firebaseUser
-    );
-
+  if (accountType === "tourist") {
+    return await createTouristProfile(firebaseUser);
   }
 
-
-  if (
-    accountType ===
-    "guide"
-  ) {
-
-    return await createGuideProfile(
-      firebaseUser
-    );
-
+  if (accountType === "guide") {
+    return await createGuideProfile(firebaseUser, profilePhotoURL);
   }
 
-
-  throw new Error(
-    "Invalid account type."
-  );
-
+  throw new Error("Invalid account type.");
 }
-
 
 /* ============================================================
    NORMAL EMAIL/PASSWORD REGISTRATION
-
-   STEP 1:
-
-   Email + Password
-        ↓
-   Firebase Authentication
-        ↓
-   Send Verification Email
-
-   IMPORTANT:
-
-   Firestore profile is NOT created here.
 ============================================================ */
 
 async function registerWithEmailPassword() {
@@ -874,37 +1050,39 @@ async function registerWithEmailPassword() {
     ? confirmPasswordInput.value
     : "";
 
-  /* ==========================================================
-     VALIDATE EMAIL
-  ========================================================== */
+  /* --------------------------------------------------------
+       EMAIL
+    -------------------------------------------------------- */
 
   if (!email) {
     throw new Error("Please enter your email address.");
   }
 
-  /* ==========================================================
-     VALIDATE PASSWORD
-  ========================================================== */
+  /* --------------------------------------------------------
+       PASSWORD
+    -------------------------------------------------------- */
 
   if (!password) {
     throw new Error("Please enter a password.");
   }
 
-  /* ==========================================================
-     CONFIRM PASSWORD
-  ========================================================== */
+  /* --------------------------------------------------------
+       CONFIRM PASSWORD
+    -------------------------------------------------------- */
 
   if (password !== confirmPassword) {
     throw new Error("Passwords do not match.");
   }
 
-  /* ==========================================================
-     CREATE FIREBASE AUTH ACCOUNT
-  ========================================================== */
+  /* --------------------------------------------------------
+       CREATE AUTH ACCOUNT
+    -------------------------------------------------------- */
 
   const userCredential = await createUserWithEmailAndPassword(
     auth,
+
     email,
+
     password,
   );
 
@@ -914,596 +1092,364 @@ async function registerWithEmailPassword() {
     throw new Error("Firebase authentication failed.");
   }
 
-  /* ============================================================
-   SEND EMAIL VERIFICATION 
-   ============================================================ */ 
-  await sendEmailVerification(
-    firebaseUser,
-  );
-  console.log(
-    "Verification email sent:", 
-    firebaseUser.email
-  );
+  /* --------------------------------------------------------
+       GUIDE PHOTO
+    -------------------------------------------------------- */
 
-  /* ==========================================================
-     SAVE PENDING PROFILE DATA
-  ========================================================== */
+  let profilePhotoURL = "";
 
-  savePendingRegistrationData();
+  if (getSelectedAccountType() === "guide") {
+    profilePhotoURL = await uploadGuideProfilePhoto();
+  }
 
-  /* ==========================================================
-     KEEP FIREBASE AUTH SESSION ACTIVE
-  ========================================================== */
+  /*
+       Keep the URL in memory.
 
-  authenticatedUser = firebaseUser;
+       This same URL is passed into
+       savePendingRegistrationData().
+    */
+
+  pendingProfilePhotoURL = profilePhotoURL;
+
+  /* --------------------------------------------------------
+       SEND VERIFICATION EMAIL
+    -------------------------------------------------------- */
+
+  await sendEmailVerification(firebaseUser);
 
   console.log("Verification email sent:", firebaseUser.email);
 
-  /* ==========================================================
-     REDIRECT TO VERIFICATION PAGE
-  ========================================================== */
+  /* --------------------------------------------------------
+       SAVE PENDING DATA
+    -------------------------------------------------------- */
+
+  savePendingRegistrationData(profilePhotoURL);
+
+  authenticatedUser = firebaseUser;
+
+  /* --------------------------------------------------------
+       REDIRECT
+    -------------------------------------------------------- */
 
   window.location.href = "verify-email.html";
 
   return firebaseUser;
 }
 
-
 /* ============================================================
    SAVE PENDING REGISTRATION DATA
 ============================================================ */
 
-function savePendingRegistrationData() {
+function savePendingRegistrationData(profilePhotoURL = "") {
+  const accountType = getSelectedAccountType();
 
-  const accountType =
-    getSelectedAccountType();
+  const fullName = fullNameInput ? fullNameInput.value.trim() : "";
 
-
-  const fullName =
-    fullNameInput
-      ? fullNameInput.value.trim()
-      : "";
-
-
-  const email =
-    emailInput
-      ? emailInput.value.trim()
-      : "";
-
+  const email = emailInput ? emailInput.value.trim() : "";
 
   /*
-     IMPORTANT:
+       IMPORTANT:
 
-     DO NOT store password or confirmPassword
-     in sessionStorage.
-  */
-
+       NEVER store password or
+       confirmPassword.
+    */
 
   const pendingData = {
+    accountType: accountType,
 
-    accountType:
-      accountType,
+    fullName: fullName,
 
-    fullName:
-      fullName,
+    email: email,
 
-    email:
-      email,
+    country: document.getElementById("country")
+      ? document.getElementById("country").value.trim()
+      : "",
 
-    country:
-      document.getElementById("country")
-        ? document.getElementById("country").value.trim()
-        : "",
+    phone: document.getElementById("phone")
+      ? document.getElementById("phone").value.trim()
+      : "",
 
-    phone:
-      document.getElementById("phone")
-        ? document.getElementById("phone").value.trim()
-        : "",
+    district: document.getElementById("guideDistrict")
+      ? document.getElementById("guideDistrict").value
+      : "",
 
-    district:
-      document.getElementById("guideDistrict")
-        ? document.getElementById("guideDistrict").value
-        : "",
+    languages: document.getElementById("languages")
+      ? document.getElementById("languages").value.trim()
+      : "",
 
-    languages:
-      document.getElementById("languages")
-        ? document.getElementById("languages").value.trim()
-        : "",
+    experience: document.getElementById("experience")
+      ? document.getElementById("experience").value
+      : "",
 
-    experience:
-      document.getElementById("experience")
-        ? document.getElementById("experience").value
-        : "",
+    /*
+           IMPORTANT:
 
-    createdAt:
-      Date.now(),
+           This is the Cloudinary URL.
+        */
 
+    profilePhotoUrl: profilePhotoURL || "",
+
+    createdAt: Date.now(),
   };
-
 
   sessionStorage.setItem(
     "lankaQuestPendingRegistration",
-    JSON.stringify(pendingData)
+
+    JSON.stringify(pendingData),
   );
 
-
-  console.log(
-    "Pending registration data saved to sessionStorage."
-  );
-
+  console.log("Pending registration data saved.");
 
   return pendingData;
-
 }
-
-
-
-
-
-
-
 
 /* ============================================================
    GOOGLE REGISTRATION
 ============================================================ */
 
 async function registerWithGoogle() {
-
-  /*
-     Google user must already be authenticated.
-
-     auth.js should have sent the user to:
-
-     register.html?google=1
-  */
-
-  const currentUser =
-    auth.currentUser;
-
+  const currentUser = auth.currentUser;
 
   if (!currentUser) {
-
     throw new Error(
-      "Your Google session could not be found. Please return to the login page and sign in with Google again."
+      "Your Google session could not be found. Please return to the login page and sign in with Google again.",
     );
-
   }
 
+  console.log("Authenticated Google user:", currentUser.uid);
 
-  console.log(
-    "Authenticated Google user:",
-    currentUser.uid
-  );
+  await reload(currentUser);
 
-
-  console.log(
-    "Google email:",
-    currentUser.email
-  );
-
-
-  /*
-     Google Authentication normally provides
-     a verified email.
-
-     Still check the Firebase user state.
-  */
-
-  await reload(
-    currentUser
-  );
-
-
-  const refreshedUser =
-    auth.currentUser;
-
+  const refreshedUser = auth.currentUser;
 
   if (!refreshedUser) {
-
-    throw new Error(
-      "Unable to load your Google account."
-    );
-
+    throw new Error("Unable to load your Google account.");
   }
 
-
-  if (
-    !refreshedUser.emailVerified
-  ) {
-
-    throw new Error(
-      "Your Google email could not be verified by Firebase."
-    );
-
+  if (!refreshedUser.emailVerified) {
+    throw new Error("Your Google email could not be verified by Firebase.");
   }
 
-
-  authenticatedUser =
-    refreshedUser;
-
+  authenticatedUser = refreshedUser;
 
   return refreshedUser;
-
 }
-
 
 /* ============================================================
    COMPLETE REGISTRATION
 ============================================================ */
 
-async function completeRegistration(
-  firebaseUser
-) {
+async function completeRegistration(firebaseUser) {
+  const accountType = getSelectedAccountType();
 
-  /* ==========================================================
-     ACCOUNT TYPE
-  ========================================================== */
+  /* --------------------------------------------------------
+       ACCOUNT TYPE
+    -------------------------------------------------------- */
 
-  const accountType =
-    getSelectedAccountType();
-
-
-  if (
-    accountType !== "tourist" &&
-    accountType !== "guide"
-  ) {
-
-    throw new Error(
-      "Please select an account type."
-    );
-
+  if (accountType !== "tourist" && accountType !== "guide") {
+    throw new Error("Please select an account type.");
   }
 
+  /* --------------------------------------------------------
+       CHECK EXISTING PROFILE
+    -------------------------------------------------------- */
 
-  /* ==========================================================
-     CHECK PROFILE
-  ========================================================== */
-
-  const existingProfile =
-    await checkExistingProfile(
-      firebaseUser.uid
-    );
-
+  const existingProfile = await checkExistingProfile(firebaseUser.uid);
 
   if (existingProfile.exists) {
-
     console.log(
       "Existing LankaWayfarer profile found:",
       existingProfile.accountType,
     );
 
-
     showRegistrationMessage(
       "A LankaQuest profile already exists for this account.",
-      "error"
+      "error",
     );
 
-
-    setTimeout(
-      () => {
-
-        window.location.href =
-          "login.html";
-
-      },
-      1500
-    );
-
+    setTimeout(() => {
+      window.location.href = "login.html";
+    }, 1500);
 
     return;
-
   }
 
+  /* --------------------------------------------------------
+       EMAIL VERIFICATION
+    -------------------------------------------------------- */
 
-  /* ==========================================================
-     GOOGLE / VERIFIED USER
-  ========================================================== */
-
-  if (
-    !isGoogleRegistration &&
-    !firebaseUser.emailVerified
-  ) {
-
+  if (!isGoogleRegistration && !firebaseUser.emailVerified) {
     throw new Error(
-      "Email verification is required before creating your LankaQuest profile."
+      "Email verification is required before creating your LankaQuest profile.",
     );
-
   }
 
+  /* --------------------------------------------------------
+       GUIDE PHOTO
+       
+       Google registration does not go through
+       registerWithEmailPassword(), so upload here.
+    -------------------------------------------------------- */
 
-  /* ==========================================================
-     CREATE FIRESTORE PROFILE
-  ========================================================== */
+  let profilePhotoURL = pendingProfilePhotoURL;
+
+  if (accountType === "guide" && !profilePhotoURL) {
+    profilePhotoURL = await uploadGuideProfilePhoto();
+  }
+
+  /* --------------------------------------------------------
+       CREATE FIRESTORE PROFILE
+    -------------------------------------------------------- */
 
   await createFirestoreProfile(
     firebaseUser,
-    accountType
+
+    accountType,
+
+    profilePhotoURL,
   );
 
+  /* --------------------------------------------------------
+       SUCCESS
+    -------------------------------------------------------- */
 
-  /* ==========================================================
-     SUCCESS
-  ========================================================== */
-
-  if (
-    accountType ===
-    "tourist"
-  ) {
-
-    showRegistrationMessage(
-      "Tourist account created successfully.",
-      "success"
-    );
-
+  if (accountType === "tourist") {
+    showRegistrationMessage("Tourist account created successfully.", "success");
   } else {
-
     showRegistrationMessage(
       "Guide registration submitted successfully. Your profile is pending verification.",
-      "success"
+      "success",
     );
-
   }
 
+  /* --------------------------------------------------------
+       REDIRECT
+    -------------------------------------------------------- */
 
-  /* ==========================================================
-     REDIRECT
-  ========================================================== */
-
-  setTimeout(
-    () => {
-
-      if (
-        accountType ===
-        "tourist"
-      ) {
-
-        window.location.href =
-          "tourist-dashboard.html";
-
-      } else {
-
-        window.location.href =
-          "guide-verification.html";
-
-      }
-
-    },
-    1500
-  );
-
+  setTimeout(() => {
+    if (accountType === "tourist") {
+      window.location.href = "tourist-dashboard.html";
+    } else {
+      window.location.href = "guide-verification.html";
+    }
+  }, 1500);
 }
-
 
 /* ============================================================
    MAIN REGISTRATION
 ============================================================ */
 
 async function registerUser() {
-
   try {
+    const accountType = getSelectedAccountType();
 
-    /* ========================================================
-       ACCOUNT TYPE
-    ======================================================== */
+    /* ----------------------------------------------------
+           ACCOUNT TYPE
+        ---------------------------------------------------- */
 
-    const accountType =
-      getSelectedAccountType();
-
-
-    if (
-      accountType !== "tourist" &&
-      accountType !== "guide"
-    ) {
-
-      throw new Error(
-        "Please select an account type."
-      );
-
+    if (accountType !== "tourist" && accountType !== "guide") {
+      throw new Error("Please select an account type.");
     }
 
+    /* ----------------------------------------------------
+           GOOGLE
+        ---------------------------------------------------- */
 
-    /* ========================================================
-       GOOGLE REGISTRATION
-    ======================================================== */
+    if (isGoogleRegistration) {
+      const firebaseUser = await registerWithGoogle();
 
-    if (
-      isGoogleRegistration
-    ) {
-
-      const firebaseUser =
-        await registerWithGoogle();
-
-
-      await completeRegistration(
-        firebaseUser
-      );
-
+      await completeRegistration(firebaseUser);
 
       return;
-
     }
 
+    /* ----------------------------------------------------
+           NORMAL EMAIL REGISTRATION
+        ---------------------------------------------------- */
 
-    /* ========================================================
-       NORMAL EMAIL REGISTRATION
-    ======================================================== */
-
-    const firebaseUser =
-      await registerWithEmailPassword();
-
-
-    /*
-       At this point:
-
-       Firebase Auth account exists.
-
-       Email verification email has been sent.
-
-       DO NOT create Firestore profile yet.
-    */
-
-
-    
-
-
+    await registerWithEmailPassword();
   } catch (error) {
+    console.error("Registration Error:", error);
 
-    console.error(
-      "Registration Error:",
-      error
-    );
+    let message = "Registration failed.";
 
-
-    let message =
-      "Registration failed.";
-
-
-    /* ========================================================
-       FIREBASE AUTH ERRORS
-    ======================================================== */
-
-    switch (
-      error.code
-    ) {
-
+    switch (error.code) {
       case "auth/email-already-in-use":
-
         message =
           "This email address is already registered. Please login instead.";
 
         break;
 
-
       case "auth/invalid-email":
-
-        message =
-          "Invalid email address.";
+        message = "Invalid email address.";
 
         break;
-
 
       case "auth/weak-password":
-
-        message =
-          "Password is too weak. Please choose a stronger password.";
+        message = "Password is too weak. Please choose a stronger password.";
 
         break;
-
 
       case "auth/network-request-failed":
-
-        message =
-          "Network error. Please check your internet connection.";
+        message = "Network error. Please check your internet connection.";
 
         break;
-
 
       case "auth/too-many-requests":
-
-        message =
-          "Too many requests. Please wait a moment and try again.";
+        message = "Too many requests. Please wait a moment and try again.";
 
         break;
 
-
       case "auth/operation-not-allowed":
-
         message =
           "Email/password registration is not enabled in Firebase Authentication.";
 
         break;
 
-
       case "permission-denied":
-
-        message =
-          "You do not have permission to create this profile.";
+        message = "You do not have permission to create this profile.";
 
         break;
-
 
       default:
-
-        message =
-          error.message ||
-          "Registration failed.";
+        message = error.message || "Registration failed.";
 
         break;
-
     }
 
-
-    showRegistrationMessage(
-      message,
-      "error"
-    );
-
+    showRegistrationMessage(message, "error");
   }
-
 }
-
 
 /* ============================================================
    FORM SUBMIT
 ============================================================ */
 
 if (registrationForm) {
-
   registrationForm.addEventListener(
-
     "submit",
 
     async (event) => {
-
       event.preventDefault();
 
-
-      /* ======================================================
-         PREVENT DUPLICATE SUBMISSIONS
-      ====================================================== */
-
-      const submitButton =
-        registrationForm.querySelector(
-          'button[type="submit"]'
-        );
-
+      const submitButton = registrationForm.querySelector(
+        'button[type="submit"]',
+      );
 
       if (submitButton) {
-
-        submitButton.disabled =
-          true;
-
+        submitButton.disabled = true;
       }
-
 
       try {
-
         await registerUser();
-
       } finally {
-
-        /*
-           If verification is pending,
-           the verification button remains available.
-
-           The main submit button can be unlocked.
-        */
-
         if (submitButton) {
-
-          submitButton.disabled =
-            false;
-
+          submitButton.disabled = false;
         }
-
       }
-
-    }
-
+    },
   );
-
 }
-
 
 /* ============================================================
    AUTH STATE
@@ -1511,67 +1457,41 @@ if (registrationForm) {
 
 onAuthStateChanged(
   auth,
+
   (user) => {
-
-    authenticatedUser =
-      user;
-
+    authenticatedUser = user;
 
     console.log(
       "Registration Auth State:",
-      user
-        ? user.uid
-        : "No authenticated user"
+      user ? user.uid : "No authenticated user",
     );
 
+    /* ----------------------------------------------------
+           GOOGLE WITHOUT SESSION
+        ---------------------------------------------------- */
 
-    /* ========================================================
-       GOOGLE REGISTRATION WITHOUT SESSION
-    ======================================================== */
-
-    if (
-      isGoogleRegistration &&
-      !user
-    ) {
-
+    if (isGoogleRegistration && !user) {
       showRegistrationMessage(
         "Google authentication session was not found. Returning to login...",
-        "error"
+        "error",
       );
 
-
-      setTimeout(
-        () => {
-
-          window.location.href =
-            "login.html";
-
-        },
-        1500
-      );
-
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 1500);
 
       return;
-
     }
 
+    /* ----------------------------------------------------
+           GOOGLE REGISTRATION
+        ---------------------------------------------------- */
 
-    /* ========================================================
-       GOOGLE REGISTRATION
-    ======================================================== */
-
-    if (
-      isGoogleRegistration &&
-      user
-    ) {
-
+    if (isGoogleRegistration && user) {
       setupGoogleRegistrationUI();
-
     }
-
-  }
+  },
 );
-
 
 /* ============================================================
    INITIALIZE
@@ -1579,15 +1499,12 @@ onAuthStateChanged(
 
 document.addEventListener(
   "DOMContentLoaded",
+
   () => {
-
     updateAccountTypeFields();
-
-  }
+  },
 );
-
 
 /* ============================================================
    END REGISTER.JS
 ============================================================ */
-

@@ -2,34 +2,23 @@
 /* ============================================================
    LankaWayfarer
    FIND GUIDES
-
    FIREBASE / FIRESTORE FIRST ARCHITECTURE
 
-   FLOW:
+   This version keeps the existing:
+   - Firebase Authentication
+   - Quotation Request ownership check
+   - Approved Guide loading
+   - Search / filter / sort
+   - Guide selection
+   - Firestore request update
+   - quotation-request.html redirect
 
-   Tourist
-      ↓
-   quotation-request.html
-      ↓
-   Firestore Quotation Request
-      ↓
-   find-guides.html?requestId=...
-      ↓
-   Verify Firebase Tourist
-      ↓
-   Verify Request Ownership
-      ↓
-   Load Approved Guides
-      ↓
-   Search / Filter / Sort
-      ↓
-   Select Guide
-      ↓
-   Update Firestore Request
-      ↓
-   status = "guide_selected"
-      ↓
-   quotation-request.html?requestId=...&guideId=...
+   Updated:
+   - Professional Guide Profile cards
+   - Profile photo support
+   - Verification badge
+   - Professional stats
+   - Better profile information
 ============================================================ */
 
 
@@ -180,7 +169,6 @@ function waitForAuthenticatedUser() {
             const existingUser =
                 getAuthenticatedUser();
 
-
             if (existingUser) {
 
                 resolve(
@@ -190,7 +178,6 @@ function waitForAuthenticatedUser() {
                 return;
 
             }
-
 
             const unsubscribe =
                 onAuthStateChanged(
@@ -277,7 +264,6 @@ function toArray(
 
     }
 
-
     if (
         value == null ||
         value === ""
@@ -286,7 +272,6 @@ function toArray(
         return [];
 
     }
-
 
     return String(
         value
@@ -311,9 +296,7 @@ function showLoading(
 ) {
 
     if (!guidesLoading) {
-
         return;
-
     }
 
     guidesLoading.style.display =
@@ -328,9 +311,7 @@ function showLoading(
 function hideLoading() {
 
     if (!guidesLoading) {
-
         return;
-
     }
 
     guidesLoading.style.display =
@@ -342,9 +323,7 @@ function hideLoading() {
 function showEmptyState() {
 
     if (!guidesEmptyState) {
-
         return;
-
     }
 
     guidesEmptyState.style.display =
@@ -356,9 +335,7 @@ function showEmptyState() {
 function hideEmptyState() {
 
     if (!guidesEmptyState) {
-
         return;
-
     }
 
     guidesEmptyState.style.display =
@@ -379,7 +356,6 @@ function showPageMessage(
         message
     );
 
-
     if (!guidesList) {
 
         alert(
@@ -390,25 +366,21 @@ function showPageMessage(
 
     }
 
-
     guidesList.innerHTML = `
 
         <div class="guide-error">
 
-            <div>
+            <div class="guide-error-icon">
                 ⚠️
             </div>
 
             <h3>
-                ${escapeHTML(
-                    message
-                )}
+                ${escapeHTML(message)}
             </h3>
 
         </div>
 
     `;
-
 
     if (guideResultCount) {
 
@@ -429,7 +401,6 @@ async function loadCurrentRequest() {
     currentRequestId =
         getRequestId();
 
-
     if (!currentRequestId) {
 
         showPageMessage(
@@ -440,7 +411,6 @@ async function loadCurrentRequest() {
 
     }
 
-
     try {
 
         const requestRef =
@@ -450,12 +420,10 @@ async function loadCurrentRequest() {
                 currentRequestId
             );
 
-
         const snapshot =
             await getDoc(
                 requestRef
             );
-
 
         if (!snapshot.exists()) {
 
@@ -467,7 +435,6 @@ async function loadCurrentRequest() {
 
         }
 
-
         currentRequest = {
 
             id:
@@ -477,12 +444,10 @@ async function loadCurrentRequest() {
 
         };
 
-
         console.log(
             "Quotation request loaded:",
             currentRequest
         );
-
 
         return currentRequest;
 
@@ -493,11 +458,9 @@ async function loadCurrentRequest() {
             error
         );
 
-
         showPageMessage(
             "Unable to load your quotation request."
         );
-
 
         return null;
 
@@ -513,11 +476,8 @@ async function loadCurrentRequest() {
 function verifyTouristOwnership() {
 
     if (!currentRequest) {
-
         return false;
-
     }
-
 
     if (!currentUser) {
 
@@ -528,7 +488,6 @@ function verifyTouristOwnership() {
         return false;
 
     }
-
 
     if (
         currentRequest.touristId &&
@@ -547,7 +506,6 @@ function verifyTouristOwnership() {
             }
         );
 
-
         showPageMessage(
             "You are not authorized to modify this quotation request."
         );
@@ -555,7 +513,6 @@ function verifyTouristOwnership() {
         return false;
 
     }
-
 
     return true;
 
@@ -578,11 +535,9 @@ async function loadGuides() {
 
     }
 
-
     showLoading();
 
     hideEmptyState();
-
 
     try {
 
@@ -600,26 +555,18 @@ async function loadGuides() {
                 )
             );
 
-
         const snapshot =
             await getDocs(
                 guidesQuery
             );
 
-
         guides = [];
-
 
         snapshot.forEach(
             (guideSnapshot) => {
 
                 const data =
                     guideSnapshot.data();
-
-
-                /*
-                   Only actual Guide accounts.
-                */
 
                 if (
                     data.accountType !==
@@ -629,7 +576,6 @@ async function loadGuides() {
                     return;
 
                 }
-
 
                 guides.push({
 
@@ -647,10 +593,8 @@ async function loadGuides() {
             }
         );
 
-
         filteredGuides =
             [...guides];
-
 
         populateDistrictFilter();
 
@@ -659,7 +603,6 @@ async function loadGuides() {
         applySort();
 
         renderGuides();
-
 
         console.log(
             "Approved guides loaded:",
@@ -673,24 +616,19 @@ async function loadGuides() {
             error
         );
 
-
         guides = [];
 
         filteredGuides = [];
 
-
         guidesList.innerHTML =
             "";
 
-
         showEmptyState();
-
 
         const heading =
             guidesEmptyState?.querySelector(
                 "h3"
             );
-
 
         if (heading) {
 
@@ -715,11 +653,8 @@ async function loadGuides() {
 function populateDistrictFilter() {
 
     if (!guideDistrict) {
-
         return;
-
     }
-
 
     const districts =
         [
@@ -742,7 +677,6 @@ function populateDistrictFilter() {
                     )
         );
 
-
     guideDistrict.innerHTML = `
 
         <option value="">
@@ -750,7 +684,6 @@ function populateDistrictFilter() {
         </option>
 
     `;
-
 
     districts.forEach(
         (district) => {
@@ -760,13 +693,11 @@ function populateDistrictFilter() {
                     "option"
                 );
 
-
             option.value =
                 district;
 
             option.textContent =
                 district;
-
 
             guideDistrict.appendChild(
                 option
@@ -785,15 +716,11 @@ function populateDistrictFilter() {
 function populateLanguageFilter() {
 
     if (!guideLanguage) {
-
         return;
-
     }
-
 
     const languages =
         new Set();
-
 
     guides.forEach(
         (guide) => {
@@ -803,7 +730,6 @@ function populateLanguageFilter() {
                     guide.languages ||
                     guide.language
                 );
-
 
             guideLanguages.forEach(
                 (language) => {
@@ -818,7 +744,6 @@ function populateLanguageFilter() {
         }
     );
 
-
     const sortedLanguages =
         [...languages].sort(
             (a, b) =>
@@ -826,7 +751,6 @@ function populateLanguageFilter() {
                     b
                 )
         );
-
 
     guideLanguage.innerHTML = `
 
@@ -836,7 +760,6 @@ function populateLanguageFilter() {
 
     `;
 
-
     sortedLanguages.forEach(
         (language) => {
 
@@ -845,13 +768,11 @@ function populateLanguageFilter() {
                     "option"
                 );
 
-
             option.value =
                 language;
 
             option.textContent =
                 language;
-
 
             guideLanguage.appendChild(
                 option
@@ -873,11 +794,8 @@ function guideMatchesLanguage(
 ) {
 
     if (!selectedLanguage) {
-
         return true;
-
     }
-
 
     const languages =
         toArray(
@@ -885,12 +803,10 @@ function guideMatchesLanguage(
             guide.language
         );
 
-
     const target =
         normalizeText(
             selectedLanguage
         );
-
 
     return languages.some(
         language =>
@@ -936,7 +852,6 @@ function getGuideSearchText(
 
     ];
 
-
     return searchableValues
         .flat()
         .filter(Boolean)
@@ -957,24 +872,17 @@ function applyFilters() {
             guideSearch?.value
         );
 
-
     const district =
         guideDistrict?.value ||
         "";
-
 
     const language =
         guideLanguage?.value ||
         "";
 
-
     filteredGuides =
         guides.filter(
             (guide) => {
-
-                /*
-                   SEARCH
-                */
 
                 if (search) {
 
@@ -982,7 +890,6 @@ function applyFilters() {
                         getGuideSearchText(
                             guide
                         );
-
 
                     if (
                         !searchableText.includes(
@@ -996,11 +903,6 @@ function applyFilters() {
 
                 }
 
-
-                /*
-                   DISTRICT
-                */
-
                 if (
                     district &&
                     guide.district !==
@@ -1010,11 +912,6 @@ function applyFilters() {
                     return false;
 
                 }
-
-
-                /*
-                   LANGUAGE
-                */
 
                 if (
                     language &&
@@ -1028,12 +925,10 @@ function applyFilters() {
 
                 }
 
-
                 return true;
 
             }
         );
-
 
     applySort();
 
@@ -1052,7 +947,6 @@ function applySort() {
         guideSort?.value ||
         "rank";
 
-
     filteredGuides.sort(
         (a, b) => {
 
@@ -1062,6 +956,7 @@ function applySort() {
             ) {
 
                 return (
+
                     Number(
                         b.experienceYears ||
                         b.experience ||
@@ -1073,10 +968,10 @@ function applySort() {
                         a.experience ||
                         0
                     )
+
                 );
 
             }
-
 
             if (
                 sort ===
@@ -1084,6 +979,7 @@ function applySort() {
             ) {
 
                 return (
+
                     Number(
                         b.reviewCount ||
                         b.reviewsCount ||
@@ -1095,10 +991,10 @@ function applySort() {
                         a.reviewsCount ||
                         0
                     )
+
                 );
 
             }
-
 
             if (
                 sort ===
@@ -1106,6 +1002,7 @@ function applySort() {
             ) {
 
                 return (
+
                     Number(
                         b.completedTrips ||
                         b.completedTourCount ||
@@ -1117,17 +1014,13 @@ function applySort() {
                         a.completedTourCount ||
                         0
                     )
+
                 );
 
             }
 
-
-            /*
-               Default:
-               Rating / Rank
-            */
-
             return (
+
                 Number(
                     b.rating ||
                     b.averageRating ||
@@ -1139,6 +1032,7 @@ function applySort() {
                     a.averageRating ||
                     0
                 )
+
             );
 
         }
@@ -1154,19 +1048,14 @@ function applySort() {
 function renderGuides() {
 
     if (!guidesList) {
-
         return;
-
     }
-
 
     guidesList.innerHTML =
         "";
 
-
     const count =
         filteredGuides.length;
-
 
     if (guideResultCount) {
 
@@ -1179,7 +1068,6 @@ function renderGuides() {
 
     }
 
-
     if (count === 0) {
 
         showEmptyState();
@@ -1188,9 +1076,7 @@ function renderGuides() {
 
     }
 
-
     hideEmptyState();
-
 
     filteredGuides.forEach(
         (guide, index) => {
@@ -1209,7 +1095,7 @@ function renderGuides() {
 
 
 /* ============================================================
-   23. CREATE GUIDE CARD
+   23. PROFESSIONAL GUIDE CARD
 ============================================================ */
 
 function createGuideCard(
@@ -1221,7 +1107,6 @@ function createGuideCard(
         document.createElement(
             "article"
         );
-
 
     card.className =
         "guide-card";
@@ -1238,16 +1123,33 @@ function createGuideCard(
         "Sri Lanka";
 
 
+    const province =
+        guide.province ||
+        "";
+
+
     const rating =
         guide.rating ||
         guide.averageRating ||
-        "New";
+        "";
+
+
+    const reviewCount =
+        guide.reviewCount ||
+        guide.reviewsCount ||
+        0;
 
 
     const experience =
         guide.experienceYears ||
         guide.experience ||
-        "Not specified";
+        "";
+
+
+    const completedTrips =
+        guide.completedTrips ||
+        guide.completedTourCount ||
+        0;
 
 
     const languages =
@@ -1257,31 +1159,50 @@ function createGuideCard(
         );
 
 
-    const languageText =
-        languages.length
-            ? languages.join(
-                ", "
-            )
-            : "N/A";
-
-
     const specializations =
-        guide.specializations ||
-        guide.specialization ||
-        "General Tourism";
+        toArray(
+            guide.specializations ||
+            guide.specialization
+        );
 
 
     const areas =
-        guide.areas ||
-        guide.coverageAreas ||
-        "N/A";
+        toArray(
+            guide.areas ||
+            guide.coverageAreas
+        );
 
 
-    const avatar =
-        guide.photoURL ||
-        guide.profileImage ||
-        guide.photo ||
-        "";
+  const avatar =
+    guide.profilePhotoUrl ||
+    guide.profilePhotoURL ||
+    guide.photoURL ||
+    guide.profileImage ||
+    guide.photo ||
+    "";
+
+    const locationText =
+        province
+            ? `${district}, ${province}`
+            : district;
+
+
+    const ratingText =
+        rating
+            ? Number(rating).toFixed(1)
+            : "New";
+
+
+    const experienceText =
+        experience
+            ? `${experience} ${
+                String(experience)
+                    .toLowerCase()
+                    .includes("year")
+                    ? ""
+                    : "years"
+            }`
+            : "Not specified";
 
 
     const avatarHTML =
@@ -1297,13 +1218,26 @@ function createGuideCard(
                     )}"
                     class="guide-avatar-image"
                     loading="lazy"
+                    onerror="
+                        this.style.display='none';
+                        this.nextElementSibling.style.display='flex';
+                    "
                 >
+
+                <div
+                    class="guide-avatar-placeholder"
+                    style="display:none;"
+                    aria-hidden="true"
+                >
+                    👤
+                </div>
 
             `
             : `
 
                 <div
                     class="guide-avatar-placeholder"
+                    aria-hidden="true"
                 >
                     👤
                 </div>
@@ -1311,145 +1245,204 @@ function createGuideCard(
             `;
 
 
-    const specializationText =
-        Array.isArray(
-            specializations
-        )
-            ? specializations.join(
-                ", "
-            )
-            : String(
-                specializations
-            );
+    const languageHTML =
+        languages.length
+            ? languages
+                .slice(0, 4)
+                .map(
+                    language => `
+                        <span class="guide-tag">
+                            ${escapeHTML(language)}
+                        </span>
+                    `
+                )
+                .join("")
+            : `
+                <span class="guide-muted">
+                    Not specified
+                </span>
+            `;
+
+
+    const specializationHTML =
+        specializations.length
+            ? specializations
+                .slice(0, 3)
+                .map(
+                    item => `
+                        <span class="guide-tag guide-tag-soft">
+                            ${escapeHTML(item)}
+                        </span>
+                    `
+                )
+                .join("")
+            : `
+                <span class="guide-muted">
+                    General Tourism
+                </span>
+            `;
 
 
     const areasText =
-        Array.isArray(
-            areas
-        )
-            ? areas.join(
-                ", "
-            )
-            : String(
-                areas
-            );
+        areas.length
+            ? areas
+                .slice(0, 3)
+                .join(", ")
+            : "Sri Lanka";
 
 
     card.innerHTML = `
 
-        <div class="guide-rank">
+        <div class="guide-card-cover">
 
-            🏆 Rank #${index + 1}
+            <div class="guide-rank-badge">
+                <span>🏆</span>
+                Rank #${index + 1}
+            </div>
+
+            <div class="guide-verified-badge">
+                <span>✓</span>
+                Verified Guide
+            </div>
 
         </div>
 
 
-        <div class="guide-card-header">
+        <div class="guide-card-top">
 
-            ${avatarHTML}
+            <div class="guide-avatar">
 
-            <div>
+                ${avatarHTML}
 
-                <h3>
-                    ${escapeHTML(
-                        name
-                    )}
-                </h3>
+            </div>
 
-                <p>
+
+            <div class="guide-main-info">
+
+                <div class="guide-name-row">
+
+                    <h3 class="guide-name">
+                        ${escapeHTML(name)}
+                    </h3>
+
+                </div>
+
+
+                <p class="guide-location">
                     📍
-                    ${escapeHTML(
-                        district
-                    )}
+                    ${escapeHTML(locationText)}
                 </p>
+
+
+                <div class="guide-profile-label">
+                    Registered LankaWayfarer Guide
+                </div>
 
             </div>
 
         </div>
 
 
-        <div class="guide-verified">
+        <div class="guide-stats">
 
-            ✓ Verified Guide
+            <div class="guide-stat">
+
+                <strong>
+                    ${escapeHTML(ratingText)}
+                </strong>
+
+                <span>
+                    ⭐ Rating
+                    ${
+                        reviewCount
+                            ? ` · ${escapeHTML(reviewCount)} reviews`
+                            : ""
+                    }
+                </span>
+
+            </div>
+
+
+            <div class="guide-stat">
+
+                <strong>
+                    ${escapeHTML(
+                        experienceText
+                    )}
+                </strong>
+
+                <span>
+                    Experience
+                </span>
+
+            </div>
+
+
+            <div class="guide-stat">
+
+                <strong>
+                    ${escapeHTML(
+                        completedTrips || "—"
+                    )}
+                </strong>
+
+                <span>
+                    Completed Trips
+                </span>
+
+            </div>
 
         </div>
 
 
         <div class="guide-details">
 
-            <p>
 
-                🧑‍💼
+            <div class="guide-detail-block">
 
-                <strong>
-                    Experience:
-                </strong>
+                <div class="guide-detail-title">
+                    🗣 Languages
+                </div>
 
-                ${escapeHTML(
-                    experience
-                )}
+                <div class="guide-tags">
+                    ${languageHTML}
+                </div>
 
-            </p>
-
-
-            <p>
-
-                🗣
-
-                <strong>
-                    Languages:
-                </strong>
-
-                ${escapeHTML(
-                    languageText
-                )}
-
-            </p>
+            </div>
 
 
-            <p>
+            <div class="guide-detail-block">
 
-                🌿
+                <div class="guide-detail-title">
+                    🌿 Specializations
+                </div>
 
-                <strong>
-                    Specializations:
-                </strong>
+                <div class="guide-tags">
+                    ${specializationHTML}
+                </div>
 
-                ${escapeHTML(
-                    specializationText
-                )}
-
-            </p>
+            </div>
 
 
-            <p>
+            <div class="guide-detail-row">
 
-                🗺
+                <span class="guide-detail-icon">
+                    🗺
+                </span>
 
-                <strong>
-                    Areas:
-                </strong>
+                <span>
+                    <strong>
+                        Areas Covered
+                    </strong>
 
-                ${escapeHTML(
-                    areasText
-                )}
+                    <br>
 
-            </p>
+                    ${escapeHTML(areasText)}
 
+                </span>
 
-            <p>
+            </div>
 
-                ⭐
-
-                <strong>
-                    Rating:
-                </strong>
-
-                ${escapeHTML(
-                    rating
-                )}
-
-            </p>
 
         </div>
 
@@ -1460,6 +1453,7 @@ function createGuideCard(
                 type="button"
                 class="view-guide-button"
             >
+                <span>👤</span>
                 View Profile
             </button>
 
@@ -1468,7 +1462,8 @@ function createGuideCard(
                 type="button"
                 class="select-guide-button"
             >
-                Select Guide →
+                Select Guide
+                <span>→</span>
             </button>
 
         </div>
@@ -1528,16 +1523,37 @@ function createGuideCard(
 
 /* ============================================================
    24. VIEW GUIDE PROFILE
+   PROFESSIONAL MODAL
 ============================================================ */
 
 function viewGuideProfile(
     guide
 ) {
 
+    /*
+       Close any existing modal first
+    */
+
+    const existingModal =
+        document.querySelector(
+            ".guide-profile-modal"
+        );
+
+    if (existingModal) {
+
+        existingModal.remove();
+
+    }
+
+
+    /* ========================================================
+       GUIDE DATA
+    ======================================================== */
+
     const name =
         guide.fullName ||
         guide.name ||
-        "Guide";
+        "Registered Guide";
 
 
     const email =
@@ -1553,7 +1569,36 @@ function viewGuideProfile(
 
     const district =
         guide.district ||
-        "Not specified";
+        "Sri Lanka";
+
+
+    const province =
+        guide.province ||
+        "";
+
+
+    const rating =
+        guide.rating ||
+        guide.averageRating ||
+        "";
+
+
+    const reviewCount =
+        guide.reviewCount ||
+        guide.reviewsCount ||
+        0;
+
+
+    const experience =
+        guide.experienceYears ||
+        guide.experience ||
+        "";
+
+
+    const completedTrips =
+        guide.completedTrips ||
+        guide.completedTourCount ||
+        0;
 
 
     const languages =
@@ -1570,32 +1615,519 @@ function viewGuideProfile(
         );
 
 
-    alert(
+    const areas =
+        toArray(
+            guide.areas ||
+            guide.coverageAreas
+        );
 
-        `${name}\n\n` +
 
-        `📍 ${district}\n` +
+    const avatar =
+      guide.profilePhotoUrl ||
+      guide.profilePhotoURL ||
+      guide.photoURL ||
+      guide.profileImage ||
+      guide.photo ||
+      "";
 
-        `📧 ${email}\n` +
+    const locationText =
+        province
+            ? `${district}, ${province}`
+            : district;
 
-        `📞 ${phone}\n\n` +
 
-        `🗣 Languages: ${
-            languages.length
-                ? languages.join(
-                    ", "
+    const ratingText =
+        rating
+            ? Number(rating).toFixed(1)
+            : "New";
+
+
+    const experienceText =
+        experience
+            ? `${experience} ${
+                String(experience)
+                    .toLowerCase()
+                    .includes("year")
+                    ? ""
+                    : "years"
+            }`
+            : "Not specified";
+
+
+    /* ========================================================
+       PROFILE PHOTO
+    ======================================================== */
+
+    const avatarHTML =
+        avatar
+            ? `
+                <img
+                    src="${escapeHTML(avatar)}"
+                    alt="${escapeHTML(name)}"
+                    class="guide-profile-modal-avatar-image"
+                    onerror="
+                        this.style.display='none';
+                        this.nextElementSibling.style.display='flex';
+                    "
+                >
+
+                <div
+                    class="guide-profile-modal-avatar-placeholder"
+                    style="display:none;"
+                    aria-hidden="true"
+                >
+                    👤
+                </div>
+            `
+            : `
+                <div
+                    class="guide-profile-modal-avatar-placeholder"
+                    aria-hidden="true"
+                >
+                    👤
+                </div>
+            `;
+
+
+    /* ========================================================
+       TAG HELPERS
+    ======================================================== */
+
+    const languageHTML =
+        languages.length
+            ? languages
+                .map(
+                    language => `
+                        <span class="guide-profile-modal-tag">
+                            ${escapeHTML(language)}
+                        </span>
+                    `
                 )
-                : "N/A"
-        }\n\n` +
+                .join("")
+            : `
+                <span class="guide-profile-modal-muted">
+                    Not specified
+                </span>
+            `;
 
-        `🌿 Specializations: ${
-            specializations.length
-                ? specializations.join(
-                    ", "
+
+    const specializationHTML =
+        specializations.length
+            ? specializations
+                .map(
+                    specialization => `
+                        <span class="guide-profile-modal-tag guide-profile-modal-tag-soft">
+                            ${escapeHTML(
+                                specialization
+                            )}
+                        </span>
+                    `
                 )
-                : "General Tourism"
-        }`
+                .join("")
+            : `
+                <span class="guide-profile-modal-muted">
+                    General Tourism
+                </span>
+            `;
 
+
+    const areasText =
+        areas.length
+            ? areas.join(", ")
+            : "Sri Lanka";
+
+
+    /* ========================================================
+       CREATE MODAL
+    ======================================================== */
+
+    const modal =
+        document.createElement(
+            "div"
+        );
+
+    modal.className =
+        "guide-profile-modal";
+
+
+    modal.innerHTML = `
+
+        <div
+            class="guide-profile-modal-overlay"
+            data-modal-close
+        ></div>
+
+
+        <div
+            class="guide-profile-modal-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="guideProfileModalTitle"
+        >
+
+
+            <!-- CLOSE -->
+
+            <button
+                type="button"
+                class="guide-profile-modal-close"
+                aria-label="Close guide profile"
+                data-modal-close
+            >
+                ×
+            </button>
+
+
+            <!-- HEADER -->
+
+            <div class="guide-profile-modal-header">
+
+
+                <div class="guide-profile-modal-avatar">
+
+                    ${avatarHTML}
+
+                </div>
+
+
+                <div class="guide-profile-modal-header-info">
+
+                    <div class="guide-profile-modal-verified">
+
+                        ✓ Verified Guide
+
+                    </div>
+
+
+                    <h2
+                        id="guideProfileModalTitle"
+                        class="guide-profile-modal-name"
+                    >
+                        ${escapeHTML(name)}
+                    </h2>
+
+
+                    <p class="guide-profile-modal-location">
+
+                        📍
+                        ${escapeHTML(locationText)}
+
+                    </p>
+
+
+                    <p class="guide-profile-modal-label">
+
+                        Registered LankaWayfarer Guide
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- STATS -->
+
+            <div class="guide-profile-modal-stats">
+
+
+                <div class="guide-profile-modal-stat">
+
+                    <strong>
+                        ${escapeHTML(ratingText)}
+                    </strong>
+
+                    <span>
+                        ⭐ Rating
+                    </span>
+
+                </div>
+
+
+                <div class="guide-profile-modal-stat">
+
+                    <strong>
+                        ${escapeHTML(
+                            reviewCount || "—"
+                        )}
+                    </strong>
+
+                    <span>
+                        Reviews
+                    </span>
+
+                </div>
+
+
+                <div class="guide-profile-modal-stat">
+
+                    <strong>
+                        ${escapeHTML(
+                            experienceText
+                        )}
+                    </strong>
+
+                    <span>
+                        Experience
+                    </span>
+
+                </div>
+
+
+                <div class="guide-profile-modal-stat">
+
+                    <strong>
+                        ${escapeHTML(
+                            completedTrips || "—"
+                        )}
+                    </strong>
+
+                    <span>
+                        Completed Trips
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- BODY -->
+
+            <div class="guide-profile-modal-body">
+
+
+                <!-- CONTACT -->
+
+                <div class="guide-profile-modal-section">
+
+                    <h3>
+                        Contact Information
+                    </h3>
+
+
+                    <div class="guide-profile-modal-detail">
+
+                        <span>📧</span>
+
+                        <span>
+                            ${escapeHTML(email)}
+                        </span>
+
+                    </div>
+
+
+                    <div class="guide-profile-modal-detail">
+
+                        <span>📞</span>
+
+                        <span>
+                            ${escapeHTML(phone)}
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- LANGUAGES -->
+
+                <div class="guide-profile-modal-section">
+
+                    <h3>
+                        🗣 Languages
+                    </h3>
+
+
+                    <div class="guide-profile-modal-tags">
+
+                        ${languageHTML}
+
+                    </div>
+
+                </div>
+
+
+                <!-- SPECIALIZATIONS -->
+
+                <div class="guide-profile-modal-section">
+
+                    <h3>
+                        🌿 Specializations
+                    </h3>
+
+
+                    <div class="guide-profile-modal-tags">
+
+                        ${specializationHTML}
+
+                    </div>
+
+                </div>
+
+
+                <!-- AREAS -->
+
+                <div class="guide-profile-modal-section">
+
+                    <h3>
+                        🗺 Areas Covered
+                    </h3>
+
+
+                    <p class="guide-profile-modal-area-text">
+
+                        ${escapeHTML(areasText)}
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- ACTIONS -->
+
+            <div class="guide-profile-modal-actions">
+
+
+                <button
+                    type="button"
+                    class="guide-profile-modal-cancel"
+                    data-modal-close
+                >
+                    Close
+                </button>
+
+
+                <button
+                    type="button"
+                    class="guide-profile-modal-select"
+                >
+                    Select This Guide
+                    <span>→</span>
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    /* ========================================================
+       CLOSE MODAL
+    ======================================================== */
+
+    const closeModal =
+        () => {
+
+            modal.remove();
+
+            document.body.classList.remove(
+                "guide-profile-modal-open"
+            );
+
+        };
+
+
+    modal
+        .querySelectorAll(
+            "[data-modal-close]"
+        )
+        .forEach(
+            element => {
+
+                element.addEventListener(
+                    "click",
+                    closeModal
+                );
+
+            }
+        );
+
+
+    /* ========================================================
+       SELECT THIS GUIDE
+       REUSE EXISTING selectGuide()
+    ======================================================== */
+
+    const selectButton =
+        modal.querySelector(
+            ".guide-profile-modal-select"
+        );
+
+
+    if (selectButton) {
+
+        selectButton.addEventListener(
+            "click",
+            async () => {
+
+                await selectGuide(
+                    guide,
+                    selectButton
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       ESCAPE KEY
+    ======================================================== */
+
+    const handleEscape =
+        (event) => {
+
+            if (
+                event.key ===
+                "Escape"
+            ) {
+
+                closeModal();
+
+                document.removeEventListener(
+                    "keydown",
+                    handleEscape
+                );
+
+            }
+
+        };
+
+
+    document.addEventListener(
+        "keydown",
+        handleEscape
+    );
+
+
+    /* ========================================================
+       BODY SCROLL LOCK
+    ======================================================== */
+
+    document.body.classList.add(
+        "guide-profile-modal-open"
+    );
+
+
+    /* ========================================================
+       FOCUS
+    ======================================================== */
+
+    requestAnimationFrame(
+        () => {
+
+            selectButton?.focus();
+
+        }
     );
 
 }
@@ -1644,10 +2176,6 @@ async function selectGuide(
     }
 
 
-    /*
-       FINAL OWNERSHIP CHECK
-    */
-
     if (
         currentRequest.touristId &&
         currentRequest.touristId !==
@@ -1675,7 +2203,6 @@ async function selectGuide(
             guide
         );
 
-
         alert(
             "This guide cannot be selected because the guide ID is missing."
         );
@@ -1696,10 +2223,21 @@ async function selectGuide(
         "";
 
 
-    /*
-       Prevent selecting a guide
-       for an already completed request.
-    */
+    if (
+        currentRequest.status ===
+            "completed" ||
+        currentRequest.status ===
+            "quotation_accepted"
+    ) {
+
+        alert(
+            "This quotation request can no longer be changed."
+        );
+
+        return;
+
+    }
+
 
     if (
         currentRequest.status ===
@@ -1725,9 +2263,7 @@ async function selectGuide(
 
 
     if (!confirmed) {
-
         return;
-
     }
 
 
@@ -1748,15 +2284,6 @@ async function selectGuide(
 
 
     try {
-
-        /*
-           Store a snapshot of the
-           selected guide.
-
-           This protects the quotation
-           request from future changes
-           to the guide profile.
-        */
 
         const selectedGuide = {
 
@@ -1808,10 +2335,6 @@ async function selectGuide(
         };
 
 
-        /*
-           Firestore request reference
-        */
-
         const requestRef =
             doc(
                 db,
@@ -1819,10 +2342,6 @@ async function selectGuide(
                 currentRequest.id
             );
 
-
-        /*
-           Update quotation request
-        */
 
         await updateDoc(
             requestRef,
@@ -1855,10 +2374,6 @@ async function selectGuide(
             }
         );
 
-
-        /*
-           Update local state
-        */
 
         currentRequest = {
 
@@ -1908,12 +2423,6 @@ async function selectGuide(
         );
 
 
-        /*
-           Continue to quotation request page.
-
-           Firestore requestId is preserved.
-        */
-
         const requestId =
             encodeURIComponent(
                 currentRequest.id
@@ -1937,10 +2446,6 @@ async function selectGuide(
             error
         );
 
-
-        /*
-           Restore button
-        */
 
         if (button) {
 
@@ -2018,7 +2523,6 @@ function clearFilters() {
     filteredGuides =
         [...guides];
 
-
     applySort();
 
     renderGuides();
@@ -2074,13 +2578,10 @@ document.addEventListener(
     "DOMContentLoaded",
     async () => {
 
-        console.log("LankaWayfarer Find Guides loading...");
+        console.log(
+            "LankaWayfarer Find Guides loading..."
+        );
 
-
-        /*
-           STEP 1
-           Firebase Authentication
-        */
 
         currentUser =
             await waitForAuthenticatedUser();
@@ -2097,42 +2598,23 @@ document.addEventListener(
         }
 
 
-        /*
-           STEP 2
-           Load quotation request
-        */
-
         const request =
             await loadCurrentRequest();
 
 
         if (!request) {
-
             return;
-
         }
 
-
-        /*
-           STEP 3
-           Verify ownership
-        */
 
         const authorized =
             verifyTouristOwnership();
 
 
         if (!authorized) {
-
             return;
-
         }
 
-
-        /*
-           STEP 4
-           Load approved guides
-        */
 
         await loadGuides();
 
@@ -2140,24 +2622,17 @@ document.addEventListener(
         console.log(
             "Find Guides initialized:",
             {
-
                 requestId:
                     currentRequestId,
 
-                touristId:
+                touristUID:
                     currentUser.uid,
 
                 guideCount:
                     guides.length
-
             }
         );
 
     }
 );
-
-
-/* ============================================================
-   END FIND-GUIDES.JS
-============================================================ */
 

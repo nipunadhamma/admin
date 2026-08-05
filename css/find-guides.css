@@ -1,6 +1,8 @@
+
 /* ============================================================
+   LankaWayfarer
    FIND REGISTERED GUIDES
-   Explore Sri Lanka
+   PROFESSIONAL GUIDE DIRECTORY
 ============================================================ */
 
 
@@ -38,7 +40,7 @@
         30px;
 
     border-radius:
-        18px;
+        20px;
 
     background:
         linear-gradient(135deg,
@@ -78,6 +80,9 @@
 
     height:
         70px;
+
+    flex-shrink:
+        0;
 
     display:
         flex;
@@ -384,13 +389,13 @@
                 1fr));
 
     gap:
-        20px;
+        22px;
 
 }
 
 
 /* ============================================================
-   7. GUIDE CARD
+   7. PROFESSIONAL GUIDE CARD
 ============================================================ */
 
 .guide-card {
@@ -411,20 +416,21 @@
         1px solid #e3e8ed;
 
     border-radius:
-        16px;
+        18px;
 
     overflow:
         hidden;
 
     box-shadow:
-        0 6px 20px rgba(0,
-            0,
-            0,
-            0.05);
+        0 8px 24px rgba(16,
+            24,
+            40,
+            0.06);
 
     transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
+        transform 0.22s ease,
+        box-shadow 0.22s ease,
+        border-color 0.22s ease;
 
 }
 
@@ -432,19 +438,42 @@
 .guide-card:hover {
 
     transform:
-        translateY(-3px);
+        translateY(-4px);
 
     box-shadow:
-        0 12px 30px rgba(0,
-            0,
-            0,
-            0.09);
+        0 16px 36px rgba(16,
+            24,
+            40,
+            0.10);
+
+    border-color:
+        #cfd8d3;
 
 }
 
 
 /* ============================================================
-   8. RANK BADGE
+   8. CARD COVER
+============================================================ */
+
+.guide-card-cover {
+
+    position:
+        relative;
+
+    min-height:
+        58px;
+
+    background:
+        linear-gradient(135deg,
+            #176044,
+            #0f4935);
+
+}
+
+
+/* ============================================================
+   9. RANK BADGE
 ============================================================ */
 
 .guide-rank-badge {
@@ -453,16 +482,79 @@
         absolute;
 
     top:
-        15px;
+        14px;
 
     left:
-        15px;
+        16px;
 
-    z-index:
-        2;
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    gap:
+        6px;
 
     padding:
-        7px 11px;
+        6px 10px;
+
+    border-radius:
+        20px;
+
+    background:
+        rgba(255,
+            255,
+            255,
+            0.14);
+
+    border:
+        1px solid rgba(255,
+            255,
+            255,
+            0.20);
+
+    color:
+        #ffffff;
+
+    font-size:
+        11px;
+
+    font-weight:
+        800;
+
+    backdrop-filter:
+        blur(6px);
+
+}
+
+
+/* ============================================================
+   10. VERIFIED BADGE
+============================================================ */
+
+.guide-verified-badge {
+
+    position:
+        absolute;
+
+    top:
+        14px;
+
+    right:
+        16px;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    gap:
+        5px;
+
+    padding:
+        6px 10px;
 
     border-radius:
         20px;
@@ -470,23 +562,26 @@
     background:
         #ffffff;
 
+    color:
+        #176044;
+
+    font-size:
+        11px;
+
+    font-weight:
+        800;
+
     box-shadow:
         0 3px 10px rgba(0,
             0,
             0,
-            0.12);
-
-    font-size:
-        13px;
-
-    font-weight:
-        800;
+            0.10);
 
 }
 
 
 /* ============================================================
-   9. GUIDE CARD TOP
+   11. CARD TOP / PROFILE
 ============================================================ */
 
 .guide-card-top {
@@ -494,25 +589,31 @@
     display:
         flex;
 
+    align-items:
+        center;
+
     gap:
         18px;
 
     padding:
-        24px;
+        0 24px 20px;
 
-    padding-top:
-        30px;
+    margin-top:
+        -4px;
 
 }
 
 
 .guide-avatar {
 
+    position:
+        relative;
+
     width:
-        72px;
+        94px;
 
     height:
-        72px;
+        94px;
 
     flex-shrink:
         0;
@@ -532,16 +633,25 @@
     background:
         #e8f4ed;
 
-    font-size:
-        32px;
+    border:
+        5px solid #ffffff;
+
+    box-shadow:
+        0 5px 18px rgba(16,
+            24,
+            40,
+            0.14);
 
     overflow:
         hidden;
 
+    margin-top:
+        -30px;
+
 }
 
 
-.guide-avatar img {
+.guide-avatar-image {
 
     width:
         100%;
@@ -549,8 +659,40 @@
     height:
         100%;
 
+    display:
+        block;
+
     object-fit:
         cover;
+
+}
+
+
+.guide-avatar-placeholder {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    background:
+        #e8f4ed;
+
+    color:
+        #176044;
+
+    font-size:
+        38px;
 
 }
 
@@ -559,6 +701,9 @@
 
     min-width:
         0;
+
+    padding-top:
+        4px;
 
 }
 
@@ -585,28 +730,14 @@
     margin:
         0;
 
-    font-size:
-        20px;
-
-}
-
-
-.verified-badge {
-
-    padding:
-        4px 8px;
-
-    border-radius:
-        20px;
-
-    background:
-        #edf8f1;
-
     color:
-        #176044;
+        #101828;
 
     font-size:
-        11px;
+        21px;
+
+    line-height:
+        1.25;
 
     font-weight:
         800;
@@ -625,11 +756,34 @@
     font-size:
         14px;
 
+    font-weight:
+        500;
+
+}
+
+
+.guide-profile-label {
+
+    margin-top:
+        7px;
+
+    color:
+        #176044;
+
+    font-size:
+        11px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        0.02em;
+
 }
 
 
 /* ============================================================
-   10. GUIDE STATS
+   12. GUIDE STATS
 ============================================================ */
 
 .guide-stats {
@@ -652,8 +806,11 @@
 
 .guide-stat {
 
+    min-width:
+        0;
+
     padding:
-        15px 10px;
+        15px 8px;
 
     text-align:
         center;
@@ -677,8 +834,14 @@
     display:
         block;
 
+    color:
+        #101828;
+
     font-size:
-        17px;
+        16px;
+
+    line-height:
+        1.25;
 
 }
 
@@ -689,25 +852,118 @@
         block;
 
     margin-top:
-        4px;
+        5px;
 
     color:
         #667085;
 
     font-size:
-        12px;
+        11px;
+
+    line-height:
+        1.35;
 
 }
 
 
 /* ============================================================
-   11. GUIDE DETAILS
+   13. GUIDE DETAILS
 ============================================================ */
 
 .guide-details {
 
     padding:
-        20px 24px;
+        20px 24px 18px;
+
+}
+
+
+.guide-detail-block {
+
+    margin-bottom:
+        16px;
+
+}
+
+
+.guide-detail-title {
+
+    margin-bottom:
+        8px;
+
+    color:
+        #344054;
+
+    font-size:
+        13px;
+
+    font-weight:
+        800;
+
+}
+
+
+.guide-tags {
+
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        7px;
+
+}
+
+
+.guide-tag {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    padding:
+        6px 9px;
+
+    border-radius:
+        20px;
+
+    background:
+        #edf8f1;
+
+    color:
+        #176044;
+
+    font-size:
+        11px;
+
+    font-weight:
+        700;
+
+}
+
+
+.guide-tag-soft {
+
+    background:
+        #f2f4f7;
+
+    color:
+        #475467;
+
+}
+
+
+.guide-muted {
+
+    color:
+        #98a2b3;
+
+    font-size:
+        12px;
 
 }
 
@@ -720,14 +976,17 @@
     gap:
         10px;
 
-    margin-bottom:
-        10px;
+    margin-top:
+        5px;
 
     color:
         #475467;
 
     font-size:
-        14px;
+        13px;
+
+    line-height:
+        1.5;
 
 }
 
@@ -740,8 +999,16 @@
 }
 
 
+.guide-detail-icon {
+
+    flex-shrink:
+        0;
+
+}
+
+
 /* ============================================================
-   12. GUIDE ACTIONS
+   14. GUIDE ACTIONS
 ============================================================ */
 
 .guide-card-actions {
@@ -751,6 +1018,9 @@
 
     gap:
         10px;
+
+    margin-top:
+        auto;
 
     padding:
         0 24px 24px;
@@ -765,16 +1035,34 @@
         1;
 
     min-height:
-        44px;
+        46px;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        7px;
 
     border-radius:
-        9px;
+        10px;
+
+    font-size:
+        13px;
 
     font-weight:
-        700;
+        800;
 
     cursor:
         pointer;
+
+    transition:
+        all 0.18s ease;
 
 }
 
@@ -793,6 +1081,17 @@
 }
 
 
+.view-guide-button:hover {
+
+    background:
+        #f8faf9;
+
+    border-color:
+        #98a2b3;
+
+}
+
+
 .select-guide-button {
 
     border:
@@ -804,6 +1103,12 @@
     color:
         #ffffff;
 
+    box-shadow:
+        0 4px 12px rgba(23,
+            96,
+            68,
+            0.18);
+
 }
 
 
@@ -812,11 +1117,29 @@
     background:
         #125038;
 
+    transform:
+        translateY(-1px);
+
+}
+
+
+.view-guide-button:disabled,
+.select-guide-button:disabled {
+
+    opacity:
+        0.65;
+
+    cursor:
+        not-allowed;
+
+    transform:
+        none;
+
 }
 
 
 /* ============================================================
-   13. EMPTY STATE
+   15. LOADING / EMPTY STATE
 ============================================================ */
 
 .guides-empty-state,
@@ -864,11 +1187,62 @@
 }
 
 
+.guide-error {
+
+    padding:
+        50px 20px;
+
+    text-align:
+        center;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid #e3e8ed;
+
+    border-radius:
+        16px;
+
+}
+
+
+.guide-error-icon {
+
+    margin-bottom:
+        12px;
+
+    font-size:
+        38px;
+
+}
+
+
 /* ============================================================
-   14. RESPONSIVE
+   16. ACCESSIBILITY
 ============================================================ */
 
-@media (max-width: 900px) {
+.view-guide-button:focus-visible,
+.select-guide-button:focus-visible,
+.clear-guide-filters:focus-visible {
+
+    outline:
+        3px solid rgba(23,
+            96,
+            68,
+            0.25);
+
+    outline-offset:
+        2px;
+
+}
+
+
+/* ============================================================
+   17. RESPONSIVE
+============================================================ */
+
+@media (max-width: 1000px) {
 
     .guide-filters {
 
@@ -878,14 +1252,12 @@
 
     }
 
-
     .clear-guide-filters {
 
         width:
             100%;
 
     }
-
 
     .guides-list {
 
@@ -897,15 +1269,25 @@
 }
 
 
-@media (max-width: 600px) {
+/* ============================================================
+   18. TABLET
+============================================================ */
+
+@media (max-width: 700px) {
 
     .find-guides-page {
 
         padding:
-            20px 12px 40px;
+            22px 14px 45px;
 
     }
 
+    .find-guides-hero {
+
+        padding:
+            22px;
+
+    }
 
     .find-guides-hero-content {
 
@@ -914,22 +1296,12 @@
 
     }
 
-
-    .find-guides-hero {
+    .guide-filter-section {
 
         padding:
             20px;
 
     }
-
-
-    .guide-filter-section {
-
-        padding:
-            18px;
-
-    }
-
 
     .guide-filter-header {
 
@@ -941,7 +1313,6 @@
 
     }
 
-
     .guide-filters {
 
         grid-template-columns:
@@ -949,11 +1320,102 @@
 
     }
 
+}
+
+
+/* ============================================================
+   19. MOBILE
+============================================================ */
+
+@media (max-width: 520px) {
+
+    .find-guides-hero-icon {
+
+        width:
+            56px;
+
+        height:
+            56px;
+
+        font-size:
+            28px;
+
+    }
+
+
+    .find-guides-hero h2 {
+
+        font-size:
+            23px;
+
+    }
+
 
     .guide-card-top {
 
+        align-items:
+            flex-start;
+
+        gap:
+            14px;
+
         padding:
-            20px;
+            0 18px 18px;
+
+    }
+
+
+    .guide-avatar {
+
+        width:
+            78px;
+
+        height:
+            78px;
+
+        margin-top:
+            -24px;
+
+    }
+
+
+    .guide-name {
+
+        font-size:
+            18px;
+
+    }
+
+
+    .guide-stats {
+
+        grid-template-columns:
+            repeat(3,
+                1fr);
+
+    }
+
+
+    .guide-stat {
+
+        padding:
+            12px 5px;
+
+    }
+
+
+    .guide-stat strong {
+
+        font-size:
+            14px;
+
+    }
+
+
+    .guide-stat span {
+
+        font-size:
+            10px;
 
     }
 
@@ -961,7 +1423,7 @@
     .guide-details {
 
         padding:
-            18px 20px;
+            18px;
 
     }
 
@@ -969,11 +1431,1108 @@
     .guide-card-actions {
 
         padding:
-            0 20px 20px;
+            0 18px 18px;
 
         flex-direction:
             column;
 
     }
 
+}
+
+
+/* ============================================================
+   20. VERY SMALL MOBILE
+============================================================ */
+
+@media (max-width: 360px) {
+
+    .guide-card-top {
+
+        flex-direction:
+            column;
+
+    }
+
+
+    .guide-avatar {
+
+        margin-top:
+            -22px;
+
+    }
+
+
+    .guide-main-info {
+
+        width:
+            100%;
+
+    }
+
+}
+
+/* ============================================================
+21. GUIDE PROFILE MODAL
+============================================================ */
+
+.guide-profile-modal {
+
+    position:
+        fixed;
+
+    inset:
+        0;
+
+    z-index:
+        9999;
+
+    display:
+        none;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    padding:
+        20px;
+
+    box-sizing:
+        border-box;
+   
+}
+
+.guide-profile-modal.is-open {
+
+    display:
+        flex;
+   
+}
+
+/* ============================================================
+22. MODAL BACKDROP
+============================================================ */
+
+.guide-profile-modal-backdrop {
+
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    background:
+        rgba(16,
+            24,
+            40,
+            0.58);
+
+    backdrop-filter:
+        blur(5px);
+   
+}
+
+/* ============================================================
+23. MODAL CONTAINER
+============================================================ */
+
+.guide-profile-modal-container {
+
+    position:
+        relative;
+
+    z-index:
+        1;
+
+    width:
+        min(680px,
+            100%);
+
+    max-height:
+        min(760px,
+            calc(100vh - 40px));
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    overflow:
+        hidden;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid #e3e8ed;
+
+    border-radius:
+        22px;
+
+    box-shadow:
+        0 24px 70px rgba(16,
+            24,
+            40,
+            0.22);
+
+    animation:
+        guideProfileModalIn 0.22s ease;
+   
+}
+
+/* ============================================================
+24. MODAL ANIMATION
+============================================================ */
+
+@keyframes guideProfileModalIn {
+
+    from {
+
+        opacity:
+            0;
+
+        transform:
+            translateY(12px) scale(0.98);
+
+    }
+
+    to {
+
+        opacity:
+            1;
+
+        transform:
+            translateY(0) scale(1);
+
+    }
+
+   
+}
+
+/* ============================================================
+25. MODAL HEADER
+============================================================ */
+
+.guide-profile-modal-header {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        15px;
+
+    padding:
+        18px 22px;
+
+    border-bottom:
+        1px solid #eaecf0;
+
+    background:
+        #ffffff;
+   
+}
+
+.guide-profile-modal-header h2 {
+
+    margin:
+        0;
+
+    color:
+        #101828;
+
+    font-size:
+        18px;
+
+    font-weight:
+        800;
+   
+}
+
+.guide-profile-modal-close {
+
+    width:
+        38px;
+
+    height:
+        38px;
+
+    flex-shrink:
+        0;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border:
+        1px solid #d0d5dd;
+
+    border-radius:
+        10px;
+
+    background:
+        #ffffff;
+
+    color:
+        #344054;
+
+    font-size:
+        25px;
+
+    line-height:
+        1;
+
+    cursor:
+        pointer;
+
+    transition:
+        all 0.18s ease;
+   
+}
+
+.guide-profile-modal-close:hover {
+
+    background:
+        #f2f4f7;
+
+    border-color:
+        #98a2b3;
+   
+}
+
+/* ============================================================
+26. MODAL CONTENT
+============================================================ */
+
+.guide-profile-modal-content {
+
+    overflow-y:
+        auto;
+
+    padding:
+        24px;
+
+    background:
+        #f8faf9;
+   
+}
+
+/* ============================================================
+27. MODAL PROFILE HERO
+============================================================ */
+
+.guide-modal-profile-hero {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        18px;
+
+    padding:
+        20px;
+
+    border:
+        1px solid #dce8e1;
+
+    border-radius:
+        18px;
+
+    background:
+        linear-gradient(135deg,
+            #ffffff,
+            #edf8f1);
+   
+}
+
+.guide-modal-avatar {
+
+    width:
+        92px;
+
+    height:
+        92px;
+
+    flex-shrink:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    overflow:
+        hidden;
+
+    border:
+        4px solid #ffffff;
+
+    border-radius:
+        50%;
+
+    background:
+        #e8f4ed;
+
+    box-shadow:
+        0 6px 18px rgba(16,
+            24,
+            40,
+            0.14);
+   
+}
+
+.guide-modal-avatar img {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    display:
+        block;
+
+    object-fit:
+        cover;
+   
+}
+
+.guide-modal-avatar-placeholder {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    color:
+        #176044;
+
+    font-size:
+        38px;
+   
+}
+
+.guide-modal-profile-info {
+
+    min-width:
+        0;
+   
+}
+
+.guide-modal-profile-info h3 {
+
+    margin:
+        0;
+
+    color:
+        #101828;
+
+    font-size:
+        24px;
+
+    line-height:
+        1.25;
+
+    font-weight:
+        800;
+   
+}
+
+.guide-modal-verified {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    gap:
+        5px;
+
+    margin-top:
+        8px;
+
+    padding:
+        5px 9px;
+
+    border-radius:
+        20px;
+
+    background:
+        #176044;
+
+    color:
+        #ffffff;
+
+    font-size:
+        11px;
+
+    font-weight:
+        800;
+   
+}
+
+.guide-modal-location {
+
+    margin:
+        8px 0 0;
+
+    color:
+        #667085;
+
+    font-size:
+        13px;
+   
+}
+
+/* ============================================================
+28. MODAL STATS
+============================================================ */
+
+.guide-modal-stats {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3,
+            1fr);
+
+    margin-top:
+        18px;
+
+    overflow:
+        hidden;
+
+    border:
+        1px solid #eaecf0;
+
+    border-radius:
+        14px;
+
+    background:
+        #ffffff;
+   
+}
+
+.guide-modal-stat {
+
+    padding:
+        14px 8px;
+
+    text-align:
+        center;
+
+    border-right:
+        1px solid #eaecf0;
+   
+}
+
+.guide-modal-stat:last-child {
+
+    border-right:
+        none;
+   
+}
+
+.guide-modal-stat strong {
+
+    display:
+        block;
+
+    color:
+        #101828;
+
+    font-size:
+        17px;
+
+    font-weight:
+        800;
+   
+}
+
+.guide-modal-stat span {
+
+    display:
+        block;
+
+    margin-top:
+        4px;
+
+    color:
+        #667085;
+
+    font-size:
+        11px;
+   
+}
+
+/* ============================================================
+29. MODAL INFORMATION GRID
+============================================================ */
+
+.guide-modal-information {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(2,
+            minmax(0,
+                1fr));
+
+    gap:
+        14px;
+
+    margin-top:
+        18px;
+   
+}
+
+.guide-modal-info-card {
+
+    padding:
+        16px;
+
+    border:
+        1px solid #eaecf0;
+
+    border-radius:
+        14px;
+
+    background:
+        #ffffff;
+   
+}
+
+.guide-modal-info-title {
+
+    margin-bottom:
+        9px;
+
+    color:
+        #344054;
+
+    font-size:
+        12px;
+
+    font-weight:
+        800;
+   
+}
+
+.guide-modal-info-value {
+
+    color:
+        #475467;
+
+    font-size:
+        13px;
+
+    line-height:
+        1.55;
+   
+}
+
+/* ============================================================
+30. MODAL TAGS
+============================================================ */
+
+.guide-modal-tags {
+
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        7px;
+   
+}
+
+.guide-modal-tag {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    padding:
+        6px 9px;
+
+    border-radius:
+        20px;
+
+    background:
+        #edf8f1;
+
+    color:
+        #176044;
+
+    font-size:
+        11px;
+
+    font-weight:
+        700;
+   
+}
+
+.guide-modal-tag-soft {
+
+    background:
+        #f2f4f7;
+
+    color:
+        #475467;
+   
+}
+
+/* ============================================================
+31. MODAL CONTACT
+============================================================ */
+
+.guide-modal-contact {
+
+    display:
+        grid;
+
+    gap:
+        9px;
+
+    margin-top:
+        18px;
+
+    padding:
+        17px;
+
+    border:
+        1px solid #eaecf0;
+
+    border-radius:
+        14px;
+
+    background:
+        #ffffff;
+   
+}
+
+.guide-modal-contact-row {
+
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    gap:
+        10px;
+
+    color:
+        #475467;
+
+    font-size:
+        13px;
+
+    line-height:
+        1.5;
+   
+}
+
+.guide-modal-contact-row strong {
+
+    color:
+        #344054;
+   
+}
+
+/* ============================================================
+32. MODAL ACTIONS
+============================================================ */
+
+.guide-profile-modal-actions {
+
+    display:
+        flex;
+
+    gap:
+        10px;
+
+    padding:
+        16px 22px;
+
+    border-top:
+        1px solid #eaecf0;
+
+    background:
+        #ffffff;
+   
+}
+
+.view-guide-modal-close-button,
+.select-guide-modal-button {
+
+    min-height:
+        46px;
+
+    flex:
+        1;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        7px;
+
+    border-radius:
+        10px;
+
+    font-size:
+        13px;
+
+    font-weight:
+        800;
+
+    cursor:
+        pointer;
+
+    transition:
+        all 0.18s ease;
+   
+}
+
+.view-guide-modal-close-button {
+
+    border:
+        1px solid #d0d5dd;
+
+    background:
+        #ffffff;
+
+    color:
+        #344054;
+   
+}
+
+.view-guide-modal-close-button:hover {
+
+    background:
+        #f8faf9;
+
+    border-color:
+        #98a2b3;
+   
+}
+
+.select-guide-modal-button {
+
+    border:
+        none;
+
+    background:
+        #176044;
+
+    color:
+        #ffffff;
+
+    box-shadow:
+        0 4px 12px rgba(23,
+            96,
+            68,
+            0.18);
+   
+}
+
+.select-guide-modal-button:hover {
+
+    background:
+        #125038;
+
+    transform:
+        translateY(-1px);
+   
+}
+
+.select-guide-modal-button:disabled {
+
+    opacity:
+        0.65;
+
+    cursor:
+        not-allowed;
+
+    transform:
+        none;
+   
+}
+
+/* ============================================================
+33. MODAL ACCESSIBILITY
+============================================================ */
+
+.guide-profile-modal-close:focus-visible,
+.view-guide-modal-close-button:focus-visible,
+.select-guide-modal-button:focus-visible {
+
+    outline:
+        3px solid rgba(23,
+            96,
+            68,
+            0.25);
+
+    outline-offset:
+        2px;
+   
+}
+
+/* ============================================================
+34. MODAL TABLET
+============================================================ */
+
+@media (max-width: 700px) {
+
+    .guide-profile-modal {
+
+        padding:
+            14px;
+
+    }
+
+
+    .guide-profile-modal-container {
+
+        max-height:
+            calc(100vh - 28px);
+
+        border-radius:
+            18px;
+
+    }
+
+
+    .guide-modal-profile-hero {
+
+        padding:
+            17px;
+
+    }
+
+
+    .guide-modal-avatar {
+
+        width:
+            78px;
+
+        height:
+            78px;
+
+    }
+
+
+    .guide-modal-profile-info h3 {
+
+        font-size:
+            20px;
+
+    }
+
+   
+}
+
+/* ============================================================
+35. MODAL MOBILE
+============================================================ */
+
+@media (max-width: 520px) {
+
+    .guide-profile-modal {
+
+        padding:
+            10px;
+
+        align-items:
+            flex-end;
+
+    }
+
+
+    .guide-profile-modal-container {
+
+        width:
+            100%;
+
+        max-height:
+            calc(100vh - 20px);
+
+        border-radius:
+            18px 18px 0 0;
+
+    }
+
+
+    .guide-profile-modal-content {
+
+        padding:
+            16px;
+
+    }
+
+
+    .guide-modal-profile-hero {
+
+        flex-direction:
+            column;
+
+        align-items:
+            center;
+
+        text-align:
+            center;
+
+    }
+
+
+    .guide-modal-profile-info {
+
+        width:
+            100%;
+
+    }
+
+
+    .guide-modal-stats {
+
+        grid-template-columns:
+            repeat(3,
+                1fr);
+
+    }
+
+
+    .guide-modal-information {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .guide-profile-modal-actions {
+
+        padding:
+            14px 16px;
+
+        flex-direction:
+            column;
+
+    }
+
+
+    .guide-profile-modal-actions button {
+
+        width:
+            100%;
+
+    }
+
+   
+}
+
+/* ============================================================
+36. VERY SMALL MOBILE
+============================================================ */
+
+@media (max-width: 360px) {
+
+    .guide-modal-avatar {
+
+        width:
+            70px;
+
+        height:
+            70px;
+
+    }
+
+
+    .guide-modal-profile-info h3 {
+
+        font-size:
+            18px;
+
+    }
+
+
+    .guide-modal-stat {
+
+        padding:
+            11px 5px;
+
+    }
+
+
+    .guide-modal-stat strong {
+
+        font-size:
+            14px;
+
+    }
+
+
+    .guide-modal-stat span {
+
+        font-size:
+            10px;
+
+    }
+
+   
+}
+
+/* ============================================================
+37. PREVENT BODY SCROLL WHEN MODAL IS OPEN
+============================================================ */
+
+body.guide-profile-modal-open {
+
+    overflow:
+        hidden;
+   
 }

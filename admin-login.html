@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+  
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Login | LankaWayfarer</title>
+
+    <link rel="stylesheet" href="css/admin-login.css">
+  
+
+</head>
+
+<body>
+
+  
+    <main class="admin-login-page">
+
+        <section class="admin-login-card">
+
+            <!-- ==================================================
+             ADMIN LOGIN HEADER
+        ================================================== -->
+
+            <div class="admin-login-header">
+
+                <h1>
+                    LankaWayfarer
+                </h1>
+
+                <p>
+                    Admin Portal
+                </p>
+
+            </div>
+
+
+            <!-- ==================================================
+             EMAIL / PASSWORD LOGIN
+        ================================================== -->
+
+            <form id="adminLoginForm">
+
+                <div class="form-group">
+
+                    <label for="adminEmail">
+                        Email Address
+                    </label>
+
+                    <input type="email" id="adminEmail" autocomplete="username" required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="adminPassword">
+                        Password
+                    </label>
+
+                    <input type="password" id="adminPassword" autocomplete="current-password" required>
+
+                </div>
+
+
+                <button type="submit" id="adminLoginButton">
+                    Login
+                </button>
+
+            </form>
+
+
+            <!-- ==================================================
+             DIVIDER
+        ================================================== -->
+
+            <div class="admin-login-divider">
+
+                <span>
+                    OR
+                </span>
+
+            </div>
+
+
+            <!-- ==================================================
+             GOOGLE LOGIN
+        ================================================== -->
+
+            <button type="button" id="googleAdminLoginButton" class="google-admin-login-button">
+
+                <span class="google-login-icon">
+                    G
+                </span>
+
+                <span>
+                    Continue with Google
+                </span>
+
+            </button>
+
+
+            <!-- ==================================================
+             LOGIN MESSAGE
+        ================================================== -->
+
+            <div id="adminLoginMessage" class="admin-login-message" aria-live="polite"></div>
+
+
+        </section>
+
+    </main>
+
+
+    <!-- ========================================================
+     ADMIN LOGIN JAVASCRIPT
+======================================================== -->
+
+    <script type="module" src="js/admin-login.js"></script>
+  
+
+</body>
+
+</html>

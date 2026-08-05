@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="robots" content="noindex, nofollow">
+
+    <title>
+        Admin Dashboard | LankaWayfarer
+    </title>
+
+    <link rel="stylesheet" href="css/admin-dashboard.css">
+
+</head>
+
+
+<body>
+
+    <!-- ======================================================
+         ADMIN APPLICATION
+    ======================================================= -->
+
+    <div class="admin-app">
+
+
+        <!-- ==================================================
+             SIDEBAR
+        =================================================== -->
+
+        <aside class="admin-sidebar">
+
+
+            <!-- BRAND -->
+
+            <div class="admin-brand">
+
+                <div class="admin-brand-logo">
+                    LW
+                </div>
+
+                <div class="admin-brand-text">
+
+                    <strong>
+                        LankaWayfarer
+                    </strong>
+
+                    <span>
+                        Administration
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- NAVIGATION -->
+
+            <nav class="admin-navigation" aria-label="Admin Navigation">
+
+                <a href="admin-dashboard.html" class="admin-nav-item active">
+
+                    <span class="admin-nav-icon">
+                        ▦
+                    </span>
+
+                    <span>
+                        Dashboard
+                    </span>
+
+                </a>
+
+
+                <a href="admin-guides.html" class="admin-nav-item">
+
+                    <span class="admin-nav-icon">
+                        👤
+                    </span>
+
+                    <span>
+                        Guide Management
+                    </span>
+
+                </a>
+
+            </nav>
+
+
+            <!-- SIDEBAR FOOTER -->
+
+            <div class="admin-sidebar-footer">
+
+                <button type="button" id="sidebarLogoutButton" class="sidebar-logout-button">
+
+                    <span>
+                        ⇥
+                    </span>
+
+                    Logout
+
+                </button>
+
+            </div>
+
+
+        </aside>
+
+
+        <!-- ==================================================
+             MAIN CONTENT
+        =================================================== -->
+
+        <main class="admin-main">
+
+
+            <!-- ==================================================
+                 HEADER
+            =================================================== -->
+
+            <header class="admin-header">
+
+
+                <div>
+
+                    <div class="admin-header-title">
+
+                        <h1>
+                            Admin Dashboard
+                        </h1>
+
+                        <p>
+                            Manage LankaWayfarer platform activity.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="admin-header-actions">
+
+                    <span id="adminAccountEmail" class="admin-account-email">
+                        Loading...
+                    </span>
+
+
+                    <button type="button" id="headerLogoutButton" class="header-logout-button">
+                        Logout
+                    </button>
+
+                </div>
+
+
+            </header>
+
+
+            <!-- ==================================================
+                 PAGE CONTENT
+            =================================================== -->
+
+            <section class="admin-content">
+
+
+                <!-- ==================================================
+                     AUTH LOADING
+                =================================================== -->
+
+                <div id="dashboardLoading" class="dashboard-loading">
+
+                    <div class="loading-spinner"></div>
+
+                    <p>
+                        Loading administrator dashboard...
+                    </p>
+
+                </div>
+
+
+                <!-- ==================================================
+                     DASHBOARD ERROR
+                =================================================== -->
+
+                <div id="dashboardError" class="dashboard-error" hidden>
+
+                    <strong>
+                        Unable to load dashboard.
+                    </strong>
+
+                    <p id="dashboardErrorMessage">
+                        Please try again.
+                    </p>
+
+                    <button type="button" id="retryDashboardButton">
+                        Retry
+                    </button>
+
+                </div>
+
+
+                <!-- ==================================================
+                     DASHBOARD CONTENT
+                =================================================== -->
+
+                <div id="dashboardContent" class="dashboard-content" hidden>
+
+
+                    <!-- ==================================================
+                         STATISTICS
+                    =================================================== -->
+
+                    <section class="statistics-grid">
+
+
+                        <!-- TOTAL -->
+
+                        <article class="stat-card">
+
+                            <div class="stat-card-icon">
+                                👥
+                            </div>
+
+                            <div class="stat-card-content">
+
+                                <span>
+                                    Total Guides
+                                </span>
+
+                                <strong id="totalGuidesCount">
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </article>
+
+
+                        <!-- PENDING -->
+
+                        <article class="stat-card pending-stat">
+
+                            <div class="stat-card-icon">
+                                ⏳
+                            </div>
+
+                            <div class="stat-card-content">
+
+                                <span>
+                                    Pending Review
+                                </span>
+
+                                <strong id="pendingGuidesCount">
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </article>
+
+
+                        <!-- APPROVED -->
+
+                        <article class="stat-card approved-stat">
+
+                            <div class="stat-card-icon">
+                                ✓
+                            </div>
+
+                            <div class="stat-card-content">
+
+                                <span>
+                                    Approved Guides
+                                </span>
+
+                                <strong id="approvedGuidesCount">
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </article>
+
+
+                        <!-- ACTIVE -->
+
+                        <article class="stat-card active-stat">
+
+                            <div class="stat-card-icon">
+                                ●
+                            </div>
+
+                            <div class="stat-card-content">
+
+                                <span>
+                                    Active Guides
+                                </span>
+
+                                <strong id="activeGuidesCount">
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </article>
+
+
+                    </section>
+
+
+                    <!-- ==================================================
+                         QUICK ACTIONS
+                    =================================================== -->
+
+                    <section class="dashboard-section">
+
+
+                        <div class="section-heading">
+
+                            <div>
+
+                                <h2>
+                                    Quick Actions
+                                </h2>
+
+                                <p>
+                                    Access the main administration tools.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="quick-actions-grid">
+
+
+                            <a href="admin-guides.html" class="quick-action-card">
+
+                                <div class="quick-action-icon">
+                                    👤
+                                </div>
+
+                                <div>
+
+                                    <h3>
+                                        Guide Management
+                                    </h3>
+
+                                    <p>
+                                        Review, approve, reject and manage guide applications.
+                                    </p>
+
+                                </div>
+
+                                <span class="quick-action-arrow">
+                                    →
+                                </span>
+
+                            </a>
+
+
+                            <a href="admin-guides.html?status=pending" class="quick-action-card">
+
+                                <div class="quick-action-icon pending-icon">
+                                    ⏳
+                                </div>
+
+                                <div>
+
+                                    <h3>
+                                        Pending Applications
+                                    </h3>
+
+                                    <p>
+                                        Review guides waiting for administrator approval.
+                                    </p>
+
+                                </div>
+
+                                <span class="quick-action-arrow">
+                                    →
+                                </span>
+
+                            </a>
+
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- ==================================================
+                         RECENT GUIDE APPLICATIONS
+                    =================================================== -->
+
+                    <section class="dashboard-section">
+
+
+                        <div class="section-heading section-heading-with-action">
+
+                            <div>
+
+                                <h2>
+                                    Recent Guide Applications
+                                </h2>
+
+                                <p>
+                                    Latest guide registrations from Firestore.
+                                </p>
+
+                            </div>
+
+
+                            <a href="admin-guides.html" class="view-all-link">
+                                View All Guides →
+                            </a>
+
+                        </div>
+
+
+                        <div class="recent-guides-container">
+
+
+                            <!-- TABLE -->
+
+                            <div class="recent-guides-table-wrapper">
+
+                                <table class="recent-guides-table">
+
+                                    <thead>
+
+                                        <tr>
+
+                                            <th>
+                                                Guide
+                                            </th>
+
+                                            <th>
+                                                Email
+                                            </th>
+
+                                            <th>
+                                                District
+                                            </th>
+
+                                            <th>
+                                                Status
+                                            </th>
+
+                                            <th>
+                                                Registration
+                                            </th>
+
+                                            <th>
+                                                Action
+                                            </th>
+
+                                        </tr>
+
+                                    </thead>
+
+
+                                    <tbody id="recentGuidesTableBody">
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+
+                            <!-- EMPTY STATE -->
+
+                            <div id="recentGuidesEmpty" class="recent-guides-empty" hidden>
+
+                                <div>
+                                    👤
+                                </div>
+
+                                <h3>
+                                    No guide applications
+                                </h3>
+
+                                <p>
+                                    There are currently no guide registrations.
+                                </p>
+
+                            </div>
+
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- ==================================================
+                         SYSTEM INFORMATION
+                    =================================================== -->
+
+                    <section class="dashboard-section">
+
+
+                        <div class="system-information-card">
+
+
+                            <div class="system-information-icon">
+                                🔐
+                            </div>
+
+
+                            <div class="system-information-content">
+
+                                <h3>
+                                    Administrator Access
+                                </h3>
+
+                                <p>
+                                    This dashboard is protected by Firebase Authentication
+                                    and the <strong>admin</strong> custom claim.
+                                    Firestore access is controlled by Firebase Security Rules.
+                                </p>
+
+                            </div>
+
+
+                            <span id="adminSecurityStatus" class="security-status">
+                                Verifying...
+                            </span>
+
+
+                        </div>
+
+                    </section>
+
+
+                </div>
+
+
+            </section>
+
+
+        </main>
+
+
+    </div>
+
+
+    <!-- ======================================================
+         SCRIPT
+    ======================================================= -->
+
+    <script type="module" src="js/admin-dashboard.js"></script>
+
+</body>
+
+</html>

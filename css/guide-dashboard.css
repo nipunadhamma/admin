@@ -1015,3 +1015,47 @@
     }
 
 }
+
+ /* ============================================================
+    GUIDE HERO PROFILE PHOTO
+ ============================================================ */
+
+ .guide-hero-icon {
+     width: 86px;
+     height: 86px;
+
+     border-radius: 50%;
+
+     overflow: hidden;
+
+     display: flex;
+     align-items: center;
+     justify-content: center;
+
+     flex-shrink: 0;
+
+     background: #f1f5f9;
+
+     border: 3px solid #ffffff;
+
+     box-shadow:
+         0 6px 18px rgba(0, 0, 0, 0.12);
+ }
+
+
+ /* ============================================================
+   GUIDE PROFILE IMAGE
+============================================================ */
+
+ .guide-profile-photo {
+     width: 100%;
+     height: 100%;
+
+     display: block;
+
+     object-fit: cover;
+
+     object-position: center;
+
+     border-radius: 50%;
+ }
