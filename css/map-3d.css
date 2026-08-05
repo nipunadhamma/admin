@@ -1,0 +1,1160 @@
+/* ============================================================
+   LANKAWAYFARER
+   3D MAP FEATURE
+============================================================ */
+
+
+/* ============================================================
+   1. 3D FEATURE CARD
+============================================================ */
+
+.map-3d-feature {
+
+    width: 100%;
+
+    margin:
+        28px 0;
+
+}
+
+
+.map-3d-card {
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 24px;
+
+    padding:
+        26px 30px;
+
+    border-radius:
+        22px;
+
+    background:
+        linear-gradient(135deg,
+            #ffffff 0%,
+            #f5fbff 100%);
+
+    border:
+        1px solid rgba(15,
+            23,
+            42,
+            0.08);
+
+    box-shadow:
+        0 18px 45px rgba(15,
+            23,
+            42,
+            0.10);
+
+    overflow:
+        hidden;
+
+}
+
+
+.map-3d-card::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 220px;
+
+    height: 220px;
+
+    right: -80px;
+
+    top: -100px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(56,
+            189,
+            248,
+            0.10);
+
+    pointer-events: none;
+
+}
+
+
+.map-3d-card-content {
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    z-index: 1;
+
+}
+
+
+.map-3d-icon {
+
+    width: 64px;
+
+    height: 64px;
+
+    flex:
+        0 0 64px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 18px;
+
+    font-size: 32px;
+
+    background:
+        linear-gradient(135deg,
+            #e0f7ff,
+            #dbeafe);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,
+            255,
+            255,
+            0.8);
+
+}
+
+
+.map-3d-text {
+
+    min-width: 0;
+
+}
+
+
+.map-3d-eyebrow {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing:
+        1.5px;
+
+    color:
+        #0284c7;
+
+}
+
+
+.map-3d-text h3 {
+
+    margin:
+        0 0 6px;
+
+    font-size: 24px;
+
+    line-height: 1.2;
+
+    color:
+        #0f172a;
+
+}
+
+
+.map-3d-text p {
+
+    margin: 0;
+
+    max-width: 620px;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+
+    color:
+        #64748b;
+
+}
+
+
+/* ============================================================
+   2. 3D BUTTON
+============================================================ */
+
+.map-3d-button {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    flex-shrink: 0;
+
+    min-height: 48px;
+
+    padding:
+        0 20px;
+
+    border:
+        0;
+
+    border-radius:
+        14px;
+
+    background:
+        linear-gradient(135deg,
+            #0284c7,
+            #0369a1);
+
+    color:
+        #ffffff;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 10px 25px rgba(2,
+            132,
+            199,
+            0.25);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+}
+
+
+.map-3d-button strong {
+
+    font-size: 18px;
+
+    transition:
+        transform 0.2s ease;
+
+}
+
+
+.map-3d-button:hover {
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 14px 30px rgba(2,
+            132,
+            199,
+            0.32);
+
+}
+
+
+.map-3d-button:hover strong {
+
+    transform:
+        translateX(4px);
+
+}
+
+
+.map-3d-button:active {
+
+    transform:
+        translateY(0);
+
+}
+
+
+/* ============================================================
+   3. 3D MAP SECTION
+============================================================ */
+
+.map-3d-section {
+
+    display:
+        none;
+
+    width: 100%;
+
+    margin:
+        30px 0 40px;
+
+    border-radius:
+        24px;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid rgba(15,
+            23,
+            42,
+            0.08);
+
+    box-shadow:
+        0 20px 55px rgba(15,
+            23,
+            42,
+            0.12);
+
+    overflow:
+        hidden;
+
+}
+
+
+.map-3d-section.active {
+
+    display:
+        block;
+
+    animation:
+        map3DFadeIn 0.35s ease;
+
+}
+
+
+@keyframes map3DFadeIn {
+
+    from {
+
+        opacity: 0;
+
+        transform:
+            translateY(12px);
+
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform:
+            translateY(0);
+
+    }
+
+}
+
+
+/* ============================================================
+   4. 3D MAP HEADER
+============================================================ */
+
+.map-3d-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding:
+        24px 26px 18px;
+
+}
+
+
+.map-3d-section-eyebrow {
+
+    display: block;
+
+    margin-bottom: 6px;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing:
+        1.4px;
+
+    color:
+        #0284c7;
+
+}
+
+
+.map-3d-header h2 {
+
+    margin:
+        0 0 6px;
+
+    font-size: 26px;
+
+    color:
+        #0f172a;
+
+}
+
+
+.map-3d-header p {
+
+    margin: 0;
+
+    font-size: 14px;
+
+    color:
+        #64748b;
+
+}
+
+
+.map-3d-close-button {
+
+    width: 42px;
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border:
+        1px solid rgba(15,
+            23,
+            42,
+            0.10);
+
+    border-radius: 50%;
+
+    background:
+        #ffffff;
+
+    color:
+        #475569;
+
+    font-size: 25px;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+
+}
+
+
+.map-3d-close-button:hover {
+
+    background:
+        #f1f5f9;
+
+    color:
+        #0f172a;
+
+    transform:
+        rotate(90deg);
+
+}
+
+
+/* ============================================================
+   5. 3D MAP TOOLBAR
+============================================================ */
+
+.map-3d-toolbar {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding:
+        0 26px 14px;
+
+}
+
+
+.map-3d-status {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    color:
+        #64748b;
+
+}
+
+
+.map-3d-status-dot {
+
+    width: 8px;
+
+    height: 8px;
+
+    border-radius: 50%;
+
+    background:
+        #22c55e;
+
+    box-shadow:
+        0 0 0 4px rgba(34,
+            197,
+            94,
+            0.12);
+
+}
+
+
+.map-3d-reset-button {
+
+    min-height: 36px;
+
+    padding:
+        0 13px;
+
+    border:
+        1px solid rgba(15,
+            23,
+            42,
+            0.10);
+
+    border-radius:
+        10px;
+
+    background:
+        #ffffff;
+
+    color:
+        #334155;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+
+}
+
+
+.map-3d-reset-button:hover {
+
+    background:
+        #f8fafc;
+
+    transform:
+        translateY(-1px);
+
+}
+
+
+/* ============================================================
+   6. MAP CONTAINER
+============================================================ */
+
+.map-3d-container {
+
+    position: relative;
+
+    width: 100%;
+
+    height: 620px;
+
+    min-height: 420px;
+
+    background:
+        #dbeafe;
+
+}
+
+
+.map-3d-container .maplibregl-canvas {
+
+    outline:
+        none;
+
+}
+
+
+/* ============================================================
+   7. MAP CONTROLS
+============================================================ */
+
+.map-3d-container .maplibregl-ctrl-group {
+
+    border-radius:
+        12px;
+
+    overflow:
+        hidden;
+
+    border:
+        1px solid rgba(15,
+            23,
+            42,
+            0.10);
+
+    box-shadow:
+        0 8px 25px rgba(15,
+            23,
+            42,
+            0.15);
+
+}
+
+
+.map-3d-container .maplibregl-ctrl button {
+
+    background:
+        #ffffff;
+
+}
+
+
+/* ============================================================
+   8. 3D DESTINATION MARKER
+============================================================ */
+
+.map-3d-marker {
+
+    position: relative;
+
+    width: 34px;
+
+    height: 34px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius:
+        50% 50% 50% 0;
+
+    background:
+        linear-gradient(135deg,
+            #0284c7,
+            #0369a1);
+
+    color:
+        #ffffff;
+
+    font-size: 16px;
+
+    box-shadow:
+        0 8px 18px rgba(3,
+            105,
+            161,
+            0.35);
+
+    transform:
+        rotate(-45deg);
+
+    border:
+        2px solid #ffffff;
+
+}
+
+
+.map-3d-marker span {
+
+    transform:
+        rotate(45deg);
+
+}
+
+
+.map-3d-marker.featured {
+
+    background:
+        linear-gradient(135deg,
+            #f59e0b,
+            #d97706);
+
+    box-shadow:
+        0 8px 20px rgba(245,
+            158,
+            11,
+            0.38);
+
+}
+
+
+/* ============================================================
+   9. 3D POPUP
+============================================================ */
+
+.map-3d-popup {
+
+    width:
+        min(280px, 70vw);
+
+}
+
+
+.map-3d-popup-image {
+
+    width: 100%;
+
+    height: 135px;
+
+    object-fit: cover;
+
+    display: block;
+
+    border-radius:
+        12px;
+
+    margin-bottom:
+        12px;
+
+}
+
+
+.map-3d-popup h3 {
+
+    margin:
+        0 0 4px;
+
+    font-size: 17px;
+
+    color:
+        #0f172a;
+
+}
+
+
+.map-3d-popup .map-3d-popup-sinhala {
+
+    margin:
+        0 0 8px;
+
+    font-size: 13px;
+
+    color:
+        #64748b;
+
+}
+
+
+.map-3d-popup p {
+
+    margin:
+        0 0 10px;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+
+    color:
+        #475569;
+
+}
+
+
+.map-3d-popup-rating {
+
+    margin-bottom:
+        12px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+}
+
+
+.map-3d-popup-link {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 100%;
+
+    min-height: 38px;
+
+    border-radius:
+        9px;
+
+    background:
+        #0284c7;
+
+    color:
+        #ffffff !important;
+
+    text-decoration:
+        none;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+}
+
+
+/* ============================================================
+   10. HELP BAR
+============================================================ */
+
+.map-3d-help {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: 18px;
+
+    padding:
+        12px 18px;
+
+    background:
+        #f8fafc;
+
+    border-top:
+        1px solid rgba(15,
+            23,
+            42,
+            0.06);
+
+    color:
+        #64748b;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+}
+
+
+/* ============================================================
+   11. ERROR STATE
+============================================================ */
+
+.map-3d-error {
+
+    position: absolute;
+
+    inset: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 30px;
+
+    text-align: center;
+
+    background:
+        #f8fafc;
+
+}
+
+
+.map-3d-error-card {
+
+    max-width: 420px;
+
+    padding: 28px;
+
+    border-radius:
+        18px;
+
+    background:
+        #ffffff;
+
+    box-shadow:
+        0 15px 40px rgba(15,
+            23,
+            42,
+            0.10);
+
+}
+
+
+.map-3d-error-card h3 {
+
+    margin:
+        0 0 8px;
+
+    color:
+        #0f172a;
+
+}
+
+
+.map-3d-error-card p {
+
+    margin: 0;
+
+    color:
+        #64748b;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+
+}
+
+
+/* ============================================================
+   12. TABLET
+============================================================ */
+
+@media (max-width: 900px) {
+
+    .map-3d-card {
+
+        flex-direction:
+            column;
+
+        align-items:
+            stretch;
+
+    }
+
+
+    .map-3d-button {
+
+        width:
+            100%;
+
+    }
+
+
+    .map-3d-container {
+
+        height:
+            540px;
+
+    }
+
+}
+
+
+/* ============================================================
+   13. MOBILE
+============================================================ */
+
+@media (max-width: 600px) {
+
+    .map-3d-card {
+
+        padding:
+            20px;
+
+        border-radius:
+            18px;
+
+    }
+
+
+    .map-3d-card-content {
+
+        align-items:
+            flex-start;
+
+    }
+
+
+    .map-3d-icon {
+
+        width: 52px;
+
+        height: 52px;
+
+        flex-basis: 52px;
+
+        border-radius: 15px;
+
+        font-size: 26px;
+
+    }
+
+
+    .map-3d-text h3 {
+
+        font-size:
+            20px;
+
+    }
+
+
+    .map-3d-text p {
+
+        font-size:
+            13px;
+
+    }
+
+
+    .map-3d-section {
+
+        border-radius:
+            18px;
+
+    }
+
+
+    .map-3d-header {
+
+        padding:
+            20px 18px 15px;
+
+    }
+
+
+    .map-3d-header h2 {
+
+        font-size:
+            21px;
+
+    }
+
+
+    .map-3d-header p {
+
+        font-size:
+            12px;
+
+    }
+
+
+    .map-3d-toolbar {
+
+        padding:
+            0 18px 12px;
+
+    }
+
+
+    .map-3d-container {
+
+        height:
+            460px;
+
+        min-height:
+            360px;
+
+    }
+
+
+    .map-3d-help {
+
+        gap:
+            10px;
+
+        font-size:
+            10px;
+
+    }
+
+}
+/* ============================================================
+   3D MAP — ADDED TO TRIP BUTTON
+============================================================ */
+
+.map-3d-popup .popup-add-trip-btn.added {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px 14px;
+
+    border: 1px solid #16a34a;
+    border-radius: 8px;
+
+    background: #16a34a;
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    text-align: center;
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+/* ============================================================
+   HOVER
+============================================================ */
+
+.map-3d-popup .popup-add-trip-btn.added:hover {
+    background: #15803d;
+    border-color: #15803d;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 4px 12px rgba(22, 163, 74, 0.25);
+}
+
+
+/* ============================================================
+   ACTIVE / CLICK
+============================================================ */
+
+.map-3d-popup .popup-add-trip-btn.added:active {
+    transform: translateY(0);
+}
+
+
+/* ============================================================
+   KEYBOARD FOCUS
+============================================================ */
+
+.map-3d-popup .popup-add-trip-btn.added:focus-visible {
+    outline: 3px solid rgba(22, 163, 74, 0.3);
+    outline-offset: 2px;
+}

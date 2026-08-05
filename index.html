@@ -96,6 +96,13 @@
     <link rel="stylesheet" href="css/hero.css">
     <link rel="stylesheet" href="css/map.css">
     <link rel="stylesheet" href="css/my-trip.css">
+    
+   
+    <link rel="stylesheet" href="css/map-3d.css">
+    
+    <!-- MapLibre GL JS -->
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css">
+
 
 </head>
 
@@ -186,6 +193,10 @@
 
             <a href="attractions.html">
                 Destinations
+            </a>
+
+            <a href="help.html" class="nav-link">
+                Help
             </a>
 
 
@@ -789,6 +800,60 @@
               
             
             </div>
+
+            <!-- =========================================================
+                 3D SRI LANKA MAP
+            ========================================================== -->
+            
+            <section class="map-3d-feature">
+            
+                <div class="map-3d-card">
+            
+                    <div class="map-3d-card-content">
+            
+                        <div class="map-3d-icon">
+                            🌍
+                        </div>
+            
+                        <div class="map-3d-text">
+            
+                            <span class="map-3d-eyebrow">
+                                NEXT-GENERATION EXPLORATION
+                            </span>
+            
+                            <h3>
+                                Explore Sri Lanka in 3D
+                            </h3>
+            
+                            <p>
+                                Discover Sri Lanka's destinations
+                                through an interactive 3D map.
+                                Rotate, tilt and explore the island
+                                from a new perspective.
+                            </p>
+            
+                        </div>
+            
+                    </div>
+            
+            
+                    <button type="button" id="open3DMapButton" class="map-3d-button">
+            
+                        <span>
+                            🌍
+                        </span>
+            
+                        Explore Sri Lanka in 3D
+            
+                        <strong>
+                            →
+                        </strong>
+            
+                    </button>
+            
+                </div>
+            
+            </section>
             
             <!-- =========================================
                  MAP
@@ -812,6 +877,76 @@
             
                 <div id="map"></div>
                
+            
+            </section>
+
+            <!-- =========================================================
+                 LANKAWAYFARER 3D MAP
+            ========================================================== -->
+            
+            <section id="map3DSection" class="map-3d-section" aria-hidden="true">
+            
+                <div class="map-3d-header">
+            
+                    <div>
+            
+                        <span class="map-3d-section-eyebrow">
+                            🌍 LANKAWAYFARER 3D
+                        </span>
+            
+                        <h2>
+                            Explore Sri Lanka in 3D
+                        </h2>
+            
+                        <p>
+                            Tilt, rotate and explore Sri Lanka's
+                            destinations from a new perspective.
+                        </p>
+            
+                    </div>
+            
+            
+                    <button type="button" id="close3DMapButton" class="map-3d-close-button" aria-label="Close 3D map">
+                        ×
+                    </button>
+            
+                </div>
+            
+            
+                <div class="map-3d-toolbar">
+            
+                    <div class="map-3d-status">
+            
+                        <span class="map-3d-status-dot"></span>
+            
+                        Interactive 3D Explorer
+            
+                    </div>
+            
+            
+                    <button type="button" id="reset3DMapButton" class="map-3d-reset-button">
+            
+                        ⟳ Reset View
+            
+                    </button>
+            
+                </div>
+            
+            
+                <div id="map3D" class="map-3d-container" aria-label="Interactive 3D map of Sri Lanka"></div>
+            
+            
+                <div class="map-3d-help">
+            
+                    <span>🖱️ Drag</span>
+            
+                    <span>↻ Rotate</span>
+            
+                    <span>↕ Tilt</span>
+            
+                    <span>🔍 Zoom</span>
+            
+                </div>
             
             </section>
 
@@ -1072,6 +1207,12 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
     </script>
     
+    <!-- ============================================================
+         MAPLIBRE GL JS
+    ============================================================ -->
+    
+    <script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js">
+    </script>
     
     <!-- Tourist Places Database -->
     
@@ -1083,9 +1224,22 @@
     <script src="js/hero-slideshow.js"></script>
     
     
-    <!-- Map Logic -->
+<!-- ============================================================
+     EXISTING LEAFLET MAP LOGIC
+
+     IMPORTANT:
+     DO NOT MODIFY THIS FILE FOR THE 3D FEATURE.
+============================================================ -->
+
+<script src="js/map.js"></script>
+
+    <!-- ============================================================
+         3D MAP FEATURE
     
-    <script src="js/map.js"></script>
+         Independent from map.js
+    ============================================================ -->
+    
+    <script src="js/map-3d.js"></script>
 
     <!-- Map Toggle -->
     <script src="js/map-toggle.js"></script>

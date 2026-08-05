@@ -559,3 +559,63 @@
     }
 
 }
+
+/* ============================================================
+   POPUP ADD TO MY TRIP
+============================================================ */
+
+.popup-add-trip-btn {
+
+    width: 100%;
+
+    margin-top: 10px;
+
+    padding: 10px 14px;
+
+    border: 1px solid #d4a017;
+
+    border-radius: 10px;
+
+    background: #fffaf0;
+
+    color: #8a6500;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        color 0.2s ease;
+
+}
+
+
+.popup-add-trip-btn:hover {
+
+    transform: translateY(-2px);
+
+    background: #fff3c4;
+
+}
+
+
+.popup-add-trip-btn.added {
+
+    background: #edf8f1;
+
+    border-color: #2e8b57;
+
+    color: #176044;
+
+}
+
+
+.popup-add-trip-btn.added:hover {
+
+    background: #dff2e7;
+
+}

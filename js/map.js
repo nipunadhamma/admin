@@ -1,5 +1,7 @@
+
 /* ============================================================
-   SRI LANKA INTERACTIVE TOURIST MAP
+   LANKAQUEST
+   INTERACTIVE TOURIST MAP
    ============================================================
 
    Features:
@@ -17,57 +19,18 @@
    🗑️ Remove / Clear Trip
    📅 Plan My Journey
 
-   IMPORTANT:
-
-   All destination data comes from:
-
-   places.js
-
-   Example:
-
-   touristPlaces = [
-       {
-           id: "sigiriya",
-           name: "Sigiriya",
-           coordinates: [7.9570, 80.7603],
-           ...
-       }
-   ]
-
-   Adding a new destination to places.js
-   automatically creates a Map Pin.
-============================================================ */
-
-/* ============================================================
-   LANKAQUEST
-   INTERACTIVE TOURIST MAP + SEARCH
-
-   DATA ARCHITECTURE:
-
-   Search:
-   data/generated/search-index.json
+   DATA:
 
    Map:
    places.js
 
-   Connection:
+   Search:
+   data/generated/search-index.json
+
+   CONNECTION:
+
    searchIndex.id === touristPlaces.id
 
-   IMPORTANT:
-
-   Search data and Map data are intentionally separated.
-
-   search-index.json
-        ↓
-      Search
-        ↓
-       ID
-        ↓
-   places.js
-        ↓
-   coordinates
-        ↓
-   Map Marker / Popup / My Trip
 ============================================================ */
 
 
@@ -77,7 +40,7 @@
 
 const sriLankaCenter = [
   7.8731,
-  80.7718,
+  80.7718
 ];
 
 
@@ -98,7 +61,7 @@ L.tileLayer(
     maxZoom: 19,
 
     attribution:
-      "&copy; OpenStreetMap contributors",
+      "&copy; OpenStreetMap contributors"
   }
 ).addTo(map);
 
@@ -107,67 +70,29 @@ L.tileLayer(
    3. GLOBAL STATE
 ============================================================ */
 
-
-/*
-   All Leaflet markers.
-
-   Example:
-
-   markers["sigiriya"]
-*/
-
 const markers = {};
 
+let activeCategory = "all";
 
-/*
-   Current active category.
+let activeSearchIndex = -1;
 
-   Default:
-   all
-*/
+/* ============================================================
+   MY TRIP STORAGE KEY
+============================================================ */
 
-let activeCategory =
-  "all";
-
-
-/*
-   Keyboard search index.
-*/
-
-let activeSearchIndex =
-  -1;
+const MY_TRIP_KEY =
+  "sriLankaMyTrip";
 
 
-/*
-   Search index data.
-
-   This is NOT the map database.
-
-   It comes from:
-
-   data/generated/search-index.json
-*/
+/* ============================================================
+   SEARCH INDEX STATE
+============================================================ */
 
 let searchIndex = [];
 
+let searchIndexLoaded = false;
 
-/*
-   Search index loading state.
-*/
-
-let searchIndexLoaded =
-  false;
-
-
-/*
-   Search loading promise.
-
-   This allows the search input to wait
-   until the JSON database is ready.
-*/
-
-let searchIndexPromise =
-  null;
+let searchIndexPromise = null;
 
 
 /* ============================================================
@@ -191,19 +116,6 @@ const clearSearch =
     "clearSearch"
   );
 
-
-/*
-   IMPORTANT:
-
-   Only actual category buttons are selected.
-
-   This prevents:
-
-   <a class="category-btn">
-
-   such as "Explore All Attractions"
-   from being treated as a filter button.
-*/
 
 const categoryButtons =
   document.querySelectorAll(
@@ -285,22 +197,9 @@ const planJourneyButton =
    6. LOAD SEARCH INDEX
 ============================================================ */
 
-
-/*
-   IMPORTANT:
-
-   Do NOT use places.js for search.
-
-   Search source:
-
-   data/generated/search-index.json
-*/
-
 function loadSearchIndex() {
 
-  if (
-    searchIndexPromise
-  ) {
+  if (searchIndexPromise) {
 
     return searchIndexPromise;
 
@@ -311,15 +210,14 @@ function loadSearchIndex() {
     fetch(
       "data/generated/search-index.json",
       {
-        cache: "no-cache",
+        cache: "no-cache"
       }
     )
+
     .then(
       (response) => {
 
-        if (
-          !response.ok
-        ) {
+        if (!response.ok) {
 
           throw new Error(
             `Search index failed to load: ${response.status}`
@@ -327,17 +225,15 @@ function loadSearchIndex() {
 
         }
 
-
         return response.json();
 
       }
     )
+
     .then(
       (data) => {
 
-        if (
-          !Array.isArray(data)
-        ) {
+        if (!Array.isArray(data)) {
 
           throw new Error(
             "Search index format is invalid."
@@ -346,27 +242,21 @@ function loadSearchIndex() {
         }
 
 
-        /*
-           Keep only valid attraction records.
-        */
-
         searchIndex =
           data.filter(
             (item) =>
               item &&
               item.id &&
-              item.type ===
-                "attraction" &&
+              item.type === "attraction" &&
               item.hide !== true
           );
 
 
-        searchIndexLoaded =
-          true;
+        searchIndexLoaded = true;
 
 
         console.log(
-          "LankaWayfarer search index loaded:",
+          "LankaQuest search index loaded:",
           searchIndex.length
         );
 
@@ -375,11 +265,11 @@ function loadSearchIndex() {
 
       }
     )
+
     .catch(
       (error) => {
 
-        searchIndexLoaded =
-          false;
+        searchIndexLoaded = false;
 
 
         console.error(
@@ -388,11 +278,10 @@ function loadSearchIndex() {
         );
 
 
-        if (
-          searchSuggestions
-        ) {
+        if (searchSuggestions) {
 
           searchSuggestions.innerHTML = `
+
             <div class="no-search-results">
 
               <div class="no-result-icon">
@@ -408,6 +297,7 @@ function loadSearchIndex() {
               </span>
 
             </div>
+
           `;
 
 
@@ -430,8 +320,6 @@ function loadSearchIndex() {
 
 /*
    Start loading immediately.
-
-   Search does not need to wait for user input.
 */
 
 loadSearchIndex().catch(
@@ -442,19 +330,6 @@ loadSearchIndex().catch(
 /* ============================================================
    7. FIND MAP PLACE BY ID
 ============================================================ */
-
-
-/*
-   Search index contains:
-
-   id
-
-   places.js contains:
-
-   id + coordinates + full map data
-
-   The ID connects the two systems.
-*/
 
 function getMapPlaceById(
   placeId
@@ -476,8 +351,7 @@ function getMapPlaceById(
     touristPlaces.find(
       (place) =>
         place &&
-        place.id ===
-          placeId
+        place.id === placeId
     ) ||
     null
   );
@@ -489,22 +363,72 @@ function getMapPlaceById(
    8. CREATE DESTINATION POPUP
 ============================================================ */
 
-/* ============================================================
-   8. CREATE DESTINATION POPUP
-============================================================ */
-
 function createPopup(
   place
 ) {
 
-  const detailPage =
-    `attractions-generated/` +
-    `${place.provinceSlug || ""}/` +
-    `${place.districtSlug || ""}/` +
-    `${place.slug || place.id}.html`;
+  /* ----------------------------------------------------------
+     SAFE SLUG CREATION
+  ---------------------------------------------------------- */
 
+  const provinceSlug =
+    place.provinceSlug ||
+    String(
+      place.province || ""
+    )
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
+
+
+  const districtSlug =
+    place.districtSlug ||
+    String(
+      place.district || ""
+    )
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
+
+
+  const placeSlug =
+    place.slug ||
+    place.id ||
+    "";
+
+
+  /* ----------------------------------------------------------
+     DETAIL PAGE
+  ---------------------------------------------------------- */
+
+  const detailPage =
+    provinceSlug &&
+    districtSlug &&
+    placeSlug
+
+      ? `attractions-generated/${provinceSlug}/${districtSlug}/${placeSlug}.html`
+
+      : "#";
+
+
+  /* ----------------------------------------------------------
+     MY TRIP STATUS
+  ---------------------------------------------------------- */
+
+  const isAdded =
+    place.id
+      ? isPlaceInTrip(place.id)
+      : false;
+
+
+  /* ----------------------------------------------------------
+     POPUP
+  ---------------------------------------------------------- */
 
   return `
+
     <div class="tourist-popup">
 
       <img
@@ -512,6 +436,7 @@ function createPopup(
         alt="${place.name || ""}"
         loading="lazy"
       >
+
 
       <div class="popup-content">
 
@@ -537,6 +462,10 @@ function createPopup(
         </div>
 
 
+        <!-- ==================================================
+             VIEW DETAILS
+        ================================================== -->
+
         <a
           href="${detailPage}"
           class="view-details-btn"
@@ -544,34 +473,38 @@ function createPopup(
           View Details →
         </a>
 
+
+        <!-- ==================================================
+             ADD TO MY TRIP
+        ================================================== -->
+
+        <button
+          type="button"
+          class="popup-add-trip-btn ${isAdded ? "added" : ""}"
+          data-place-id="${place.id || ""}"
+        >
+
+          ${
+            isAdded
+              ? "❤️ Added to Trip"
+              : "♡ Add to My Trip"
+          }
+
+        </button>
+
+
       </div>
 
     </div>
+
   `;
 
 }
 
 
-
-
 /* ============================================================
    9. CREATE ALL MAP MARKERS
 ============================================================ */
-
-
-/*
-   IMPORTANT:
-
-   Map markers ONLY come from places.js.
-
-   Therefore:
-
-   Add place to places.js
-        ↓
-   coordinates
-        ↓
-   automatic Map Pin
-*/
 
 if (
   Array.isArray(
@@ -582,9 +515,9 @@ if (
   touristPlaces.forEach(
     (place) => {
 
-      /*
-         Validate ID.
-      */
+      /* ------------------------------------------------------
+         Validate place
+      ------------------------------------------------------ */
 
       if (
         !place ||
@@ -601,9 +534,9 @@ if (
       }
 
 
-      /*
-         Validate coordinates.
-      */
+      /* ------------------------------------------------------
+         Validate coordinates
+      ------------------------------------------------------ */
 
       if (
         !Array.isArray(
@@ -622,9 +555,9 @@ if (
       }
 
 
-      /*
-         Create marker.
-      */
+      /* ------------------------------------------------------
+         Create marker
+      ------------------------------------------------------ */
 
       const marker =
         L.marker(
@@ -632,38 +565,50 @@ if (
         );
 
 
-      /*
-         Attach popup.
-      */
+      /* ------------------------------------------------------
+         Popup
+      ------------------------------------------------------ */
 
       marker.bindPopup(
         createPopup(
           place
         ),
         {
-          maxWidth: 300,
+          maxWidth: 300
         }
       );
 
 
-      /*
-         Save by unique ID.
-      */
+      /* ------------------------------------------------------
+         Save marker by ID
+      ------------------------------------------------------ */
 
       markers[
         place.id
       ] = marker;
 
 
-      /*
-         Add to map.
-      */
+      /* ------------------------------------------------------
+         Add marker to map
+      ------------------------------------------------------ */
 
       marker.addTo(
         map
       );
 
     }
+  );
+
+
+  console.log(
+    "LankaQuest map markers created:",
+    Object.keys(markers).length
+  );
+
+} else {
+
+  console.error(
+    "LankaQuest: touristPlaces is not available."
   );
 
 }
@@ -695,9 +640,7 @@ function updateMapMarkers() {
         ];
 
 
-      if (
-        !marker
-      ) {
+      if (!marker) {
 
         return;
 
@@ -705,15 +648,11 @@ function updateMapMarkers() {
 
 
       const categoryMatch =
-        activeCategory ===
-          "all" ||
-        place.category ===
-          activeCategory;
+        activeCategory === "all" ||
+        place.category === activeCategory;
 
 
-      if (
-        categoryMatch
-      ) {
+      if (categoryMatch) {
 
         marker.addTo(
           map
@@ -756,9 +695,7 @@ categoryButtons.forEach(
           button.dataset.category;
 
 
-        if (
-          !category
-        ) {
+        if (!category) {
 
           return;
 
@@ -768,10 +705,6 @@ categoryButtons.forEach(
         activeCategory =
           category;
 
-
-        /*
-           Active button.
-        */
 
         categoryButtons.forEach(
           (btn) => {
@@ -789,16 +722,8 @@ categoryButtons.forEach(
         );
 
 
-        /*
-           Update map pins.
-        */
-
         updateMapMarkers();
 
-
-        /*
-           Reset search.
-        */
 
         resetSearch();
 
@@ -815,22 +740,16 @@ categoryButtons.forEach(
 
 function resetSearch() {
 
-  if (
-    searchInput
-  ) {
+  if (searchInput) {
 
-    searchInput.value =
-      "";
+    searchInput.value = "";
 
   }
 
 
-  if (
-    searchSuggestions
-  ) {
+  if (searchSuggestions) {
 
-    searchSuggestions.innerHTML =
-      "";
+    searchSuggestions.innerHTML = "";
 
     searchSuggestions.style.display =
       "none";
@@ -838,9 +757,7 @@ function resetSearch() {
   }
 
 
-  if (
-    clearSearch
-  ) {
+  if (clearSearch) {
 
     clearSearch.style.display =
       "none";
@@ -879,10 +796,6 @@ function searchIndexMatch(
   searchText
 ) {
 
-  /*
-     Search all important generated fields.
-  */
-
   const searchableValues = [
 
     item.name,
@@ -909,7 +822,7 @@ function searchIndexMatch(
       item.keywords
     )
       ? item.keywords
-      : []),
+      : [])
 
   ];
 
@@ -934,9 +847,7 @@ function getSearchResults(
   searchText
 ) {
 
-  if (
-    !searchIndexLoaded
-  ) {
+  if (!searchIndexLoaded) {
 
     return [];
 
@@ -946,24 +857,12 @@ function getSearchResults(
   return searchIndex.filter(
     (item) => {
 
-      /*
-         Category filtering is based on
-         search-index.json.
-
-         This keeps Search and Attractions
-         using the same data source.
-      */
-
       const categoryMatch =
-        activeCategory ===
-          "all" ||
-        item.category ===
-          activeCategory;
+        activeCategory === "all" ||
+        item.category === activeCategory;
 
 
-      if (
-        !categoryMatch
-      ) {
+      if (!categoryMatch) {
 
         return false;
 
@@ -985,9 +884,7 @@ function getSearchResults(
    16. LIVE SEARCH
 ============================================================ */
 
-if (
-  searchInput
-) {
+if (searchInput) {
 
   searchInput.addEventListener(
     "input",
@@ -999,13 +896,7 @@ if (
         );
 
 
-      /*
-         Clear button.
-      */
-
-      if (
-        clearSearch
-      ) {
+      if (clearSearch) {
 
         clearSearch.style.display =
           searchText
@@ -1015,17 +906,9 @@ if (
       }
 
 
-      /*
-         Empty search.
-      */
+      if (!searchText) {
 
-      if (
-        !searchText
-      ) {
-
-        if (
-          searchSuggestions
-        ) {
+        if (searchSuggestions) {
 
           searchSuggestions.innerHTML =
             "";
@@ -1043,21 +926,13 @@ if (
       }
 
 
-      /*
-         Wait for search index.
-      */
-
-      if (
-        !searchIndexLoaded
-      ) {
+      if (!searchIndexLoaded) {
 
         try {
 
           await loadSearchIndex();
 
-        } catch (
-          error
-        ) {
+        } catch (error) {
 
           return;
 
@@ -1066,19 +941,11 @@ if (
       }
 
 
-      /*
-         Search JSON index.
-      */
-
       const results =
         getSearchResults(
           searchText
         );
 
-
-      /*
-         Render suggestions.
-      */
 
       displayLiveSuggestions(
         results
@@ -1098,9 +965,7 @@ function displayLiveSuggestions(
   results
 ) {
 
-  if (
-    !searchSuggestions
-  ) {
+  if (!searchSuggestions) {
 
     return;
 
@@ -1114,15 +979,14 @@ function displayLiveSuggestions(
   resetSearchKeyboard();
 
 
-  /*
-     No results.
-  */
+  /* ----------------------------------------------------------
+     No results
+  ---------------------------------------------------------- */
 
-  if (
-    results.length === 0
-  ) {
+  if (results.length === 0) {
 
     searchSuggestions.innerHTML = `
+
       <div class="no-search-results">
 
         <div class="no-result-icon">
@@ -1138,6 +1002,7 @@ function displayLiveSuggestions(
         </span>
 
       </div>
+
     `;
 
 
@@ -1150,9 +1015,9 @@ function displayLiveSuggestions(
   }
 
 
-  /*
-     Maximum 6 suggestions.
-  */
+  /* ----------------------------------------------------------
+     Maximum 6 suggestions
+  ---------------------------------------------------------- */
 
   const limitedResults =
     results.slice(
@@ -1164,23 +1029,11 @@ function displayLiveSuggestions(
   limitedResults.forEach(
     (searchPlace) => {
 
-      /*
-         Connect search result to map data.
-      */
-
       const mapPlace =
         getMapPlaceById(
           searchPlace.id
         );
 
-
-      /*
-         If the place exists in search index
-         but not in places.js, it cannot
-         be shown as a map result.
-
-         Still allow Details link.
-      */
 
       const isAdded =
         mapPlace
@@ -1193,11 +1046,13 @@ function displayLiveSuggestions(
       const featuredBadge =
         searchPlace.featured
           ? `
+
               <span
                 class="featured-badge"
               >
                 ⭐ Featured
               </span>
+
             `
           : "";
 
@@ -1304,6 +1159,7 @@ function displayLiveSuggestions(
             ${
               mapPlace
                 ? `
+
                   <button
                     type="button"
                     class="add-trip-btn ${
@@ -1313,12 +1169,15 @@ function displayLiveSuggestions(
                     }"
                     data-place-id="${mapPlace.id}"
                   >
+
                     ${
                       isAdded
                         ? "❤️ Added to Trip"
                         : "♡ Add to My Trip"
                     }
+
                   </button>
+
                 `
                 : ""
             }
@@ -1340,9 +1199,7 @@ function displayLiveSuggestions(
         );
 
 
-      if (
-        viewDetailsButton
-      ) {
+      if (viewDetailsButton) {
 
         viewDetailsButton.addEventListener(
           "click",
@@ -1400,26 +1257,9 @@ function displayLiveSuggestions(
         "click",
         () => {
 
-          /*
-             Search index record exists,
-             but map record is required
-             for map navigation.
-          */
+          if (!mapPlace) {
 
-          if (
-            !mapPlace
-          ) {
-
-            /*
-               No coordinates in places.js.
-
-               Do not break the search.
-               The Details link still works.
-            */
-
-            if (
-              searchInput
-            ) {
+            if (searchInput) {
 
               searchInput.value =
                 searchPlace.name ||
@@ -1428,9 +1268,7 @@ function displayLiveSuggestions(
             }
 
 
-            if (
-              searchSuggestions
-            ) {
+            if (searchSuggestions) {
 
               searchSuggestions.style.display =
                 "none";
@@ -1445,24 +1283,18 @@ function displayLiveSuggestions(
           }
 
 
-          /*
-             Check marker.
-          */
-
           const marker =
             markers[
               mapPlace.id
             ];
 
 
-          /*
-             If category currently hides
-             this marker, make it visible.
-          */
+          /* --------------------------------------------------
+             Make marker visible if category hides it
+          -------------------------------------------------- */
 
           if (
-            activeCategory !==
-              "all" &&
+            activeCategory !== "all" &&
             mapPlace.category !==
               activeCategory
           ) {
@@ -1488,9 +1320,7 @@ function displayLiveSuggestions(
               );
 
 
-            if (
-              allButton
-            ) {
+            if (allButton) {
 
               allButton.classList.add(
                 "active"
@@ -1504,39 +1334,35 @@ function displayLiveSuggestions(
           }
 
 
-          /*
-             Map zoom.
-          */
+          /* --------------------------------------------------
+             Zoom to destination
+          -------------------------------------------------- */
 
           map.setView(
             mapPlace.coordinates,
             12,
             {
-              animate: true,
+              animate: true
             }
           );
 
 
-          /*
-             Open popup.
-          */
+          /* --------------------------------------------------
+             Open popup
+          -------------------------------------------------- */
 
-          if (
-            marker
-          ) {
+          if (marker) {
 
             marker.openPopup();
 
           }
 
 
-          /*
-             Update input.
-          */
+          /* --------------------------------------------------
+             Update search input
+          -------------------------------------------------- */
 
-          if (
-            searchInput
-          ) {
+          if (searchInput) {
 
             searchInput.value =
               searchPlace.name ||
@@ -1546,13 +1372,11 @@ function displayLiveSuggestions(
           }
 
 
-          /*
-             Hide suggestions.
-          */
+          /* --------------------------------------------------
+             Hide suggestions
+          -------------------------------------------------- */
 
-          if (
-            searchSuggestions
-          ) {
+          if (searchSuggestions) {
 
             searchSuggestions.style.display =
               "none";
@@ -1584,9 +1408,7 @@ function displayLiveSuggestions(
    18. CLEAR SEARCH BUTTON
 ============================================================ */
 
-if (
-  clearSearch
-) {
+if (clearSearch) {
 
   clearSearch.addEventListener(
     "click",
@@ -1595,9 +1417,7 @@ if (
       resetSearch();
 
 
-      if (
-        searchInput
-      ) {
+      if (searchInput) {
 
         searchInput.focus();
 
@@ -1610,7 +1430,7 @@ if (
 
 
 /* ============================================================
-   19. CLOSE SEARCH WHEN CLICKING OUTSIDE
+   19. CLOSE SEARCH OUTSIDE CLICK
 ============================================================ */
 
 document.addEventListener(
@@ -1623,9 +1443,7 @@ document.addEventListener(
       )
     ) {
 
-      if (
-        searchSuggestions
-      ) {
+      if (searchSuggestions) {
 
         searchSuggestions.style.display =
           "none";
@@ -1645,9 +1463,7 @@ document.addEventListener(
    20. SEARCH KEYBOARD NAVIGATION
 ============================================================ */
 
-if (
-  searchInput
-) {
+if (searchInput) {
 
   searchInput.addEventListener(
     "keydown",
@@ -1661,18 +1477,16 @@ if (
           : [];
 
 
-      /*
+      /* ------------------------------------------------------
          Escape
-      */
+      ------------------------------------------------------ */
 
       if (
         event.key ===
         "Escape"
       ) {
 
-        if (
-          searchSuggestions
-        ) {
+        if (searchSuggestions) {
 
           searchSuggestions.style.display =
             "none";
@@ -1687,18 +1501,16 @@ if (
       }
 
 
-      if (
-        items.length === 0
-      ) {
+      if (items.length === 0) {
 
         return;
 
       }
 
 
-      /*
+      /* ------------------------------------------------------
          Arrow Down
-      */
+      ------------------------------------------------------ */
 
       if (
         event.key ===
@@ -1716,8 +1528,7 @@ if (
           items.length
         ) {
 
-          activeSearchIndex =
-            0;
+          activeSearchIndex = 0;
 
         }
 
@@ -1729,9 +1540,9 @@ if (
       }
 
 
-      /*
+      /* ------------------------------------------------------
          Arrow Up
-      */
+      ------------------------------------------------------ */
 
       else if (
         event.key ===
@@ -1761,9 +1572,9 @@ if (
       }
 
 
-      /*
+      /* ------------------------------------------------------
          Enter
-      */
+      ------------------------------------------------------ */
 
       else if (
         event.key ===
@@ -1817,9 +1628,7 @@ function updateActiveSearchItem(
     ];
 
 
-  if (
-    activeItem
-  ) {
+  if (activeItem) {
 
     activeItem.classList.add(
       "active"
@@ -1829,8 +1638,7 @@ function updateActiveSearchItem(
     activeItem.scrollIntoView(
       {
         block: "nearest",
-
-        behavior: "smooth",
+        behavior: "smooth"
       }
     );
 
@@ -1840,298 +1648,448 @@ function updateActiveSearchItem(
 
 
 /* ============================================================
-   22. RESET SEARCH KEYBOARD INDEX
+   22. RESET SEARCH KEYBOARD
 ============================================================ */
 
 function resetSearchKeyboard() {
 
-  activeSearchIndex =
-    -1;
+  activeSearchIndex = -1;
 
 }
 
-/* ============================================================
-   17. MY TRIP LOCAL STORAGE SYSTEM
-============================================================ */
 
-const MY_TRIP_KEY = "sriLankaMyTrip";
+
+
 
 /* ============================================================
-   GET MY TRIP
+   24. GET MY TRIP
 ============================================================ */
 
 function getMyTrip() {
-  const savedTrip = localStorage.getItem(MY_TRIP_KEY);
 
-  /*
-       No Saved Trip
-    */
+  const savedTrip =
+    localStorage.getItem(
+      MY_TRIP_KEY
+    );
+
 
   if (!savedTrip) {
+
     return [];
+
   }
+
 
   try {
-    const parsedTrip = JSON.parse(savedTrip);
 
-    /*
-           Ensure Array
-        */
+    const parsedTrip =
+      JSON.parse(
+        savedTrip
+      );
 
-    return Array.isArray(parsedTrip) ? parsedTrip : [];
+
+    return Array.isArray(
+      parsedTrip
+    )
+      ? parsedTrip
+      : [];
+
   } catch (error) {
-    console.error("Trip data error:", error);
+
+    console.error(
+      "Trip data error:",
+      error
+    );
+
 
     return [];
+
   }
+
 }
 
+
 /* ============================================================
-   SAVE MY TRIP
+   25. SAVE MY TRIP
 ============================================================ */
 
-function saveMyTrip(trip) {
+function saveMyTrip(
+  trip
+) {
+
   localStorage.setItem(
     MY_TRIP_KEY,
-
-    JSON.stringify(trip),
+    JSON.stringify(
+      trip
+    )
   );
+
 }
 
+
 /* ============================================================
-   CHECK PLACE IN MY TRIP
+   26. CHECK PLACE IN MY TRIP
 ============================================================ */
 
-function isPlaceInTrip(placeId) {
-  const trip = getMyTrip();
+function isPlaceInTrip(
+  placeId
+) {
 
-  return trip.some((place) => place.id === placeId);
+  const trip =
+    getMyTrip();
+
+
+  return trip.some(
+    (place) =>
+      place.id ===
+      placeId
+  );
+
 }
 
+
 /* ============================================================
-   ADD / REMOVE PLACE FROM MY TRIP
+   27. ADD / REMOVE PLACE FROM MY TRIP
 ============================================================ */
 
-function toggleTripPlace(place, button) {
-  let trip = getMyTrip();
+function toggleTripPlace(
+  place,
+  button
+) {
 
-  /*
-       Check Existing Place
-    */
+  let trip =
+    getMyTrip();
 
-  const existingIndex = trip.findIndex((item) => item.id === place.id);
 
-  /*
-       Already Added
-       → Remove
-    */
+  const existingIndex =
+    trip.findIndex(
+      (item) =>
+        item.id ===
+        place.id
+    );
 
-  if (existingIndex !== -1) {
-    trip.splice(existingIndex, 1);
 
-    saveMyTrip(trip);
+  /* ----------------------------------------------------------
+     REMOVE
+  ---------------------------------------------------------- */
 
-    /*
-           Update Button
-        */
+  if (
+    existingIndex !== -1
+  ) {
+
+    trip.splice(
+      existingIndex,
+      1
+    );
+
+
+    saveMyTrip(
+      trip
+    );
+
 
     if (button) {
-      button.classList.remove("added");
 
-      button.innerHTML = "♡ Add to My Trip";
+      button.classList.remove(
+        "added"
+      );
+
+
+      button.innerHTML =
+        "♡ Add to My Trip";
+
     }
+
 
     updateTripCounter();
 
-    console.log("Removed from trip:", place.name);
+
+    console.log(
+      "Removed from trip:",
+      place.name
+    );
+
 
     return;
+
   }
 
-  /*
-       New Place
-       → Add
-    */
+
+  /* ----------------------------------------------------------
+     ADD
+  ---------------------------------------------------------- */
 
   trip.push({
-    id: place.id,
 
-    name: place.name,
+    id:
+      place.id,
 
-    sinhalaName: place.sinhalaName,
+    name:
+      place.name,
 
-    coordinates: place.coordinates,
+    sinhalaName:
+      place.sinhalaName,
 
-    image: place.image,
+    coordinates:
+      place.coordinates,
 
-    category: place.category,
+    image:
+      place.image,
 
-    categoryName: place.categoryName,
+    category:
+      place.category,
 
-    province: place.province,
+    categoryName:
+      place.categoryName,
 
-    district: place.district,
+    province:
+      place.province,
 
-    rating: place.rating,
+    district:
+      place.district,
 
-    page: place.page,
+    rating:
+      place.rating,
+
+    page:
+      place.page
+
   });
 
-  /*
-       Save
-    */
 
-  saveMyTrip(trip);
+  saveMyTrip(
+    trip
+  );
 
-  /*
-       Update Button
-    */
 
   if (button) {
-    button.classList.add("added");
 
-    button.innerHTML = "❤️ Added to Trip";
+    button.classList.add(
+      "added"
+    );
+
+
+    button.innerHTML =
+      "❤️ Added to Trip";
+
   }
+
 
   updateTripCounter();
 
-  console.log("Added to trip:", place.name);
+
+  console.log(
+    "Added to trip:",
+    place.name
+  );
+
 }
 
+
 /* ============================================================
-   18. UPDATE TRIP COUNTER
+   28. UPDATE TRIP COUNTER
 ============================================================ */
 
 function updateTripCounter() {
-  const trip = getMyTrip();
 
-  const counter = document.getElementById("tripCounter");
+  const trip =
+    getMyTrip();
+
+
+  const counter =
+    document.getElementById(
+      "tripCounter"
+    );
+
 
   if (!counter) {
+
     return;
+
   }
 
-  counter.textContent = trip.length;
 
-  /*
-       Hide Counter If Empty
-    */
+  counter.textContent =
+    trip.length;
 
-  if (trip.length === 0) {
-    counter.style.display = "none";
+
+  if (
+    trip.length ===
+    0
+  ) {
+
+    counter.style.display =
+      "none";
+
   } else {
-    counter.style.display = "inline-flex";
+
+    counter.style.display =
+      "inline-flex";
+
   }
+
 }
 
+
 /* ============================================================
-   19. REFRESH MY TRIP UI
+   29. REFRESH MY TRIP UI
 ============================================================ */
 
 function refreshMyTripUI() {
-  /*
-       Update Counter
-    */
 
   updateTripCounter();
 
-  /*
-       Search Buttons Update
-    */
 
   if (!searchSuggestions) {
+
     return;
+
   }
 
-  const buttons = searchSuggestions.querySelectorAll(".add-trip-btn");
 
-  buttons.forEach((button) => {
-    /*
-               Get Place ID
-            */
+  const buttons =
+    searchSuggestions.querySelectorAll(
+      ".add-trip-btn"
+    );
 
-    const placeId = button.dataset.placeId;
 
-    /*
-               Check Trip
-            */
+  buttons.forEach(
+    (button) => {
 
-    const isAdded = isPlaceInTrip(placeId);
+      const placeId =
+        button.dataset.placeId;
 
-    /*
-               Update Button
-            */
 
-    if (isAdded) {
-      button.classList.add("added");
+      const isAdded =
+        isPlaceInTrip(
+          placeId
+        );
 
-      button.innerHTML = "❤️ Added to Trip";
-    } else {
-      button.classList.remove("added");
 
-      button.innerHTML = "♡ Add to My Trip";
+      if (isAdded) {
+
+        button.classList.add(
+          "added"
+        );
+
+
+        button.innerHTML =
+          "❤️ Added to Trip";
+
+      } else {
+
+        button.classList.remove(
+          "added"
+        );
+
+
+        button.innerHTML =
+          "♡ Add to My Trip";
+
+      }
+
     }
-  });
+  );
+
 }
 
+
 /* ============================================================
-   20. OPEN MY TRIP PANEL
+   30. OPEN MY TRIP PANEL
 ============================================================ */
 
 function openTripPlanner() {
-  if (!tripPlannerPanel || !tripPlannerOverlay) {
+
+  if (
+    !tripPlannerPanel ||
+    !tripPlannerOverlay
+  ) {
+
     return;
+
   }
 
-  tripPlannerPanel.classList.add("active");
 
-  tripPlannerOverlay.classList.add("active");
+  tripPlannerPanel.classList.add(
+    "active"
+  );
 
-  /*
-       Render Latest Trip
-    */
+
+  tripPlannerOverlay.classList.add(
+    "active"
+  );
+
 
   renderMyTrip();
+
 }
 
+
 /* ============================================================
-   21. CLOSE MY TRIP PANEL
+   31. CLOSE MY TRIP PANEL
 ============================================================ */
 
 function closeTripPlannerPanel() {
+
   if (tripPlannerPanel) {
-    tripPlannerPanel.classList.remove("active");
+
+    tripPlannerPanel.classList.remove(
+      "active"
+    );
+
   }
+
 
   if (tripPlannerOverlay) {
-    tripPlannerOverlay.classList.remove("active");
+
+    tripPlannerOverlay.classList.remove(
+      "active"
+    );
+
   }
+
 }
 
+
 /* ============================================================
-   22. MY TRIP BUTTON EVENTS
+   32. MY TRIP BUTTON EVENTS
 ============================================================ */
 
 if (myTripButton) {
-  myTripButton.addEventListener("click", openTripPlanner);
+
+  myTripButton.addEventListener(
+    "click",
+    openTripPlanner
+  );
+
 }
+
 
 if (closeTripPlanner) {
-  closeTripPlanner.addEventListener("click", closeTripPlannerPanel);
+
+  closeTripPlanner.addEventListener(
+    "click",
+    closeTripPlannerPanel
+  );
+
 }
+
 
 if (tripPlannerOverlay) {
-  tripPlannerOverlay.addEventListener("click", closeTripPlannerPanel);
+
+  tripPlannerOverlay.addEventListener(
+    "click",
+    closeTripPlannerPanel
+  );
+
 }
 
+
 /* ============================================================
-   23. RENDER MY TRIP
+   33. RENDER MY TRIP
 ============================================================ */
 
 function renderMyTrip() {
-  /*
-       Required Elements Check
-    */
 
   if (
     !tripDestinations ||
@@ -2139,274 +2097,452 @@ function renderMyTrip() {
     !tripActions ||
     !tripPlaceCount
   ) {
-    return;
-  }
-
-  /*
-       Get Saved Trip
-    */
-
-  const trip = getMyTrip();
-
-  /*
-       Clear Existing Cards
-    */
-
-  tripDestinations.innerHTML = "";
-
-  /*
-       Update Destination Count
-    */
-
-  tripPlaceCount.textContent = trip.length;
-
-  /*
-       Empty Trip
-    */
-
-  if (trip.length === 0) {
-    emptyTripMessage.style.display = "block";
-
-    tripActions.style.display = "none";
 
     return;
+
   }
 
-  /*
-       Trip Has Destinations
-    */
 
-  emptyTripMessage.style.display = "none";
-
-  tripActions.style.display = "flex";
-
-  /*
-       Create Destination Cards
-    */
-
-  trip.forEach((place, index) => {
-    const card = document.createElement("div");
-
-    card.className = "trip-destination-card";
-
-    card.innerHTML = `
-
-                <img
-                    src="${place.image || ""}"
-                    alt="${place.name || ""}"
-                    class="trip-destination-image"
-                >
+  const trip =
+    getMyTrip();
 
 
-                <div
-                    class="trip-destination-info"
-                >
-
-                    <h4>
-
-                        ${index + 1}.
-
-                        ${place.name || ""}
-
-                    </h4>
+  tripDestinations.innerHTML =
+    "";
 
 
-                    <p>
-
-                        📍
-
-                        ${place.district || ""}
-
-                        ·
-
-                        ${place.province || ""}
-
-                    </p>
+  tripPlaceCount.textContent =
+    trip.length;
 
 
-                    <p>
+  /* ----------------------------------------------------------
+     Empty
+  ---------------------------------------------------------- */
 
-                        ⭐
+  if (
+    trip.length ===
+    0
+  ) {
 
-                        ${place.rating || "N/A"}
-
-                    </p>
-
-                </div>
+    emptyTripMessage.style.display =
+      "block";
 
 
-                <button
-                    type="button"
-                    class="trip-destination-remove"
-                    data-place-id="${place.id}"
-                    title="Remove from My Trip"
-                >
+    tripActions.style.display =
+      "none";
 
-                    🗑️
 
-                </button>
+    return;
 
-            `;
+  }
 
-    /*
-               Remove Button
-            */
 
-    const removeButton = card.querySelector(".trip-destination-remove");
+  /* ----------------------------------------------------------
+     Has destinations
+  ---------------------------------------------------------- */
 
-    if (removeButton) {
-      removeButton.addEventListener("click", () => {
-        removePlaceFromTrip(place.id);
-      });
+  emptyTripMessage.style.display =
+    "none";
+
+
+  tripActions.style.display =
+    "flex";
+
+
+  /* ----------------------------------------------------------
+     Destination cards
+  ---------------------------------------------------------- */
+
+  trip.forEach(
+    (place, index) => {
+
+      const card =
+        document.createElement(
+          "div"
+        );
+
+
+      card.className =
+        "trip-destination-card";
+
+
+      card.innerHTML = `
+
+        <img
+          src="${place.image || ""}"
+          alt="${place.name || ""}"
+          class="trip-destination-image"
+        >
+
+
+        <div
+          class="trip-destination-info"
+        >
+
+          <h4>
+
+            ${index + 1}.
+
+            ${place.name || ""}
+
+          </h4>
+
+
+          <p>
+
+            📍
+
+            ${place.district || ""}
+
+            ·
+
+            ${place.province || ""}
+
+          </p>
+
+
+          <p>
+
+            ⭐
+
+            ${place.rating || "N/A"}
+
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="trip-destination-remove"
+          data-place-id="${place.id}"
+          title="Remove from My Trip"
+        >
+
+          🗑️
+
+        </button>
+
+      `;
+
+
+      const removeButton =
+        card.querySelector(
+          ".trip-destination-remove"
+        );
+
+
+      if (removeButton) {
+
+        removeButton.addEventListener(
+          "click",
+          () => {
+
+            removePlaceFromTrip(
+              place.id
+            );
+
+          }
+        );
+
+      }
+
+
+      tripDestinations.appendChild(
+        card
+      );
+
     }
+  );
 
-    /*
-               Add Card
-            */
-
-    tripDestinations.appendChild(card);
-  });
 }
 
+
 /* ============================================================
-   24. REMOVE PLACE FROM MY TRIP
+   34. REMOVE PLACE FROM MY TRIP
 ============================================================ */
 
-function removePlaceFromTrip(placeId) {
-  let trip = getMyTrip();
+function removePlaceFromTrip(
+  placeId
+) {
 
-  /*
-       Remove Place
-    */
+  let trip =
+    getMyTrip();
 
-  trip = trip.filter((place) => place.id !== placeId);
 
-  /*
-       Save Updated Trip
-    */
+  trip =
+    trip.filter(
+      (place) =>
+        place.id !==
+        placeId
+    );
 
-  saveMyTrip(trip);
 
-  /*
-       Update UI
-    */
+  saveMyTrip(
+    trip
+  );
+
 
   updateTripCounter();
+
 
   renderMyTrip();
 
+
   refreshMyTripUI();
+
 }
 
+
 /* ============================================================
-   25. CLEAR ENTIRE TRIP
+   35. CLEAR ENTIRE TRIP
 ============================================================ */
 
 if (clearTripButton) {
-  clearTripButton.addEventListener("click", () => {
-    /*
-               Confirm User
-            */
 
-    const confirmed = confirm(
-      "Are you sure you want to clear your entire trip?",
-    );
+  clearTripButton.addEventListener(
+    "click",
+    () => {
 
-    if (!confirmed) {
-      return;
+      const confirmed =
+        confirm(
+          "Are you sure you want to clear your entire trip?"
+        );
+
+
+      if (!confirmed) {
+
+        return;
+
+      }
+
+
+      saveMyTrip(
+        []
+      );
+
+
+      updateTripCounter();
+
+
+      renderMyTrip();
+
+
+      refreshMyTripUI();
+
     }
+  );
 
-    /*
-               Clear Trip
-            */
-
-    saveMyTrip([]);
-
-    /*
-               Update UI
-            */
-
-    updateTripCounter();
-
-    renderMyTrip();
-
-    refreshMyTripUI();
-  });
 }
 
+
 /* ============================================================
-   26. EXPLORE DESTINATIONS
+   36. EXPLORE DESTINATIONS
 ============================================================ */
 
 if (exploreDestinationsButton) {
-  exploreDestinationsButton.addEventListener("click", () => {
-    /*
-               Close My Trip Panel
-            */
 
-    closeTripPlannerPanel();
+  exploreDestinationsButton.addEventListener(
+    "click",
+    () => {
 
-    /*
-               Focus Search
-            */
+      closeTripPlannerPanel();
 
-    if (searchInput) {
-      searchInput.focus();
+
+      if (searchInput) {
+
+        searchInput.focus();
+
+      }
+
     }
-  });
+  );
+
 }
 
+
 /* ============================================================
-   27. PLAN MY JOURNEY
+   37. PLAN MY JOURNEY
 ============================================================ */
 
 if (planJourneyButton) {
-  planJourneyButton.addEventListener("click", () => {
-    /*
-               Get Current Trip
-            */
 
-    const trip = getMyTrip();
+  planJourneyButton.addEventListener(
+    "click",
+    () => {
 
-    /*
-               No Destinations
-            */
+      const trip =
+        getMyTrip();
 
-    if (trip.length === 0) {
-      alert("Please add at least one destination to your trip.");
 
-      return;
+      if (
+        trip.length ===
+        0
+      ) {
+
+        alert(
+          "Please add at least one destination to your trip."
+        );
+
+
+        return;
+
+      }
+
+
+      window.location.href =
+        "trip-planner.html";
+
     }
+  );
 
-    /*
-               Open Trip Planner Page
-            */
-
-    window.location.href = "trip-planner.html";
-  });
 }
 
+
 /* ============================================================
-   28. INITIALIZE TRIP COUNTER
+   38. POPUP → ADD TO MY TRIP
 ============================================================ */
 
-document.addEventListener("DOMContentLoaded", () => {
-  updateTripCounter();
-});
+document.addEventListener(
+  "click",
+  (event) => {
+
+    const button =
+      event.target.closest(
+        ".popup-add-trip-btn"
+      );
+
+
+    if (!button) {
+
+      return;
+
+    }
+
+
+    /* --------------------------------------------------------
+       Prevent popup / map click propagation
+    -------------------------------------------------------- */
+
+    event.stopPropagation();
+
+
+    /* --------------------------------------------------------
+       Get Place ID
+    -------------------------------------------------------- */
+
+    const placeId =
+      button.dataset.placeId;
+
+
+    if (!placeId) {
+
+      console.error(
+        "Popup My Trip: place ID missing."
+      );
+
+
+      return;
+
+    }
+
+
+    /* --------------------------------------------------------
+       Find Original Place
+    -------------------------------------------------------- */
+
+    const place =
+      getMapPlaceById(
+        placeId
+      );
+
+
+    if (!place) {
+
+      console.error(
+        "Popup My Trip: destination not found:",
+        placeId
+      );
+
+
+      return;
+
+    }
+
+
+    /* --------------------------------------------------------
+       Toggle My Trip
+    -------------------------------------------------------- */
+
+    toggleTripPlace(
+      place,
+      button
+    );
+
+
+    /* --------------------------------------------------------
+       Refresh UI
+    -------------------------------------------------------- */
+
+    refreshMyTripUI();
+
+  }
+);
+
 
 /* ============================================================
-   29. INITIALIZE MAP
+   39. INITIALIZE TRIP COUNTER
+============================================================ */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    updateTripCounter();
+
+  }
+);
+
+
+/* ============================================================
+   40. INITIALIZE MAP MARKERS
 ============================================================ */
 
 /*
    Ensure all markers follow
    current active category.
 
-   Default category = all
+   Default category:
+   all
 */
 
 updateMapMarkers();
 
+
+/* ============================================================
+   DEBUG INFORMATION
+============================================================ */
+
+console.log(
+  "LankaQuest map.js loaded successfully."
+);
+
+
+console.log(
+  "Tourist places:",
+  Array.isArray(touristPlaces)
+    ? touristPlaces.length
+    : "touristPlaces NOT FOUND"
+);
+
+
+console.log(
+  "Map markers:",
+  Object.keys(markers).length
+);
+
+
 /* ============================================================
    END OF MAP.JS
 ============================================================ */
+
